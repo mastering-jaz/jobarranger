@@ -246,6 +246,9 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.ScheduleEdit
         // <summary>リブートアイコン設定テーブル</summary>
         public DataTable IconRebootTable { get; set; }
 
+        // <summary>保留解除アイコン設定テーブル</summary>
+        public DataTable IconReleaseTable { get; set; }
+
         #endregion
 
 

@@ -324,7 +324,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.ScheduleEdit
             lblComment.Text = Convert.ToString(row["memo"]);
 
             //更新日
-            lblUpdDate.Text = (ConvertUtil.ConverIntYYYYMMDDHHMISS2Date(Convert.ToInt64(row["update_date"]))).ToString();
+            lblUpdDate.Text = (ConvertUtil.ConverIntYYYYMMDDHHMISS2Date(Convert.ToInt64(row["update_date"]))).ToString("yyyy/MM/dd HH:mm:ss");
             //ユーザー名
             lblUserName.Text = Convert.ToString(row["user_name"]);
         }
@@ -397,7 +397,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.ScheduleEdit
                     TreeViewItem item = new TreeViewItem();
                     item.Header = row["calendar_id"].ToString();
                     item.Tag = Consts.ObjectEnum.JOBNET;
-                    item.FontFamily = new FontFamily("MS Gothic");
+                    //item.FontFamily = new FontFamily("MS Gothic");
                     treeViewItem.Items.Add(item);
                 }
             }

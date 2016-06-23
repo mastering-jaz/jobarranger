@@ -18,9 +18,9 @@
 **/
 
 /*
-** $Date:: 2013-05-17 16:53:37 +0900 #$
-** $Revision: 4641 $
-** $Author: ossinfra@FITECHLABS.CO.JP $
+** $Date:: 2013-12-06 15:18:05 +0900 #$
+** $Revision: 5530 $
+** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
 #include "common.h"
@@ -62,8 +62,6 @@ int jarun_skip(const zbx_uint64_t inner_job_id,
         return FAIL;
 
     if (ja_value_before_after(inner_job_id) == FAIL)
-        return FAIL;
-    if (jarun_value_after(inner_job_id) == FAIL)
         return FAIL;
 
     if (job_type == JA_JOB_TYPE_START || job_type == JA_JOB_TYPE_END

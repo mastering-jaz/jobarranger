@@ -23,7 +23,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:src="clr-namespace:jp.co.ftf.jobcontroller.JobController" 
         Title="{x:Static src:Properties.Resources.operation_day_file_reading_screen_name}" Height="242" Width="470"
-        ResizeMode="NoResize">
+        ResizeMode="NoResize" FontSize="11" FontFamily="Meiryo">
     <Window.Resources>
         <x:Array x:Key="DateFormat" Type="{x:Type src:FormatComboBoxItem}">
             <src:FormatComboBoxItem Format="yyyy/MM/dd" ViewFormat="YYYY/MM/DD" />
@@ -35,12 +35,12 @@
     </Window.Resources>
 
     <Grid Width="442">
-        <TextBlock Height="23" HorizontalAlignment="Left" Margin="12,27,0,0" Name="textBlock1" Text="{x:Static src:Properties.Resources.operation_day_file_reading_screen_language}" VerticalAlignment="Top" FontSize="13" />
+        <TextBlock Height="23" HorizontalAlignment="Left" Margin="12,27,0,0" Name="textBlock1" Text="{x:Static src:Properties.Resources.operation_day_file_reading_screen_language}" VerticalAlignment="Top" FontSize="12" />
         <TextBox Height="23" HorizontalAlignment="Left" Margin="12,83,0,0" Name="textBox_fileName" VerticalAlignment="Top" Width="324" Text="{Binding file_name}" />
         <Button Content="{x:Static src:Properties.Resources.ref_file_button_text}" Height="23" HorizontalAlignment="Left" Margin="350,83,0,0" Name="refFile" VerticalAlignment="Top" Width="65" Click="refFile_Click"/>
-        <TextBlock Height="23" HorizontalAlignment="Left" Margin="12,129,0,0" Name="textBlock4" Text="{x:Static src:Properties.Resources.format_label_text}" VerticalAlignment="Top" FontSize="13" />
-        <ComboBox Height="23" HorizontalAlignment="Left" Margin="80,129,0,0" Name="formatComboBox" VerticalAlignment="Top" Width="120" ItemsSource="{Binding Source={StaticResource DateFormat}}" DisplayMemberPath="ViewFormat" SelectedValuePath="Format"/>
-        <Button Content="{x:Static src:Properties.Resources.reading_button_text}" Height="23" HorizontalAlignment="Left" Margin="232,174,0,0" Name="fileRead" VerticalAlignment="Top" Width="75" Click="fileRead_Click" IsDefault="True"/>
-        <Button Content="{x:Static src:Properties.Resources.cancel_button_text}" Height="23" HorizontalAlignment="Left" Margin="313,174,0,0" Name="cancel" VerticalAlignment="Top" Width="75" Click="cancel_Click" IsCancel="True"/>
+        <TextBlock Height="23" HorizontalAlignment="Left" Margin="12,131,0,0" Name="textBlock4" Text="{x:Static src:Properties.Resources.format_label_text}" VerticalAlignment="Top" />
+        <ComboBox Height="23" HorizontalAlignment="Left" Margin="91,128,0,0" Name="formatComboBox" VerticalAlignment="Top" Width="120" ItemsSource="{Binding Source={StaticResource DateFormat}}" DisplayMemberPath="ViewFormat" SelectedValuePath="Format"/>
+        <Button Content="{x:Static src:Properties.Resources.reading_button_text}" Height="25" HorizontalAlignment="Left" Margin="232,174,0,0" Name="fileRead" VerticalAlignment="Top" Width="75" Click="fileRead_Click" IsDefault="True" FontSize="11.5"/>
+        <Button Content="{x:Static src:Properties.Resources.cancel_button_text}" Height="25" HorizontalAlignment="Left" Margin="313,174,0,0" Name="cancel" VerticalAlignment="Top" Width="75" Click="cancel_Click" IsCancel="True" FontSize="11.5"/>
     </Grid>
 </src:BaseWindow>

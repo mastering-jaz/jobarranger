@@ -32,6 +32,7 @@ using System.Windows.Shapes;
 using System.Collections.ObjectModel;
 using jp.co.ftf.jobcontroller.DAO;
 using jp.co.ftf.jobcontroller.Common;
+using jp.co.ftf.jobcontroller.JobController.Form.JobEdit;
 
 namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
 {
@@ -133,20 +134,19 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
         //*******************************************************************
         private void listView_ContextMenuOpening(object sender, RoutedEventArgs e)
         {
-
+            hideContextMenu.IsEnabled = false;
+            stopContextMenu.IsEnabled = false;
             // 何らかのアイテムを選択した状態のとき
             if (listView1.SelectedItems.Count > 0)
             {
                 hideContextMenu.IsEnabled = true;
-                stopContextMenu.IsEnabled = true;
                 JobnetExecInfo jobnetExecInfo = (JobnetExecInfo)listView1.SelectedItems[0];
                 hideContextMenu.Tag = jobnetExecInfo;
-                stopContextMenu.Tag = jobnetExecInfo;
-            }
-            else
-            {
-                hideContextMenu.IsEnabled = false;
-                stopContextMenu.IsEnabled = false;
+                if ((RunJobStatusType)jobnetExecInfo.status == RunJobStatusType.During )
+                {
+                    stopContextMenu.IsEnabled = true;
+                    stopContextMenu.Tag = jobnetExecInfo;
+                }
             }
             #if VIEWER
                 this.stopContextMenu.Visibility = Visibility.Collapsed;

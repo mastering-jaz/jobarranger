@@ -65,7 +65,8 @@ namespace jp.co.ftf.jobcontroller.DAO
                                                   "ja_icon_value_table",
                                                   "ja_icon_fcopy_table",
                                                   "ja_icon_fwait_table",
-                                                  "ja_icon_reboot_table"
+                                                  "ja_icon_reboot_table",
+                                                  "ja_icon_release_table"
                                                 };
         //インポート時、重複チェック用情報
         private static Hashtable KEY_FOR_DOUBLE_CHECK = new Hashtable();
@@ -73,7 +74,8 @@ namespace jp.co.ftf.jobcontroller.DAO
         private static Hashtable KEY_FOR_RELATION_CHECK = new Hashtable();
 
         private static bool SET_DOUBLE_KEY = false;
-        private static bool SET_RELATE_KEY = false;
+        //整合性チェック情報セットフラグ
+        private static bool SET_RELATE_KEY = true;
         #region 採番処理
 
 
@@ -134,15 +136,28 @@ namespace jp.co.ftf.jobcontroller.DAO
         public static String InsertRunJobnet(DataRow jobnetRow, Consts.RunTypeEnum runType)
         {
             String innerJobnetId = DBUtil.GetNextId("2");
-            String sql = "insert into ja_run_jobnet_table"
+            String sql = "insert into ja_run_jobnet_table "
                             + "(inner_jobnet_id, inner_jobnet_main_id, inner_job_id, update_date, run_type, "
-                            + "main_flag, status, start_time, end_time, public_flag, jobnet_id, user_name, jobnet_name, memo) "
-                            + "VALUES ("+innerJobnetId+","+innerJobnetId+",0,"+jobnetRow["update_date"]+","+(int)runType+",0,0,0,0,"+jobnetRow["public_flag"]+",'"+jobnetRow["jobnet_id"]+"','"+jobnetRow["user_name"]+"','"+jobnetRow["jobnet_name"]+"','"+jobnetRow["memo"]+"')";
+                            + "main_flag, status, start_time, end_time, public_flag, jobnet_id, user_name, jobnet_name, memo, execution_user_name) "
+                            + "VALUES (?,?,0,?,?,0,0,0,0,?,?,?,?,?,?)";
             DBConnect db = new DBConnect(LoginSetting.ConnectStr);
+
+            List<ComSqlParam> insertRunJobnetSqlParams = new List<ComSqlParam>();
+            insertRunJobnetSqlParams.Add(new ComSqlParam(DbType.String, "@inner_jobnet_id", innerJobnetId));
+            insertRunJobnetSqlParams.Add(new ComSqlParam(DbType.String, "@inner_jobnet_main_id", innerJobnetId));
+            insertRunJobnetSqlParams.Add(new ComSqlParam(DbType.String, "@update_date", jobnetRow["update_date"]));
+            insertRunJobnetSqlParams.Add(new ComSqlParam(DbType.String, "@run_type", (int)runType));
+            insertRunJobnetSqlParams.Add(new ComSqlParam(DbType.String, "@public_flag", jobnetRow["public_flag"]));
+            insertRunJobnetSqlParams.Add(new ComSqlParam(DbType.String, "@jobnet_id", jobnetRow["jobnet_id"]));
+            insertRunJobnetSqlParams.Add(new ComSqlParam(DbType.String, "@user_name", jobnetRow["user_name"]));
+            insertRunJobnetSqlParams.Add(new ComSqlParam(DbType.String, "@jobnet_name", jobnetRow["jobnet_name"]));
+            insertRunJobnetSqlParams.Add(new ComSqlParam(DbType.String, "@memo", jobnetRow["memo"]));
+            insertRunJobnetSqlParams.Add(new ComSqlParam(DbType.String, "@execution_user_name", LoginSetting.UserName));
             db.CreateSqlConnect();
             db.BeginTransaction();
-            int count = db.ExecuteNonQuery(sql);
+            int count = db.ExecuteNonQuery(sql, insertRunJobnetSqlParams);
             db.TransactionCommit();
+            db.CloseSqlConnect();
             if (count == 1) return innerJobnetId;
             return null;
         }
@@ -292,21 +307,40 @@ namespace jp.co.ftf.jobcontroller.DAO
         {
             String tableName = "ja_calendar_control_table";
             String idColumnName = "calendar_id";
-            if (objectType == Consts.ObjectEnum.SCHEDULE)
-            {
-                tableName = "ja_schedule_control_table";
-                idColumnName = "schedule_id";
-            }
-            if (objectType == Consts.ObjectEnum.JOBNET)
-            {
-                tableName = "ja_jobnet_control_table";
-                idColumnName = "jobnet_id";
-            }
-            string strSql1 = "update "+ tableName + " set valid_flag=0 where " + idColumnName + "='" + objectId + "' and valid_flag=1";
-            string strSql2 = "update " + tableName + " set valid_flag=1 where " + idColumnName + "='" + objectId + "' and update_date=" + updDate;
             DBConnect db = new DBConnect(LoginSetting.ConnectStr);
             db.CreateSqlConnect();
             db.BeginTransaction();
+            try
+            {
+                if (objectType == Consts.ObjectEnum.CALENDAR)
+                {
+                    tableName = "ja_calendar_control_table";
+                    idColumnName = "calendar_id";
+                    CalendarControlDAO calendarControlDAO = new CalendarControlDAO(db);
+                    calendarControlDAO.GetLock(objectId, LoginSetting.DBType);
+                }
+                if (objectType == Consts.ObjectEnum.SCHEDULE)
+                {
+                    tableName = "ja_schedule_control_table";
+                    idColumnName = "schedule_id";
+                    ScheduleControlDAO scheduleControlDAO = new ScheduleControlDAO(db);
+                    scheduleControlDAO.GetLock(objectId, LoginSetting.DBType);
+                }
+                if (objectType == Consts.ObjectEnum.JOBNET)
+                {
+                    tableName = "ja_jobnet_control_table";
+                    idColumnName = "jobnet_id";
+                    JobnetControlDAO jobnetControlDAO = new JobnetControlDAO(db);
+                    jobnetControlDAO.GetLock(objectId, LoginSetting.DBType);
+                }
+            }
+            catch (DBException e)
+            {
+                e.MessageID = Consts.ERROR_DB_LOCK;
+                throw e;
+            }
+            string strSql1 = "update "+ tableName + " set valid_flag=0 where " + idColumnName + "='" + objectId + "' and valid_flag=1";
+            string strSql2 = "update " + tableName + " set valid_flag=1 where " + idColumnName + "='" + objectId + "' and update_date=" + updDate;
             db.AddBatch(strSql1);
             db.AddBatch(strSql2);
             db.ExecuteBatchUpdate();
@@ -365,15 +399,34 @@ namespace jp.co.ftf.jobcontroller.DAO
             db.BeginTransaction();
             String tableName = "ja_calendar_control_table";
             String idColumnName = "calendar_id";
-            if (objectType == Consts.ObjectEnum.SCHEDULE)
+            try
             {
-                tableName = "ja_schedule_control_table";
-                idColumnName = "schedule_id";
+                if (objectType == Consts.ObjectEnum.CALENDAR)
+                {
+                    tableName = "ja_calendar_control_table";
+                    idColumnName = "calendar_id";
+                    CalendarControlDAO calendarControlDAO = new CalendarControlDAO(db);
+                    calendarControlDAO.GetLock(objectId, LoginSetting.DBType);
+                }
+                if (objectType == Consts.ObjectEnum.SCHEDULE)
+                {
+                    tableName = "ja_schedule_control_table";
+                    idColumnName = "schedule_id";
+                    ScheduleControlDAO scheduleControlDAO = new ScheduleControlDAO(db);
+                    scheduleControlDAO.GetLock(objectId, LoginSetting.DBType);
+                }
+                if (objectType == Consts.ObjectEnum.JOBNET)
+                {
+                    tableName = "ja_jobnet_control_table";
+                    idColumnName = "jobnet_id";
+                    JobnetControlDAO jobnetControlDAO = new JobnetControlDAO(db);
+                    jobnetControlDAO.GetLock(objectId, LoginSetting.DBType);
+                }
             }
-            if (objectType == Consts.ObjectEnum.JOBNET)
+            catch (DBException e)
             {
-                tableName = "ja_jobnet_control_table";
-                idColumnName = "jobnet_id";
+                e.MessageID = Consts.ERROR_DB_LOCK;
+                throw e;
             }
             foreach (DataRow row in rows)
             {
@@ -390,51 +443,21 @@ namespace jp.co.ftf.jobcontroller.DAO
 
         }
 
-        /// <summary>オブジェクトを削除する<summary>
+        /// <summary>オブジェクトを削除するため、関連データ有無チェック<summary>
         /// <param name="objectId">オブジェクトＩＤ</param>
         /// <param name="objectType">オブジェクト種別</param>
         /// <param name="rows">オブジェクトRows</param>
-        public static bool DelObject(String objectId, Consts.ObjectEnum objectType, DataRow[] rows)
+        public static bool CheckForRelation4Del(String objectId, Consts.ObjectEnum objectType, DataRow[] rows)
         {
-            if (rows == null)
-            {
-                return DelAllVer(objectId, objectType);
-                
-            }
-            return DelSpecialVer(objectId, objectType, rows);
-        }
-
-        /// <summary>オブジェクトを削除する<summary>
-        /// <param name="objectId">オブジェクトＩＤ</param>
-        /// <param name="objectType">オブジェクト種別</param>
-        private static bool DelAllVer(String objectId, Consts.ObjectEnum objectType)
-        {
-            DBConnect db = new DBConnect(LoginSetting.ConnectStr);
-            db.CreateSqlConnect();
-            db.BeginTransaction();
-            String tableName = "ja_calendar_control_table";
-            String idColumnName = "calendar_id";
             if (objectType == Consts.ObjectEnum.CALENDAR)
             {
-                tableName = "ja_calendar_control_table";
-                idColumnName = "calendar_id";
-                if(IsExistRelate4Calendar(objectId, null)) return false;
+                if (IsExistRelate4Calendar(objectId, rows)) return false;
             }
-            if (objectType == Consts.ObjectEnum.SCHEDULE)
-            {
-                tableName = "ja_schedule_control_table";
-                idColumnName = "schedule_id";
-            }
+
             if (objectType == Consts.ObjectEnum.JOBNET)
             {
-                tableName = "ja_jobnet_control_table";
-                idColumnName = "jobnet_id";
-                if (IsExistRelate4Jobnet(objectId, null)) return false;
+                if (IsExistRelate4Jobnet(objectId, rows)) return false;
             }
-            string strSql = "delete from " + tableName + " where " + idColumnName + "='" + objectId + "'";
-            db.ExecuteNonQuery(strSql);
-            db.TransactionCommit();
-            db.CloseSqlConnect();
             return true;
         }
 
@@ -442,29 +465,126 @@ namespace jp.co.ftf.jobcontroller.DAO
         /// <param name="objectId">オブジェクトＩＤ</param>
         /// <param name="objectType">オブジェクト種別</param>
         /// <param name="rows">オブジェクトRows</param>
-        private static bool DelSpecialVer(String objectId, Consts.ObjectEnum objectType, DataRow[] rows)
+        public static void DelObject(String objectId, Consts.ObjectEnum objectType, DataRow[] rows)
         {
+            if (rows == null)
+            {
+                DelAllVer(objectId, objectType);
+            }
+            else
+            {
+                DelSpecialVer(objectId, objectType, rows);
+            }
+        }
+
+        /// <summary>オブジェクトを削除する<summary>
+        /// <param name="objectId">オブジェクトＩＤ</param>
+        /// <param name="objectType">オブジェクト種別</param>
+        private static void DelAllVer(String objectId, Consts.ObjectEnum objectType)
+        {
+            /*
+            if (objectType == Consts.ObjectEnum.CALENDAR)
+            {
+                if (IsExistRelate4Calendar(objectId, null)) return false;
+            }
+
+            if (objectType == Consts.ObjectEnum.JOBNET)
+            {
+                if (IsExistRelate4Jobnet(objectId, null)) return false;
+            }
+            */
             DBConnect db = new DBConnect(LoginSetting.ConnectStr);
             db.CreateSqlConnect();
             db.BeginTransaction();
             String tableName = "ja_calendar_control_table";
             String idColumnName = "calendar_id";
+            try
+            {
+                if (objectType == Consts.ObjectEnum.CALENDAR)
+                {
+                    tableName = "ja_calendar_control_table";
+                    idColumnName = "calendar_id";
+                    CalendarControlDAO calendarControlDAO = new CalendarControlDAO(db);
+                    calendarControlDAO.GetLock(objectId, LoginSetting.DBType);
+                }
+                if (objectType == Consts.ObjectEnum.SCHEDULE)
+                {
+                    tableName = "ja_schedule_control_table";
+                    idColumnName = "schedule_id";
+                    ScheduleControlDAO scheduleControlDAO = new ScheduleControlDAO(db);
+                    scheduleControlDAO.GetLock(objectId, LoginSetting.DBType);
+                }
+                if (objectType == Consts.ObjectEnum.JOBNET)
+                {
+                    tableName = "ja_jobnet_control_table";
+                    idColumnName = "jobnet_id";
+                    JobnetControlDAO jobnetControlDAO = new JobnetControlDAO(db);
+                    jobnetControlDAO.GetLock(objectId, LoginSetting.DBType);
+                }
+            }
+            catch (DBException e)
+            {
+                e.MessageID = Consts.ERROR_DB_LOCK;
+                throw e;
+            }
+
+            string strSql = "delete from " + tableName + " where " + idColumnName + "='" + objectId + "'";
+            db.ExecuteNonQuery(strSql);
+            db.TransactionCommit();
+            db.CloseSqlConnect();
+        }
+
+        /// <summary>オブジェクトを削除する<summary>
+        /// <param name="objectId">オブジェクトＩＤ</param>
+        /// <param name="objectType">オブジェクト種別</param>
+        /// <param name="rows">オブジェクトRows</param>
+        private static void DelSpecialVer(String objectId, Consts.ObjectEnum objectType, DataRow[] rows)
+        {
+            /*
             if (objectType == Consts.ObjectEnum.CALENDAR)
             {
-                tableName = "ja_calendar_control_table";
-                idColumnName = "calendar_id";
                 if (IsExistRelate4Calendar(objectId, rows)) return false;
             }
-            if (objectType == Consts.ObjectEnum.SCHEDULE)
-            {
-                tableName = "ja_schedule_control_table";
-                idColumnName = "schedule_id";
-            }
+
             if (objectType == Consts.ObjectEnum.JOBNET)
             {
-                tableName = "ja_jobnet_control_table";
-                idColumnName = "jobnet_id";
                 if (IsExistRelate4Jobnet(objectId, rows)) return false;
+            }
+            */
+
+            DBConnect db = new DBConnect(LoginSetting.ConnectStr);
+            db.CreateSqlConnect();
+            db.BeginTransaction();
+            String tableName = "ja_calendar_control_table";
+            String idColumnName = "calendar_id";
+            try
+            {
+                if (objectType == Consts.ObjectEnum.CALENDAR)
+                {
+                    tableName = "ja_calendar_control_table";
+                    idColumnName = "calendar_id";
+                    CalendarControlDAO calendarControlDAO = new CalendarControlDAO(db);
+                    calendarControlDAO.GetLock(objectId, LoginSetting.DBType);
+                }
+                if (objectType == Consts.ObjectEnum.SCHEDULE)
+                {
+                    tableName = "ja_schedule_control_table";
+                    idColumnName = "schedule_id";
+                    ScheduleControlDAO scheduleControlDAO = new ScheduleControlDAO(db);
+                    scheduleControlDAO.GetLock(objectId, LoginSetting.DBType);
+                }
+                if (objectType == Consts.ObjectEnum.JOBNET)
+                {
+                    tableName = "ja_jobnet_control_table";
+                    idColumnName = "jobnet_id";
+                    JobnetControlDAO jobnetControlDAO = new JobnetControlDAO(db);
+                    jobnetControlDAO.GetLock(objectId, LoginSetting.DBType);
+                }
+            }
+            catch (DBException e)
+            {
+                e.MessageID = Consts.ERROR_DB_LOCK;
+                throw e;
             }
             foreach (DataRow row in rows)
             {
@@ -475,8 +595,6 @@ namespace jp.co.ftf.jobcontroller.DAO
             db.ExecuteBatchUpdate();
             db.TransactionCommit();
             db.CloseSqlConnect();
-            return true;
-
         }
 
         private static bool IsExistRelate4Calendar(String objectId, DataRow[] rows)

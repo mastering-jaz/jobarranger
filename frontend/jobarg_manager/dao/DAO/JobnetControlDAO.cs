@@ -49,18 +49,18 @@ namespace jp.co.ftf.jobcontroller.DAO
         private string _selectSql = "select * from ja_jobnet_control_table where 0!=0";
 
         /// <summary>ロック </summary>
-        private string _selectCountWithLock = "select * from ja_jobnet_control_table " +
-            "where jobnet_id = ? and update_date = ? for update nowait ";
+        private string _selectWithLock = "select * from ja_jobnet_control_table " +
+            "where jobnet_id = ? for update nowait ";
 
-        /// <summary>ロックしない </summary>
-        private string _selectCountNoLock = "select count(1) as count from ja_jobnet_control_table " +
+        /// <summary>PKデータ存在チェック </summary>
+        private string _selectCountByPk = "select count(1) as count from ja_jobnet_control_table " +
             "where jobnet_id = ? and update_date = ?";
 
         private string _selectCountByJobNetIdSql = "select count(1) as count from ja_jobnet_control_table " +
             "where jobnet_id = ?";
 
-        private string _selectSqlForJobInfo = "select jobnet_id, MAX(update_date) as update_date, jobnet_name from " +
-            "ja_jobnet_control_table where jobnet_id = ?";
+        private string _selectSqlForJobInfo = "select jobnet_id, update_date, jobnet_name from " +
+            "ja_jobnet_control_table where update_date = (select MAX(update_date) from ja_jobnet_control_table where jobnet_id = ?)";
 
         private string _selectValidByJobnetIdSql = "select * from ja_jobnet_control_table " +
              "where jobnet_id = ? and valid_flag = '1'";
@@ -184,121 +184,110 @@ namespace jp.co.ftf.jobcontroller.DAO
             return dt;
         }
 
+
         //************************************************************************
-        /// <summary> データの取得</summary>
+        /// <summary> PKデータの件数取得</summary>
         /// <param name="jobnet_id">ジョブネットID</param>
         /// <param name="update_date">更新日</param>
         /// <return>検索結果</return>
         //************************************************************************
-        //public string GetCountByPkWithLock(object jobnet_id, object update_date)
-        //{
-        //    string count = "";
-
-        //    List<ComSqlParam> sqlParams = new List<ComSqlParam>();
-        //    sqlParams.Add(new ComSqlParam(DbType.String, "jobnet_id", jobnet_id));
-        //    sqlParams.Add(new ComSqlParam(DbType.Int64, "update_date", update_date));
-        //    DataTable dt = _db.ExecuteQuery(_selectCountWithLock, sqlParams, TableName);
-
-        //    if (dt != null)
-        //        count = Convert.ToString(dt.Rows[0]["count"]);
-
-        //    return count;
-        //}
-
-        //************************************************************************
-        /// <summary> データの取得</summary>
-        /// <param name="jobnet_id">ジョブネットID</param>
-        /// <param name="update_date">更新日</param>
-        /// <return>検索結果</return>
-        //************************************************************************
-        public string GetCountByPk(object jobnet_id, object update_date)
+        public int GetCountByPk(object jobnet_id, object update_date)
         {
-            string count = "";
+            int count = 0;
 
             List<ComSqlParam> sqlParams = new List<ComSqlParam>();
             sqlParams.Add(new ComSqlParam(DbType.String, "@jobnet_id", jobnet_id));
             sqlParams.Add(new ComSqlParam(DbType.Int64, "@update_date", update_date));
-            DataTable dt = _db.ExecuteQuery(_selectCountNoLock, sqlParams, TableName);
+            DataTable dt = _db.ExecuteQuery(_selectCountByPk, sqlParams, TableName);
 
             if (dt != null)
-                count = Convert.ToString(dt.Rows[0]["count"]);
+                count = int.Parse(Convert.ToString(dt.Rows[0]["count"]));
 
             return count;
         }
 
         //************************************************************************
-        /// <summary> データの取得(For Update)</summary>
+        /// <summary>MysqlDBのIDデータロック取得</summary>
         /// <param name="jobnet_id">ジョブネットID</param>
-        /// <param name="update_date">更新日</param>
         /// <return>検索結果</return>
         //************************************************************************
-        public string GetCountByPkForUpdate(object jobnet_id, object update_date)
+        public int GetLock4Mysql(object jobnet_id)
         {
-            string count = "";
+            int count = 0;
+            string _getLock = "SELECT GET_LOCK('ja_jobnet_control_table."+ jobnet_id  + "', 0) as count";
 
             List<ComSqlParam> sqlParams = new List<ComSqlParam>();
             sqlParams.Add(new ComSqlParam(DbType.String, "@jobnet_id", jobnet_id));
-            sqlParams.Add(new ComSqlParam(DbType.Int64, "@update_date", update_date));
-            DataTable dt = _db.ExecuteQuery(_selectCountWithLock, sqlParams, TableName);
-
-            // データ有の場合
-
-            if (dt != null && dt.Rows.Count > 0)
-                return "1";
-
-            return count;
-        }
-
-        //************************************************************************
-        /// <summary> データの取得</summary>
-        /// <param name="jobnet_id">ジョブネットID</param>
-        /// <param name="update_date">更新日</param>
-        /// <return>検索結果</return>
-        //************************************************************************
-        public string GetLockByPk(object jobnet_id, object update_date)
-        {
-            string count = "";
-
-            string _getLock = "SELECT GET_LOCK('ja_jobnet_control_table."+ jobnet_id +
-                 "." + update_date + "', 0) as count";
-
-            List<ComSqlParam> sqlParams = new List<ComSqlParam>();
-            sqlParams.Add(new ComSqlParam(DbType.String, "@jobnet_id", jobnet_id));
-            sqlParams.Add(new ComSqlParam(DbType.Int64, "@update_date", update_date));
             DataTable dt = _db.ExecuteQuery(_getLock, sqlParams, TableName);
 
-            if (dt != null)
-                count = Convert.ToString(dt.Rows[0]["count"]);
-
+            count = int.Parse(Convert.ToString(dt.Rows[0]["count"]));
+            if (count < 1)
+            {
+                RealseLock(jobnet_id);
+                _db.CloseSqlConnect();
+                throw new DBException();
+            }
             return count;
+
         }
 
         //************************************************************************
-        /// <summary> データの取得</summary>
+        /// <summary>NotMysqlDBのIDデータロック取得</summary>
         /// <param name="jobnet_id">ジョブネットID</param>
-        /// <param name="update_date">更新日</param>
         /// <return>検索結果</return>
         //************************************************************************
-        public string RealseLockByPk(object jobnet_id, object update_date)
+        public int GetLock4NotMysql(object jobnet_id)
+        {
+            List<ComSqlParam> sqlParams = new List<ComSqlParam>();
+            sqlParams.Add(new ComSqlParam(DbType.String, "@jobnet_id", jobnet_id));
+            DataTable dt = _db.ExecuteQuery(_selectWithLock, sqlParams, TableName);
+
+            return dt.Rows.Count;
+
+        }
+
+        //************************************************************************
+        /// <summary>IDデータロック取得</summary>
+        /// <param name="jobnet_id">ジョブネットID</param>
+        /// <param name="dbType">DB種別</param>
+        /// <return>検索結果</return>
+        //************************************************************************
+        public int GetLock(object jobnet_id, Consts.DBTYPE dbType)
+        {
+            if (dbType == Consts.DBTYPE.MYSQL)
+            {
+                return GetLock4Mysql(jobnet_id);
+            }
+            return GetLock4NotMysql(jobnet_id);
+
+        }
+
+
+        //************************************************************************
+        /// <summary>MysqlDBのIDデータロック開放</summary>
+        /// <param name="jobnet_id">ジョブネットID</param>
+        /// <return>検索結果</return>
+        //************************************************************************
+        public String RealseLock(object jobnet_id)
         {
             string count = "";
 
-            string _releaseLock = "SELECT RELEASE_LOCK('ja_jobnet_control_table." + jobnet_id +
-                "." + update_date + "') as count";
+            string _releaseLock = "SELECT RELEASE_LOCK('ja_jobnet_control_table." + jobnet_id  + "') as count";
 
             List<ComSqlParam> sqlParams = new List<ComSqlParam>();
             sqlParams.Add(new ComSqlParam(DbType.String, "@jobnet_id", jobnet_id));
-            sqlParams.Add(new ComSqlParam(DbType.Int64, "@update_date", update_date));
             DataTable dt = _db.ExecuteQuery(_releaseLock, sqlParams, TableName);
 
             if (dt != null)
-                count = Convert.ToString(dt.Rows[0]["count"]);
+            {
+                count =Convert.ToString(dt.Rows[0]["count"]);
+            }
 
             return count;
         }
 
         //************************************************************************
-        /// <summary> データの取得</summary>
+        /// <summary>IDデータ件数の取得</summary>
         /// <param name="jobnet_id">ジョブネットID</param>
         /// <return>検索結果</return>
         //************************************************************************

@@ -56,6 +56,9 @@ namespace jp.co.ftf.jobcontroller.Common
         /// <summary>半角英数字とハイフン、スラッシュ</summary>
         private const string MATCH_HANKAKU_HYPHEN_SLASH = "^[0-9a-zA-Z\\-\\/]*$";
 
+        /// <summary>半角英数字とハイフン、アンダーバー、スラッシュ</summary>
+        private const string MATCH_HANKAKU_HYPHEN_UNDERBAR_SLASH = "^[0-9a-zA-Z-_/]*$";
+
         /// <summary>半角英数字とハイフン、アンダーバー</summary>
         private const string MATCH_HANKAKU_HYPHEN_UNDERBAR = "^[0-9a-zA-Z_-]*$";
 
@@ -209,7 +212,7 @@ namespace jp.co.ftf.jobcontroller.Common
             {
                 return true;
             }
-            String[] array = str.Split(new char[2]{',','-'});
+            String[] array = str.Split(new char[2] { ',', '-' });
             foreach (String i in array)
             {
                 if (i.Length == 0 || !IsHankakuNum(i))
@@ -218,6 +221,19 @@ namespace jp.co.ftf.jobcontroller.Common
                 }
             }
             return true;
+        }
+
+        /// <summary>半角英数字とハイフン、アンダーバー、スラッシュチェック処理</summary>
+        /// <param name="str">チェックする文字列</param>
+        /// <return>「True：半角英数字、ハイフン、アンダーバー、スラッシュ」「False：それ以外」</return>
+        public static bool IsHankakuStrAndHyphenUnderbarAndSlash(string str)
+        {
+            if (str == null || str.Length == 0
+                || Regex.IsMatch(str, MATCH_HANKAKU_HYPHEN_UNDERBAR_SLASH))
+            {
+                return true;
+            }
+            return false;
         }
 
         /// <summary>半角英数字とハイフン、スラッシュチェック処理</summary>
@@ -259,6 +275,19 @@ namespace jp.co.ftf.jobcontroller.Common
             return false;
         }
 
+        /// <summary>半角英数字とハイフン、アンダーバー、スラッシュチェック処理</summary>
+        /// <param name="str">チェックする文字列</param>
+        /// <return>「True：半角英数字、ハイフン、アンダーバー、スラッシュ」「False：それ以外」</return>
+        public static bool IsHankakuStrAndHyphenAndUnderbarAndSlash(string str)
+        {
+            if (str == null || str.Length == 0
+                || Regex.IsMatch(str, MATCH_HANKAKU_HYPHEN_UNDERBAR_SLASH))
+            {
+                return true;
+            }
+            return false;
+        }
+
         /// <summary>予約語（START）チェック処理</summary>
         /// <param name="str">チェックする文字列</param>
         /// <return>「True：予約語（START）」「False：それ以外」</return>
@@ -269,6 +298,54 @@ namespace jp.co.ftf.jobcontroller.Common
                 return false;
             }
             if (HOLD_START.Equals(str))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>日付の月であるかチェック</summary>
+        /// <param name="month">チェックする数値</param>
+        /// <return>「True：1-12の場合」「False：それ以外」</return>
+        public static bool IsMonth(int month)
+        {
+            if (month >= 1 && month<=12)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>時間の時が正しいかチェック</summary>
+        /// <param name="hour">チェックする数値</param>
+        /// <return>「True：0-23の場合」「False：それ以外」</return>
+        public static bool IsHour(int hour)
+        {
+            if (hour >= 0 && hour <= 23)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>時間の分が正しいかチェック</summary>
+        /// <param name="min">チェックする数値</param>
+        /// <return>「True：0-59の場合」「False：それ以外」</return>
+        public static bool IsMin(int min)
+        {
+            if (min >= 0 && min <= 59)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>日付の日であるかチェック</summary>
+        /// <param name="day">チェックする数値</param>
+        /// <return>「True：1-31の場合」「False：それ以外」</return>
+        public static bool IsDay(int day)
+        {
+            if (day >= 1 && day <= 31)
             {
                 return true;
             }
@@ -286,11 +363,40 @@ namespace jp.co.ftf.jobcontroller.Common
             return intLength;
         }
 
+        /// <summary>ユーザーグループIDがログインユーザーグループリストに存在するかチェック</summary>
+        /// <param name="loginUserGroupList">ログインユーザーグループリスト</param>
+        /// <param name="objectUserGroupList">ユーザーグループID</param>
+        /// <returns>「True：存在」「False：存在しない」</returns>
         public static bool isExistGroupId(List<Decimal> loginUserGroupList, List<Decimal> objectUserGroupList)
         {
             foreach (Decimal userGroupId in loginUserGroupList)
             {
                 if (objectUserGroupList.Contains(userGroupId)) return true;
+            }
+            return false;
+        }
+
+        /// <summary>オブジェクト名、ジョブ名の入力不可文字存在チェック</summary>
+        /// <param name="strValue">チェックする文字列</param>
+        /// <returns>「True："'\,が存在する」「False："'\,が存在しない」</returns>
+        public static bool IsImpossibleStr(string strValue)
+        {
+
+            if(strValue.IndexOf("\"") >= 0) {
+
+                return true;
+            }
+            if (strValue.IndexOf("'") >= 0)
+            {
+                return true;
+            }
+            if (strValue.IndexOf(",") >= 0)
+            {
+                return true;
+            }
+            if (strValue.IndexOf("\\") >= 0)
+            {
+                return true;
             }
             return false;
         }

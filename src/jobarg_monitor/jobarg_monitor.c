@@ -18,9 +18,9 @@
 **/
 
 /*
-** $Date:: 2013-06-21 11:18:28 +0900 #$
-** $Revision: 4973 $
-** $Author: ossinfra@FITECHLABS.CO.JP $
+** $Date:: 2013-08-15 15:11:24 +0900 #$
+** $Revision: 5241 $
+** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
 #include "common.h"
@@ -40,12 +40,13 @@
 const char *progname = NULL;
 static char DEFAULT_CONFIG_FILE[] = SYSCONFDIR "/jobarg_monitor.conf";
 
-const char title_message[] = "Job Arranger monitor";
+const char title_message[] = "Job Arranger Monitor";
 const char usage_message[] = "[-hV] [-c <file>]";
 const char *help_message[] = {
     "Options:",
     "  -c --config <file>              Absolute path to the configuration file",
     "",
+    "Other options:",
     "  -h --help                       Give this help",
     "  -V --version                    Display version number",
     "",
@@ -123,13 +124,30 @@ int CONFIG_PROXYDATA_FREQUENCY = 0;
  * Comments:                                                                  *
  *                                                                            *
  ******************************************************************************/
-static void ja_help()
+static void help_jobarg()
 {
     const char **p = help_message;
     usage();
     printf("\n");
     while (NULL != *p)
         printf("%s\n", *p++);
+}
+
+/******************************************************************************
+ *                                                                            *
+ * Function: version_jobarg                                                   *
+ *                                                                            *
+ * Purpose: show the version of the application                               *
+ *                                                                            *
+ * Return value:                                                              *
+ *                                                                            *
+ * Comments:                                                                  *
+ *                                                                            *
+ ******************************************************************************/
+void version_jobarg()
+{
+    printf("%s v%s (revision %s) (%s)\n", title_message, JOBARG_VERSION, JOBARG_REVISION, JOBARG_REVDATE);
+    printf("Compilation time: %s %s\n", __DATE__, __TIME__);
 }
 
 /******************************************************************************
@@ -160,15 +178,15 @@ static void parse_commandline(int argc, char **argv)
             CONFIG_FILE = zbx_strdup(CONFIG_FILE, zbx_optarg);
             break;
         case 'h':
-            ja_help();
+            help_jobarg();
             exit(FAIL);
             break;
         case 'V':
-            version();
+            version_jobarg();
             exit(FAIL);
             break;
         default:
-            ja_help();
+            usage();
             exit(FAIL);
             break;
         }

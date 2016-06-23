@@ -18,20 +18,24 @@
 **/
 
 /*
-** $Date:: 2013-05-17 17:04:52 +0900 #$
-** $Revision: 4643 $
-** $Author: ossinfra@FITECHLABS.CO.JP $
+** $Date:: 2013-12-06 15:33:03 +0900 #$
+** $Revision: 5531 $
+** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
 #ifndef JOBARG_JATRAPPER_H
 #define JOBARG_JATRAPPER_H
 
 #include "comms.h"
+
+#define JA_LASTEXIT_LEN          10
+#define JA_LASTSTDOUT_LEN        4096
+
 extern int CONFIG_TIMEOUT;
 extern int CONFIG_TRAPPER_TIMEOUT;
 
-#define JOBARG_EXEC_REQUEST	struct zbx_jobarg_exec_request
-#define JOBARG_JOBNET_INFO	struct zbx_jobarg_jobnet_info
+#define JOBARG_EXEC_REQUEST     struct zbx_jobarg_exec_request
+#define JOBARG_JOBNET_INFO      struct zbx_jobarg_jobnet_info
 
 JOBARG_EXEC_REQUEST {
     char *username;
@@ -51,6 +55,9 @@ JOBARG_JOBNET_INFO {
     zbx_uint64_t scheduled_time;
     zbx_uint64_t start_time;
     zbx_uint64_t end_time;
+    char lastexitcd[JA_LASTEXIT_LEN];
+    char laststdout[JA_LASTSTDOUT_LEN];
+    char laststderr[JA_LASTSTDOUT_LEN];
 };
 
 void main_jatrapper_loop(zbx_sock_t * s);

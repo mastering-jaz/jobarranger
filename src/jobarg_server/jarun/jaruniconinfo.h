@@ -18,16 +18,16 @@
 **/
 
 /*
-** $Date:: 2012-11-26 13:40:59 +0900 #$
-** $Revision: 2728 $
-** $Author: ossinfra@FITECHLABS.CO.JP $
+** $Date:: 2013-12-16 16:39:52 +0900 #$
+** $Revision: 5627 $
+** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
 #ifndef JOBARG_JARUNICONINFO_H
 #define JOBARG_JARUNICONINFO_H
 
-int jarun_icon_info_get_status(const zbx_uint64_t inner_jobnet_id,
-                               char *get_job_id);
+int jarun_icon_info_get_status(const zbx_uint64_t inner_jobnet_id, char *get_job_id, const zbx_uint64_t inner_job_id);
+int jarun_icon_info_get_calendar(const char *get_calendar_id, const zbx_uint64_t inner_job_id);
 int jarun_icon_info(const zbx_uint64_t inner_job_id);
 
 #endif

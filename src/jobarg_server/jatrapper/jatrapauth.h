@@ -31,5 +31,6 @@
 
 int jatrap_auth_host(zbx_sock_t * sock, ja_telegram_object * obj);
 zbx_uint64_t jatrap_auth_user(ja_telegram_object * obj);
+int jatrap_auth_jobnet(zbx_uint64_t userid, zbx_uint64_t inner_jobnet_id);
 
 #endif

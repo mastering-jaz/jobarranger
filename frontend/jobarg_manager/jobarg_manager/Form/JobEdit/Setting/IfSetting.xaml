@@ -23,7 +23,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:src="clr-namespace:jp.co.ftf.jobcontroller.JobController" 
         WindowStartupLocation="CenterScreen" ResizeMode="NoResize"
-        Title="{x:Static src:Properties.Resources.if_icon_screen_name}" Height="240" Width="390" FontFamily="MS Gothic" Closing="Window_Closed">
+        Title="{x:Static src:Properties.Resources.if_icon_screen_name}" Height="240" Width="390" FontSize="11" FontFamily="Meiryo"
+        Closing="Window_Closed">
     <Grid Background="#FFEEECE1" Name="GridSetting">
         <Grid.RowDefinitions>
             <RowDefinition Height="30" />

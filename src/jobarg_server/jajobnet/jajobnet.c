@@ -18,8 +18,8 @@
 **/
 
 /*
-** $Date:: 2013-04-15 14:29:52 +0900 #$
-** $Revision: 4400 $
+** $Date:: 2013-07-19 15:00:14 +0900 #$
+** $Revision: 5208 $
 ** $Author: ossinfra@FITECHLABS.CO.JP $
 **/
 
@@ -87,6 +87,7 @@ static void process_jajobnet_summary()
         case JA_JOBNET_STATUS_RUN:
             if (jobnet_abort_flag == 1) {
                 ret = jajobnet_kill(inner_jobnet_id);
+                ja_joblog(JC_JOBNET_ERR_END, inner_jobnet_id, 0);
             }
             break;
         default:

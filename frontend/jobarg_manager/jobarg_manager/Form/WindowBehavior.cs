@@ -20,8 +20,15 @@ using System;
 using System.Windows;
 using System.Windows.Interop;
 using System.Runtime.InteropServices;
-
-
+//*******************************************************************
+//                                                                  *
+//                                                                  *
+//  Copyright (C) 2013 FitechForce, Inc. All Rights Reserved.       *
+//                                                                  *
+//  * @author KIM  2013/01/14 新規作成<BR>                          *
+//                                                                  *
+//                                                                  *
+//*******************************************************************
 namespace jp.co.ftf.jobcontroller.JobController
 {
     public class WindowBehavior

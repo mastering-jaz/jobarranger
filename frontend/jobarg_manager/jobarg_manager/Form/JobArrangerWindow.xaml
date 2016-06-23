@@ -24,9 +24,10 @@
         xmlns:design="clr-namespace:jp.co.ftf.jobcontroller.JobController.Form.JobEdit"
         xmlns:exec="clr-namespace:jp.co.ftf.jobcontroller.JobController.Form.JobManager"                
         xmlns:src="clr-namespace:jp.co.ftf.jobcontroller.JobController"
-        Title="{x:Static src:Properties.Resources.WINDOW_NAME_200}" Height="760" Width="1160"
+        Title="{x:Static src:Properties.Resources.WINDOW_NAME_200}" Height="760" Width="1170"
         WindowStartupLocation="CenterScreen" Closing="Window_Closed" Background="White"
-        Loaded="mainWindow_Load" WindowStyle="ThreeDBorderWindow" KeyDown="Del_KeyDown">
+        Loaded="mainWindow_Load" WindowStyle="ThreeDBorderWindow" KeyDown="JobArrangerWindow_KeyDown" 
+        FontSize="11" FontFamily="Meiryo">
     <Window.Resources>
         <src:ContentToPathConverter x:Key="content2PathConverter"/>
         <src:ContentToMarginConverter x:Key="content2MarginConverter"/>
@@ -147,12 +148,11 @@
         <Separator Height="5" DockPanel.Dock="Top" HorizontalAlignment="Stretch" Margin="0,-4,0,0" Background="Black" />
         <Grid Name="grid1" DockPanel.Dock="Top" Margin="0,3,0,15" Background="#FF4A452A">
             <Label Content="{x:Static src:Properties.Resources.user_name_label_text}" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,9,207,0"
-                   Height="25" FontFamily="MS Gothic" Foreground="White" />
+                   Height="25" Foreground="White" />
             <TextBlock Text="" Name="userName" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,14,3,0" 
-                   Width="205" Height="43" Foreground="White" FontFamily="MS Gothic" TextWrapping="Wrap" />
+                   Width="205" Height="43" Foreground="White" TextWrapping="Wrap" />
             <TabControl HorizontalAlignment="Stretch" Margin="0,30,-1,0" Name="tabControl" VerticalAlignment="Stretch" SelectionChanged="tabControl_Selected" Style="{StaticResource TabControlStyle}" >
-               <!-- <TabControl HorizontalAlignment="Stretch" Margin="0,30,-1,0" Name="tabControl" VerticalAlignment="Stretch" SelectionChanged="tabControl_Selected" >-->
-                    <TabItem Header="{x:Static src:Properties.Resources.object_control_tab_text}" Name="tabItemObjectList" Background="#FF897F7F">
+                <TabItem Header="{x:Static src:Properties.Resources.object_control_tab_text}" Name="tabItemObjectList" Background="#FF897F7F">
                     <Grid Name="grid" Margin="0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="262" />
@@ -161,15 +161,15 @@
                         </Grid.ColumnDefinitions>
                         <Border Grid.Column="0" Margin="1,1,1,1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" BorderThickness="1" BorderBrush="Black" >
                             <TreeView Name="treeView1" BorderThickness="0" PreviewMouseRightButtonUp ="TreetView_PreviewMouseRightButtonUp" ScrollViewer.HorizontalScrollBarVisibility="Visible" ScrollViewer.VerticalScrollBarVisibility="Auto">
-                                <TreeViewItem Header="{x:Static src:Properties.Resources.calendar_node_text}" Name="treeViewCalendar" Tag="0"  PreviewMouseRightButtonDown="TreeViewItem_PreviewMouseRightButtonDown">
+                                <TreeViewItem Header="{x:Static src:Properties.Resources.calendar_node_text}" Name="treeViewCalendar" Tag="0"  PreviewMouseRightButtonDown="TreeViewItem_PreviewMouseRightButtonDown" Selected="Calendar_Selected">
                                     <TreeViewItem Header="{x:Static src:Properties.Resources.public_calendar_node_text}" Name="publicCalendar" Selected="Public_Calendar_Selected" Tag="0" PreviewMouseRightButtonDown="TreeViewItem_PreviewMouseRightButtonDown"/>
                                     <TreeViewItem Header="{x:Static src:Properties.Resources.private_calendar_node_text}" Name="privateCalendar" Selected="Private_Calendar_Selected" Tag="0" PreviewMouseRightButtonDown="TreeViewItem_PreviewMouseRightButtonDown"/>
                                 </TreeViewItem>
-                                <TreeViewItem Header="{x:Static src:Properties.Resources.schedule_node_text}" Name="treeViewSchedule" Tag="1" PreviewMouseRightButtonDown="TreeViewItem_PreviewMouseRightButtonDown">
+                                <TreeViewItem Header="{x:Static src:Properties.Resources.schedule_node_text}" Name="treeViewSchedule" Tag="1" PreviewMouseRightButtonDown="TreeViewItem_PreviewMouseRightButtonDown" Selected="Schedule_Selected">
                                     <TreeViewItem Header="{x:Static src:Properties.Resources.public_schedule_node_text}" Name="publicSchedule" Selected="Public_Schedule_Selected" Tag="1" PreviewMouseRightButtonDown="TreeViewItem_PreviewMouseRightButtonDown"/>
                                     <TreeViewItem Header="{x:Static src:Properties.Resources.private_schedule_node_text}" Name="privateSchedule" Selected="Private_Schedule_Selected" Tag="1" PreviewMouseRightButtonDown="TreeViewItem_PreviewMouseRightButtonDown"/>
                                 </TreeViewItem>
-                                <TreeViewItem Header="{x:Static src:Properties.Resources.jobnet_node_text}" Name="treeViewJobNet" Tag="2" PreviewMouseRightButtonDown="TreeViewItem_PreviewMouseRightButtonDown">
+                                <TreeViewItem Header="{x:Static src:Properties.Resources.jobnet_node_text}" Name="treeViewJobNet" Tag="2" PreviewMouseRightButtonDown="TreeViewItem_PreviewMouseRightButtonDown" Selected="Jobnet_Selected">
                                     <TreeViewItem Header="{x:Static src:Properties.Resources.public_jobnet_node_text}" Name="publicJobnet" Selected="Public_Jobnet_Selected" Tag="2" PreviewMouseRightButtonDown="TreeViewItem_PreviewMouseRightButtonDown"/>
                                     <TreeViewItem Header="{x:Static src:Properties.Resources.private_jobnet_node_text}" Name="privateJobnet" Selected="Private_Jobnet_Selected" Tag="2" PreviewMouseRightButtonDown="TreeViewItem_PreviewMouseRightButtonDown"/>
                                 </TreeViewItem>
@@ -203,7 +203,9 @@
                         </Grid>
                     </Grid>
                 </TabItem>
-                <TabItem Header="{x:Static src:Properties.Resources.job_control_tab_text}" Name="tabItemJobManager" Background="#FF897F7F" IsTabStop="False">
+                <TabItem Header="{x:Static src:Properties.Resources.job_control_tab_text}" Name="tabItemJobManager" Background="#FF897F7F">
+                </TabItem>
+                <TabItem Header="{x:Static src:Properties.Resources.job_result_tab_text}" Name="tabItemJobResult" Background="#FF897F7F">
                 </TabItem>
             </TabControl>
         </Grid>

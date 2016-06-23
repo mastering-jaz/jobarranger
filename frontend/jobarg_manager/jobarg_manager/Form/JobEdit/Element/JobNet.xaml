@@ -23,24 +23,26 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             >
+             FontSize="10" FontFamily="Meiryo">
     <Canvas x:Name="LayoutRoot"    Background="Transparent" >
 
         <Polyline Name="picJobnet" Points="10,30 0,20 0,10 10,0 70,0 80,10 80,20 70,30 10,30"
-                  Canvas.Top="0" Canvas.Left="0" Stroke="Black" Fill="#FFCCCCFF">
+                  Canvas.Top="0" Canvas.Left="0" Stroke="Gray" Fill="#FFCCCCFF">
         </Polyline>
-        
-        <TextBlock   Canvas.ZIndex="1000" Name="tbJobId" Foreground="Black" FontSize="11"  Text=""  
+
+        <TextBlock Style="{StaticResource TextBlockServiceStyle}" Canvas.ZIndex="1000" Name="tbJobId" Foreground="Black" Text=""
+                     Tag="{Binding Path=JobId, NotifyOnTargetUpdated=True}" TargetUpdated="textBlockJobId_TargetUpdated"
                      VerticalAlignment="Center" HorizontalAlignment="Center" MaxWidth="90"
-                     Height="11" Width="80" 
-                     Canvas.Left="0" Canvas.Top="4"
-                     FontWeight="Normal" TextAlignment="Center" FontFamily="MS Gothic">
+                     Height="13" Width="80" 
+                     Canvas.Left="0" Canvas.Top="2"
+                     FontWeight="Normal" TextAlignment="Center">
         </TextBlock>
-        <TextBlock   Canvas.ZIndex="1000" Name="tbJobName" Foreground="Black" FontSize="11"  Text="情報取得"  
+        <TextBlock Style="{StaticResource TextBlockServiceStyle}" Canvas.ZIndex="1000" Name="tbJobName" Foreground="Black" Text="ジョブネット"
+                     Tag="{Binding Path=JobName, NotifyOnTargetUpdated=True}" TargetUpdated="textBlockJobName_TargetUpdated"
                      VerticalAlignment="Center" HorizontalAlignment="Center" MaxWidth="90"
                      Height="15" Width="80"
                      Canvas.Left="0" Canvas.Top="15"
-                     FontWeight="Normal" TextAlignment="Center" FontFamily="MS Gothic">
+                     FontWeight="Normal" TextAlignment="Center">
         </TextBlock>
         
         <Rectangle Name="HotspotLeft" Width="5" Height="5" Canvas.ZIndex="1000" Fill="Blue" Stroke="White" 

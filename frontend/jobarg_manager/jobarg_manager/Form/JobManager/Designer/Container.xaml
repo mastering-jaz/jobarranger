@@ -31,7 +31,7 @@
             <RowDefinition Height="86"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions >
-        <Slider Grid.Row="0"  Grid.Column="0" x:Name="zoomSlider" Minimum="0.3" Maximum="1" Value="1"/>
+        <Slider Grid.Row="0"  Grid.Column="0" x:Name="zoomSlider" Minimum="0.3" Maximum="1" Value="1" IsMoveToPointEnabled="True"/>
         <ScrollViewer Grid.Row="1" Grid.Column="0" HorizontalAlignment="Stretch" Name="svSampleContainer" VerticalAlignment="Stretch" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" >
             <ScrollViewer.Content>
                 <Canvas Name="sampleContainer" Background="#FFEEECE1" HorizontalAlignment="Left" Width="860" VerticalAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Visible">
@@ -49,8 +49,9 @@
                     <design:TaskSample Canvas.ZIndex="100" Canvas.Top="8" Canvas.Left="655" x:Name="picTask" ></design:TaskSample>
                     <design:InfSample Canvas.ZIndex="100" Canvas.Top="8" Canvas.Left="732" x:Name="picInfomation" ></design:InfSample>
                     <design:FCopySample Canvas.ZIndex="100" Canvas.Top="38" Canvas.Left="5" x:Name="picCopy" ></design:FCopySample>
-                    <!--<design:FWaitSample Canvas.ZIndex="100" Canvas.Top="10" Canvas.Left="845" x:Name="picFWait" ></design:FWaitSample>-->
-                    <design:RebootSample Canvas.ZIndex="100" Canvas.Top="38" Canvas.Left="85" x:Name="picReboot" ></design:RebootSample>
+                    <design:FWaitSample Canvas.ZIndex="100" Canvas.Top="38" Canvas.Left="85" x:Name="picFWait" ></design:FWaitSample>
+                    <design:RebootSample Canvas.ZIndex="100" Canvas.Top="38" Canvas.Left="165" x:Name="picReboot" ></design:RebootSample>
+                    <design:ReleaseSample Canvas.ZIndex="100" Canvas.Top="38" Canvas.Left="240" x:Name="picRelease" ></design:ReleaseSample>
                 </Canvas>
             </ScrollViewer.Content>
         </ScrollViewer>
@@ -69,8 +70,8 @@
                                  ContextMenuOpening="ContextMenu_Open">
                         <Canvas.ContextMenu>
                             <ContextMenu Name="contextMenu">
-                                <MenuItem Header="{x:Static src:Properties.Resources.hold_menu_text}"  Name="menuitemReserve" Click="MenuitemReserve_Click"></MenuItem>
-                                <MenuItem Header="{x:Static src:Properties.Resources.unhold_menu_text}"  Name="menuitemUnReserve" Click="MenuitemUnReserve_Click"></MenuItem>
+                                <MenuItem Header="{x:Static src:Properties.Resources.hold_menu_text}"  Name="menuitemHold" Click="MenuitemHold_Click"></MenuItem>
+                                <MenuItem Header="{x:Static src:Properties.Resources.unhold_menu_text}"  Name="menuitemUnHold" Click="MenuitemUnHold_Click"></MenuItem>
                                 <Separator></Separator>
                                 <MenuItem Header="{x:Static src:Properties.Resources.skip_menu_text}"  Name="menuitemSkip" Click="MenuitemSkip_Click"></MenuItem>
                                 <MenuItem Header="{x:Static src:Properties.Resources.unskip_menu_text}"  Name="menuitemUnSkip" Click="MenuitemUnSkip_Click"></MenuItem>

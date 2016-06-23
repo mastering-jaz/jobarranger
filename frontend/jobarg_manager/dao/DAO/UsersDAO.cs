@@ -55,6 +55,13 @@ namespace jp.co.ftf.jobcontroller.DAO
         private string _selectSqlByNameAndPass = "select * from users " +
                         "where alias = ? and passwd = ?";
 
+        private string _selectAllSql = "select * from users order by alias";
+
+        private string _selectGroupUserSql = "select * from users U where " +
+                        "U.userid in (select userid from users_groups where " +
+                        "usrgrpid in (select usrgrpid from users_groups where userid=?)) " +
+                        "order by alias";
+
         private DBConnect _db = null;
 
         #endregion
@@ -155,6 +162,35 @@ namespace jp.co.ftf.jobcontroller.DAO
             sqlParams.Add(new ComSqlParam(DbType.String, "@passwd", pass));
 
             DataTable dt = _db.ExecuteQuery(_selectSqlByNameAndPass, sqlParams, TableName);
+
+            return dt;
+        }
+
+        //************************************************************************
+        /// <summary> 
+        /// 全データの取得.
+        /// </summary>
+        /// <return>検索結果</return>
+        //************************************************************************
+        public DataTable GetAllEntity()
+        {
+
+            DataTable dt = _db.ExecuteQuery(_selectAllSql, TableName);
+
+            return dt;
+        }
+
+        //************************************************************************
+        /// <summary> 
+        /// 全グループデータの取得.
+        /// </summary>
+        /// <return>検索結果</return>
+        //************************************************************************
+        public DataTable GetGroupUser(object userid)
+        {
+            List<ComSqlParam> sqlParams = new List<ComSqlParam>();
+            sqlParams.Add(new ComSqlParam(DbType.String, "@userid", userid));
+            DataTable dt = _db.ExecuteQuery(_selectGroupUserSql, sqlParams, TableName);
 
             return dt;
         }

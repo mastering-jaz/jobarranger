@@ -18,8 +18,8 @@
 **/
 
 /*
-** $Date:: 2013-07-08 11:13:41 +0900 #$
-** $Revision: 5070 $
+** $Date:: 2014-01-06 11:52:37 +0900 #$
+** $Revision: 5711 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -34,9 +34,9 @@
 #endif
 
 /* version or revsion */
-#define JOBARG_VERSION          "1.3.0"
-#define JOBARG_REVISION         "5164"
-#define JOBARG_REVDATE		"2013-07-10"
+#define JOBARG_VERSION          "1.4.1"
+#define JOBARG_REVISION         "5710"
+#define JOBARG_REVDATE		"2014-01-06"
 
 /* treat unknown parameters as error */
 #define JA_CFG_STRICT			0
@@ -159,11 +159,13 @@
 #define JA_PROTO_TAG_JOBSTATUS		"jobstatus"
 #define JA_PROTO_TAG_USERNAME		"username"
 #define JA_PROTO_TAG_PASSWORD		"password"
-#define JA_PROTO_TAG_JOBNETID		"jobnetid"
 #define JA_PROTO_TAG_SCHEDULEDTIME	"scheduled_time"
 #define JA_PROTO_TAG_STARTTIME		"start_time"
 #define JA_PROTO_TAG_ENDTIME		"end_time"
 #define JA_PROTO_TAG_REGISTRYNUMBER	"registrynumber"
+#define JA_PROTO_TAG_LASTEXITCD         "lastexitcd"
+#define JA_PROTO_TAG_LASTSTDOUT         "laststdout"
+#define JA_PROTO_TAG_LASTSTDERR         "laststderr"
 
 /* message item value */
 #define JA_PROTO_VALUE_JOBNETRUN	"jobnetrun"

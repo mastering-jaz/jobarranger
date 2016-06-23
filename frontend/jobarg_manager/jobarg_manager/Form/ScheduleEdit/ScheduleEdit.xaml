@@ -26,7 +26,7 @@
              xmlns:design="clr-namespace:jp.co.ftf.jobcontroller.JobController.Form.ScheduleEdit"
              xmlns:src="clr-namespace:jp.co.ftf.jobcontroller.JobController"
              mc:Ignorable="d"
-             d:DesignHeight="300" d:DesignWidth="300">
+             d:DesignHeight="300" d:DesignWidth="300" FontFamily="Meiryo" FontSize="11">
 
     <Grid Grid.Column="2" Name="ScheduleGrid">
         <Grid.RowDefinitions>
@@ -34,25 +34,25 @@
             <RowDefinition Height="450*" />
             <RowDefinition Height="40" />
         </Grid.RowDefinitions>
-        <Label Content="{x:Static src:Properties.Resources.schedule_id_label_text}" Height="23" HorizontalAlignment="Left" Margin="10,3,0,0" VerticalAlignment="Top" />
-        <TextBox Height="23" Width="246" HorizontalAlignment="Left" Margin="94,3,0,0" Name="tbxScheduleId" VerticalAlignment="Top"
-                 VerticalContentAlignment="Center" MaxLength="32" FontFamily="MS Gothic"/>
+        <Label Content="{x:Static src:Properties.Resources.schedule_id_label_text}" Height="23" HorizontalAlignment="Left" Margin="0,3,0,0" VerticalAlignment="Top" />
+        <TextBox Height="23" Width="246" HorizontalAlignment="Left" Margin="96,3,0,0" Name="tbxScheduleId" VerticalAlignment="Top"
+                 VerticalContentAlignment="Center" MaxLength="32"/>
         <Label Content="{x:Static src:Properties.Resources.public_label_text}" Height="23" HorizontalAlignment="Left" Margin="360,3,0,0" VerticalAlignment="Top" />
         <CheckBox Height="16" HorizontalAlignment="Left" Margin="405,8,0,0" Name="cbOpen" VerticalAlignment="Top" />
-        <Label Content="{x:Static src:Properties.Resources.authority_label_text}" Height="23" HorizontalAlignment="Left" Margin="445,3,0,0" VerticalAlignment="Top" />
+        <Label Content="{x:Static src:Properties.Resources.authority_label_text}" Height="23" HorizontalAlignment="Left" Margin="440,3,0,0" VerticalAlignment="Top" />
         <Label Content="{x:Static src:Properties.Resources.can_update_auth}" Height="23" Width="80" HorizontalAlignment="Left" Margin="500,3,0,0" Name="powerLabel" 
                VerticalAlignment="Top" />
         <Label Content="{x:Static src:Properties.Resources.update_date_label_text}" Height="23" HorizontalAlignment="Left" Margin="580,3,0,0" VerticalAlignment="Top" />
-        <Label Content="" Height="23" Width="100" HorizontalAlignment="Left" Margin="650,3,20,0" Name="lblUpdDate" 
+        <Label Content="" Height="23" Width="130" HorizontalAlignment="Left" Margin="650,3,20,0" Name="lblUpdDate" 
                VerticalAlignment="Top" />
-        <Label Content="{x:Static src:Properties.Resources.schedule_name_label_text}" HorizontalAlignment="Left" Margin="10,33,0,7" Name="label2" />
-        <TextBox Height="Auto" Width="470" HorizontalAlignment="Left" Margin="94,33,0,0" MaxLength="64"
+        <Label Content="{x:Static src:Properties.Resources.schedule_name_label_text}" HorizontalAlignment="Left" Margin="0,33,0,7" Name="label2" />
+        <TextBox Height="Auto" Width="470" HorizontalAlignment="Left" Margin="96,33,0,0" MaxLength="64"
                  Name="tbScheduleName" VerticalAlignment="Top" VerticalContentAlignment="Center" TextWrapping="WrapWithOverflow"/>
         <Label Content="{x:Static src:Properties.Resources.user_name_label_text}" Height="23" HorizontalAlignment="Left" Margin="580,30,0,0" VerticalAlignment="Top" />
         <Label Content="" Height="23" Width="100" HorizontalAlignment="Left" Margin="650,30,0,0" Name="lblUserName" 
                VerticalAlignment="Top" />
-        <Label Content="{x:Static src:Properties.Resources.memo_label_text}" Height="23" HorizontalAlignment="Left" Margin="10,63,0,0" VerticalAlignment="Top" />
-        <TextBox Height="Auto" Width="700" HorizontalAlignment="Left" Margin="94,63,0,0" Name="tbComment" VerticalAlignment="Top" VerticalContentAlignment="Center" 
+        <Label Content="{x:Static src:Properties.Resources.memo_label_text}" Height="23" HorizontalAlignment="Left" Margin="0,63,0,0" VerticalAlignment="Top" />
+        <TextBox Height="Auto" Width="700" HorizontalAlignment="Left" Margin="96,63,0,0" Name="tbComment" VerticalAlignment="Top" VerticalContentAlignment="Center" 
                  MaxLength="100" TextWrapping="WrapWithOverflow"/>
         <design:Container x:Name="container" Grid.Row="1"></design:Container>
 

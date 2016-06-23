@@ -23,7 +23,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             >
+             FontSize="11" FontFamily="Meiryo">
     <Canvas x:Name="LayoutRoot"    Background="Transparent">
 
         <Polyline Name="picIf" Points="0,12.5 15,0 30,12.5 15,25 0,12.5" 

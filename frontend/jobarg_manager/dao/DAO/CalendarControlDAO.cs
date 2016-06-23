@@ -49,15 +49,15 @@ namespace jp.co.ftf.jobcontroller.DAO
         private string _selectSql = "select * from ja_calendar_control_table where 0!=0";
 
         /// <summary>ロック </summary>
-        private string _selectCountWithLock = "select * from ja_calendar_control_table " +
-            "where calendar_id = ? and update_date = ? for update nowait ";
+        private string _selectWithLock = "select * from ja_calendar_control_table " +
+            "where calendar_id = ? for update nowait ";
 
         /// <summary>ロックしない </summary>
-        private string _selectCountNoLock = "select count(1) as count from ja_calendar_control_table " +
+        private string _selectCountByPk = "select count(1) as count from ja_calendar_control_table " +
             "where calendar_id = ? and update_date = ?";
 
-        private string _selectCountByJobNetIdSql = "select count(1) as count from ja_calendar_control_table " +
-            "where calendar_id = ? and public_flag = '1'";
+        private string _selectCountByCalendarIdSql = "select count(1) as count from ja_calendar_control_table " +
+            "where calendar_id = ?";
 
         private string _selectValidByCalendarIdSql = "select * from ja_calendar_control_table " +
             "where calendar_id = ? and valid_flag = '1'";
@@ -84,6 +84,41 @@ namespace jp.co.ftf.jobcontroller.DAO
 
         private string _deleteSqlByPk = "delete from ja_calendar_control_table " +
               "where calendar_id = ? and update_date = ? ";
+
+        private string _selectSqlByUserId = "SELECT calendar.calendar_id, calendar.calendar_name, calendar.update_date " +
+                                        "FROM ( " +
+                                        "(" +
+                                        "SELECT C.calendar_id, C.calendar_name, C.update_date " +
+                                        "FROM ja_calendar_control_table as C " +
+                                        "WHERE C.public_flag =1 " +
+                                        "and C.update_date=" +
+                                        "( SELECT MAX(D.update_date) " +
+                                        "FROM ja_calendar_control_table AS D " +
+                                        "WHERE D.calendar_id = C.calendar_id) " +
+                                        ") " +
+                                        "UNION (" +
+                                        "SELECT A.calendar_id, A.calendar_name, A.update_date " +
+                                        "FROM ja_calendar_control_table AS A, users AS U, users_groups AS UG1, users_groups AS UG2 " +
+                                        "WHERE A.user_name = U.alias " +
+                                        "AND U.userid = UG1.userid " +
+                                        "AND UG2.userid=? " +
+                                        "AND UG1.usrgrpid = UG2.usrgrpid " +
+                                        "AND A.update_date = ( " +
+                                        "SELECT MAX( B.update_date ) " +
+                                        "FROM ja_calendar_control_table AS B " +
+                                        "WHERE B.calendar_id = A.calendar_id " +
+                                        "GROUP BY B.calendar_id ) " +
+                                        "AND A.public_flag =0" +
+                                        ")" +
+                                        ") AS calendar " +
+                                        "ORDER BY calendar.calendar_id ";
+        private string _selectSqlByUserIdSuper = "SELECT A.calendar_id,A.calendar_name,A.update_date " +
+                                                "FROM ja_calendar_control_table AS A " +
+                                                "WHERE A.update_date=" +
+                                                "( SELECT MAX(B.update_date) " +
+                                                "FROM ja_calendar_control_table AS B " +
+                                                "WHERE A.calendar_id = B.calendar_id) " +
+                                                "order by A.calendar_id";
 
         private DBConnect _db = null;
 
@@ -158,125 +193,113 @@ namespace jp.co.ftf.jobcontroller.DAO
         /// <param name="update_date">更新日</param>
         /// <return>検索結果</return>
         //************************************************************************
-        //public string GetCountByPkWithLock(object calendar_id, object update_date)
-        //{
-        //    string count = "";
-
-        //    List<ComSqlParam> sqlParams = new List<ComSqlParam>();
-        //    sqlParams.Add(new ComSqlParam(DbType.String, "calendar_id", calendar_id));
-        //    sqlParams.Add(new ComSqlParam(DbType.Int64, "update_date", update_date));
-        //    DataTable dt = _db.ExecuteQuery(_selectCountWithLock, sqlParams, TableName);
-
-        //    if (dt != null)
-        //        count = Convert.ToString(dt.Rows[0]["count"]);
-
-        //    return count;
-        //}
-
-        //************************************************************************
-        /// <summary> データの取得</summary>
-        /// <param name="calendar_id">カレンダーID</param>
-        /// <param name="update_date">更新日</param>
-        /// <return>検索結果</return>
-        //************************************************************************
-        public string GetCountByPk(object calendar_id, object update_date)
+        public int GetCountByPk(object calendar_id, object update_date)
         {
-            string count = "";
+            int count = 0;
 
             List<ComSqlParam> sqlParams = new List<ComSqlParam>();
-            sqlParams.Add(new ComSqlParam(DbType.String, "calendar_id", calendar_id));
-            sqlParams.Add(new ComSqlParam(DbType.Int64, "update_date", update_date));
-            DataTable dt = _db.ExecuteQuery(_selectCountNoLock, sqlParams, TableName);
+            sqlParams.Add(new ComSqlParam(DbType.String, "@calendar_id", calendar_id));
+            sqlParams.Add(new ComSqlParam(DbType.Int64, "@update_date", update_date));
+            DataTable dt = _db.ExecuteQuery(_selectCountByPk, sqlParams, TableName);
 
             if (dt != null)
-                count = Convert.ToString(dt.Rows[0]["count"]);
+                count = int.Parse(Convert.ToString(dt.Rows[0]["count"]));
 
             return count;
         }
 
         //************************************************************************
-        /// <summary> データの取得(For Update)</summary>
+        /// <summary>MysqlDBのIDデータロック取得</summary>
         /// <param name="calendar_id">カレンダーID</param>
-        /// <param name="update_date">更新日</param>
         /// <return>検索結果</return>
         //************************************************************************
-        public string GetCountByPkForUpdate(object calendar_id, object update_date)
+        public int GetLock4Mysql(object calendar_id)
         {
-            string count = "";
+            int count = 0;
+            string _getLock = "SELECT GET_LOCK('ja_calendar_control_table." + calendar_id + "', 0) as count";
 
             List<ComSqlParam> sqlParams = new List<ComSqlParam>();
-            sqlParams.Add(new ComSqlParam(DbType.String, "calendar_id", calendar_id));
-            sqlParams.Add(new ComSqlParam(DbType.Int64, "update_date", update_date));
-            DataTable dt = _db.ExecuteQuery(_selectCountWithLock, sqlParams, TableName);
-
-            // データ有の場合
-
-            if (dt != null || dt.Rows.Count > 0)
-                return "1";
-
-            return count;
-        }
-
-        //************************************************************************
-        /// <summary> データの取得</summary>
-        /// <param name="calendar_id">カレンダーID</param>
-        /// <param name="update_date">更新日</param>
-        /// <return>検索結果</return>
-        //************************************************************************
-        public string GetLockByPk(object calendar_id, object update_date)
-        {
-            string count = "";
-
-            string _getLock = "SELECT GET_LOCK('ja_calendar_control_table."+ calendar_id +
-                 "." + update_date + "', 0) as count";
-
-            List<ComSqlParam> sqlParams = new List<ComSqlParam>();
-            sqlParams.Add(new ComSqlParam(DbType.String, "calendar_id", calendar_id));
-            sqlParams.Add(new ComSqlParam(DbType.Int64, "update_date", update_date));
+            sqlParams.Add(new ComSqlParam(DbType.String, "@calendar_id", calendar_id));
             DataTable dt = _db.ExecuteQuery(_getLock, sqlParams, TableName);
 
-            if (dt != null)
-                count = Convert.ToString(dt.Rows[0]["count"]);
-
+            count = int.Parse(Convert.ToString(dt.Rows[0]["count"]));
+            if (count < 1)
+            {
+                RealseLock(calendar_id);
+                _db.CloseSqlConnect();
+                throw new DBException();
+            }
             return count;
+
         }
 
         //************************************************************************
-        /// <summary> データの取得</summary>
+        /// <summary>NotMysqlDBのIDデータロック取得</summary>
         /// <param name="calendar_id">カレンダーID</param>
-        /// <param name="update_date">更新日</param>
         /// <return>検索結果</return>
         //************************************************************************
-        public string RealseLockByPk(object calendar_id, object update_date)
+        public int GetLock4NotMysql(object calendar_id)
+        {
+            List<ComSqlParam> sqlParams = new List<ComSqlParam>();
+            sqlParams.Add(new ComSqlParam(DbType.String, "@calendar_id", calendar_id));
+            DataTable dt = _db.ExecuteQuery(_selectWithLock, sqlParams, TableName);
+
+            return dt.Rows.Count;
+
+        }
+
+        //************************************************************************
+        /// <summary>IDデータロック取得</summary>
+        /// <param name="calendar_id">カレンダーID</param>
+        /// <param name="dbType">DB種別</param>
+        /// <return>検索結果</return>
+        //************************************************************************
+        public int GetLock(object calendar_id, Consts.DBTYPE dbType)
+        {
+            if (dbType == Consts.DBTYPE.MYSQL)
+            {
+                return GetLock4Mysql(calendar_id);
+            }
+            return GetLock4NotMysql(calendar_id);
+
+        }
+
+
+        //************************************************************************
+        /// <summary>MysqlDBのIDデータロック開放</summary>
+        /// <param name="calendar_id">カレンダーID</param>
+        /// <return>検索結果</return>
+        //************************************************************************
+        public String RealseLock(object calendar_id)
         {
             string count = "";
 
-            string _releaseLock = "SELECT RELEASE_LOCK('ja_calendar_control_table." + calendar_id +
-                "." + update_date + "') as count";
+            string _releaseLock = "SELECT RELEASE_LOCK('ja_calendar_control_table." + calendar_id + "') as count";
 
             List<ComSqlParam> sqlParams = new List<ComSqlParam>();
-            sqlParams.Add(new ComSqlParam(DbType.String, "calendar_id", calendar_id));
-            sqlParams.Add(new ComSqlParam(DbType.Int64, "update_date", update_date));
+            sqlParams.Add(new ComSqlParam(DbType.String, "@calendar_id", calendar_id));
             DataTable dt = _db.ExecuteQuery(_releaseLock, sqlParams, TableName);
 
             if (dt != null)
+            {
                 count = Convert.ToString(dt.Rows[0]["count"]);
+            }
 
             return count;
         }
 
         //************************************************************************
-        /// <summary> データの取得</summary>
+        /// <summary>IDデータ件数の取得</summary>
         /// <param name="calendar_id">カレンダーID</param>
         /// <return>検索結果</return>
         //************************************************************************
-        public string GetCountByJobNetId(object calendar_id)
+        public string GetCountByCalendarId(object calendar_id)
         {
             string count = "";
 
             List<ComSqlParam> sqlParams = new List<ComSqlParam>();
             sqlParams.Add(new ComSqlParam(DbType.String, "calendar_id", calendar_id));
-            DataTable dt = _db.ExecuteQuery(_selectCountByJobNetIdSql, sqlParams, TableName);
+            DataTable dt = _db.ExecuteQuery(_selectCountByCalendarIdSql, sqlParams, TableName);
 
             if (dt != null)
                 count = Convert.ToString(dt.Rows[0]["count"]);
@@ -367,6 +390,34 @@ namespace jp.co.ftf.jobcontroller.DAO
         }
 
         //************************************************************************
+        /// <summary> データの取得</summary>
+        /// <param name="userid">ユーザーID</param>
+        /// <return>検索結果</return>
+        //************************************************************************
+        public DataTable GetInfoByUserId(object userid)
+        {
+            List<ComSqlParam> sqlParams = new List<ComSqlParam>();
+            sqlParams.Add(new ComSqlParam(DbType.String, "@userid", userid));
+            DataTable dt = _db.ExecuteQuery(_selectSqlByUserId, sqlParams, TableName);
+
+            return dt;
+        }
+
+        //************************************************************************
+        /// <summary> データの取得</summary>
+        /// <param name="userid">ユーザーID</param>
+        /// <return>検索結果</return>
+        //************************************************************************
+        public DataTable GetInfoByUserIdSuper()
+        {
+            List<ComSqlParam> sqlParams = new List<ComSqlParam>();
+
+            DataTable dt = _db.ExecuteQuery(_selectSqlByUserIdSuper, sqlParams, TableName);
+
+            return dt;
+        }
+
+        //************************************************************************
         /// <summary> 
         /// データを削除.
         /// </summary>
@@ -400,7 +451,7 @@ namespace jp.co.ftf.jobcontroller.DAO
 
         //************************************************************************
         /// <summary> 最新データの取得</summary>
-        /// <param name="jobnet_id">カレンダーID</param>
+        /// <param name="calendar_id">カレンダーID</param>
         /// <return>検索結果</return>
         //************************************************************************
         public DataTable GetMaxUpdateDateEntityById(object calendar_id)

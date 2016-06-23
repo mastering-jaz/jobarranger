@@ -41,6 +41,12 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
         {
             InitializeComponent();
         }
+        public Ife(RunJobMethodType methodType)
+        {
+            InitializeComponent();
+
+            _methodType = methodType;
+        }
         public Ife(SolidColorBrush color)
         {
             InitializeComponent();
@@ -74,6 +80,23 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             set
             {
                 _jobId = value;
+                picToolTip.ToolTip = value;
+                
+            }
+        }
+
+        /// <summary>処理フラグ</summary>
+        private RunJobMethodType _methodType;
+        public RunJobMethodType MethodType
+        {
+            get
+            {
+                return _methodType;
+            }
+            set
+            {
+                _methodType = value;
+
             }
         }
 
@@ -285,7 +308,20 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
         /// <summary>色のリセット</summary>
         public void ResetInitColor()
         {
-            picIfe.Fill = SystemConst.ColorConst.JobColor;
+            Brush color;
+            switch (MethodType)
+            {
+                case RunJobMethodType.HOLD:
+                    color = SystemConst.ColorConst.HoldColor;
+                    break;
+                case RunJobMethodType.SKIP:
+                    color = SystemConst.ColorConst.SkipColor;
+                    break;
+                default:
+                    color = SystemConst.ColorConst.JobColor;
+                    break;
+            }
+            picIfe.Fill = color;
         }
 
         /// <summary>部品欄のアイコン色をセット</summary>

@@ -18,8 +18,8 @@
 **/
 
 /*
-** $Date:: 2013-05-02 09:01:42 +0900 #$
-** $Revision: 4520 $
+** $Date:: 2013-07-12 15:12:54 +0900 #$
+** $Revision: 5180 $
 ** $Author: ossinfra@FITECHLABS.CO.JP $
 **/
 
@@ -27,6 +27,7 @@
 #include "log.h"
 #include "db.h"
 
+#include "jastr.h"
 #include "javalue.h"
 #include "jalog.h"
 
@@ -67,6 +68,12 @@ int jarun_value_before(const zbx_uint64_t inner_job_id)
         }
         if (ja_set_value_before
             (inner_job_id, inner_jobnet_id, "JOB_NAME", row[2]) == FAIL) {
+            DBfree_result(result);
+            return FAIL;
+        }
+        if (ja_set_value_before
+            (inner_job_id, inner_jobnet_id, "CURRENT_TIME",
+             ja_timestamp2str(time(NULL))) == FAIL) {
             DBfree_result(result);
             return FAIL;
         }

@@ -18,9 +18,9 @@
 **/
 
 /*
-** $Date:: 2013-07-10 15:16:37 +0900 #$
-** $Revision: 5154 $
-** $Author: ossinfra@FITECHLABS.CO.JP $
+** $Date:: 2013-12-16 16:39:52 +0900 #$
+** $Revision: 5627 $
+** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
 #include <json/json.h>
@@ -78,7 +78,9 @@ int jarun_icon_fcopy(const zbx_uint64_t inner_job_id, const int method)
 
     result =
         DBselect
-        ("select * from ja_run_icon_fcopy_table where inner_job_id = "
+        ("select inner_job_id, inner_jobnet_id, from_host_flag, to_host_flag, overwrite_flag,"
+         " from_host_name, from_directory, from_file_name, to_host_name, to_directory"
+         " from ja_run_icon_fcopy_table where inner_job_id = "
          ZBX_FS_UI64, inner_job_id);
     if (NULL != (row = DBfetch(result))) {
         from_host_flag = atoi(row[2]);
@@ -88,25 +90,22 @@ int jarun_icon_fcopy(const zbx_uint64_t inner_job_id, const int method)
         zbx_snprintf(to_host_name, sizeof(to_host_name), "%s", row[8]);
 
         if (ja_cpy_value(inner_job_id, row[6], from_directory) == FAIL) {
-            zabbix_log(LOG_LEVEL_ERR,
-                       "In %s() cat not find the value [%s]. inner_job_id: "
-                       ZBX_FS_UI64, __function_name, row[6], inner_job_id);
+            ja_log("JARUNICONFCOPY200004", 0, NULL, inner_job_id,
+                   __function_name, row[6], inner_job_id);
             DBfree_result(result);
             return ja_set_runerr(inner_job_id);
         }
 
         if (ja_cpy_value(inner_job_id, row[7], from_file_name) == FAIL) {
-            zabbix_log(LOG_LEVEL_ERR,
-                       "In %s() cat not find the value [%s]. inner_job_id: "
-                       ZBX_FS_UI64, __function_name, row[7], inner_job_id);
+            ja_log("JARUNICONFCOPY200004", 0, NULL, inner_job_id,
+                   __function_name, row[7], inner_job_id);
             DBfree_result(result);
             return ja_set_runerr(inner_job_id);
         }
 
         if (ja_cpy_value(inner_job_id, row[9], to_directory) == FAIL) {
-            zabbix_log(LOG_LEVEL_ERR,
-                       "In %s() cat not find the value [%s]. inner_job_id: "
-                       ZBX_FS_UI64, __function_name, row[9], inner_job_id);
+            ja_log("JARUNICONFCOPY200004", 0, NULL, inner_job_id,
+                   __function_name, row[9], inner_job_id);
             DBfree_result(result);
             return ja_set_runerr(inner_job_id);
         }
@@ -121,19 +120,15 @@ int jarun_icon_fcopy(const zbx_uint64_t inner_job_id, const int method)
     if (ja_host_getname
         (inner_job_id, from_host_flag, from_host_name,
          from_host) == FAIL) {
-        zabbix_log(LOG_LEVEL_ERR,
-                   "In %s() can get host name %s. from_host_flag: %d, inner_job_id: "
-                   ZBX_FS_UI64, __function_name, from_host_name,
-                   from_host_flag, inner_job_id);
+        ja_log("JARUNICONFCOPY200005", 0, NULL, inner_job_id,
+               __function_name, from_host_name, from_host_flag, inner_job_id);
         return ja_set_runerr(inner_job_id);
     }
 
     if (ja_host_getname(inner_job_id, to_host_flag, to_host_name, to_host)
         == FAIL) {
-        zabbix_log(LOG_LEVEL_ERR,
-                   "In %s() can get host name %s. from_host_flag: %d, inner_job_id: "
-                   ZBX_FS_UI64, __function_name, from_host_name,
-                   from_host_flag, inner_job_id);
+        ja_log("JARUNICONFCOPY200006", 0, NULL, inner_job_id,
+               __function_name, to_host_name, to_host_flag, inner_job_id);
         return ja_set_runerr(inner_job_id);
     }
 

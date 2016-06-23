@@ -25,33 +25,43 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:design="clr-namespace:jp.co.ftf.jobcontroller.JobController.Form.JobManager"
              xmlns:src="clr-namespace:jp.co.ftf.jobcontroller.JobController"
-             mc:Ignorable="d"
-             Title="{x:Static src:Properties.Resources.WINDOW_NAME_310}" Height="675" Width="880" Closing="Window_Closed" 
+             mc:Ignorable="d" FontSize="11" FontFamily="Meiryo"
+             Title="{x:Static src:Properties.Resources.WINDOW_NAME_310}" Height="700" Width="900" Closing="Window_Closed" 
              GotKeyboardFocus="Window_GotKeyboardFocus" LostKeyboardFocus="Window_LostKeyboardFocus">
     <Grid Grid.Column="2" Name="JobNetGrid" Background="{StaticResource BackgroundBrush}">
         <Grid.RowDefinitions>
-            <RowDefinition Height="80" />
+            <RowDefinition Height="102" />
             <RowDefinition Height="405*" />
             <RowDefinition Height="40" />
         </Grid.RowDefinitions>
         <Grid Grid.Row="0">
             <Grid.RowDefinitions>
-                <RowDefinition Height="30"/>
-                <RowDefinition Height="25" />
-                <RowDefinition Height="25"/>
+                <RowDefinition Height="32"/>
+                <RowDefinition Height="22" />
+                <RowDefinition Height="22"/>
+                <RowDefinition Height="22"/>
             </Grid.RowDefinitions>
-            <TextBlock Grid.Row="0" Text="{x:Static src:Properties.Resources.jobnet_id_label_text}" Height="23" HorizontalAlignment="Left" Margin="10,5,0,0" VerticalAlignment="Bottom" />
-            <TextBlock Grid.Row="0" Height="23" Width="246" HorizontalAlignment="Left" Margin="94,5,0,0" Name="lblJobNetId" VerticalAlignment="Bottom" FontFamily="MS Gothic" />
-            <TextBlock Grid.Row="0" Text="{x:Static src:Properties.Resources.public_label_text}" Height="23" HorizontalAlignment="Left" Margin="400,5,0,0" VerticalAlignment="Bottom" />
-            <TextBlock Grid.Row="0" Height="23" HorizontalAlignment="Left" Margin="440,5,0,0" Name="lblOpen" VerticalAlignment="Bottom" />
-            <TextBlock Grid.Row="0" Text="{x:Static src:Properties.Resources.update_date_label_text}" Height="23" HorizontalAlignment="Left" Margin="560,5,0,0" VerticalAlignment="Bottom" />
-            <TextBlock Grid.Row="0" Text="" Height="23" Width="120" HorizontalAlignment="Left" Margin="630,5,0,0" Name="lblUpdDate" VerticalAlignment="Bottom" />
-            <TextBlock Grid.Row="1" Height="23" Text="{x:Static src:Properties.Resources.jobnet_name_label_text}" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Bottom"/>
-            <TextBlock Grid.Row="1" Height="23" Width="450" HorizontalAlignment="Left" Margin="94,0,0,0" Name="lblJobnetName" VerticalAlignment="Bottom" TextWrapping="WrapWithOverflow" />
-            <TextBlock Grid.Row="1" Height="23" Text="{x:Static src:Properties.Resources.user_name_label_text}" HorizontalAlignment="Left" Margin="560,0,0,0" VerticalAlignment="Bottom" />
-            <TextBlock Grid.Row="1" Height="23" Width="100" HorizontalAlignment="Left" Margin="620,0,0,0" Name="lblUserName" VerticalAlignment="Bottom" TextWrapping="WrapWithOverflow" />
-            <TextBlock Grid.Row="2" Text="{x:Static src:Properties.Resources.memo_label_text}" Height="23" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Bottom" />
-            <TextBlock Grid.Row="2" Height="23" Margin="94,0,0,0" Name="lblComment" VerticalAlignment="Bottom" TextWrapping="WrapWithOverflow"/>
+            <TextBlock Grid.Row="0" Text="{x:Static src:Properties.Resources.manage_id_label_text}" Height="20" HorizontalAlignment="Left" Margin="10,5,0,0" VerticalAlignment="Bottom" />
+            <TextBlock Grid.Row="0" Height="20" Width="145" HorizontalAlignment="Left" Margin="75,5,0,0" Name="lblManageId" VerticalAlignment="Bottom" />
+            <TextBlock Grid.Row="0" Text="{x:Static src:Properties.Resources.schedule_time_label_text}" Height="20" HorizontalAlignment="Left" Margin="235,5,0,0" VerticalAlignment="Bottom" />
+            <TextBlock Grid.Row="0" Height="20" Width="130" HorizontalAlignment="Left" Margin="325,5,0,0" Name="lblScheduledTime" VerticalAlignment="Bottom" />
+            <TextBlock Grid.Row="0" Text="{x:Static src:Properties.Resources.start_time_label_text}" Height="20" HorizontalAlignment="Left" Margin="465,5,0,0" VerticalAlignment="Bottom" />
+            <TextBlock Grid.Row="0" Text="" Height="20" Width="130" HorizontalAlignment="Left" Margin="525,5,0,0" Name="lblStartTime" VerticalAlignment="Bottom" />
+            <TextBlock Grid.Row="0" Text="{x:Static src:Properties.Resources.end_time_label_text}" Height="20" HorizontalAlignment="Left" Margin="665,5,0,0" VerticalAlignment="Bottom" />
+            <TextBlock Text="" Height="20" Width="130" HorizontalAlignment="Left" Margin="725,5,0,0" Name="lblEndTime" VerticalAlignment="Bottom" />
+            
+            <TextBlock Grid.Row="1" Text="{x:Static src:Properties.Resources.jobnet_id_label_text}" Height="20" HorizontalAlignment="Left" Margin="10,5,0,0" VerticalAlignment="Bottom" />
+            <TextBlock Grid.Row="1" Height="20" Width="246" HorizontalAlignment="Left" Margin="100,5,0,0" Name="lblJobNetId" VerticalAlignment="Bottom" />
+            <TextBlock Grid.Row="1" Text="{x:Static src:Properties.Resources.public_label_text}" Height="20" HorizontalAlignment="Left" Margin="400,5,0,0" VerticalAlignment="Bottom" />
+            <TextBlock Grid.Row="1" Height="20" HorizontalAlignment="Left" Margin="440,5,0,0" Name="lblOpen" VerticalAlignment="Bottom" />
+            <TextBlock Grid.Row="1" Text="{x:Static src:Properties.Resources.update_date_label_text}" Height="20" HorizontalAlignment="Left" Margin="560,5,0,0" VerticalAlignment="Bottom" />
+            <TextBlock Grid.Row="1" Text="" Height="20" Width="120" HorizontalAlignment="Left" Margin="630,5,0,0" Name="lblUpdDate" VerticalAlignment="Bottom" />
+            <TextBlock Grid.Row="2" Height="20" Text="{x:Static src:Properties.Resources.jobnet_name_label_text}" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Bottom"/>
+            <TextBlock Grid.Row="2" Height="20" Width="450" HorizontalAlignment="Left" Margin="100,0,0,0" Name="lblJobnetName" VerticalAlignment="Bottom" TextWrapping="WrapWithOverflow" />
+            <TextBlock Grid.Row="2" Height="20" Text="{x:Static src:Properties.Resources.user_name_label_text}" HorizontalAlignment="Left" Margin="560,0,0,0" VerticalAlignment="Bottom" />
+            <TextBlock Grid.Row="2" Height="20" Width="100" HorizontalAlignment="Left" Margin="630,0,0,0" Name="lblUserName" VerticalAlignment="Bottom" TextWrapping="WrapWithOverflow" />
+            <TextBlock Grid.Row="3" Text="{x:Static src:Properties.Resources.memo_label_text}" Height="20" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Bottom" />
+            <TextBlock Grid.Row="3" Height="20" Margin="100,0,0,0" Name="lblComment" VerticalAlignment="Bottom" TextWrapping="WrapWithOverflow"/>
         </Grid>
         <design:Container x:Name="container" Grid.Row="1" Margin="5,0,0,0"></design:Container>
         <Button Grid.Row="2" Content="{x:Static src:Properties.Resources.close_button_text}" Height="28" Name="btnRegist" Width="75" Margin="0,6,29,6" 

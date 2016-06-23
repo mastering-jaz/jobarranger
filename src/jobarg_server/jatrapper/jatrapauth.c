@@ -27,6 +27,7 @@
 #include "common.h"
 #include "comms.h"
 #include "log.h"
+#include "db.h"
 
 #include "jatelegram.h"
 #include "jauser.h"
@@ -143,8 +144,12 @@ zbx_uint64_t jatrap_auth_user(ja_telegram_object * obj)
         err =
             zbx_dsprintf(NULL, "user authentication error, username: %s",
                          username);
+        goto error;
     }
-
+    if (ja_user_status(userid) != 0) {
+        err = zbx_dsprintf(NULL, "invalid user, username: %s", username);
+        userid = 0;
+    }
   error:
     if (userid == 0) {
         zabbix_log(LOG_LEVEL_ERR, "In %s() error: %s", __function_name,
@@ -154,4 +159,56 @@ zbx_uint64_t jatrap_auth_user(ja_telegram_object * obj)
     if (err != NULL)
         zbx_free(err);
     return userid;
+}
+
+/******************************************************************************
+ *                                                                            *
+ * Function:                                                                  *
+ *                                                                            *
+ * Purpose:                                                                   *
+ *                                                                            *
+ * Parameters:                                                                *
+ *                                                                            *
+ * Return value:                                                              *
+ *                                                                            *
+ * Comments:                                                                  *
+ *                                                                            *
+ ******************************************************************************/
+int jatrap_auth_jobnet(zbx_uint64_t userid, zbx_uint64_t inner_jobnet_id)
+{
+    int ret;
+    DB_RESULT result;
+    DB_ROW row;
+    int user_type, public_flag, user_cmp;
+    const char *__function_name = "jatrap_auth_jobnet";
+
+    zabbix_log(LOG_LEVEL_DEBUG, "In %s()", __function_name);
+    if (userid == 0)
+        return FAIL;
+
+    user_type = ja_user_type(userid);
+
+    ret = SUCCEED;
+    public_flag = 0;
+    user_cmp = 0;
+
+    result =
+        DBselect
+        ("select user_name, public_flag from ja_run_jobnet_table where inner_jobnet_id = "
+         ZBX_FS_UI64, inner_jobnet_id);
+    row = DBfetch(result);
+    if (row == NULL) {
+        ret = FAIL;
+    } else {
+        public_flag = atoi(row[1]);
+        if (ja_user_groups(ja_user_id(row[0]), userid) > 0)
+            user_cmp = 1;
+    }
+    DBfree_result(result);
+    if (ret == FAIL)
+        return FAIL;
+    if (user_type == USER_TYPE_SUPER_ADMIN || public_flag == 1
+        || user_cmp == 1)
+        return SUCCEED;
+    return FAIL;
 }

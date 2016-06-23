@@ -19,8 +19,10 @@
 using System;
 using System.Windows;
 using System.Windows.Controls;
+using jp.co.ftf.jobcontroller;
 using jp.co.ftf.jobcontroller.Common;
 using System.Data;
+using System.Collections;
 using System.Windows.Input;
 using System.Windows.Threading;
 using jp.co.ftf.jobcontroller.DAO;
@@ -123,18 +125,27 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
         /// <summary> リブートアイコン設定テーブル </summary>
         private IconRebootDAO _iconRebootDAO;
 
+        /// <summary> 保留解除アイコン設定テーブル </summary>
+        private IconReleaseDAO _iconReleaseDAO;
+
+        public Hashtable JobNoHash = new Hashtable();
+
         #endregion
 
         #region コンストラクタ
 
         /// <summary>コンストラクタ(新規追加用)</summary>
-        public JobEdit()
+        public JobEdit(JobArrangerWindow parentWindow)
         {
+            ParantWindow = parentWindow;
+
             InitializeComponent();
+            tbxJobNetId.SetValue(InputMethod.IsInputMethodEnabledProperty, false);
             // 初期化 
             LoadForAdd();
 
             HankakuTextChangeEvent.AddTextChangedEventHander(tbxJobNetId);
+            CommonUtil.InitJobNo(JobNoHash);
 
             _successFlg = true;
         }
@@ -142,17 +153,15 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
         /// <summary>コンストラクタ(編集、コピー新規用)</summary>
         /// <param name="jobnetId">ジョブネットID</param>
         /// <param name="updDate">更新日</param>
-        public JobEdit(string jobnetId, string updDate, Consts.EditType editType)
+        public JobEdit(JobArrangerWindow parentWindow, string jobnetId, string updDate, Consts.EditType editType)
         {
-            if (jobnetId == null)
-            {
-                new JobEdit();
-                return;
-            }
+            ParantWindow = parentWindow;
             if (LoadForUpd(jobnetId, updDate, editType))
             {
                 InitializeComponent();
+                tbxJobNetId.SetValue(InputMethod.IsInputMethodEnabledProperty, false);
                 HankakuTextChangeEvent.AddTextChangedEventHander(tbxJobNetId);
+                CommonUtil.InitJobNo(JobNoHash);
                 _successFlg = true;
             }
             else
@@ -278,6 +287,19 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                 _healthCheckFlag = true;
             }
         }
+        /// <summaryサブジョブネットフラグ</summary>
+        private bool _isSubJobnet = false;
+        public bool IsSubJobnet
+        {
+            get
+            {
+                return _isSubJobnet;
+            }
+            set
+            {
+                _isSubJobnet = value;
+            }
+        }
 
         #endregion
 
@@ -323,21 +345,9 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
 
                 this.Commit();
 
-                if (oldPublicFlg != cbOpen.IsChecked &&
-                    _editType != Consts.EditType.Add &&
-                    _editType != Consts.EditType.CopyNew)
-                {
-                    ParantWindow.SetTreeObject(!cbOpen.IsChecked.Value, Consts.ObjectEnum.JOBNET, tbxJobNetId.Text);
-                }
-                if (oldPublicFlg != cbOpen.IsChecked ||
-                    _editType == Consts.EditType.Add ||
-                    _editType == Consts.EditType.CopyNew)                
+                //画面表示
+                AfterRegistView();
 
-                {
-                    ParantWindow.SetTreeObject(cbOpen.IsChecked.Value, Consts.ObjectEnum.JOBNET, tbxJobNetId.Text);
-                }
-                // オブジェクト一覧画面を表示する
-                ParantWindow.ShowObjectList(tbxJobNetId.Text, Consts.ObjectEnum.JOBNET);
             }
 
             // 終了ログ
@@ -362,8 +372,15 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                     // ロールバック
                     this.Rollback();
 
-                    // オブジェクト一覧画面を表示する 
-                    ParantWindow.ShowObjectList(_jobnetId, Consts.ObjectEnum.JOBNET);
+                    if (!_isSubJobnet)
+                    {
+                        // オブジェクト一覧画面を表示する 
+                        ParantWindow.ShowObjectList(null, Consts.ObjectEnum.JOBNET);
+                    }
+                    else
+                    {
+                        Window.GetWindow(this).Close();
+                    }
 
                 }
             }
@@ -372,8 +389,15 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                 // ロールバック
                 this.Rollback();
 
-                // オブジェクト一覧画面を表示する 
-                ParantWindow.ShowObjectList(_jobnetId, Consts.ObjectEnum.JOBNET);
+                if (!_isSubJobnet)
+                {
+                    // オブジェクト一覧画面を表示する 
+                    ParantWindow.ShowObjectList(null, Consts.ObjectEnum.JOBNET);
+                }
+                else
+                {
+                    Window.GetWindow(this).Close();
+                }
             }
 
             // 終了ログ
@@ -387,7 +411,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
         {
             CommonItem room = (CommonItem)sender;
             room.SetSelectedColor();
-            room.ShowIconSetting();
+            room.ShowIconSetting(false);
         }
 
         #endregion
@@ -424,19 +448,22 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
         /// Treeを再セット 
         /// </summary>
         //*******************************************************************
-        public override void ResetTree()
+        public override void ResetTree(String objectId)
         {
+            if (objectId == null && (_editType == Consts.EditType.Modify || _editType == Consts.EditType.READ))
+                objectId = ((TreeViewItem)ParantWindow.treeView1.SelectedItem).Header.ToString();
+
             if (oldPublicFlg != cbOpen.IsChecked &&
                 _editType != Consts.EditType.Add &&
                 _editType != Consts.EditType.CopyNew)
             {
-                ParantWindow.SetTreeObject(!cbOpen.IsChecked.Value, Consts.ObjectEnum.JOBNET, null);
+                ParantWindow.SetTreeObject(!cbOpen.IsChecked.Value, Consts.ObjectEnum.JOBNET, objectId);
             }
             if (oldPublicFlg != cbOpen.IsChecked ||
                 _editType == Consts.EditType.Add ||
                 _editType == Consts.EditType.CopyNew)
             {
-                ParantWindow.SetTreeObject(cbOpen.IsChecked.Value, Consts.ObjectEnum.JOBNET, null);
+                ParantWindow.SetTreeObject(cbOpen.IsChecked.Value, Consts.ObjectEnum.JOBNET, objectId);
             }
 
         }
@@ -447,8 +474,11 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
         public override void Commit()
         {
             // ロックをリリース
-            if (_editType == Consts.EditType.Modify && Consts.DBTYPE.MYSQL == LoginSetting.DBType)
-                this.RealseLock(_jobnetId, _oldUpdateDate);
+            if ((_editType == Consts.EditType.Modify || _editType == Consts.EditType.CopyVer) && Consts.DBTYPE.MYSQL == LoginSetting.DBType)
+                this.RealseLock(_jobnetId);
+
+            //表示中から削除
+            ParantWindow.viewJobEdit.Remove(_jobnetId + _oldUpdateDate);
 
             dbAccess.TransactionCommit();
             dbAccess.CloseSqlConnect();
@@ -460,9 +490,11 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
         public override void Rollback()
         {
             // ロックをリリース
-            if (_editType == Consts.EditType.Modify && Consts.DBTYPE.MYSQL == LoginSetting.DBType)
-                this.RealseLock(_jobnetId, _oldUpdateDate);
+            if ((_editType == Consts.EditType.Modify || _editType == Consts.EditType.CopyVer) && Consts.DBTYPE.MYSQL == LoginSetting.DBType)
+                this.RealseLock(_jobnetId);
 
+            //表示中から削除
+            ParantWindow.viewJobEdit.Remove(_jobnetId + _oldUpdateDate);
             dbAccess.TransactionRollback();
             dbAccess.CloseSqlConnect();
         }
@@ -527,7 +559,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             _editType = Consts.EditType.Add;
 
             // ジョブIDを初期化 
-            CommonUtil.InitJobNo();
+            //CommonUtil.InitJobNo();
             // プロパティをセット 
             container.ParantWindow = this;
 
@@ -541,6 +573,16 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
         //*******************************************************************
         private bool LoadForUpd(string jobnetId, string updDate, Consts.EditType editType)
         {
+            //既に表示中か判断して、表示中の場合はエラーメッセージを表示
+            if (editType == Consts.EditType.Modify || editType == Consts.EditType.READ)
+            {
+                if (ParantWindow.viewJobEdit.Contains(jobnetId + updDate))
+                {
+                    CommonDialog.ShowErrorDialog(Consts.ERROR_JOBEDIT_013);
+                    return false;
+                }
+            }
+
             // DAOの初期化 
             InitialDAO();
 
@@ -579,51 +621,51 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             ShowJobNet();
 
             // ジョブIDを初期化 
-            CommonUtil.InitJobNo();
+            //CommonUtil.InitJobNo();
 
             //ＤＢヘルスチェックをセット
             SetHealthCheck();
+
+            //表示中に追加
+            if (editType == Consts.EditType.Modify || editType == Consts.EditType.READ)
+            {
+                ParantWindow.viewJobEdit[jobnetId + updDate] = "1";
+            }
 
             return true;
         }
 
         //*******************************************************************
-        /// <summary> 存在チェックANDDBのロック取得４UPD</summary>
+        /// <summary> DBのロック取得、存在チェック</summary>
         //*******************************************************************
         private bool ExistCheckAndGetLockForUpd(string jobnetId, string updDate, Consts.EditType editType)
         {
-            // スケジュールが存在しない場合、メッセージを表示し、処理終了する 
-            bool exitFlg = false;
-            try
+            //編集モード時、jobnet_idベースでロックする。
+            if (editType == Consts.EditType.Modify || editType == Consts.EditType.CopyVer)
             {
-                exitFlg = ExistCheck(jobnetId, updDate, editType);
+                dbAccess.BeginTransaction();
+                try
+                {
+                    GetLock(jobnetId);
+                }
+                catch (DBException ex)
+                {
+                    CommonDialog.ShowErrorDialog(Consts.ERROR_JOBEDIT_006);
+                    return false;
+                }
+            }
 
-            }
-            catch (DBException ex)
-            {
-                CommonDialog.ShowErrorDialog(Consts.ERROR_JOBEDIT_006);
-                dbAccess.CloseSqlConnect();
-                return false;
-            }
+            //存在チェック
+            bool exitFlg = ExistCheck(jobnetId, updDate);
 
             // 存在しない場合 
             if (exitFlg == false)
             {
                 CommonDialog.ShowErrorDialog(Consts.ERROR_JOBEDIT_002);
-                dbAccess.CloseSqlConnect();
+                Rollback();
                 return false;
             }
 
-            //開発モード、Mysqlの場合、ロックを取得 
-            if (Consts.ActionMode.DEVELOP == LoginSetting.Mode && Consts.DBTYPE.MYSQL == LoginSetting.DBType)
-            {
-                if (editType == Consts.EditType.Modify && !GetLock(jobnetId, updDate))
-                {
-                    CommonDialog.ShowErrorDialog(Consts.ERROR_JOBEDIT_006);
-                    Rollback();
-                    return false;
-                }
-            }
             return true;
 
         }
@@ -692,6 +734,9 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
 
             /// リブートアイコン設定テーブル 
             _iconRebootDAO = new IconRebootDAO(dbAccess);
+
+            /// 保留解除アイコン設定テーブル 
+            _iconReleaseDAO = new IconReleaseDAO(dbAccess);
         }
 
         //*******************************************************************
@@ -749,6 +794,9 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             container.IconFwaitTable = _iconFwaitDAO.GetEmptyTable();
             // リブートアイコン設定テーブル 
             container.IconRebootTable = _iconRebootDAO.GetEmptyTable();
+            // 保留解除アイコン設定テーブル 
+            container.IconReleaseTable = _iconReleaseDAO.GetEmptyTable();
+
             dbAccess.CloseSqlConnect();
         }
 
@@ -817,18 +865,9 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             // リブートアイコン設定テーブル 
             container.IconRebootTable = _iconRebootDAO.GetEntityByJobnet(jobnetId, updDate);
 
-            // 拡張ジョブ定義テーブル 
-            // 行状態を変更 
-            //SetAllRowsState();
+            // 保留解除アイコン設定テーブル 
+            container.IconReleaseTable = _iconReleaseDAO.GetEntityByJobnet(jobnetId, updDate);
 
-            // dataSet.AcceptChanges();
-            //dsOriginal = dataSet.GetChanges();
-            //
-            //UpdateForUpd(container.TmpUpdDate);
-            //RegistDataTable();
-            //dataSet.AcceptChanges();
-
-            //container.IconValueTable.
         }
 
         //*******************************************************************
@@ -925,54 +964,41 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             if (container.IconRebootTable != null)
                 foreach (DataRow row in container.IconRebootTable.Select())
                     row.SetAdded();
+
+            // 保留解除アイコン設定テーブル 
+            if (container.IconReleaseTable != null)
+                foreach (DataRow row in container.IconReleaseTable.Select())
+                    row.SetAdded();
         }
 
         //*******************************************************************
-        /// <summary> ロックを取得</summary>
+        /// <summary> DBがMysql時、ロックをリリース</summary>
         //*******************************************************************
-        private bool GetLock(string jobnetId, string updDate)
+        private void RealseLock(string jobnetId)
         {
-            string count = _jobnetControlDAO.GetLockByPk(jobnetId, updDate);
+            _jobnetControlDAO.RealseLock(jobnetId);
 
-            // 成功にロックの場合 
-            if("1".Equals(count))
-                return true;
-
-            return false;
         }
 
         //*******************************************************************
-        /// <summary> ロックをリリース</summary>
+        /// <summary> ジョブネットロック</summary>
         //*******************************************************************
-        private bool RealseLock(string jobnetId, string updDate)
+        private void GetLock(string jobnetId)
         {
-            string count = _jobnetControlDAO.RealseLockByPk(jobnetId, updDate);
+            _jobnetControlDAO.GetLock(jobnetId, LoginSetting.DBType);
 
-            // 成功にリリースの場合 
-            if ("1".Equals(count))
-                return true;
-
-            return false;
         }
 
         //*******************************************************************
         /// <summary> ジョブネット存在チェック</summary>
         //*******************************************************************
-        private bool ExistCheck(string jobnetId, string updDate, Consts.EditType editType)
+        private bool ExistCheck(string jobnetId, string updDate)
         {
-            string count;
+            int count = 0;;
 
-            if (_editType == Consts.EditType.Modify)
-                dbAccess.BeginTransaction();
+            count = _jobnetControlDAO.GetCountByPk(jobnetId, updDate);
 
-            // 運用モード、またはMysqlの場合、ロックしない 
-            if (Consts.ActionMode.USE == LoginSetting.Mode || Consts.DBTYPE.MYSQL == LoginSetting.DBType || !(_editType == Consts.EditType.Modify))
-                count = Convert.ToString(_jobnetControlDAO.GetCountByPk(jobnetId, updDate));
-            // Postgresqlの場合 
-            else
-                count = Convert.ToString(_jobnetControlDAO.GetCountByPkForUpdate(jobnetId, updDate));
-
-            if (!"1".Equals(count))
+            if (count!=1)
             {
                 return false;
             }
@@ -986,6 +1012,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
         {
             // ジョブデータ（ジョブアイコンの生成用） 
             JobData jobData = null;
+
             // ジョブを表示------------------
             foreach (DataRow row in container.JobControlTable.Select())
             {
@@ -993,7 +1020,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                 // ジョブタイプ 
                 jobData.JobType = (ElementType)row["job_type"];
 
-                CommonItem room = new CommonItem(container, jobData,_editType);
+                CommonItem room = new CommonItem(container, jobData, _editType, (RunJobMethodType)row["method_flag"]);
                 // ジョブID 
                 room.JobId = Convert.ToString(row["job_id"]);
                 //ジョブ名 
@@ -1014,6 +1041,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                 // ジョブフロー領域に追加 
                 container.ContainerCanvas.Children.Add(room);
                 container.JobItems.Add(room.JobId, room);
+                container.SetedJobIds[room.JobId] = "1";
             }
 
             // フローを表示------------------
@@ -1216,6 +1244,14 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                 row["update_date"] = updateDate;
             }
 
+            // 保留解除アイコン設定テーブル 
+            DataRow[] rowsIconRelease = container.IconReleaseTable.Select();
+            foreach (DataRow row in rowsIconRelease)
+            {
+                row["jobnet_id"] = jobnetId;
+                row["update_date"] = updateDate;
+            }
+
         }
 
         //*******************************************************************
@@ -1365,6 +1401,12 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             {
                 row["update_date"] = updateDate;
             }
+            // 保留解除アイコン設定テーブル 
+            DataRow[] rowsIconRelease = container.IconReleaseTable.Select();
+            foreach (DataRow row in rowsIconRelease)
+            {
+                row["update_date"] = updateDate;
+            }
         }
 
         //*******************************************************************
@@ -1377,7 +1419,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             DateTime now = DBUtil.GetSysTime();
             _updateDate = now.ToString("yyyyMMddHHmmss");
             container.TmpUpdDate = _updateDate;
-            lblUpdDate.Content = now.ToString("yyyy/MM/dd HH:mm");
+            //lblUpdDate.Content = now.ToString("yyyy/MM/dd HH:mm");
         }
 
         //*******************************************************************
@@ -1446,6 +1488,16 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             {
                 lblUserName.Content = Convert.ToString(row["user_name"]);
             }
+
+            //更新日
+            if (_editType == Consts.EditType.READ || _editType == Consts.EditType.Modify)
+            {
+                lblUpdDate.Content = ConvertUtil.ConverIntYYYYMMDDHHMISS2Date(Convert.ToDecimal(row["update_date"])).ToString("yyyy/MM/dd HH:mm:ss");
+            }
+            else
+            {
+                lblUpdDate.Content = "";
+            }
         }
 
 
@@ -1474,6 +1526,14 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                 return false;
             }
 
+            // 入力不可文字「"'\,」チェック
+            if (CheckUtil.IsImpossibleStr(jobnetName))
+            {
+                CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_025,
+                    new string[] { Properties.Resources.err_message_jobnet_name});
+                return false;
+            }
+
             // 説明のチェック 
             string comment = tbComment.Text.Trim();
             if (CheckUtil.IsLenOver(comment, 100))
@@ -1483,148 +1543,15 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                 return false;
             }
 
-            return true;
-        }
-
-        //*******************************************************************
-        /// <summary>整合性チェック </summary>
-        /// <returns>チェック結果</returns>
-        //*******************************************************************
-        private bool ConformCheck()
-        {
-            bool result = true;
-            string jobId;
-            ElementType jobType;
-            int inFlowNum = 0;
-            int outFlowNum = 0;
-            int trueFlowNum = 0;
-            int falseFlowNum = 0;
-            DataRow[] flowRows = null;
-
-            foreach (DataRow row in container.JobControlTable.Select())
+            // 入力不可文字「"'\,」チェック
+            if (CheckUtil.IsImpossibleStr(comment))
             {
-                // ジョブID 
-                jobId = Convert.ToString(row["job_id"]);
-                // ジョブタイプ 
-                jobType = (ElementType)row["job_type"];
-                // INフローの本数 
-                flowRows = container.FlowControlTable.Select("end_job_id ='" + jobId + "'");
-                if (flowRows != null)
-                    inFlowNum = flowRows.Length;
-                // OUTフローの本数 
-                flowRows = container.FlowControlTable.Select("start_job_id ='" + jobId + "'");
-                if (flowRows != null)
-                    outFlowNum = flowRows.Length;
-
-                // 整合性チェック 
-                switch (jobType)
-                {
-                    // ジョブアイコン 
-                    case ElementType.JOB:
-                    // ジョブコントローラ変数アイコン 
-                    case ElementType.ENV:
-                    // 拡張ジョブアイコン 
-                    case ElementType.EXTJOB:
-                    // ジョブネットアイコン 
-                    case ElementType.JOBNET:
-                    // 計算アイコン 
-                    case ElementType.CAL:
-                    // タスクアイコン 
-                    case ElementType.TASK:
-                    // 情報取得アイコン 
-                    case ElementType.INF:
-                    // ファイル転送アイコン 
-                    case ElementType.FCOPY:
-                    // ファイル待ち合わせアイコン 
-                    case ElementType.FWAIT:
-                    // リブートアイコン 
-                    case ElementType.REBOOT:
-                        {
-                            // INフローの本数≠1、またはOUTフローの本数≠1の場合 
-                            if (inFlowNum != 1 || outFlowNum != 1)
-                                result = false;
-                            break;
-                        }
-                    case ElementType.START:
-                        {
-                            // INフローの本数≠0、またはOUTフローの本数≠1の場合 
-                            if (inFlowNum != 0 || outFlowNum != 1)
-                                result = false;
-                            break;
-                        }
-                    case ElementType.END:
-                        {
-                            // INフローの本数≠1、またはOUTフローの本数≠0の場合 
-                            if (inFlowNum != 1 || outFlowNum != 0)
-                                result = false;
-                            break;
-                        }
-                    // 条件分岐アイコン 
-                    case ElementType.IF:
-                        {
-                            // TRUEフローの本数を取得 
-                            flowRows = container.FlowControlTable.Select(
-                                "start_job_id ='" + jobId + "' and flow_type=1");
-                            if (flowRows != null)
-                                trueFlowNum = flowRows.Length;
-
-                            // FALSEフロー本数を取得 
-                            flowRows = container.FlowControlTable.Select(
-                                "start_job_id ='" + jobId + "' and flow_type=2");
-                            if (flowRows != null)
-                                falseFlowNum = flowRows.Length;
-
-                            // INフローの本数≠1、TRUEフローの本数≠1 
-                            // またはFALSEフローの本数≠1の場合 
-                            if (inFlowNum != 1 || trueFlowNum != 1 || falseFlowNum != 1)
-                                result = false;
-                            break;
-                        }
-                    // 並行処理開始アイコン 
-                    case ElementType.MTS:
-                        {
-                            //INフローの本数≠1、またはOUTフローの本数=0の場合 
-                            if (inFlowNum != 1 || outFlowNum < 1)
-                                result = false;
-                            break;
-                        }
-                    // 行処理終了アイコン 
-                    case ElementType.MTE:
-                        {
-                            //INフローの本数=0、またはOUTフローの本数≠1の場合 
-                            if (inFlowNum < 1 || outFlowNum != 1)
-                                result = false;
-                            break;
-                        }
-                    // ループアイコン 
-                    case ElementType.LOOP:
-                        {
-                            //INフローの本数≠2、またはOUTフローの本数≠1の場合 
-                            if (inFlowNum != 2 || outFlowNum != 1)
-                                result = false;
-                            break;
-                        }
-                    //added by kim 2012/11/14
-                    // 分岐処理終了アイコン 
-                    case ElementType.IFE:
-                        {
-                            //INフローの本数=0、またはOUTフローの本数≠1の場合 
-                            if (inFlowNum < 1 || outFlowNum != 1)
-                                result = false;
-                            break;
-                        }
-                }
-                // 整合しない場合 
-                if (result == false)
-                {
-                    CommonDialog.ShowErrorDialog(Consts.ERROR_JOBEDIT_005,
-                        new string[] { jobId });
-                    result = false;
-                    break;
-                }
+                CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_025,
+                    new string[] { Properties.Resources.err_message_memo });
+                return false;
             }
 
-            return result;
+            return true;
         }
 
         //*******************************************************************
@@ -1701,7 +1628,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                         break;
                     // その以外の場合
                     default:
-                        if (jobEditType==Consts.EditType.Add && !container.SetedJobIds.Contains(jobId))
+                        if (!container.SetedJobIds.Contains(jobId))
                         {
                             CommonDialog.ShowErrorDialog(Consts.ERROR_JOBEDIT_010,
                                 new string[] { jobId });
@@ -1816,6 +1743,8 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             dbAccess.ExecuteNonQuery(container.IconFwaitTable, _iconFwaitDAO);
             // リブートアイコン設定テーブル 
             dbAccess.ExecuteNonQuery(container.IconRebootTable, _iconRebootDAO);
+            // 保留解除アイコン設定テーブル 
+            dbAccess.ExecuteNonQuery(container.IconReleaseTable, _iconReleaseDAO);
         }
 
         //*******************************************************************
@@ -1842,6 +1771,41 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             dataSet.Tables.Add(container.IconFcopyTable);
             dataSet.Tables.Add(container.IconFwaitTable);
             dataSet.Tables.Add(container.IconRebootTable);
+            dataSet.Tables.Add(container.IconReleaseTable);
+        }
+
+        //*******************************************************************
+        /// <summary>DataSetをリセット（UNDO用）</summary>
+        //*******************************************************************
+        public void ResetDataSet()
+        {
+            dataSet.Tables.Clear();    
+            // dataSetにセット
+            dataSet.Tables.Add(container.JobnetControlTable);
+            dataSet.Tables.Add(container.JobControlTable);
+            dataSet.Tables.Add(container.FlowControlTable);
+            dataSet.Tables.Add(container.IconCalcTable);
+            dataSet.Tables.Add(container.IconEndTable);
+            dataSet.Tables.Add(container.IconExtjobTable);
+            dataSet.Tables.Add(container.IconIfTable);
+            dataSet.Tables.Add(container.IconInfoTable);
+            dataSet.Tables.Add(container.IconJobnetTable);
+            dataSet.Tables.Add(container.IconJobTable);
+            dataSet.Tables.Add(container.JobCommandTable);
+            dataSet.Tables.Add(container.ValueJobTable);
+            dataSet.Tables.Add(container.ValueJobConTable);
+            dataSet.Tables.Add(container.IconTaskTable);
+            dataSet.Tables.Add(container.IconValueTable);
+            dataSet.Tables.Add(container.IconFcopyTable);
+            dataSet.Tables.Add(container.IconFwaitTable);
+            dataSet.Tables.Add(container.IconRebootTable);
+            dataSet.Tables.Add(container.IconReleaseTable);
+
+            // 目的：Rowstateをセット 
+            dataSet.AcceptChanges();
+
+            // RowstateをAddにセット 
+            SetAllRowsState();
         }
 
         //*******************************************************************
@@ -1856,6 +1820,23 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                 _dispatcherTimer.Interval = new TimeSpan(0, LoginSetting.HealthCheckInterval, 0);
                 _dispatcherTimer.Tick += new EventHandler(HealthCheck);
                 _dispatcherTimer.Start();
+            }
+        }
+
+        //*******************************************************************
+        /// <summary>登録後表示</summary>
+        //*******************************************************************
+        private void AfterRegistView()
+        {
+            if (_isSubJobnet)
+            {
+                ResetTree(null);
+                Window.GetWindow(this).Close();
+            }
+            else
+            {
+                ResetTree(tbxJobNetId.Text);
+                ParantWindow.ShowObjectList(tbxJobNetId.Text, Consts.ObjectEnum.JOBNET);
             }
         }
 

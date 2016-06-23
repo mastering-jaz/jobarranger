@@ -120,6 +120,22 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
 
         #region イベント
 
+        /// <summary>ファイル存在チェックを選択</summary>
+        /// <param name="sender">源</param>
+        /// <param name="e">イベント</param>
+        private void existCheck_Checked(object sender, RoutedEventArgs e)
+        {
+            txtWaitTime.IsEnabled = false;
+        }
+
+        /// <summary>待ち合わせリブートを選択</summary>
+        /// <param name="sender">源</param>
+        /// <param name="e">イベント</param>
+        private void wait_Checked(object sender, RoutedEventArgs e)
+        {
+            txtWaitTime.IsEnabled = true;
+        }
+
         /// <summary>登録処理</summary>
         /// <param name="sender">源</param>
         /// <param name="e">イベント</param>
@@ -130,6 +146,9 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             {
                 return;
             }
+
+            //処理前現在データで履歴を作成
+            ((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.Container)_myJob.Container).CreateHistData();
 
             // 入力されたジョブID 
             string newJobId = txtJobId.Text;
@@ -166,7 +185,31 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                 //ファイル名
                 rowIconFwait[0]["file_name"] = textFileName.Text;
 
+                //ファイル削除フラグ
+                if (CheckBoxDelete.IsChecked == true)
+                {
+                    rowIconFwait[0]["file_delete_flag"] = "1";
+                }
+                else
+                {
+                    rowIconFwait[0]["file_delete_flag"] = "0";
+                }
+
+                // モード 
+                if (rbFileWait.IsChecked == true)
+                {
+                    rowIconFwait[0]["fwait_mode_flag"] = "0";
+                    // 待ち合わせ時間 
+                    rowIconFwait[0]["file_wait_time"] = txtWaitTime.Text;
+                }
+                else
+                {
+                    rowIconFwait[0]["fwait_mode_flag"] = "1";
+                    // 待ち合わせ時間  
+                    rowIconFwait[0]["file_wait_time"] = "0";
+                }
             }
+
 
             // ジョブIDが変更された場合、フロー管理テーブルを更新 
             if (!_oldJobId.Equals(newJobId))
@@ -231,6 +274,10 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             rbHostName.IsEnabled = false;
             rbVariableName.IsEnabled = false;
             textFileName.IsEnabled = false;
+            rbFileWait.IsEnabled = false;
+            rbFileCheck.IsEnabled = false;
+            CheckBoxDelete.IsEnabled = false;
+            txtWaitTime.IsEnabled = false;
         }
         #endregion
 
@@ -309,6 +356,32 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                 //ファイル名
                 textFileName.Text = Convert.ToString(rowIconFwait[0]["file_name"]);
 
+                // モード 
+                string waitMode = Convert.ToString(rowIconFwait[0]["fwait_mode_flag"]);
+                string waitTime = Convert.ToString(rowIconFwait[0]["file_wait_time"]);
+                txtWaitTime.Text = waitTime;
+                if ("0".Equals(waitMode))
+                {
+                    rbFileWait.IsChecked = true;
+                    txtWaitTime.IsEnabled = true;
+                }
+                else
+                {
+                    rbFileCheck.IsChecked = true;
+                    txtWaitTime.IsEnabled = false;
+                }
+
+                // ファイル削除 
+                string deleteFile = Convert.ToString(rowIconFwait[0]["file_delete_flag"]);
+                if ("0".Equals(deleteFile))
+                {
+                    CheckBoxDelete.IsChecked = false;
+                }
+                else
+                {
+                    CheckBoxDelete.IsChecked = true;
+                }
+
             }
         }
 
@@ -333,10 +406,10 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                     new string[] { jobIdForChange, "32" });
                 return false;
             }
-            // 半角英数字とハイフン（-）チェック 
-            if (!CheckUtil.IsHankakuStrAndHyphen(jobId))
+            // 半角英数値、「-」、「_」チェック 
+            if (!CheckUtil.IsHankakuStrAndHyphenAndUnderbar(jobId))
             {
-                CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_005,
+                CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_013,
                     new string[] { jobIdForChange });
                 return false;
             }
@@ -369,6 +442,14 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             {
                 CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_003,
                     new string[] { jobNameForChange, "64" });
+                return false;
+            }
+
+            // 入力不可文字「"'\,」チェック
+            if (CheckUtil.IsImpossibleStr(jobName))
+            {
+                CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_025,
+                    new string[] { jobNameForChange });
                 return false;
             }
 
@@ -429,6 +510,34 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                 CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_003,
                     new string[] { fileNameForChange, "1024" });
                 return false;
+            }
+
+            // リブートモード 
+            if (rbFileWait.IsChecked == true)
+            {
+                string waitTimeForChange = Properties.Resources.err_message_wait_time;
+                string waitTime = Convert.ToString(txtWaitTime.Text);
+                // 未入力の場合 
+                if (CheckUtil.IsNullOrEmpty(waitTime))
+                {
+                    CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_001,
+                        new string[] { waitTimeForChange });
+                    return false;
+                }
+                // バイト数チェック 
+                if (CheckUtil.IsLenOver(waitTime, 4))
+                {
+                    CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_003,
+                        new string[] { waitTimeForChange, "4" });
+                    return false;
+                }
+                // 半角数値以外チェック 
+                if (!CheckUtil.IsHankakuNum(waitTime))
+                {
+                    CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_007,
+                        new string[] { waitTimeForChange });
+                    return false;
+                }
             }
 
             return true;

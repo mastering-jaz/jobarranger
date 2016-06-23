@@ -18,9 +18,9 @@
 **/
 
 /*
-** $Date:: 2013-06-21 09:43:04 +0900 #$
-** $Revision: 4934 $
-** $Author: ossinfra@FITECHLABS.CO.JP $
+** $Date:: 2013-12-18 16:46:23 +0900 #$
+** $Revision: 5658 $
+** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
 #include <json/json.h>
@@ -87,6 +87,9 @@ void init_jobnetinfo(JOBARG_JOBNET_INFO * ji)
     ji->scheduled_time = 0;
     ji->start_time = 0;
     ji->end_time = 0;
+    ji->lastexitcd[0] = '\0';
+    ji->laststdout[0] = '\0';
+    ji->laststderr[0] = '\0';
 }
 
 int get_jobnet_info(zbx_uint64_t registrynumber,
@@ -94,6 +97,7 @@ int get_jobnet_info(zbx_uint64_t registrynumber,
 {
     DB_RESULT result;
     DB_ROW row;
+    zbx_uint64_t inner_job_id;
     int ret = SUCCEED;
     result =
         DBselect
@@ -103,6 +107,7 @@ int get_jobnet_info(zbx_uint64_t registrynumber,
     row = DBfetch(result);
     if (row == NULL) {
         ja_log("JATRAPPER200054", 0, NULL, 0, registrynumber);
+        DBfree_result(result);
         ret = FAIL;
         return ret;
     }
@@ -115,6 +120,59 @@ int get_jobnet_info(zbx_uint64_t registrynumber,
     ZBX_STR2UINT64(ji->end_time, row[5]);
     ji->jobnetid = strdup(row[6]);
     ji->jobnetname = strdup(row[7]);
+    DBfree_result(result);
+
+    /* last job information acquisition */
+    /* find the end-icon that has completed processing */
+    result =
+        DBselect
+        ("select inner_job_id from ja_run_job_table"
+         " where status = %d and job_type = %d and inner_jobnet_main_id = " ZBX_FS_UI64,
+         JA_JOB_STATUS_END, JA_JOB_TYPE_END, registrynumber);
+    row = DBfetch(result);
+    if (row == NULL) {
+        DBfree_result(result);
+        return ret;
+    }
+    ZBX_STR2UINT64(inner_job_id, row[0]);
+    DBfree_result(result);
+
+    /* get pre-change environment variable (JOB_EXIT_CD) */
+    result =
+        DBselect
+        ("select before_value from ja_run_value_before_table"
+         " where value_name = 'JOB_EXIT_CD' and inner_job_id = " ZBX_FS_UI64,
+         inner_job_id);
+    row = DBfetch(result);
+    if (row != NULL) {
+        zbx_strlcpy(ji->lastexitcd, row[0], JA_LASTEXIT_LEN);
+    }
+    DBfree_result(result);
+
+    /* get pre-change environment variable (STD_OUT) */
+    result =
+        DBselect
+        ("select before_value from ja_run_value_before_table"
+         " where value_name = 'STD_OUT' and inner_job_id = " ZBX_FS_UI64,
+         inner_job_id);
+    row = DBfetch(result);
+    if (row != NULL) {
+        zbx_strlcpy(ji->laststdout, row[0], JA_LASTSTDOUT_LEN);
+    }
+    DBfree_result(result);
+
+    /* get pre-change environment variable (STD_ERR) */
+    result =
+        DBselect
+        ("select before_value from ja_run_value_before_table"
+         " where value_name = 'STD_ERR' and inner_job_id = " ZBX_FS_UI64,
+         inner_job_id);
+    row = DBfetch(result);
+    if (row != NULL) {
+        zbx_strlcpy(ji->laststderr, row[0], JA_LASTSTDOUT_LEN);
+    }
+    DBfree_result(result);
+
     return ret;
 }
 
@@ -135,7 +193,7 @@ int job_exec_auth(JOBARG_EXEC_REQUEST er)
     int ret;
     DB_RESULT result;
     DB_ROW row;
-    zbx_uint64_t userid, usrgrpid;
+    zbx_uint64_t userid;
     char *jobnet_id;
     int user_type, public_flag, user_cmp;
     const char *__function_name = "job_exec_auth";
@@ -153,7 +211,6 @@ int job_exec_auth(JOBARG_EXEC_REQUEST er)
         return FAIL;
     }
     user_type = ja_user_type(userid);
-    usrgrpid = ja_user_usrgrpid(userid);
 
     ret = SUCCEED;
     jobnet_id = DBdyn_escape_string(er.jobnetid);
@@ -167,8 +224,7 @@ int job_exec_auth(JOBARG_EXEC_REQUEST er)
         ret = FAIL;
     } else {
         public_flag = atoi(row[1]);
-        if (usrgrpid == ja_user_usrgrpid(ja_user_id(row[0]))
-            && usrgrpid > 0)
+        if (ja_user_groups(ja_user_id(row[0]), userid) > 0)
             user_cmp = 1;
     }
     zbx_free(jobnet_id);
@@ -232,7 +288,7 @@ int register_db_table(JOBARG_EXEC_REQUEST er,
         run_type = JA_JOBNET_RUN_TYPE_IMMEDIATE;
         scheduled_time = 0;
     }
-    next_id = get_next_id(JA_RUN_ID_JOBNET_EX, 0, jobnetid);
+    next_id = get_next_id(JA_RUN_ID_JOBNET_EX, 0, jobnetid, 0);
     if (next_id == 0) {
         ja_log("JATRAPPER200015", 0, jobnetid, 0);
         zbx_free(jobnetid);
@@ -245,12 +301,12 @@ int register_db_table(JOBARG_EXEC_REQUEST er,
     res = DBexecute("insert into ja_run_jobnet_table"
                     " (inner_jobnet_id, inner_jobnet_main_id,"
                     " update_date, run_type, main_flag, status, scheduled_time, public_flag,"
-                    " jobnet_id, user_name, jobnet_name, memo)"
+                    " jobnet_id, user_name, jobnet_name, memo, execution_user_name)"
                     " values ( " ZBX_FS_UI64 ", " ZBX_FS_UI64 ", "
                     ZBX_FS_UI64 "," " %d, 0, 0, " ZBX_FS_UI64
-                    ", %d, '%s', '%s', '%s', '%s')", next_id, next_id,
+                    ", %d, '%s', '%s', '%s', '%s', '%s')", next_id, next_id,
                     update_date, run_type, scheduled_time, public_flag,
-                    jobnetid, user_name, jobnet_name, memo);
+                    jobnetid, user_name, jobnet_name, memo, er.username);
     if (ZBX_DB_OK > res) {
         ja_log("JATRAPPER200016", 0, jobnetid, 0, jobnetid);
         zbx_free(jobnetid);
@@ -371,6 +427,12 @@ void reply_jobnetstatusrq_response(zbx_sock_t * sock, int ret,
         zbx_json_adduint64(&json, JA_PROTO_TAG_JOBNETSTATUS,
                            ji->jobnetstatus);
         zbx_json_adduint64(&json, JA_PROTO_TAG_JOBSTATUS, ji->jobstatus);
+        zbx_json_addstring(&json, JA_PROTO_TAG_LASTEXITCD, ji->lastexitcd,
+                           ZBX_JSON_TYPE_STRING);
+        zbx_json_addstring(&json, JA_PROTO_TAG_LASTSTDOUT, ji->laststdout,
+                           ZBX_JSON_TYPE_STRING);
+        zbx_json_addstring(&json, JA_PROTO_TAG_LASTSTDERR, ji->laststderr,
+                           ZBX_JSON_TYPE_STRING);
     } else {
         zbx_json_addstring(&json, JA_PROTO_TAG_MESSAGE, message,
                            ZBX_JSON_TYPE_STRING);
@@ -379,9 +441,13 @@ void reply_jobnetstatusrq_response(zbx_sock_t * sock, int ret,
     zbx_json_close(&json);
     zabbix_log(LOG_LEVEL_DEBUG, "JSON before sending [%s]", json.buffer);
     if (FAIL == (ret = zbx_tcp_send_to(sock, json.buffer, CONFIG_TIMEOUT))) {
+        zbx_free(ji->jobnetid);
+        zbx_free(ji->jobnetname);
         ja_log("JATRAPPER200038", 0, NULL, 0, zbx_tcp_strerror());
         ret = NETWORK_ERROR;
     }
+    zbx_free(ji->jobnetid);
+    zbx_free(ji->jobnetname);
     zbx_json_free(&json);
 }
 

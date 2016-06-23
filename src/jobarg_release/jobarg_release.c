@@ -44,7 +44,7 @@ static struct zbx_option longopts[] = {
     {"password", 1, NULL, 'P'},
     {"job-id", 1, NULL, 'j'},
     {"time", 0, NULL, 't'},
-    {"management-id", 0, NULL, 'i'},
+    {"management-id", 0, NULL, 'r'},
     {"help", 0, NULL, 'h'},
     {"version", 0, NULL, 'V'},
     {NULL}
@@ -66,9 +66,9 @@ char *CONFIG_STARTTIME = NULL;
 char *CONFIG_MID = NULL;
 
 const char *progname = NULL;
-const char title_message[] = "Job Arranger release";
+const char title_message[] = "Job Arranger Release";
 const char usage_message[] =
-    "[-hV] -z <hostname or IP> [-p <port>] -U <username> -P <password> -j <jobid> [-t [<YYYYMMDD>|<YYYYMMDDHHMM>] ] [-r <management ID>]";
+    "[-hV] -z <hostname or IP> [-p <port>] -U <username> -P <password> -j <jobid> [-t [<YYYYMMDD>|<YYYYMMDDHHMM>] ] [-r <registry number>]";
 
 const char *help_message[] = {
     "Options:",
@@ -78,7 +78,7 @@ const char *help_message[] = {
     "  -P --password <password>                         Specify password",
     "  -j --job-id <jobid>                              Specify jobid",
     "  -t --start-time [<YYYYMMDD>|<YYYYMMDDHHMM>]      Specify jobnet start time",
-    "  -r --management-id                               Specify jobnet managemnet id",
+    "  -r --registry-number <registry-number>           Specify registry number",
     "",
     "Other options:",
     "  -h --help                                        Give this help",
@@ -87,6 +87,23 @@ const char *help_message[] = {
 };
 
 /* COMMAND LINE OPTIONS */
+
+/******************************************************************************
+ *                                                                            *
+ * Function: version_jobarg                                                   *
+ *                                                                            *
+ * Purpose: show the version of the application                               *
+ *                                                                            *
+ * Return value:                                                              *
+ *                                                                            *
+ * Comments:                                                                  *
+ *                                                                            *
+ ******************************************************************************/
+void version_jobarg()
+{
+    printf("%s v%s (revision %s) (%s)\n", title_message, JOBARG_VERSION, JOBARG_REVISION, JOBARG_REVDATE);
+    printf("Compilation time: %s %s\n", __DATE__, __TIME__);
+}
 
 /******************************************************************************
  *                                                                            *
@@ -124,7 +141,7 @@ static void send_signal_handler(int sig)
  * Comments:                                                                  *
  *                                                                            *
  ******************************************************************************/
-static void ja_help()
+static void help_jobarg()
 {
     const char **p = help_message;
     usage();
@@ -178,25 +195,23 @@ static void parse_commandline(int argc, char **argv)
             CONFIG_MID = zbx_strdup(CONFIG_MID, zbx_optarg);
             break;
         case 'h':
-            ja_help();
+            help_jobarg();
             exit(FAIL);
             break;
         case 'V':
-            version();
+            version_jobarg();
             exit(FAIL);
             break;
         default:
-            ja_help();
+            usage();
             exit(FAIL);
             break;
         }
     }
 
-    if (CONFIG_SERVER == NULL)
-        CONFIG_SERVER = zbx_strdup(CONFIG_SERVER, "localhost");
 
-    if (CONFIG_USERNAME == NULL || CONFIG_PASSWORD == NULL
-        || CONFIG_JOBID == NULL) {
+    if (CONFIG_SERVER == NULL || CONFIG_USERNAME == NULL
+        || CONFIG_PASSWORD == NULL || CONFIG_JOBID == NULL) {
         usage();
         exit(FAIL);
     }

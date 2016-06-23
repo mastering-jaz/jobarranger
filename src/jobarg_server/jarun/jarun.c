@@ -18,9 +18,9 @@
 **/
 
 /*
-** $Date:: 2013-07-10 13:51:33 +0900 #$
-** $Revision: 5131 $
-** $Author: ossinfra@FITECHLABS.CO.JP $
+** $Date:: 2013-10-28 12:08:44 +0900 #$
+** $Revision: 5302 $
+** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
 #include "common.h"
@@ -53,7 +53,9 @@ static int process_jarun()
 {
     int ret;
     DB_RESULT result;
+    DB_RESULT result2;
     DB_ROW row;
+    DB_ROW row2;
     double sec;
     zbx_uint64_t inner_job_id, inner_jobnet_id;
     int method_flag, job_type, test_flag;
@@ -85,11 +87,19 @@ static int process_jarun()
 
         ret = SUCCEED;
         DBbegin();
-        DBfree_result(DBselect
-                      ("select inner_job_id from ja_run_job_table where inner_job_id = "
-                       ZBX_FS_UI64 " for update", inner_job_id));
+        result2 = DBselect("select inner_job_id from ja_run_job_table where inner_job_id = "
+                           ZBX_FS_UI64 " and status = %d for update", inner_job_id, JA_JOB_STATUS_READY);
+	if (NULL == (row2 = DBfetch(result2)))
+	{
+            DBcommit();
+            DBfree_result(result2);
+            continue;
+	}
+        DBfree_result(result2);
+
         switch (method_flag) {
         case JA_JOB_METHOD_NORMAL:
+            ja_joblog(JC_JOB_START, inner_jobnet_id, inner_job_id);
             ret = jarun_normal(inner_job_id, job_type, test_flag);
             break;
         case JA_JOB_METHOD_WAIT:
@@ -101,6 +111,10 @@ static int process_jarun()
         case JA_JOB_METHOD_ABORT:
             ja_log("JARUN300001", inner_jobnet_id, NULL, inner_job_id,
                    __function_name, inner_job_id);
+            break;
+        case JA_JOB_METHOD_RERUN:
+            ja_joblog(JC_JOB_RERUN, inner_jobnet_id, inner_job_id);
+            ret = jarun_normal(inner_job_id, job_type, test_flag);
             break;
         default:
             ja_log("JARUN200001", inner_jobnet_id, NULL, inner_job_id,

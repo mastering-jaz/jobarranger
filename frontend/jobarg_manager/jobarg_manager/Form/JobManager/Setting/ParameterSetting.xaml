@@ -22,7 +22,7 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
         xmlns:src="clr-namespace:jp.co.ftf.jobcontroller.JobController" 
-        WindowStartupLocation="CenterScreen" ResizeMode="NoResize" FontFamily="MS Gothic"
+        WindowStartupLocation="CenterScreen" ResizeMode="NoResize" FontSize="11" FontFamily="Meiryo"
         Title="{x:Static src:Properties.Resources.change_variable_value_screen_name}" Height="347" Width="390" >
 
     <Grid Background="#FFEEECE1" Height="312">

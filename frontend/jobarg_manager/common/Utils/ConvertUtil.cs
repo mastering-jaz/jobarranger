@@ -39,7 +39,10 @@ namespace jp.co.ftf.jobcontroller.Common
         public static DateTime ConverIntYYYYMMDDHHMISS2Date(decimal iDate)
         {
             String str = iDate.ToString();
-
+            if (str.Length == 17)
+            {
+                return DateTime.ParseExact(str, "yyyyMMddHHmmssfff", null);
+            }
             return DateTime.ParseExact(str, "yyyyMMddHHmmss", null);
         }
 

@@ -18,8 +18,8 @@
 **/
 
 /*
-** $Date:: 2013-06-10 14:12:42 +0900 #$
-** $Revision: 4882 $
+** $Date:: 2013-08-05 13:45:29 +0900 #$
+** $Revision: 5232 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -55,10 +55,10 @@ int	ja_joblog(char *message_id, zbx_uint64_t inner_jobnet_id, zbx_uint64_t inner
 {
 	FILE		*fp;
 	struct tm	*tm;
-	time_t		now;
+	struct timeval	tv;
 	DB_RESULT	result;
 	DB_ROW		row;
-	int		job_type, log_type, sql_flag, rc, hit, m, n, cnt;
+	int		job_type, log_type, sql_flag, rc, hit, m, n, cnt, ms;
 	zbx_uint64_t	i_inner_jobnet_id;
 	char		*now_date, *message = NULL, *name = NULL, *type = NULL, *msg = NULL;
 	char		line[AP_MESSAGE_BUF_SIZE+1];
@@ -208,15 +208,17 @@ int	ja_joblog(char *message_id, zbx_uint64_t inner_jobnet_id, zbx_uint64_t inner
 		*(message + AP_MESSAGE_BUF_SIZE) = '\0';
 	}
 
-	time(&now);
-	tm = localtime(&now);
-	now_date = zbx_dsprintf(NULL, "%04d%02d%02d%02d%02d%02d",
+	gettimeofday(&tv, NULL);
+	tm = localtime(&tv.tv_sec);
+	ms = (int)(tv.tv_usec / 1000);
+	now_date = zbx_dsprintf(NULL, "%04d%02d%02d%02d%02d%02d%03d",
 				(tm->tm_year + 1900),
 				(tm->tm_mon  + 1),
 				 tm->tm_mday,
 				 tm->tm_hour,
 				 tm->tm_min,
-				 tm->tm_sec);
+				 tm->tm_sec,
+				 ms);
 
 	/* determine the type of sql */
 	sql_flag = 0;

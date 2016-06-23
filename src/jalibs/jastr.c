@@ -18,9 +18,9 @@
 **/
 
 /*
-** $Date:: 2013-05-30 11:46:29 +0900 #$
-** $Revision: 4704 $
-** $Author: ossinfra@FITECHLABS.CO.JP $
+** $Date:: 2013-08-05 13:45:29 +0900 #$
+** $Revision: 5232 $
+** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
 #include "common.h"
@@ -159,18 +159,20 @@ int ja_format_timestamp(const char *input, char *output)
     char *p, *q;
 
     len = strlen(input);
-    if (len != 8 && len != 10 && len != 12 && len != 14)
+    if (len != 8 && len != 10 && len != 12 && len != 14 && len != 17)
         return FAIL;
 
     p = (char *) input;
     q = output;
     for (i = 0; i < len; i++) {
         if (i == 4 || i == 6)
-            *q++ = '-';
+            *q++ = '/';
         if (i == 8)
             *q++ = ' ';
         if (i == 10 || i == 12)
             *q++ = ':';
+        if (i == 14)
+            *q++ = '.';
         *q++ = *p++;
     }
     *q = '\0';

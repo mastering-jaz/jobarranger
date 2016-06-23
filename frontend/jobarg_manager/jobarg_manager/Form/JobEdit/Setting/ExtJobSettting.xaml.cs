@@ -112,6 +112,9 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                 return;
             }
 
+            //処理前現在データで履歴を作成
+            ((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.Container)_myJob.Container).CreateHistData();
+
             // 入力されたジョブID 
             string newJobId = txtJobId.Text;
             // 入力されたジョブ名 
@@ -209,7 +212,8 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             DBConnect dbAccess = new DBConnect(LoginSetting.ConnectStr);
             dbAccess.CreateSqlConnect();
             DefineExtJobDAO _defineExtJobDAO = new DefineExtJobDAO(dbAccess);
-            _dtDefine = _defineExtJobDAO.GetEntityByNone();
+            _dtDefine = _defineExtJobDAO.GetEntityByLang(LoginSetting.Lang);
+
             dbAccess.CloseSqlConnect();
             combExtJob.Items.Clear();
             combExtJob.ItemsSource = _dtDefine.DefaultView;
@@ -263,10 +267,10 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                     new string[] { jobIdForChange, "32" });
                 return false;
             }
-            // 半角英数字とハイフン（-）チェック 
-            if (!CheckUtil.IsHankakuStrAndHyphen(jobId))
+            // 半角英数値、「-」、「_」チェック 
+            if (!CheckUtil.IsHankakuStrAndHyphenAndUnderbar(jobId))
             {
-                CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_005,
+                CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_013,
                     new string[] { jobIdForChange });
                 return false;
             }
@@ -299,6 +303,14 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                 return false;
             }
 
+            // 入力不可文字「"'\,」チェック
+            if (CheckUtil.IsImpossibleStr(jobName))
+            {
+                CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_025,
+                    new string[] { jobNameForChange });
+                return false;
+            }
+
             // 拡張ジョブ 
             string extJobForChange = Properties.Resources.err_message_extend_job;
             string extJob = Convert.ToString(combExtJob.SelectedValue);
@@ -313,13 +325,6 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             // パラメータ 
             string paramForChange = Properties.Resources.err_message_parameter;
             string param = Convert.ToString(txtParameter.Text);
-            // ASCII文字チェック 
-            if (!CheckUtil.IsASCIIStr(param))
-            {
-                CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_002,
-                    new string[] { paramForChange });
-                return false;
-            }
             // バイト数チェック 
             if (CheckUtil.IsLenOver(param, 4000))
             {

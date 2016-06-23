@@ -259,6 +259,21 @@ namespace jp.co.ftf.jobcontroller.JobController
             }
         }
 
+        /// <summary>DEBUGログを出力</summary>
+        /// <param name="message">メッセージ</param>
+        public static void WriteDebugLog(string message)
+        {
+            // INFO用のログ
+            ILog _debugLog = LogManager.GetLogger("debugLog");
+
+            if (!_debugLog.IsDebugEnabled)
+            {
+                return;
+            }
+
+            _debugLog.Info(message);
+        }
+
         #endregion
 
         #region privateメソッド

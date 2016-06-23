@@ -23,42 +23,49 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             >
+             FontSize="10" FontFamily="Meiryo">
     <Canvas x:Name="LayoutRoot"    Background="Transparent">
-
-        <Polyline Name="picIfe" Points="0,20 20,0 40,20 20,40 0,20" 
-                  Canvas.Top="0" Canvas.Left="0"
-                  Stroke="Black" Fill="#FFCCCCFF">
-        </Polyline>
+        <Rectangle Canvas.ZIndex="100"  Name="picIfe" Height="30" Width="30" Stroke="Gray"
+                   Canvas.Top="0" Canvas.Left="0" Fill="#FFCCCCFF" >
+            <Rectangle.RenderTransform>
+                <RotateTransform Angle="45" CenterX="13" CenterY="27"/>
+            </Rectangle.RenderTransform>
+        </Rectangle>
         <TextBlock   Canvas.ZIndex="101" Name="picSize" Foreground="Black" Text=""
                      VerticalAlignment="Center" HorizontalAlignment="Center"
                      TextWrapping="Wrap"  MaxWidth="90"
                      Height="40" Width="40"
-                     Canvas.Left="0" Canvas.Top="1">
+                     Canvas.Left="1" Canvas.Top="1">
         </TextBlock>
 
 
-        <Polyline Canvas.ZIndex="101" Name="charIfe" Points="20,10 20,30 "
+        <Polyline Canvas.ZIndex="101" Name="charIfe" Points="22,10 22,30 "
                   Canvas.Top="0" Canvas.Left="0" Stroke="Black"  StrokeThickness="2">
         </Polyline>
 
         <Rectangle Name="HotspotLeft" Width="5" Height="5"
                    Canvas.ZIndex="1000" Fill="Blue" Stroke="White"
-                   Canvas.Left="-2"  Canvas.Top="18"
+                   Canvas.Left="-1"  Canvas.Top="18"
                    StrokeThickness="1" RadiusX="0" RadiusY="0"
                    Opacity="1.0" Visibility="Collapsed">
         </Rectangle>
         <Rectangle Name="HotspotTop" Width="5" Height="5" Canvas.ZIndex="1000" Fill="Blue" Stroke="White"
-                   Canvas.Left="18" Canvas.Top="-2"
+                   Canvas.Left="20" Canvas.Top="-2"
                    StrokeThickness="1" RadiusX="0" RadiusY="0" Opacity="1.0" Visibility="Collapsed">
         </Rectangle>
         <Rectangle Name="HotspotRight" Width="5" Height="5" Canvas.ZIndex="1000" Fill="Blue" Stroke="White"
-                   Canvas.Left="38" Canvas.Top="18"
+                   Canvas.Left="40" Canvas.Top="18"
                    StrokeThickness="1" RadiusX="0" RadiusY="0" Opacity="1.0" Visibility="Collapsed">
         </Rectangle>
         <Rectangle Name="HotspotBottom" Width="5" Height="5" Canvas.ZIndex="1000" Fill="Blue" Stroke="White"
-                   Canvas.Left="18" Canvas.Top="38"
+                   Canvas.Left="20" Canvas.Top="38"
                    StrokeThickness="1" RadiusX="0" RadiusY="0" Opacity="1.0" Visibility="Collapsed">
+        </Rectangle>
+        <Rectangle Canvas.ZIndex="102"  Name="picToolTip" Height="30" Width="30" Stroke="Transparent"
+                   Canvas.Top="0" Canvas.Left="0" Fill="Transparent" >
+            <Rectangle.RenderTransform>
+                <RotateTransform Angle="45" CenterX="13" CenterY="27"/>
+            </Rectangle.RenderTransform>
         </Rectangle>
     </Canvas>
 </UserControl>

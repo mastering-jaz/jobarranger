@@ -18,9 +18,9 @@
 **/
 
 /*
-** $Date:: 2013-04-15 14:29:52 +0900 #$
-** $Revision: 4400 $
-** $Author: ossinfra@FITECHLABS.CO.JP $
+** $Date:: 2013-10-17 13:54:27 +0900 #$
+** $Revision: 5278 $
+** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
 #include "common.h"
@@ -30,6 +30,7 @@
 #include "jacommon.h"
 #include "javalue.h"
 #include "jastatus.h"
+#include "jastr.h"
 #include "jalog.h"
 
 /******************************************************************************
@@ -51,6 +52,7 @@ int jajobnet_ready(const zbx_uint64_t inner_jobnet_id)
     DB_ROW row;
     zbx_uint64_t icon_start_id;
     int count;
+    char time_str[13];
     const char *__function_name = "jajobnet_ready";
 
     zabbix_log(LOG_LEVEL_DEBUG,
@@ -60,13 +62,14 @@ int jajobnet_ready(const zbx_uint64_t inner_jobnet_id)
     // set jobnet before value
     result =
         DBselect
-        ("select jobnet_id, jobnet_name, user_name from ja_run_jobnet_table where inner_jobnet_id = "
-         ZBX_FS_UI64, inner_jobnet_id);
+        ("select jobnet_id, jobnet_name, user_name, inner_jobnet_id from ja_run_jobnet_table"
+         " where inner_jobnet_id = " ZBX_FS_UI64, inner_jobnet_id);
 
     if (NULL != (row = DBfetch(result))) {
         ja_set_value_jobnet_before(inner_jobnet_id, "JOBNET_ID", row[0]);
         ja_set_value_jobnet_before(inner_jobnet_id, "JOBNET_NAME", row[1]);
         ja_set_value_jobnet_before(inner_jobnet_id, "USER_NAME", row[2]);
+        ja_set_value_jobnet_before(inner_jobnet_id, "MANAGEMENT_ID", row[3]);
     } else {
         ja_log("JAJOBNETREADY200001", inner_jobnet_id, NULL, 0,
                __function_name, inner_jobnet_id);
@@ -74,6 +77,10 @@ int jajobnet_ready(const zbx_uint64_t inner_jobnet_id)
         return ja_set_enderr_jobnet(inner_jobnet_id);
     }
     DBfree_result(result);
+    zbx_snprintf(time_str, sizeof(time_str), "%s",
+                 ja_timestamp2str(time(NULL)));
+    ja_set_value_jobnet_before(inner_jobnet_id, "JOBNET_BOOT_TIME", time_str);
+
 
     // set jobnet status
     if (ja_set_run_jobnet(inner_jobnet_id) == FAIL)

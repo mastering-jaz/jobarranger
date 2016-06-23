@@ -18,8 +18,8 @@
 **/
 
 /*
-** $Date:: 2013-04-04 11:51:35 +0900 #$
-** $Revision: 4265 $
+** $Date:: 2013-12-18 16:41:02 +0900 #$
+** $Revision: 5657 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -42,6 +42,7 @@ static char	msgwork[2048];
  * Parameters: count_id (in) - ID serial number identification                *
  *             inner_jobnet_id (in) - inner jobnet id                         *
  *             jobnet_id (in) - jobnet id                                     *
+ *             inner_job_id (in) - inner job id                               *
  *                                                                            *
  * Return value: next id value                                                *
  *               0 - an error occurred                                        *
@@ -49,7 +50,8 @@ static char	msgwork[2048];
  * Comments:                                                                  *
  *                                                                            *
  ******************************************************************************/
-zbx_uint64_t	get_next_id(int count_id, zbx_uint64_t inner_jobnet_id, char *jobnet_id)
+zbx_uint64_t	get_next_id(int count_id, zbx_uint64_t inner_jobnet_id, char *jobnet_id,
+				zbx_uint64_t inner_job_id)
 {
 	DB_RESULT	result;
 	DB_ROW		row;
@@ -64,7 +66,7 @@ zbx_uint64_t	get_next_id(int count_id, zbx_uint64_t inner_jobnet_id, char *jobne
 	if (NULL == (row = DBfetch(result)))
 	{
 		zbx_snprintf(msgwork, sizeof(msgwork), "%d", count_id);
-		ja_log("JAINDEX200001", inner_jobnet_id, jobnet_id, 0, "ja_index_table", msgwork);
+		ja_log("JAINDEX200001", inner_jobnet_id, jobnet_id, inner_job_id, "ja_index_table", msgwork);
 		DBfree_result(result);
 		return 0;
 	}
@@ -113,7 +115,7 @@ zbx_uint64_t	get_next_id(int count_id, zbx_uint64_t inner_jobnet_id, char *jobne
 	if (rc <= ZBX_DB_OK)
 	{
 		zbx_snprintf(msgwork, sizeof(msgwork), "%d", count_id);
-		ja_log("JAINDEX200002", inner_jobnet_id, jobnet_id, 0, "ja_index_table", msgwork);
+		ja_log("JAINDEX200002", inner_jobnet_id, jobnet_id, inner_job_id, "ja_index_table", msgwork);
 		return 0;
 	}
 

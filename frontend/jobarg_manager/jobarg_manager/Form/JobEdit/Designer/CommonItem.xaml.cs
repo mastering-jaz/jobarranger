@@ -24,6 +24,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Data;
 using jp.co.ftf.jobcontroller.Common;
+using jp.co.ftf.jobcontroller.DAO;
 //*******************************************************************
 //                                                                  *
 //                                                                  *
@@ -45,7 +46,7 @@ public partial class CommonItem : UserControl, IRoom
 {
 
     #region コンストラクタ
-    public CommonItem(IContainer container, JobData data, Consts.EditType editType)
+    public CommonItem(IContainer container, JobData data, Consts.EditType editType, RunJobMethodType methodType)
     {
 
         InitializeComponent();
@@ -54,7 +55,7 @@ public partial class CommonItem : UserControl, IRoom
         _container = container;
 
         // 内容アイコンの初期化 
-        InitContentItem(data, editType, null);
+        InitContentItem(data, editType, methodType);
 
         // 内容のコンテナのセット  
         _contentItem.Container = container; ;
@@ -97,6 +98,8 @@ public partial class CommonItem : UserControl, IRoom
     #endregion
 
     #region フィールド
+
+    DBConnect dbAccess;
 
     /// <summary>マウス追従フラグ</summary>
     bool trackingMouseMove = false;
@@ -388,18 +391,18 @@ public partial class CommonItem : UserControl, IRoom
         {
             e.Handled = true;
             hadActualMove = false;
+            /*
 
-            if ((isSelectd == false) || (isSelectd == true && _container.ShiftKeyIsPress))
+            if (isSelectd == false && _container.ShiftKeyIsPress)
             {
-                if (isSelectd == false && _container.ShiftKeyIsPress)
-                {
-                    _container.IsSelectedByShiftKey = true;
-                }
+                _container.IsSelectedByShiftKey = true;
+            }
+            if (!_container.ShiftKeyIsPress)
+                IsSelectd = true;
+            if(_container.ShiftKeyIsPress)
                 IsSelectd = !IsSelectd;
                 _container.SetWorkFlowElementSelected(this, IsSelectd);
-            }
-
-
+            */
             FrameworkElement element = sender as FrameworkElement;
             mousePosition = e.GetPosition(Window.GetWindow(this));
                 
@@ -409,12 +412,13 @@ public partial class CommonItem : UserControl, IRoom
                 element.Cursor = Cursors.Hand;
                 if (isSelectd == true)
                     trackingMouseMove = true;
-            }
+            } 
             _container.CanvasClickFlg = false;
+
         }
         ((UserControl)_container).Focusable = true;
         Keyboard.Focus((UserControl)_container);
-
+        
     }
 
     /// <summary>マウスを左釈放</summary>
@@ -424,8 +428,12 @@ public partial class CommonItem : UserControl, IRoom
     {
         if (e.ClickCount == 1)
         {
+            FrameworkElement element = sender as FrameworkElement;
             if (hadActualMove)
             {
+                //処理前現在データで履歴を作成
+                ((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.Container)_container).CreateHistData();
+
                 Point p = e.GetPosition(_container.ContainerCanvas);
 
                 double x = (double)this.GetValue(Canvas.LeftProperty);
@@ -442,7 +450,21 @@ public partial class CommonItem : UserControl, IRoom
                 // 別の選択したアイコンのフローのTrue、Falseの位置をセット
                 _container.SetControlCollectionItemAndRuleNameControlPosition(this);
             }
-            FrameworkElement element = sender as FrameworkElement;
+            else
+            {
+
+                if (isSelectd == false && _container.ShiftKeyIsPress)
+                {
+                    _container.IsSelectedByShiftKey = true;
+                }
+                if (!_container.ShiftKeyIsPress)
+                    IsSelectd = true;
+                if (_container.ShiftKeyIsPress)
+                    IsSelectd = !IsSelectd;
+                _container.SetWorkFlowElementSelected(this, IsSelectd);
+
+            }
+            //FrameworkElement element = sender as FrameworkElement;
             trackingMouseMove = false;
             element.ReleaseMouseCapture();
 
@@ -450,6 +472,8 @@ public partial class CommonItem : UserControl, IRoom
             element.Cursor = null;
             _container.CanvasClickFlg = true;
         }
+        ((UserControl)_container).Focusable = true;
+        Keyboard.Focus((UserControl)_container);
 
     }
 
@@ -476,16 +500,7 @@ public partial class CommonItem : UserControl, IRoom
     private void UserControl_MouseDoubleClick(object sender, MouseButtonEventArgs e)
     {
         // 設定画面を表示する
-        ShowIconSetting();
-    }
-
-    /// <summary>部品をダブルクリック</summary>
-    /// <param name="sender">源</param>
-    /// <param name="e">マウスイベント</param>
-    private void UserControl_MouseDoubleClick4Read(object sender, MouseButtonEventArgs e)
-    {
-        // 設定画面を表示する
-        ShowIconSetting();
+        ShowIconSetting(false);
     }
 
     /// <summary>部品の移動処理</summary>
@@ -680,7 +695,7 @@ public partial class CommonItem : UserControl, IRoom
     }
 
     /// <summary>アイコン設定画面を表示</summary>
-    public void ShowIconSetting()
+    public void ShowIconSetting(bool isSetting)
     {
         bool viewer = false;
         #if VIEWER
@@ -697,7 +712,7 @@ public partial class CommonItem : UserControl, IRoom
             case ElementType.MTE:
             //added by kim 2012/11/14
             case ElementType.IFE:
-                OtherSetting otherSetting = new OtherSetting(this, jobId);
+                OtherSetting otherSetting = new OtherSetting(this, jobId, ElementType);
                 if (ItemEditType == Consts.EditType.READ || viewer)
                     otherSetting.SetDisable();
                 otherSetting.ShowDialog();
@@ -758,12 +773,55 @@ public partial class CommonItem : UserControl, IRoom
                     infSetting.SetDisable();
                 infSetting.ShowDialog();
                 break;
-            // 12：情報取得場合 
+            // 13：ジョブネットの場合 
             case ElementType.JOBNET:
-                JobnetSetting jobnetSetting = new JobnetSetting(this, jobId);
-                if (ItemEditType == Consts.EditType.READ || viewer)
-                    jobnetSetting.SetDisable();
-                jobnetSetting.ShowDialog();
+                if (isSetting)
+                {
+                    JobnetSetting jobnetSetting = new JobnetSetting(this, jobId);
+                    if (ItemEditType == Consts.EditType.READ || viewer)
+                        jobnetSetting.SetDisable();
+                    jobnetSetting.ShowDialog();
+                }
+                else
+                {
+                    SubJobEdit subJobEdit;
+                    DataRow[] rows = _container.IconJobnetTable.Select("job_id='" + jobId + "'");
+                    String subJobnetId = rows[0]["link_jobnet_id"].ToString();
+
+                    GetDBConnect();
+                    dbAccess.CreateSqlConnect();
+                    JobnetControlDAO jobnetDao = new JobnetControlDAO(dbAccess);
+                    DataTable dt = jobnetDao.GetValidORMaxUpdateDateEntityById(subJobnetId);
+                    dbAccess.CloseSqlConnect();
+                    String updDate = dt.Rows[0]["update_date"].ToString();
+                    String userName = (String)dt.Rows[0]["user_name"];
+                    List<Decimal> objectUserGroupList = DBUtil.GetGroupIDListByAlias(userName);
+                    Consts.ObjectOwnType objectOwnType = Consts.ObjectOwnType.Other;
+                    if (CheckUtil.isExistGroupId(LoginSetting.GroupList, objectUserGroupList))
+                    {
+                        objectOwnType = Consts.ObjectOwnType.Owner;
+                    }
+                    int validFlag = (Int32)dt.Rows[0]["valid_flag"];
+
+                    if (ItemEditType == Consts.EditType.READ || viewer || validFlag == 1 || (objectOwnType == Consts.ObjectOwnType.Other && !(LoginSetting.Authority == Consts.AuthorityEnum.SUPER)))
+                    {
+                        subJobEdit = new SubJobEdit(((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)(_container.ParantWindow)).ParantWindow, subJobnetId, updDate, Consts.EditType.READ, true);
+                    }
+                    else
+                    {
+                        subJobEdit = new SubJobEdit(((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)(_container.ParantWindow)).ParantWindow, subJobnetId, updDate, Consts.EditType.Modify, true);
+                    }
+
+                    if (subJobEdit.SuccessFlg)
+                    {
+                        //subJobEdit.Focusable = true;
+                        //Keyboard.Focus(subJobEdit);
+                        //subJobEdit.Topmost = true;
+                        //subJobEdit.Owner = ((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)(_container.ParantWindow)).ParantWindow;
+                        subJobEdit.Show();
+                        return;
+                    }
+                }
                 break;
 
             // 14：ファイル転送場合 
@@ -787,6 +845,13 @@ public partial class CommonItem : UserControl, IRoom
                 if (ItemEditType == Consts.EditType.READ || viewer)
                     reboot.SetDisable();
                 reboot.ShowDialog();
+                break;
+            // 17：保留解除の場合 
+            case ElementType.RELEASE:
+                ReleaseSetting release = new ReleaseSetting(this, jobId);
+                if (ItemEditType == Consts.EditType.READ || viewer)
+                    release.SetDisable();
+                release.ShowDialog();
                 break;
             default:
                 break;
@@ -864,6 +929,19 @@ public partial class CommonItem : UserControl, IRoom
     #endregion
 
     #region private メッソド
+
+    //************************************************************************
+    /// <summary>アイコンの初期化処理</summary>
+    /// <param name="data">データ</param>
+    /// <param name="editType">編集タイプ</param>
+    //************************************************************************
+    private void GetDBConnect()
+    {
+        if (dbAccess == null)
+        {
+            dbAccess = new DBConnect(LoginSetting.ConnectStr);
+        }
+    }
 
     //************************************************************************
     /// <summary>アイコンの初期化処理</summary>
@@ -952,6 +1030,10 @@ public partial class CommonItem : UserControl, IRoom
             case ElementType.REBOOT:
                 item = new Reboot();
                 break;
+            // 17：保留解除の場合 
+            case ElementType.RELEASE:
+                item = new Release();
+                break;
         }
 
         string jobId = "";
@@ -960,14 +1042,20 @@ public partial class CommonItem : UserControl, IRoom
             // ジョブデータをセット 
             DataRow row = _container.JobControlTable.NewRow();
             _container.JobControlTable.Rows.Add(row);
-                
-            jobId = CommonUtil.GetJobId(type);
+
+            jobId = CommonUtil.GetJobId(((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)_container.ParantWindow).JobNoHash, type);
+            if (ElementType.JOBNET == type)
+                jobId = data.Data.ToString();
 
             // 既存の場合、繰り返して取得 
+            int count = 0;
             while(ElementType.START != type
                 && _container.JobItems.ContainsKey(jobId))
             {
-                jobId = CommonUtil.GetJobId(type);
+                count++;
+                jobId = CommonUtil.GetJobId(((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)_container.ParantWindow).JobNoHash, type);
+                if (ElementType.JOBNET == type)
+                    jobId = data.Data.ToString() + "-" + count;
             }
             // ジョブネットID 
             row["jobnet_id"] = _container.JobnetId;
@@ -992,6 +1080,150 @@ public partial class CommonItem : UserControl, IRoom
         if (ElementType.JOBNET == type && Consts.EditType.Add == editType)
             this.JobName = data.Data.ToString();
         else 
+            this.JobName = "";
+
+        return true;
+    }
+
+    //************************************************************************
+    /// <summary>アイコンの初期化処理</summary>
+    /// <param name="data">データ</param>
+    /// <param name="editType">編集タイプ</param>
+    /// <param name="methodType">処理フラグ</param>
+    //************************************************************************
+    private bool InitContentItem(JobData data, Consts.EditType editType, RunJobMethodType methodType)
+    {
+        if (data == null)
+            return false;
+
+        ElementType type = data.JobType;
+        this.ElementType = type;
+
+        // アイテムのインスタンス 
+        IElement item = null;
+
+        switch (type)
+        {
+            // 0:開始の場合 
+            case ElementType.START:
+                item = new Start(methodType);
+                break;
+            // 1:終了の場合 
+            case ElementType.END:
+                item = new End(methodType);
+                break;
+            // 2:条件分岐の場合 
+            case ElementType.IF:
+                item = new If(methodType);
+                break;
+            // 3:ジョブコントローラ変数の場合 
+            case ElementType.ENV:
+                item = new Env(methodType);
+                break;
+            // 4:ジョブの場合 
+            case ElementType.JOB:
+                item = new Job(methodType);
+                break;
+            // 5:ジョブネットの場合 
+            case ElementType.JOBNET:
+                item = new JobNet(methodType);
+                break;
+            // 6:並行処理開始の場合 
+            case ElementType.MTS:
+                item = new Mts(methodType);
+                break;
+            // 7：並行処理終了の場合 
+            case ElementType.MTE:
+                item = new Mte(methodType);
+                break;
+            // 8：ループの場合 
+            case ElementType.LOOP:
+                item = new Loop(methodType);
+                break;
+            // 9：拡張ジョブの場合 
+            case ElementType.EXTJOB:
+                item = new ExtJob(methodType);
+                break;
+            //  10：計算の場合 
+            case ElementType.CAL:
+                item = new Cal(methodType);
+                break;
+            // 11：タスク場合 
+            case ElementType.TASK:
+                item = new Task(methodType);
+                break;
+            // 12：情報取得場合 
+            case ElementType.INF:
+                item = new Inf(methodType);
+                break;
+            // 13：分岐終了 
+            case ElementType.IFE:
+                item = new Ife(methodType);
+                break;
+            // 14：ファイル転送 
+            case ElementType.FCOPY:
+                item = new FCopy(methodType);
+                break;
+            // 15：ファイル待ち合わせ 
+            case ElementType.FWAIT:
+                item = new FWait(methodType);
+                break;
+            // 16：リブート 
+            case ElementType.REBOOT:
+                item = new Reboot(methodType);
+                break;
+            // 17：保留解除
+            case ElementType.RELEASE:
+                item = new Release(methodType);
+                break;
+        }
+
+        string jobId = "";
+        if (Consts.EditType.Add == editType)
+        {
+            // ジョブデータをセット 
+            DataRow row = _container.JobControlTable.NewRow();
+            _container.JobControlTable.Rows.Add(row);
+
+            jobId = CommonUtil.GetJobId(((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)_container.ParantWindow).JobNoHash, type);
+            if (ElementType.JOBNET == type)
+                jobId = data.Data.ToString();
+
+            // 既存の場合、繰り返して取得 
+            int count = 0;
+            while (ElementType.START != type
+                && _container.JobItems.ContainsKey(jobId))
+            {
+                count++;
+                jobId = CommonUtil.GetJobId(((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)_container.ParantWindow).JobNoHash, type);
+                if (ElementType.JOBNET == type)
+                    jobId = data.Data.ToString() + "-" + count;
+            }
+            // ジョブネットID 
+            row["jobnet_id"] = _container.JobnetId;
+            // ジョブID 
+            row["job_id"] = jobId;
+            // 更新日 
+            row["update_date"] = _container.TmpUpdDate;
+            // ジョブタイプ 
+            row["job_type"] = type;
+            // 処理タイプ 
+            row["method_flag"] = (int)RunJobMethodType.NORMAL;
+            // ジョブネットの場合 
+            if (ElementType.JOBNET == type)
+                row["job_name"] = data.Data.ToString();
+        }
+
+        // コンクリート 
+        commonRoom.Children.Add((UIElement)item);
+
+        // 変数の初期化 
+        this.ContentItem = (IElement)item;
+        this.JobId = jobId;
+        // ジョブネットの場合、ジョブ名にリンク先ジョブネットIDをセット 
+        if (ElementType.JOBNET == type && Consts.EditType.Add == editType)
+            this.JobName = data.Data.ToString();
+        else
             this.JobName = "";
 
         return true;
@@ -1084,6 +1316,10 @@ public partial class CommonItem : UserControl, IRoom
             case ElementType.REBOOT:
                 item = new Reboot(color);
                 break;
+            // 17：保留解除
+            case ElementType.RELEASE:
+                item = new Release(color);
+                break;
         }
 
         string jobId = "";
@@ -1093,13 +1329,19 @@ public partial class CommonItem : UserControl, IRoom
             DataRow row = _container.JobControlTable.NewRow();
             _container.JobControlTable.Rows.Add(row);
 
-            jobId = CommonUtil.GetJobId(type);
+            jobId = CommonUtil.GetJobId(((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)_container.ParantWindow).JobNoHash, type);
+            if (ElementType.JOBNET == type)
+                jobId = data.Data.ToString();
 
             // 既存の場合、繰り返して取得 
+            int count = 0;
             while (ElementType.START != type
                 && _container.JobItems.ContainsKey(jobId))
             {
-                jobId = CommonUtil.GetJobId(type);
+                count++;
+                jobId = CommonUtil.GetJobId(((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)_container.ParantWindow).JobNoHash, type);
+                if (ElementType.JOBNET == type)
+                    jobId = data.Data.ToString() + "-" + count;
             }
             // ジョブネットID 
             row["jobnet_id"] = _container.JobnetId;
@@ -1199,6 +1441,10 @@ public partial class CommonItem : UserControl, IRoom
             // 16：リブートの場合 
             case ElementType.REBOOT:
                 InsertIconRebootTbl();
+                break;
+            // 17：保留解除の場合 
+            case ElementType.RELEASE:
+                InsertIconReleaseTbl();
                 break;
         }
 
@@ -1411,6 +1657,13 @@ public partial class CommonItem : UserControl, IRoom
         row["host_name"] = DBNull.Value;
         // ファイル名 
         row["file_name"] = DBNull.Value;
+        // 処理モード 
+        row["fwait_mode_flag"] = 0;
+        // 削除モード 
+        row["file_delete_flag"] = 0;
+        // 待合せ時間(初期値:0) 
+        row["file_wait_time"] = 0;
+
     }
 
     //************************************************************************
@@ -1435,19 +1688,23 @@ public partial class CommonItem : UserControl, IRoom
         row["reboot_wait_time"] = 0;
 
     }
-    //************************************************************************
-    /// <summary>ジョブコントローラ変数アイコン設定テーブル の登録処理</summary>
-    //************************************************************************
-    //private void InsertIconValueTbl()
-    //{
-    //    string jobId = JobId;
-    //    DataRow row = _container.IconValueTable.NewRow();
-    //    _container.IconValueTable.Rows.Add(row);
 
-    //    row["jobnet_id"] = _container.JobnetId;
-    //    row["job_id"] = JobId;
-    //    row["update_date"] = _container.TmpUpdDate;
-    //}
+    //************************************************************************
+    /// <summary>保留解除アイコン設定テーブルの登録処理</summary>
+    //************************************************************************
+    private void InsertIconReleaseTbl()
+    {
+        string jobId = JobId;
+        DataRow row = _container.IconReleaseTable.NewRow();
+        _container.IconReleaseTable.Rows.Add(row);
+
+        row["jobnet_id"] = _container.JobnetId;
+        row["job_id"] = JobId;
+        row["update_date"] = _container.TmpUpdDate;
+        row["release_job_id"] = DBNull.Value;
+
+
+    }
 
     private double[] ResizeMoveDalta(double deltaH, double deltaV)
     {

@@ -23,18 +23,18 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             >
+             FontSize="10" FontFamily="Meiryo">
     <Canvas x:Name="LayoutRoot"    Background="Transparent" >
 
-        <Rectangle Canvas.ZIndex="100"  Name="picLoop" Height="30" Width="30" Stroke="Black"
-                   Canvas.Top="0" Canvas.Left="0" Fill="#FFCCCCFF" >
+        <Rectangle Canvas.ZIndex="100"  Name="picLoop" Height="30" Width="30" Stroke="Gray"
+                   Canvas.Top="0" Canvas.Left="0" Fill="#FFCCCCFF">
         </Rectangle>
         
         <TextBlock   Canvas.ZIndex="101" Name="txtActivityName" Foreground="Black"  FontSize="26"    
                      VerticalAlignment="Center" HorizontalAlignment="Center" TextWrapping="Wrap"  MaxWidth="90"
                      Height="30" Width="30"
                      Canvas.Left="0" Canvas.Top="0"
-                     FontWeight="Black" TextAlignment="Center" FontFamily="MS Gothic">
+                     FontWeight="Black" TextAlignment="Center">
         </TextBlock>
         
         <Polyline Canvas.ZIndex="101" Name="charParStart1" Points="10,5 10,24 20,24 "
@@ -57,6 +57,9 @@
         <Rectangle Name="HotspotBottom" Width="5" Height="5" Canvas.ZIndex="101" Fill="Blue" Stroke="White"
                    Canvas.Left="13" Canvas.Top="28"
                    StrokeThickness="1" RadiusX="0" RadiusY="0" Opacity="1.0" Visibility="Collapsed">
+        </Rectangle>
+        <Rectangle Canvas.ZIndex="102"  Name="picToolTip" Height="30" Width="30" Stroke="Transparent"
+                   Canvas.Top="0" Canvas.Left="0" Fill="Transparent">
         </Rectangle>
     </Canvas>
 

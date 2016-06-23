@@ -25,7 +25,7 @@
              xmlns:System="clr-namespace:System;assembly=mscorlib" 
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             mc:Ignorable="d" 
+             mc:Ignorable="d" FontSize="11" FontFamily="Meiryo"
              d:DesignHeight="300" d:DesignWidth="300">
     <Grid>
         <Grid.RowDefinitions>
@@ -54,17 +54,27 @@
             </ListView.ContextMenu>
             <ListView.View>
                     <GridView>
-                        <GridViewColumn Width="220">
+                    <GridViewColumn Width="145">
+                        <GridViewColumnHeader Content="{x:Static src:Properties.Resources.management_id_col_head_text}" />
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <TextBlock Text="{Binding inner_jobnet_id}" TextAlignment="Center"/>
+                                </Grid>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Width="235">
                             <GridViewColumnHeader Content="{x:Static src:Properties.Resources.jobnet_id_col_head_text}" />
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
                                     <Grid>
-                                    <TextBlock Text="{Binding jobnet_id}" TextAlignment="Center" FontFamily="MS PGothic"/>
+                                    <TextBlock Text="{Binding jobnet_id}" TextAlignment="Center"/>
                                     </Grid>
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
-                        <GridViewColumn Width="85">
+                        <GridViewColumn Width="70">
                             <GridViewColumnHeader Content="{x:Static src:Properties.Resources.status_col_head_text}"/>
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
@@ -74,7 +84,7 @@
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
-                        <GridViewColumn Width="440">
+                    <GridViewColumn Width="290">
                             <GridViewColumnHeader Content="{x:Static src:Properties.Resources.jobnet_name_col_head_text}"/>
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
@@ -84,7 +94,7 @@
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
-                    <GridViewColumn Width="120">
+                    <GridViewColumn Width="130">
                             <GridViewColumnHeader Content="{x:Static src:Properties.Resources.schedule_time_col_head_text}"/>
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
@@ -94,7 +104,7 @@
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
-                    <GridViewColumn Width="120">
+                    <GridViewColumn Width="130">
                             <GridViewColumnHeader Content="{x:Static src:Properties.Resources.started_time_col_head_text}"/>
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
@@ -104,7 +114,7 @@
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
-                    <GridViewColumn Width="120" >
+                    <GridViewColumn Width="130" >
                             <GridViewColumnHeader Content="{x:Static src:Properties.Resources.ended_time_col_head_text}"/>
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>

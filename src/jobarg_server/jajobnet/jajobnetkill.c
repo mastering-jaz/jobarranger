@@ -18,9 +18,9 @@
 **/
 
 /*
-** $Date:: 2013-05-13 13:26:01 +0900 #$
-** $Revision: 4602 $
-** $Author: ossinfra@FITECHLABS.CO.JP $
+** $Date:: 2013-12-12 11:34:45 +0900 #$
+** $Revision: 5601 $
+** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
 #include "common.h"
@@ -31,6 +31,7 @@
 #include "jastatus.h"
 #include "jalog.h"
 #include "../jarun/jaruniconjob.h"
+#include "../jarun/jaruniconfwait.h"
 #include "../jajob/jajobiconextjob.h"
 
 /******************************************************************************
@@ -119,6 +120,8 @@ int jajobnet_kill(const zbx_uint64_t inner_jobnet_id)
                 jarun_icon_job(inner_job_id, JA_AGENT_METHOD_KILL);
             } else if (job_type == JA_JOB_TYPE_EXTJOB) {
                 jajob_icon_extjob_kill(inner_job_id);
+            } else if (job_type == JA_JOB_TYPE_FWAIT) {
+                jarun_icon_fwait(inner_job_id, JA_AGENT_METHOD_KILL);
             }
             break;
         default:

@@ -95,7 +95,7 @@ namespace jp.co.ftf.jobcontroller.JobController
         {
         }
 
-        public virtual void ResetTree()
+        public virtual void ResetTree(String objectId)
         {
         }
 

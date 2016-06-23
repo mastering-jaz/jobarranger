@@ -420,10 +420,10 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                     new string[] { jobIdForChange, "32" });
                 return false;
             }
-            // 半角英数字とハイフン（-）チェック 
-            if (!CheckUtil.IsHankakuStrAndHyphen(jobId))
+            // 半角英数値、「-」、「_」チェック 
+            if (!CheckUtil.IsHankakuStrAndHyphenAndUnderbar(jobId))
             {
-                CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_005,
+                CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_013,
                     new string[] { jobIdForChange });
                 return false;
             }
@@ -459,6 +459,14 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                 return false;
             }
 
+            // 入力不可文字「"'\,」チェック
+            if (CheckUtil.IsImpossibleStr(jobName))
+            {
+                CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_025,
+                    new string[] { jobNameForChange });
+                return false;
+            }
+
             // ジョブコントローラ変数 
             string jonConValueForChange = Properties.Resources.err_message_jobcontrol_variable;
             if (_gridViewTable == null || _gridViewTable.Rows.Count == 0)
@@ -487,6 +495,9 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             {
                 return;
             }
+
+            //処理前現在データで履歴を作成
+            ((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.Container)_myJob.Container).CreateHistData();
 
             // 入力されたジョブID 
             string newJobId = txtJobId.Text;

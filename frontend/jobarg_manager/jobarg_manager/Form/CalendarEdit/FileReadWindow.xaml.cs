@@ -190,9 +190,33 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.CalendarEdit
                 file.Close();
                 Close();
             }
+            catch (ArgumentException ex)
+            {
+                CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_019);
+            }
+            catch (NotSupportedException ex)
+            {
+                CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_019);
+            }
+            catch (DirectoryNotFoundException ex)
+            {
+                CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_022);
+            }
             catch (FileNotFoundException ex)
             {
                 CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_011);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_023);
+            }
+            catch (System.IO.IOException ex)
+            {
+                CommonDialog.ShowErrorDialogFromMessage(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                CommonDialog.ShowErrorDialogFromMessage(ex.Message);
             }
             // 終了ログ
             base.WriteEndLog("fileRead_Click", Consts.PROCESS_001);

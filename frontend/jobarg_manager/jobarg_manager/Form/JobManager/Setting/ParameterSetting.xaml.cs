@@ -45,7 +45,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
         #region フィールド
         /// <summary>DBアクセスインスタンス</summary>
         private DBConnect _dbAccess = new DBConnect(LoginSetting.ConnectStr);
-
+        
         //変数変更情報
         private List<String[]> updateInfos = new List<String[]>();
 
@@ -154,7 +154,6 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
 
 
             updateInfos.Add(updateData);
-
         }
 
         //*******************************************************************
@@ -282,7 +281,6 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
         private void Touroku()
         {
             _dbAccess.BeginTransaction();
-            _dbAccess.ExecuteBatchUpdate();
             String sql;
             foreach(string[] updateDate in updateInfos)
             {

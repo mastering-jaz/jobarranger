@@ -30,6 +30,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Data;
+using System.Timers;
 using System.Collections.ObjectModel;
 using jp.co.ftf.jobcontroller.DAO;
 using jp.co.ftf.jobcontroller.Common;
@@ -56,9 +57,8 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
         private JobnetExecControlErrPage errPage;
         private JobnetExecControlRunningPage runningPage;
         private int jobnetLoadSpan = 0;
-        public DispatcherTimer dispatcherTimer;
-
-
+        private DispatcherTimer dispatcherTimer;
+        
         #endregion
 
         #region コンストラクタ
@@ -71,10 +71,11 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
             errPage.JobnetExecList = new ObservableCollection<JobnetExecInfo>();
             runningPage = new JobnetExecControlRunningPage(this);
             runningPage.JobnetExecList = new ObservableCollection<JobnetExecInfo>();
+            
             dispatcherTimer = new DispatcherTimer(DispatcherPriority.Normal);
-            dispatcherTimer.Interval = new TimeSpan(0, 0, 1);
             dispatcherTimer.Tick += new EventHandler(refresh);
             dispatcherTimer.Start();
+
             _db.CreateSqlConnect();
             runJobnetSummaryDAO = new RunJobnetSummaryDAO(_db);
             hideJobnetInnerIdList = new List<decimal>();
@@ -212,11 +213,12 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
                     return;
                 }
 
-        }
+            }
 
         }
         private void refresh(object sender, EventArgs e)
         {
+            ((DispatcherTimer)sender).Interval = new TimeSpan(0, 0, 1);
             SetInit();
             resetDefinitions();
             resetData();
@@ -290,6 +292,19 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
             detail.Show();
             detail.Focusable = true;
             Keyboard.Focus(detail);
+        }
+
+        /// <summary>refreshをストップ</summary>
+        public void Stop()
+        {
+            dispatcherTimer.Stop();
+            dispatcherTimer.Interval = new TimeSpan(0, 0, 0);
+        }
+
+        /// <summary>refreshをスタート</summary>
+        public void Start()
+        {
+            dispatcherTimer.Start();
         }
         #endregion
 
@@ -399,16 +414,6 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
                 i++;
             }
             allPage.listView1.GetBindingExpression(System.Windows.Controls.ListView.ItemsSourceProperty).UpdateTarget();
-            //var gridView = allPage.listView1.View as GridView;
-            //if (gridView != null)
-            //{
-            //    foreach (var c in gridView.Columns)
-            //    {
-            //        // double.Nanにすることで自動調整される。
-            //        c.Width = 0;
-            //        c.Width = double.NaN;
-            //    }
-            //}
 
         }
 
@@ -444,16 +449,6 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
 
             errPage.listView1.GetBindingExpression(System.Windows.Controls.ListView.ItemsSourceProperty).UpdateTarget();
 
-            //var gridView = errPage.listView1.View as GridView;
-            //if (gridView != null)
-            //{
-            //    foreach (var c in gridView.Columns)
-            //    {
-            //        // double.Nanにすることで自動調整される。
-            //        c.Width = 0;
-            //        c.Width = double.NaN;
-            //    }
-            //}
         }
 
         /// <summary>実行中ジョブネットリスト表示する</summary>
@@ -481,16 +476,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
                 i++;
             }
             runningPage.listView1.GetBindingExpression(System.Windows.Controls.ListView.ItemsSourceProperty).UpdateTarget();
-            //var gridView = runningPage.listView1.View as GridView;
-            //if (gridView != null)
-            //{
-            //    foreach (var c in gridView.Columns)
-            //    {
-            //        // double.Nanにすることで自動調整される。
-            //        c.Width = 0;
-            //        c.Width = double.NaN;
-            //    }
-            //}
+
         }
 
         /// <summary>実行ジョブネットデータを作成する</summary>
@@ -506,7 +492,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
 
             if (Convert.ToDecimal(row["scheduled_time"]) > 0)
             {
-                jobnetExecInfo.scheduled_time = ConvertUtil.ConverIntYYYYMMDDHHMI2Date(Convert.ToDecimal(row["scheduled_time"])).ToString();
+                jobnetExecInfo.scheduled_time = ConvertUtil.ConverIntYYYYMMDDHHMI2Date(Convert.ToDecimal(row["scheduled_time"])).ToString("yyyy/MM/dd HH:mm:ss");
             }
             else
             {
@@ -514,7 +500,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
             }
             if (Convert.ToDecimal(row["start_time"]) > 0)
             {
-                jobnetExecInfo.start_time = ConvertUtil.ConverIntYYYYMMDDHHMISS2Date(Convert.ToDecimal(row["start_time"])).ToString();
+                jobnetExecInfo.start_time = ConvertUtil.ConverIntYYYYMMDDHHMISS2Date(Convert.ToDecimal(row["start_time"])).ToString("yyyy/MM/dd HH:mm:ss");
             }
             else
             {
@@ -522,7 +508,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
             }
             if (Convert.ToDecimal(row["end_time"]) > 0)
             {
-                jobnetExecInfo.end_time = ConvertUtil.ConverIntYYYYMMDDHHMISS2Date(Convert.ToDecimal(row["end_time"])).ToString();
+                jobnetExecInfo.end_time = ConvertUtil.ConverIntYYYYMMDDHHMISS2Date(Convert.ToDecimal(row["end_time"])).ToString("yyyy/MM/dd HH:mm:ss");
             }
             else
             {

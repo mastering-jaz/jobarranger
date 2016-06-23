@@ -18,9 +18,9 @@
 **/
 
 /*
-** $Date:: 2013-06-06 09:00:59 +0900 #$
-** $Revision: 4861 $
-** $Author: ossinfra@FITECHLABS.CO.JP $
+** $Date:: 2013-12-06 15:18:05 +0900 #$
+** $Revision: 5530 $
+** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
 #include "common.h"
@@ -45,6 +45,7 @@
 #include "jaruniconfcopy.h"
 #include "jaruniconfwait.h"
 #include "jaruniconreboot.h"
+#include "jaruniconrelease.h"
 #include "jarunnormal.h"
 
 /******************************************************************************
@@ -77,8 +78,6 @@ int jarun_normal(zbx_uint64_t inner_job_id, int job_type, int test_flag)
         return FAIL;
 
     if (ja_value_before_after(inner_job_id) == FAIL)
-        return FAIL;
-    if (jarun_value_after(inner_job_id) == FAIL)
         return FAIL;
 
     ret = SUCCEED;
@@ -137,6 +136,9 @@ int jarun_normal(zbx_uint64_t inner_job_id, int job_type, int test_flag)
         break;
     case JA_JOB_TYPE_REBOOT:
         ret = jarun_icon_reboot(inner_job_id, test_flag);
+        break;
+    case JA_JOB_TYPE_REL:
+        ret = jarun_icon_release(inner_job_id, test_flag);
         break;
     default:
         ja_log("JARUNNORMAL200001", 0, NULL, inner_job_id, __function_name,

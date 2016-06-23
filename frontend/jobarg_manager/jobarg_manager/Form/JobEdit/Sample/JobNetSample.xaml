@@ -23,18 +23,18 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             >
+             FontSize="11" FontFamily="Meiryo">
     <Canvas x:Name="LayoutRoot"    Background="Transparent" >
 
         <Polyline Name="picJobnet" Points="10,24 0,16 0,8 10,0 60,0 70,8 70,16 60,24 10,24"
                   Canvas.Top="0" Canvas.Left="0" Stroke="Black" Fill="White">
         </Polyline>
 
-        <TextBlock   Canvas.ZIndex="1000" Name="tbJobName" Foreground="Black" FontSize="12"  Text="情報取得"  
+        <TextBlock   Canvas.ZIndex="1000" Name="tbJobName" Foreground="Black" Text="情報取得"  
                      VerticalAlignment="Center" HorizontalAlignment="Center" TextWrapping="Wrap"  MaxWidth="90"
                      Height="15" Width="70"
-                     Canvas.Left="0" Canvas.Top="8"
-                     FontWeight="Normal" TextAlignment="Center" FontFamily="MS Gothic">
+                     Canvas.Left="0" Canvas.Top="5"
+                     FontWeight="Normal" TextAlignment="Center">
         </TextBlock>
 
     </Canvas>

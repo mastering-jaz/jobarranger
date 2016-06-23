@@ -23,15 +23,16 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
         xmlns:src="clr-namespace:jp.co.ftf.jobcontroller.JobController" 
         WindowStartupLocation="CenterScreen" ResizeMode="NoResize"
-        Title="{x:Static src:Properties.Resources.ext_job_icon_screen_name}" Height="300" Width="390" FontFamily="MS Gothic" Closing="Window_Closed">
+        Title="{x:Static src:Properties.Resources.ext_job_icon_screen_name}" Height="404" Width="394"
+        FontSize="11" FontFamily="Meiryo" Closing="Window_Closed">
     <Grid Background="#FFEEECE1" Name="GridSetting">
         <Grid.RowDefinitions>
             <RowDefinition Height="30" />
             <RowDefinition Height="30" />
             <RowDefinition Height="30" />
-            <RowDefinition Height="70" />
-            <RowDefinition Height="60" />
-            <RowDefinition Height="*" />
+            <RowDefinition Height="100" />
+            <RowDefinition Height="121" />
+            <RowDefinition Height="54*" />
         </Grid.RowDefinitions>
         <Label Grid.Row="0" Content="{x:Static src:Properties.Resources.job_id_label_text}" Height="28" HorizontalAlignment="Left" Margin="12,3,0,0" 
                VerticalAlignment="Top" VerticalContentAlignment="Center" />
@@ -47,17 +48,17 @@
                   Margin="100,6,0,0" VerticalAlignment="Top" SelectionChanged="combExtJob_SelectionChanged"/>
         <Label Grid.Row="3" Content="{x:Static src:Properties.Resources.parameter_label_text}" Height="28" HorizontalAlignment="Left" Margin="12,3,0,0" 
                VerticalAlignment="Top" VerticalContentAlignment="Center" />
-        <TextBox Grid.Row="3" Name="txtParameter" Height="60" Width="265" HorizontalAlignment="Left" 
+        <TextBox Grid.Row="3" Name="txtParameter" Height="90" Width="265" HorizontalAlignment="Left" 
                  Margin="100,6,0,0" VerticalAlignment="Top" TextWrapping="Wrap" 
                  VerticalScrollBarVisibility="Auto" MaxLength="4000" />
-        <GroupBox Grid.Row="4" Header="{x:Static src:Properties.Resources.memo_col_head_text}" Height="58" Margin="15,2,17,0" Name="gbHost" VerticalAlignment="Top">
+        <GroupBox Grid.Row="4" Header="{x:Static src:Properties.Resources.memo_col_head_text}" Height="106" Margin="15,2,6,0" Name="gbHost" VerticalAlignment="Top">
             <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                 <TextBlock Name="tbMemo" Padding="2" Text="" TextWrapping="Wrap" />
             </ScrollViewer>
         </GroupBox>
-        <Button Grid.Row="5" Content="{x:Static src:Properties.Resources.regist_button_text}" Height="28" HorizontalAlignment="Left" Margin="188,9,0,0" 
+        <Button Grid.Row="5" Content="{x:Static src:Properties.Resources.regist_button_text}" Height="28" HorizontalAlignment="Left" Margin="188,22,0,0" 
                 Name="btnToroku" VerticalAlignment="Top" Width="75" Click="btnToroku_Click" IsDefault="True" />
-        <Button Grid.Row="5" Content="{x:Static src:Properties.Resources.cancel_button_text}" Height="28" HorizontalAlignment="Left" Margin="268,9,0,0" 
+        <Button Grid.Row="5" Content="{x:Static src:Properties.Resources.cancel_button_text}" Height="28" HorizontalAlignment="Left" Margin="268,22,0,0" 
                 Name="btnCancel" VerticalAlignment="Top" Width="75" Click="btnCancel_Click" IsCancel="True"/>
     </Grid>
 </Window>

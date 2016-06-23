@@ -18,9 +18,9 @@
 **/
 
 /*
-** $Date:: 2013-04-16 16:11:21 +0900 #$
-** $Revision: 4408 $
-** $Author: ossinfra@FITECHLABS.CO.JP $
+** $Date:: 2013-09-10 17:50:21 +0900 #$
+** $Revision: 5265 $
+** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
 #include "common.h"
@@ -63,7 +63,8 @@ int ja_flow_set_status(const zbx_uint64_t start_inner_job_id,
     result =
         DBselect
         ("select status, test_flag, job_type, boot_count, end_count"
-         " from ja_run_job_table " " where inner_job_id = " ZBX_FS_UI64,
+         " from ja_run_job_table " " where inner_job_id = " ZBX_FS_UI64
+         " for update",
          end_inner_job_id);
 
     if (NULL == (row = DBfetch(result))) {

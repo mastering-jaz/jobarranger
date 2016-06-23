@@ -17,7 +17,7 @@ if not exist "%file_path%" (
 
 if not exist "%filename%" (
     echo The file '%filename%' does not exist
-    exit 1
+    exit 0
 )
 
 set att=%~a1
@@ -32,7 +32,7 @@ if %file_delete_flag% equ 1 (
     set ERRMSG=Can not delete the file '%filename%'
     del "%filename%"| find /V "" && goto FAILURE
 )
-exit 0
+exit 1
 
 :FAILURE
 echo %ERRMSG% 1>&2

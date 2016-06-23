@@ -113,6 +113,9 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.ScheduleEdit
         /// <summary> リブートアイコン設定テーブル </summary>
         private IconRebootDAO _iconRebootDAO;
 
+        /// <summary> 保留解除アイコン設定テーブル </summary>
+        private IconReleaseDAO _iconReleaseDAO;
+
         #endregion
 
         #region コンストラクタ
@@ -294,7 +297,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.ScheduleEdit
                 // ジョブタイプ 
                 jobData.JobType = (ElementType)row["job_type"];
 
-                CommonItem room = new CommonItem(container, jobData, Consts.EditType.Modify);
+                CommonItem room = new CommonItem(container, jobData, Consts.EditType.Modify, (RunJobMethodType)row["method_flag"]);
                 // ジョブID 
                 room.JobId = Convert.ToString(row["job_id"]);
                 //ジョブ名 
@@ -429,6 +432,9 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.ScheduleEdit
 
             /// リブートアイコン設定テーブル 
             _iconRebootDAO = new IconRebootDAO(dbAccess);
+
+            /// リブート保留解除アイコン設定テーブル 
+            _iconReleaseDAO = new IconReleaseDAO(dbAccess);
         }
 
         //*******************************************************************
@@ -479,6 +485,8 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.ScheduleEdit
             container.IconFwaitTable = _iconFwaitDAO.GetEmptyTable();
             // リブートアイコン設定テーブル 
             container.IconRebootTable = _iconRebootDAO.GetEmptyTable();
+            // 保留解除アイコン設定テーブル 
+            container.IconReleaseTable = _iconReleaseDAO.GetEmptyTable();
 
             dbAccess.CloseSqlConnect();
         }
@@ -546,6 +554,9 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.ScheduleEdit
             // リブートアイコン設定テーブル  
             container.IconRebootTable = _iconRebootDAO.GetEntityByJobnet(jobnetId, updDate);
 
+            // 保留解除アイコン設定テーブル  
+            container.IconReleaseTable = _iconReleaseDAO.GetEntityByJobnet(jobnetId, updDate);
+
         }
 
         //*******************************************************************
@@ -570,7 +581,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.ScheduleEdit
             // 説明 
             lblComment.Text = Convert.ToString(row["memo"]);
             //更新日
-            lblUpdDate.Text = (ConvertUtil.ConverIntYYYYMMDDHHMISS2Date(Convert.ToInt64(row["update_date"]))).ToString();
+            lblUpdDate.Text = (ConvertUtil.ConverIntYYYYMMDDHHMISS2Date(Convert.ToInt64(row["update_date"]))).ToString("yyyy/MM/dd HH:mm:ss");
             //ユーザー名
             lblUserName.Text = Convert.ToString(row["user_name"]);
         }
@@ -632,7 +643,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.ScheduleEdit
                     TreeViewItem item = new TreeViewItem();
                     item.Header = row["jobnet_id"].ToString();
                     item.Tag = Consts.ObjectEnum.JOBNET;
-                    item.FontFamily = new FontFamily("MS Gothic");
+                    //item.FontFamily = new FontFamily("MS Gothic");
                     treeViewItem.Items.Add(item);
                 }
             }

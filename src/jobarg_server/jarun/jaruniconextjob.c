@@ -18,9 +18,9 @@
 **/
 
 /*
-** $Date:: 2013-05-17 16:53:37 +0900 #$
-** $Revision: 4641 $
-** $Author: ossinfra@FITECHLABS.CO.JP $
+** $Date:: 2013-12-02 19:26:37 +0900 #$
+** $Revision: 5503 $
+** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
 #include "common.h"
@@ -137,7 +137,7 @@ int jarun_icon_extjob(const zbx_uint64_t inner_job_id, const int test_flag)
     int ret;
     DB_RESULT result;
     DB_ROW row;
-    zbx_uint64_t inner_jobnet_id;
+    zbx_uint64_t inner_jobnet_id, inner_jobnet_main_id;
     char command_id[JA_MAX_STRING_LEN], value[JA_MAX_STRING_LEN],
         start_time[16], command[JA_MAX_DATA_LEN];
     const char *__function_name = "jarun_icon_extjob";
@@ -162,14 +162,28 @@ int jarun_icon_extjob(const zbx_uint64_t inner_job_id, const int test_flag)
     ja_format_extjob(row[2], value);
     DBfree_result(result);
 
+    result =
+        DBselect
+        ("select inner_jobnet_main_id from ja_run_jobnet_table"
+         " where inner_jobnet_id = " ZBX_FS_UI64, inner_jobnet_id);
+    row = DBfetch(result);
+    if (row == NULL) {
+        ja_log("JARUNICONEXTJOB200007", 0, NULL, inner_job_id,
+               __function_name, inner_jobnet_id);
+        DBfree_result(result);
+        return ja_set_runerr(inner_job_id);
+    }
+    ZBX_STR2UINT64(inner_jobnet_main_id, row[0]);
+    DBfree_result(result);
+
     if (test_flag == JA_JOB_TEST_FLAG_ON) {
         zbx_snprintf(command, sizeof(command), " ");
     } else {
         if (strcmp(command_id, JA_CMD_TIME) == 0) {
-            if (ja_get_jobnet_summary_start(inner_jobnet_id, start_time) ==
+            if (ja_get_jobnet_summary_start(inner_jobnet_main_id, start_time) ==
                 FAIL) {
-                ja_log("JARUNICONEXTJOB200005", inner_jobnet_id, NULL,
-                       inner_job_id, __function_name, inner_jobnet_id);
+                ja_log("JARUNICONEXTJOB200005", inner_jobnet_main_id, NULL,
+                       inner_job_id, __function_name, inner_jobnet_main_id);
                 return ja_set_runerr(inner_job_id);
             }
             zbx_snprintf(command, sizeof(command), "%s%c%s %s %s",

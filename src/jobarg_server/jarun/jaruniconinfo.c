@@ -18,9 +18,9 @@
 **/
 
 /*
-** $Date:: 2013-05-17 16:53:37 +0900 #$
-** $Revision: 4641 $
-** $Author: ossinfra@FITECHLABS.CO.JP $
+** $Date:: 2013-12-16 17:00:25 +0900 #$
+** $Revision: 5630 $
+** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
 #include "common.h"
@@ -28,6 +28,7 @@
 #include "db.h"
 
 #include "jacommon.h"
+#include "jastr.h"
 #include "jastatus.h"
 #include "javalue.h"
 #include "jaflow.h"
@@ -47,14 +48,14 @@
  *                                                                            *
  ******************************************************************************/
 int jarun_icon_info_get_status(const zbx_uint64_t inner_jobnet_id,
-                               char *get_job_id)
+                               char *get_job_id, const zbx_uint64_t inner_job_id)
 {
     char *tp;
     DB_RESULT result;
     DB_ROW row;
     int status;
     zbx_uint64_t sub_inner_job_id, sub_inner_jobnet_id;
-    const char *__function_name = "jarun_icon_info";
+    const char *__function_name = "jarun_icon_info_get_status";
 
     zabbix_log(LOG_LEVEL_DEBUG,
                "In %s() inner_jobnet_id: " ZBX_FS_UI64 " get_job_id: %s",
@@ -73,7 +74,7 @@ int jarun_icon_info_get_status(const zbx_uint64_t inner_jobnet_id,
             if (NULL != (row = DBfetch(result))) {
                 ZBX_STR2UINT64(sub_inner_jobnet_id, row[0]);
             } else {
-                ja_log("JARUNICONINFO200001", sub_inner_jobnet_id, NULL, 0,
+                ja_log("JARUNICONINFO200001", 0, NULL, inner_job_id,
                        __function_name, sub_inner_job_id);
                 status = -1;
                 DBfree_result(result);
@@ -91,8 +92,8 @@ int jarun_icon_info_get_status(const zbx_uint64_t inner_jobnet_id,
             ZBX_STR2UINT64(sub_inner_job_id, row[0]);
             status = atoi(row[1]);
         } else {
-            ja_log("JARUNICONINFO200002", sub_inner_jobnet_id, NULL, 0,
-                   __function_name, sub_inner_jobnet_id, tp);
+            ja_log("JARUNICONINFO200002", 0, NULL, inner_job_id,
+                   __function_name, tp, inner_job_id);
             status = -1;
             DBfree_result(result);
             break;
@@ -116,6 +117,62 @@ int jarun_icon_info_get_status(const zbx_uint64_t inner_jobnet_id,
  * Comments:                                                                  *
  *                                                                            *
  ******************************************************************************/
+int jarun_icon_info_get_calendar(const char *get_calendar_id, const zbx_uint64_t inner_job_id)
+{
+    int status;
+    char today[9];
+    DB_RESULT result;
+    DB_ROW row;
+    char *update_date;
+    const char *__function_name = "jarun_icon_info_get_calendar";
+
+    zabbix_log(LOG_LEVEL_DEBUG, "In %s() get_calendar_id: %s",
+               __function_name, get_calendar_id);
+    status = -1;
+    update_date = NULL;
+    zbx_snprintf(today, sizeof(today), "%s", ja_timestamp2str(time(NULL)));
+
+    result =
+        DBselect
+        ("select update_date from ja_calendar_control_table where calendar_id = '%s' and valid_flag = 1",
+         get_calendar_id);
+    if (NULL != (row = DBfetch(result))) {
+        update_date = zbx_strdup(NULL, row[0]);
+    }
+    DBfree_result(result);
+    if (update_date == NULL) {
+        ja_log("JARUNICONINFO200004", 0, NULL, inner_job_id,
+               __function_name, get_calendar_id);
+        return -1;
+    }
+    result =
+        DBselect
+        ("select operating_date from ja_calendar_detail_table where calendar_id = '%s' and update_date = %s and operating_date = %s",
+         get_calendar_id, update_date, today);
+    if (NULL != (row = DBfetch(result))) {
+        status = 1;
+    } else {
+        status = 0;
+    }
+    DBfree_result(result);
+
+    zbx_free(update_date);
+    return status;
+}
+
+/******************************************************************************
+ *                                                                            *
+ * Function:                                                                  *
+ *                                                                            *
+ * Purpose:                                                                   *
+ *                                                                            *
+ * Parameters:                                                                *
+ *                                                                            *
+ * Return value:                                                              *
+ *                                                                            *
+ * Comments:                                                                  *
+ *                                                                            *
+ ******************************************************************************/
 int jarun_icon_info(const zbx_uint64_t inner_job_id)
 {
     DB_RESULT result;
@@ -123,7 +180,8 @@ int jarun_icon_info(const zbx_uint64_t inner_job_id)
     int status;
     char str_status[4];
     zbx_uint64_t inner_jobnet_id;
-    char *get_job_id;
+    int info_flag;
+    char *get_job_id, *get_calendar_id;
     const char *__function_name = "jarun_icon_info";
 
     zabbix_log(LOG_LEVEL_DEBUG, "In %s() inner_job_id: " ZBX_FS_UI64,
@@ -131,15 +189,26 @@ int jarun_icon_info(const zbx_uint64_t inner_job_id)
 
     result =
         DBselect
-        ("select inner_jobnet_id, get_job_id"
+        ("select inner_jobnet_id, info_flag, get_job_id, get_calendar_id"
          " from ja_run_icon_info_table" " where inner_job_id = "
          ZBX_FS_UI64, inner_job_id);
 
     status = -1;
     if (NULL != (row = DBfetch(result))) {
         ZBX_STR2UINT64(inner_jobnet_id, row[0]);
-        get_job_id = row[1];
-        status = jarun_icon_info_get_status(inner_jobnet_id, get_job_id);
+        info_flag = atoi(row[1]);
+        get_job_id = row[2];
+        get_calendar_id = row[3];
+        switch (info_flag) {
+        case 0:
+            status = jarun_icon_info_get_status(inner_jobnet_id, get_job_id, inner_job_id);
+            break;
+        case 3:
+            status = jarun_icon_info_get_calendar(get_calendar_id, inner_job_id);
+            break;
+        default:
+            break;
+        }
     } else {
         ja_log("JARUNICONINFO200003", inner_jobnet_id, NULL, inner_job_id,
                __function_name, inner_job_id);

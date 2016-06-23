@@ -18,9 +18,9 @@
 **/
 
 /*
-** $Date:: 2013-05-16 16:03:58 +0900 #$
-** $Revision: 4633 $
-** $Author: ossinfra@FITECHLABS.CO.JP $
+** $Date:: 2014-01-06 10:51:40 +0900 #$
+** $Revision: 5710 $
+** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
 #include "common.h"
@@ -315,8 +315,8 @@ int ja_kill(JA_PID job_pid)
             zabbix_log(LOG_LEVEL_INFORMATION, "kill %d", jpt[pos].pid);
             if (kill(jpt[pos].pid, 9) != 0) {
                 if (errno != 3) {
-                    zabbix_log(LOG_LEVEL_ERR, "Can not kill pid: %s",
-                               jpt[pos].pid);
+                    zabbix_log(LOG_LEVEL_ERR, "Can not kill pid: %d errno: %d [%s]",
+                               jpt[pos].pid, errno, strerror(errno));
                     zbx_free(jpt);
                     return FAIL;
                 }

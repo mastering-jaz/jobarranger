@@ -16,10 +16,14 @@
 ** along with this program; if not, write to the Free Software
 ** Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 **/
+using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using System.Windows.Data;
+using jp.co.ftf.jobcontroller.Common;
+
 //*******************************************************************
 //                                                                  *
 //                                                                  *
@@ -35,17 +39,27 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
     /// <summary>
     /// Env.xaml の相互作用ロジック
     /// </summary>
-    public partial class Env : UserControl,IElement
+    public partial class Env : UserControl, IElement
     {
         #region コンストラクタ
         public Env()
         {
             InitializeComponent();
+            this.DataContext = new IconViewData();
         }
+
+        public Env(RunJobMethodType methodType)
+        {
+            InitializeComponent();
+            _methodType = methodType;
+            this.DataContext = new IconViewData();
+        }
+
         public Env(SolidColorBrush color)
         {
             InitializeComponent();
             picVar.Fill = color;
+            this.DataContext = new IconViewData();
         }
         #endregion
 
@@ -77,6 +91,26 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                 _jobId = value;
 
                 tbJobId.Text = CommonUtil.GetOmitString(value, SystemConst.LEN_JOBID_ENV);
+
+                IconViewData data = (IconViewData)this.DataContext;
+
+                data.JobId = value;
+
+            }
+        }
+
+        /// <summary>処理フラグ</summary>
+        private RunJobMethodType _methodType;
+        public RunJobMethodType MethodType
+        {
+            get
+            {
+                return _methodType;
+            }
+            set
+            {
+                _methodType = value;
+
             }
         }
 
@@ -96,6 +130,8 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                 _jobName = value;
 
                 tbJobName.Text = CommonUtil.GetOmitString(value, SystemConst.LEN_JOBNAME_ENV);
+                IconViewData data = (IconViewData)this.DataContext;
+                data.JobName = value;
 
             }
         }
@@ -106,7 +142,6 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             get
             {
                 return (int)this.GetValue(Canvas.ZIndexProperty);
-
             }
             set
             {
@@ -227,6 +262,42 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
 
         #endregion
 
+        #region イベント
+        //*******************************************************************
+        /// <summary>JobId変更時イベント</summary>
+        /// <param name="sender">源</param>
+        /// <param name="e">イベント</param>
+        //*******************************************************************
+        private void textBlockJobId_TargetUpdated(object sender, DataTransferEventArgs e)
+        {
+            bool IsTextTrimmed = false;
+            var textBlock = sender as TextBlock;
+            if (textBlock != null && textBlock.Tag != null && CheckUtil.IsLenOver(textBlock.Tag.ToString(), GetJobIdTrimLimitLength()))
+            {
+                IsTextTrimmed = true;
+            }
+            TextBlockService.SetIsTextTrimmed(textBlock, IsTextTrimmed);
+        }
+
+        //*******************************************************************
+        /// <summary>JobName変更時イベント</summary>
+        /// <param name="sender">源</param>
+        /// <param name="e">イベント</param>
+        //*******************************************************************
+        private void textBlockJobName_TargetUpdated(object sender, DataTransferEventArgs e)
+        {
+            bool IsTextTrimmed = false;
+            var textBlock = sender as TextBlock;
+            if (textBlock != null && textBlock.Tag != null
+                    && CheckUtil.IsLenOver(textBlock.Tag.ToString(), GetJobNameTrimLimitLength()))
+            {
+                IsTextTrimmed = true;
+            }
+            TextBlockService.SetIsTextTrimmed(textBlock, IsTextTrimmed);
+        }
+
+        #endregion
+
         #region privateメッソド
 
         /// <summary>連接点の色をセット</summary>
@@ -240,6 +311,18 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             HotspotRight.Opacity = opacity;
             HotspotBottom.Fill = new SolidColorBrush(color);
             HotspotBottom.Opacity = opacity;
+        }
+
+        /// <summary>JobID表示文字数</summary>//
+        private int GetJobIdTrimLimitLength()
+        {
+            return SystemConst.LEN_JOBID_ENV - 3;
+        }
+
+        /// <summary>Job名表示文字数</summary>/// 
+        private int GetJobNameTrimLimitLength()
+        {
+            return SystemConst.LEN_JOBNAME_ENV - 3;
         }
 
         #endregion
@@ -259,10 +342,6 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             if (this._state != IElementState.Focus)
             {
                 SetHotspotStyle(Colors.Blue, 1.0);
-                //HotspotLeft.Visibility = Visibility.Visible;
-                //HotspotTop.Visibility = Visibility.Visible;
-                //HotspotRight.Visibility = Visibility.Visible;
-                //HotspotBottom.Visibility = Visibility.Visible;
 
                 this._state = IElementState.Focus;
             }
@@ -273,11 +352,6 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
         {
             if (this._state != IElementState.UnFocus)
             {
-                //HotspotLeft.Visibility = Visibility.Collapsed;
-                //HotspotTop.Visibility = Visibility.Collapsed;
-                //HotspotRight.Visibility = Visibility.Collapsed;
-                //HotspotBottom.Visibility = Visibility.Collapsed;
-
                 this._state = IElementState.UnFocus;
             }
         }
@@ -291,7 +365,20 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
         /// <summary>色のリセット</summary>
         public void ResetInitColor()
         {
-            picVar.Fill = SystemConst.ColorConst.JobColor;
+            Brush color;
+            switch (MethodType)
+            {
+                case RunJobMethodType.HOLD:
+                    color = SystemConst.ColorConst.HoldColor;
+                    break;
+                case RunJobMethodType.SKIP:
+                    color = SystemConst.ColorConst.SkipColor;
+                    break;
+                default:
+                    color = SystemConst.ColorConst.JobColor;
+                    break;
+            }
+            picVar.Fill = color;
         }
 
         /// <summary>部品欄のアイコン色をセット</summary>
@@ -312,15 +399,11 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             if (this._state != IElementState.Selected)
             {
                 SetHotspotStyle(Colors.Red, 0.5);
-                //HotspotLeft.Visibility = Visibility.Visible;
-                //HotspotTop.Visibility = Visibility.Visible;
-                //HotspotRight.Visibility = Visibility.Visible;
-                //HotspotBottom.Visibility = Visibility.Visible;
-
                 this._state = IElementState.Selected;
             }
         }
 
         #endregion
     }
+
 }

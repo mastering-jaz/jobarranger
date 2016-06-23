@@ -25,12 +25,15 @@ using jp.co.ftf.jobcontroller.JobController.Form.CalendarEdit;
 using jp.co.ftf.jobcontroller.JobController.Form.ScheduleEdit;
 using jp.co.ftf.jobcontroller.JobController.Form.JobEdit;
 using jp.co.ftf.jobcontroller.JobController.Form.JobManager;
+using jp.co.ftf.jobcontroller.JobController.Form.JobResult;
 using System.Configuration;
 using jp.co.ftf.jobcontroller.DAO;
 using System.Data;
 using System;
 using System.Windows.Media;
 using System.Windows.Data;
+using System.Collections;
+using System.Collections.Generic;
 
 //*******************************************************************
 //                                                                  *
@@ -59,8 +62,33 @@ namespace jp.co.ftf.jobcontroller.JobController
         /// <summary>実行管理画面</summary>
         private JobnetExecControlPage _execControl = null;
 
+        /// <summary>実行結果画面</summary>
+        private JobnetExecResultPage _execResult = null;
+
         /// <summary>Tab1のタイトル</summary>
         private String tab1Title = null;
+
+        /// <summary>編集画面表示中のJobnet</summary>
+        public Hashtable viewJobEdit = new Hashtable();
+
+        /// <summary>ジョブネット編集画面コピー用SaveJobControlRows</summary>
+        public List<DataRow> SaveJobControlRows = new List<DataRow>();
+
+        /// <summary>ジョブネット編集画面コピー用SaveSetedJobIds</summary>
+        public Hashtable SaveSetedJobIds = new Hashtable();
+
+        /// <summary>ジョブネット編集画面コピー用SaveItems</summary>
+        public Hashtable SaveItems = new Hashtable();
+
+        /// <summary>ジョブネット編集画面コピー用SaveFlows</summary>
+        public DataTable SaveFlows = new DataTable();
+
+        /// <summary>ジョブネット編集画面コピー用SaveMinX</summary>
+        public double SaveMinX = 0;
+
+        /// <summary>ジョブネット編集画面コピー用SaveMinY</summary>
+        public double SaveMinY = 0;
+
 
         #endregion
 
@@ -95,6 +123,19 @@ namespace jp.co.ftf.jobcontroller.JobController
                 return Consts.WINDOW_200;
             }
         }
+
+        /// <summary>編集画面オブジェクト</summary>
+        public EditBaseUserControl ObjectEdit
+        {
+            get
+            {
+                return _objectEdit;
+            }
+            set
+            {
+                _objectEdit = value;
+            }
+        }
         #endregion
 
         #region イベント
@@ -108,6 +149,7 @@ namespace jp.co.ftf.jobcontroller.JobController
         {
             userName.Text = LoginSetting.UserName;
             _objList = new ObjectList();
+            _objList.DadWindow = this;
 
             this.Title = MessageUtil.GetMsgById(_objList.GamenId) + " - " + LoginSetting.JobconName;
             treeViewCalendar.IsSelected = true;
@@ -154,12 +196,13 @@ namespace jp.co.ftf.jobcontroller.JobController
                     case 0: /* tabPage1 */
                         if (_execControl != null)
                         {
-                            _execControl.dispatcherTimer.Stop();
+                            _execControl.Stop();
                             _execControl.DB.CloseSqlConnect();
                         }
                         if (tab1Title != null) this.Title = tab1Title;
                         tabItemObjectList.IsTabStop = true;
                         tabItemJobManager.IsTabStop = false;
+                        tabItemJobResult.IsTabStop = false;
                         break;
                     case 1: /* tabPage2 */
                         if (_execControl == null)
@@ -169,10 +212,28 @@ namespace jp.co.ftf.jobcontroller.JobController
                         }
                         tab1Title = this.Title;
                         this.Title = MessageUtil.GetMsgById(_execControl.GamenId) + " - " + LoginSetting.JobconName;
-                        _execControl.dispatcherTimer.Start();
+                        _execControl.Start();
                         _execControl.DB.CreateSqlConnect();
-                        tabItemObjectList.IsTabStop = false;
                         tabItemJobManager.IsTabStop = true;
+                        tabItemObjectList.IsTabStop = false;
+                        tabItemJobResult.IsTabStop = false;
+                        break;
+                    case 2: /* tabPage3 */
+                        if (_execControl != null)
+                        {
+                            _execControl.Stop();
+                            _execControl.DB.CloseSqlConnect();
+                        }
+                        if (_execResult == null)
+                        {
+                            _execResult = new JobnetExecResultPage(this);
+                            tabItemJobResult.Content = _execResult;
+                        }
+                        tab1Title = this.Title;
+                        this.Title = MessageUtil.GetMsgById(_execResult.GamenId) + " - " + LoginSetting.JobconName;
+                        tabItemJobResult.IsTabStop = true;
+                        tabItemJobManager.IsTabStop = false;
+                        tabItemObjectList.IsTabStop = false;
                         break;
                     default:
                         break;
@@ -181,17 +242,25 @@ namespace jp.co.ftf.jobcontroller.JobController
        }
 
         //*******************************************************************
-        /// <summary>Deleteキー押下</summary>
+        /// <summary>Delete、F5キー押下</summary>
         /// <param name="sender">源</param>
         /// <param name="e">イベント</param>
         //*******************************************************************
-        private void Del_KeyDown(object sender, KeyEventArgs e)
+        private void JobArrangerWindow_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Delete)
             {
                 if (tabControl.SelectedIndex == 0 && _objList != null && JobNetGrid.Children.Contains(_objList))
                 {
                     DelFromMenuitemOrKey();
+                }
+                e.Handled = true;
+            }
+            if (e.Key == Key.F5)
+            {
+                if (tabControl.SelectedIndex == 0 && _objList != null && JobNetGrid.Children.Contains(_objList))
+                {
+                    RefreshObjectList();
                 }
                 e.Handled = true;
             }
@@ -235,6 +304,11 @@ namespace jp.co.ftf.jobcontroller.JobController
 
         }
 
+        //*******************************************************************
+        /// <summary>TreeViewItemのPreview右マウスクリック</summary>
+        /// <param name="sender">源</param>
+        /// <param name="e">マウスイベント</param>
+        //*******************************************************************
         private void TreeViewItem_PreviewMouseRightButtonDown(object sender, MouseEventArgs e)
         {
             if (_objList != null && JobNetGrid.Children.Contains(_objList))
@@ -260,23 +334,6 @@ namespace jp.co.ftf.jobcontroller.JobController
             }
                
         }
-
-        //*******************************************************************
-        /// <summary>親ノードの右クリック</summary>
-        /// <param name="sender">源</param>
-        /// <param name="e">マウスイベント</param>
-        //*******************************************************************
-        /*
-        private void TreeViewItem_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            TreeViewItem item = (TreeViewItem)sender;
-            if (item != null)
-            {
-                item.Selected -= Object_Click;
-                item.Focus();
-                item.Selected += Object_Click;
-            }
-        }*/
 
         //*******************************************************************
         /// <summary>親ノードの右クリック</summary>
@@ -352,8 +409,6 @@ namespace jp.co.ftf.jobcontroller.JobController
             {
                 ClearGridContent();
 
-                _objectEdit.ParantWindow = this;
-
                 JobNetGrid.Children.Add(_objectEdit);
 
                 this.Title = MessageUtil.GetMsgById(_objectEdit.GamenId) + " - " + LoginSetting.JobconName;
@@ -372,7 +427,7 @@ namespace jp.co.ftf.jobcontroller.JobController
             // 開始ログ
             base.WriteStartLog("MenuitemImport_Click", Consts.PROCESS_013);
 
-            ImportWindow importWindow = new ImportWindow();
+            ImportWindow importWindow = new ImportWindow(this);
             importWindow.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
             importWindow.Owner = this;
             importWindow.ShowDialog();
@@ -449,6 +504,17 @@ namespace jp.co.ftf.jobcontroller.JobController
         }
 
         //*******************************************************************
+        /// <summary>カレンダーを展開</summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        //*******************************************************************
+        private void Calendar_Selected(object sender, RoutedEventArgs e)
+        {
+            if (_objList.ObjectId == null)
+                _objList.ObjectType = Consts.ObjectEnum.CALENDAR;
+        }
+
+        //*******************************************************************
         /// <summary>公開カレンダーを展開</summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -456,6 +522,8 @@ namespace jp.co.ftf.jobcontroller.JobController
         private void Public_Calendar_Selected(object sender, RoutedEventArgs e)
         {
             SetTreeCalendar(true, null);
+            if (_objList.ObjectId == null)
+                _objList.ObjectType = Consts.ObjectEnum.CALENDAR;
         }
 
 
@@ -467,6 +535,19 @@ namespace jp.co.ftf.jobcontroller.JobController
         private void Private_Calendar_Selected(object sender, RoutedEventArgs e)
         {
             SetTreeCalendar(false, null);
+            if (_objList.ObjectId == null)
+                _objList.ObjectType = Consts.ObjectEnum.CALENDAR;
+        }
+
+        //*******************************************************************
+        /// <summary>スケジュールを展開</summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        //*******************************************************************
+        private void Schedule_Selected(object sender, RoutedEventArgs e)
+        {
+            if (_objList.ObjectId == null)
+                _objList.ObjectType = Consts.ObjectEnum.SCHEDULE;
         }
 
         //*******************************************************************
@@ -477,6 +558,8 @@ namespace jp.co.ftf.jobcontroller.JobController
         private void Public_Schedule_Selected(object sender, RoutedEventArgs e)
         {
             SetTreeSchedule(true, null);
+            if (_objList.ObjectId == null)
+                _objList.ObjectType = Consts.ObjectEnum.SCHEDULE;
         }
 
 
@@ -488,6 +571,19 @@ namespace jp.co.ftf.jobcontroller.JobController
         private void Private_Schedule_Selected(object sender, RoutedEventArgs e)
         {
             SetTreeSchedule(false, null);
+            if (_objList.ObjectId == null)
+                _objList.ObjectType = Consts.ObjectEnum.SCHEDULE;
+        }
+
+        //*******************************************************************
+        /// <summary>ジョブネットを展開</summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        //*******************************************************************
+        private void Jobnet_Selected(object sender, RoutedEventArgs e)
+        {
+            if (_objList.ObjectId == null)
+                _objList.ObjectType = Consts.ObjectEnum.JOBNET;
         }
 
         //*******************************************************************
@@ -498,6 +594,8 @@ namespace jp.co.ftf.jobcontroller.JobController
         private void Public_Jobnet_Selected(object sender, RoutedEventArgs e)
         {
             SetTreeJobnet(true, null);
+            if (_objList.ObjectId == null)
+                _objList.ObjectType = Consts.ObjectEnum.JOBNET;
         }
 
         //*******************************************************************
@@ -508,6 +606,8 @@ namespace jp.co.ftf.jobcontroller.JobController
         private void Private_Jobnet_Selected(object sender, RoutedEventArgs e)
         {
             SetTreeJobnet(false, null);
+            if (_objList.ObjectId == null)
+                _objList.ObjectType = Consts.ObjectEnum.JOBNET;
         }
 
         //*******************************************************************
@@ -582,9 +682,11 @@ namespace jp.co.ftf.jobcontroller.JobController
             base.WriteEndLog("MenuitemTestRun_Click", Consts.PROCESS_009);
         }
 
+        //*******************************************************************
         /// <summary>バージョンメニュークリック</summary>
         /// <param name="sender">源</param>
         /// <param name="e">イベント</param>
+        //*******************************************************************
         private void MenuitemVer_Click(object sender, RoutedEventArgs e)
         {
             CommonDialog.ShowVersionDialog();
@@ -607,6 +709,7 @@ namespace jp.co.ftf.jobcontroller.JobController
                     return;
             }
 
+            //Treeの選択状況からオブジェクト編集画面を作成
             NewObjectEditFromTreeView();
 
             if (_objectEdit.SuccessFlg)
@@ -784,30 +887,132 @@ namespace jp.co.ftf.jobcontroller.JobController
         #endregion
 
         #region public メソッド
+        //*******************************************************************
         /// <summary>オブジェクト一覧を表示</summary>
         /// <param name="objectId">オブジェクトＩＤ</param>
         /// <param name="objecType">オブジェクトタイプ</param>
+        //*******************************************************************
         public void ShowObjectList(string objectId, Consts.ObjectEnum objectType)
         {
             // 開始ログ
             base.WriteStartLog("ShowObjectList", Consts.PROCESS_015);
-
             ClearGridContent();
 
-            _objList = new ObjectList(this, objectId, objectType);
+            if (objectId != null)
+            {
+                _objList = new ObjectList(this, objectId, objectType);
+                //リストにデータがない場合、選択された親TreeViewからオブジェクト種別を取得してセット
+                if (_objList.dgObject.Items.Count < 1)
+                {
+                    _objList.ObjectType = GetObjectEnum4NotData();
+                }
+
+            }
+
+            JobNetGrid.Children.Add(_objList);
 
             this.Title = MessageUtil.GetMsgById(_objList.GamenId) + " - " + LoginSetting.JobconName;
 
-            JobNetGrid.Children.Add(_objList);
+
             // 終了ログ
             base.WriteEndLog("ShowObjectList", Consts.PROCESS_015);
         }
 
+        //*******************************************************************
+        /// <summary>オブジェクト一覧を表示</summary>
+        /// <param name="objectId">オブジェクトＩＤ</param>
+        /// <param name="objecType">オブジェクトタイプ</param>
+        //*******************************************************************
+        public void RefreshObjectList()
+        {
+            String objectId = null;
+            Consts.ObjectEnum objectType = Consts.ObjectEnum.CALENDAR;
+            if (_objList != null)
+            {
+                objectId = _objList.ObjectId;
+                objectType = _objList.ObjectType;
+            }
+
+            if (publicCalendar.IsExpanded)
+            {
+                if (objectType == Consts.ObjectEnum.CALENDAR)
+                {
+                    SetTreeObject(true, Consts.ObjectEnum.CALENDAR, objectId);
+                }
+                else
+                {
+                    SetTreeObject(true, Consts.ObjectEnum.CALENDAR, null);
+                }          
+            }
+            if (privateCalendar.IsExpanded)
+            {
+                if (objectType == Consts.ObjectEnum.CALENDAR)
+                {
+                    SetTreeObject(false, Consts.ObjectEnum.CALENDAR, objectId);
+                }
+                else
+                {
+                    SetTreeObject(false, Consts.ObjectEnum.CALENDAR, null);
+                }
+            }
+
+            if (publicSchedule.IsExpanded)
+            {
+                if (objectType == Consts.ObjectEnum.SCHEDULE)
+                {
+                    SetTreeObject(true, Consts.ObjectEnum.SCHEDULE, objectId);
+                }
+                else
+                {
+                    SetTreeObject(true, Consts.ObjectEnum.SCHEDULE, null);
+                }
+            }
+            if (privateSchedule.IsExpanded)
+            {
+                if (objectType == Consts.ObjectEnum.SCHEDULE)
+                {
+                    SetTreeObject(false, Consts.ObjectEnum.SCHEDULE, objectId);
+                }
+                else
+                {
+                    SetTreeObject(false, Consts.ObjectEnum.CALENDAR, null);
+                }
+            }
+
+            if (publicJobnet.IsExpanded)
+            {
+                if (objectType == Consts.ObjectEnum.JOBNET)
+                {
+                    SetTreeObject(true, Consts.ObjectEnum.JOBNET, objectId);
+                }
+                else
+                {
+                    SetTreeObject(true, Consts.ObjectEnum.JOBNET, null);
+                }
+            }
+            if (privateJobnet.IsExpanded)
+            {
+                if (objectType == Consts.ObjectEnum.JOBNET)
+                {
+                    SetTreeObject(false, Consts.ObjectEnum.JOBNET, objectId);
+                }
+                else
+                {
+                    SetTreeObject(false, Consts.ObjectEnum.JOBNET, null);
+                }
+            }
+            if (_objList != null )
+                ShowObjectList(objectId, objectType);
+
+        }
+
+        //*******************************************************************
         /// <summary>オブジェクトを編集画面を表示</summary>
         /// <param name="jobnetId">オブジェクトＩＤ</param>
         /// <param name="updDate">更新日</param>
         /// <param name="editType">編集タイプ</param>
         /// <param name="objecType">オブジェクトタイプ</param>
+        //*******************************************************************
         public void EditObject(string objectId, string updDate, Consts.EditType editType, Consts.ObjectEnum objecType)
         {
             // 開始ログ
@@ -827,8 +1032,6 @@ namespace jp.co.ftf.jobcontroller.JobController
             {
                 ClearGridContent();
 
-                _objectEdit.ParantWindow = this;
-
                 this.Title = MessageUtil.GetMsgById(_objectEdit.GamenId) + " - " + LoginSetting.JobconName;
 
                 JobNetGrid.Children.Add(_objectEdit);
@@ -837,7 +1040,9 @@ namespace jp.co.ftf.jobcontroller.JobController
             base.WriteEndLog("EditObject", Consts.PROCESS_016);
         }
 
+        //*******************************************************************
         /// <summary>Treeコンテクストメニュー、メニューバー、Delete Keyから削除</summary>
+        //*******************************************************************
         public void DelFromMenuitemOrKey()
         {
             // 開始ログ
@@ -876,10 +1081,11 @@ namespace jp.co.ftf.jobcontroller.JobController
             // 終了ログ
             base.WriteEndLog("DelFromMenuitemOrKey", Consts.PROCESS_006);
         }
-
+        //*******************************************************************
         /// <summary>オブジェクトTreeを展開</summary>
         /// <param name="publicFlag">公開フラグ</param>
         /// <param name="objectType">オブジェクト種別</param>
+        //*******************************************************************
         public void SetTreeObject(bool publicFlag, Consts.ObjectEnum objectType, String objectID)
         {
             switch (objectType)
@@ -934,8 +1140,9 @@ namespace jp.co.ftf.jobcontroller.JobController
         #endregion
 
         #region  private メソッド
-
+        //*******************************************************************
         /// <summary>Treeコンテクストメニューの使用可能をセットする</summary>
+        //*******************************************************************
         private void SetContextStatus()
         {
             contextMenuitemAdd.IsEnabled = true;
@@ -962,21 +1169,22 @@ namespace jp.co.ftf.jobcontroller.JobController
                 contextMenuItemTestRun.IsEnabled = false;
             }
         }
-
-        // <summary>選択されたTreeViewから編集画面を取得</summary>
+        //*******************************************************************
+        /// <summary>選択されたTreeViewから編集画面を取得</summary>
+        //*******************************************************************
         private void NewObjectEditFromTreeView()
         {
             _objectEdit = null;
             if (treeView1.SelectedItem == null)
             {
-                _objectEdit = new CalendarEdit();
+                _objectEdit = new CalendarEdit(this);
                 return;
             }
             if (treeView1.SelectedItem.Equals(treeViewCalendar)
                 || treeView1.SelectedItem.Equals(publicCalendar)
                 || treeView1.SelectedItem.Equals(privateCalendar))
             {
-                _objectEdit = new CalendarEdit();
+                _objectEdit = new CalendarEdit(this);
                 return;
             }
 
@@ -984,7 +1192,7 @@ namespace jp.co.ftf.jobcontroller.JobController
                 || treeView1.SelectedItem.Equals(publicSchedule)
                 || treeView1.SelectedItem.Equals(privateSchedule))
             {
-                _objectEdit = new ScheduleEdit();
+                _objectEdit = new ScheduleEdit(this);
                 return;
             }
 
@@ -992,42 +1200,74 @@ namespace jp.co.ftf.jobcontroller.JobController
                 || treeView1.SelectedItem.Equals(publicJobnet)
                 || treeView1.SelectedItem.Equals(privateJobnet))
             {
-                _objectEdit = new JobEdit();
+                _objectEdit = new JobEdit(this);
                 return;
             }
 
             if ((Consts.ObjectEnum)(((TreeViewItem)(treeView1.SelectedItem)).Tag) == Consts.ObjectEnum.CALENDAR)
             {
-                _objectEdit = new CalendarEdit();
+                _objectEdit = new CalendarEdit(this);
                 return;
             }
             if ((Consts.ObjectEnum)(((TreeViewItem)(treeView1.SelectedItem)).Tag) == Consts.ObjectEnum.SCHEDULE)
             {
-                _objectEdit = new ScheduleEdit();
+                _objectEdit = new ScheduleEdit(this);
                 return;
             }
             if ((Consts.ObjectEnum)(((TreeViewItem)(treeView1.SelectedItem)).Tag) == Consts.ObjectEnum.JOBNET)
             {
-                _objectEdit = new JobEdit();
+                _objectEdit = new JobEdit(this);
                 return;
             }
         }
+        //*******************************************************************
+        /// <summary>選択されたデータ以外のTreeViewからオブジェクト種別取得</summary>
+        //*******************************************************************
+        private Consts.ObjectEnum GetObjectEnum4NotData()
+        {
+            if (treeView1.SelectedItem == null)
+            {
+                return Consts.ObjectEnum.CALENDAR;
+            }
+            if (treeView1.SelectedItem.Equals(treeViewCalendar)
+                || treeView1.SelectedItem.Equals(publicCalendar)
+                || treeView1.SelectedItem.Equals(privateCalendar))
+            {
+                return Consts.ObjectEnum.CALENDAR;
+            }
 
-        // <summary>オブジェクト一覧画面から編集画面を取得</summary>
+            if (treeView1.SelectedItem.Equals(treeViewSchedule)
+                || treeView1.SelectedItem.Equals(publicSchedule)
+                || treeView1.SelectedItem.Equals(privateSchedule))
+            {
+                return Consts.ObjectEnum.SCHEDULE;
+            }
+
+            if (treeView1.SelectedItem.Equals(treeViewJobNet)
+                || treeView1.SelectedItem.Equals(publicJobnet)
+                || treeView1.SelectedItem.Equals(privateJobnet))
+            {
+                return Consts.ObjectEnum.JOBNET;
+            }
+            return Consts.ObjectEnum.CALENDAR;
+        }
+        //*******************************************************************
+        /// <summary>オブジェクト一覧画面から編集画面を取得</summary>
+        //*******************************************************************
         private void NewObjectEditFromObjectList()
         {
             _objectEdit = null;
             switch (_objList.ObjectType)
             {
                 case Consts.ObjectEnum.CALENDAR:
-                    _objectEdit = new CalendarEdit();
+                    _objectEdit = new CalendarEdit(this);
                     break;
                 case Consts.ObjectEnum.SCHEDULE:
-                    _objectEdit = new ScheduleEdit();
+                    _objectEdit = new ScheduleEdit(this);
                     break;
 
                 case Consts.ObjectEnum.JOBNET:
-                    _objectEdit = new JobEdit();
+                    _objectEdit = new JobEdit(this);
                     break;
             }
         }
@@ -1039,13 +1279,13 @@ namespace jp.co.ftf.jobcontroller.JobController
             switch (objecType)
             {
                 case Consts.ObjectEnum.CALENDAR:
-                    _objectEdit = new CalendarEdit(objectId, updDate, editType);
+                    _objectEdit = new CalendarEdit(this, objectId, updDate, editType);
                     break;
                 case Consts.ObjectEnum.SCHEDULE:
-                    _objectEdit = new ScheduleEdit(objectId, updDate, editType);
+                    _objectEdit = new ScheduleEdit(this, objectId, updDate, editType);
                     break;
                 case Consts.ObjectEnum.JOBNET:
-                    _objectEdit = new JobEdit(objectId, updDate, editType);
+                    _objectEdit = new JobEdit(this, objectId, updDate, editType);
                     break;
             }
             return _objectEdit;
@@ -1068,7 +1308,7 @@ namespace jp.co.ftf.jobcontroller.JobController
                 if (!editObject.RegistObject())
                     return false;
                 editObject.Commit();
-                editObject.ResetTree();
+                editObject.ResetTree(null);
             }
             else
             {
@@ -1078,7 +1318,7 @@ namespace jp.co.ftf.jobcontroller.JobController
         }
 
         /// <summary>Gridの内容をクリア</summary>
-        private void ClearGridContent()
+        public void ClearGridContent()
         {
             UIElementCollection items = JobNetGrid.Children;
             if (items != null && items.Count > 0)
@@ -1143,12 +1383,14 @@ namespace jp.co.ftf.jobcontroller.JobController
         private void RunJobnet(Consts.RunTypeEnum runType)
         {
             String innerJobnetId = null;
-            MessageBoxResult result = CommonDialog.ShowJobnetStartDialog();
-            if (result == MessageBoxResult.Yes)
+
+            String jobnetId = ((TreeViewItem)treeView1.SelectedItem).Header.ToString();
+            DataTable dtJobnet = DBUtil.GetValidJobnetVer(jobnetId);
+            if (dtJobnet.Rows.Count > 0)
             {
-                String jobnetId = ((TreeViewItem)treeView1.SelectedItem).Header.ToString();
-                DataTable dtJobnet = DBUtil.GetValidJobnetVer(jobnetId);
-                if (dtJobnet.Rows.Count > 0)
+                MessageBoxResult result = CommonDialog.ShowJobnetStartDialog();
+
+                if (result == MessageBoxResult.Yes)
                 {
                     innerJobnetId = DBUtil.InsertRunJobnet(dtJobnet.Rows[0], runType);
                     if (innerJobnetId != null)
@@ -1160,13 +1402,13 @@ namespace jp.co.ftf.jobcontroller.JobController
                     }
                     return;
                 }
-                else
-                {
-                    CommonDialog.ShowErrorDialog(Consts.ERROR_RUN_JOBNET_001);
-                    return;
-                }
-
             }
+            else
+            {
+                CommonDialog.ShowErrorDialog(Consts.ERROR_RUN_JOBNET_001);
+                return;
+            }
+
         }
 
         /// <summary>カレンダーTree展開</summary>
@@ -1230,7 +1472,6 @@ namespace jp.co.ftf.jobcontroller.JobController
                     TreeViewItem item = new TreeViewItem();
                     item.Header = row["calendar_id"].ToString();
                     item.Tag = Consts.ObjectEnum.CALENDAR;
-                    item.FontFamily = new FontFamily("MS Gothic");
                     treeViewItem.Items.Add(item);
                     if (calendarID != null && item.Header.Equals(calendarID))
                     {
@@ -1245,8 +1486,6 @@ namespace jp.co.ftf.jobcontroller.JobController
             {
                 itemCalendar = (TreeViewItem)item;
                 itemCalendar.Selected += Object_Click;
-                //itemCalendar.MouseDoubleClick += Object_Click;
-                //itemCalendar.MouseRightButtonDown += TreeViewItem_MouseRightButtonDown;
             }
             if (public_flg)
             {
@@ -1322,7 +1561,6 @@ namespace jp.co.ftf.jobcontroller.JobController
                 {
                     TreeViewItem item = new TreeViewItem();
                     item.Header = row["schedule_id"].ToString();
-                    item.FontFamily = new FontFamily("MS Gothic");
                     item.Tag = Consts.ObjectEnum.SCHEDULE;
                     treeViewItem.Items.Add(item);
                     if (scheduleID != null && item.Header.Equals(scheduleID))
@@ -1337,8 +1575,6 @@ namespace jp.co.ftf.jobcontroller.JobController
             {
                 itemSchedule = (TreeViewItem)item;
                 itemSchedule.Selected += Object_Click;
-                //itemSchedule.MouseDoubleClick += Object_Click;
-                //itemSchedule.MouseRightButtonDown += TreeViewItem_MouseRightButtonDown;
             }
 
             if (public_flg)
@@ -1416,7 +1652,6 @@ namespace jp.co.ftf.jobcontroller.JobController
                     TreeViewItem item = new TreeViewItem();
                     item.Header = row["jobnet_id"].ToString();
                     item.Tag = Consts.ObjectEnum.JOBNET;
-                    item.FontFamily = new FontFamily("MS Gothic");
                     treeViewItem.Items.Add(item);
                     if (jobnetID != null && item.Header.Equals(jobnetID))
                     {
@@ -1431,8 +1666,6 @@ namespace jp.co.ftf.jobcontroller.JobController
                 itemJobnet = (TreeViewItem)item;
                 itemJobnet.PreviewMouseLeftButtonDown += Jobnet_MouseLeftButtonDown;
                 itemJobnet.Selected += Object_Click;
-                //itemJobnet.MouseDoubleClick += Object_Click;
-                //itemJobnet.MouseRightButtonDown += TreeViewItem_MouseRightButtonDown;
             }
             if (public_flg)
             {
@@ -1446,6 +1679,7 @@ namespace jp.co.ftf.jobcontroller.JobController
             }
             dbaccess.CloseSqlConnect();
         }
+
         /// <summary>子要素を検索</summary>
         private childItem FindVisualChild<childItem>(DependencyObject obj)
 where childItem : DependencyObject

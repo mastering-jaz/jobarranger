@@ -249,7 +249,7 @@
     <value>STARTは予約語のため、入力しないでください。</value>
   </data>
   <data name="ERROR_JOBEDIT_002" xml:space="preserve">
-    <value>選択されたジョブネットIDが他のユーザに削除されました。</value>
+    <value>選択されたジョブネットIDが他のユーザによって削除されました。</value>
   </data>
   <data name="ERROR_JOBEDIT_003" xml:space="preserve">
     <value>指定されたジョブIDが自ジョブネット、および自ジョブネットから呼び出されるジョブネットに所属していません。</value>
@@ -261,7 +261,7 @@
     <value>アイコン「{0}」のフローが不正です。INフロー又はOUTフローを修正してください。</value>
   </data>
   <data name="ERROR_JOBEDIT_006" xml:space="preserve">
-    <value>選択されたジョブネットバージョンは他のユーザーによって編集中です。
+    <value>選択されたジョブネットIDデータは他のユーザーによって編集中です。
 しばらくしてから、再実行してください。</value>
   </data>
   <data name="ERROR_LOGIN_001" xml:space="preserve">
@@ -481,11 +481,12 @@
     <value>編集中のデータを登録します。よろしいですか？</value>
   </data>
   <data name="MSG_COMMON_003" xml:space="preserve">
-    <value>                      Job Arranger for Zabbix
+    <value>Job Arranger for Zabbix
 
-                     Job Manager Version 1.3.0
+Job Manager Version 1.4.0
 
-Copyright (C) 2012-2013 FitechForce, Inc. All Rights Reserved.</value>
+Copyright (C) 2012-2013 FitechForce, Inc. All Rights Reserved. 
+Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.</value>
   </data>
   <data name="MSG_COMMON_004" xml:space="preserve">
     <value>データを削除します。よろしいですか？</value>
@@ -821,7 +822,7 @@ Copyright (C) 2012-2013 FitechForce, Inc. All Rights Reserved.</value>
     <value>選択されたカレンダーバージョンは他のユーザーによって、削除されました。</value>
   </data>
   <data name="ERROR_CALENDAR_002" xml:space="preserve">
-    <value>選択されたカレンダーバージョンは他のユーザーによって編集中です。
+    <value>選択されたカレンダーIDデータは他のユーザーによって編集中です。
 しばらくしてから、再実行してください。</value>
   </data>
   <data name="ERROR_COMMON_013" xml:space="preserve">
@@ -831,7 +832,7 @@ Copyright (C) 2012-2013 FitechForce, Inc. All Rights Reserved.</value>
     <value>選択されたスケジュールバージョンは他のユーザーによって、削除されました。</value>
   </data>
   <data name="ERROR_SCHEDULE_002" xml:space="preserve">
-    <value>選択されたスケジュールバージョンは他のユーザーによって編集中です。
+    <value>選択されたスケジュールIDデータは他のユーザーによって編集中です。
 しばらくしてから、再実行してください。</value>
   </data>
   <data name="ERROR_JOBEDIT_009" xml:space="preserve">
@@ -1065,7 +1066,7 @@ Copyright (C) 2012-2013 FitechForce, Inc. All Rights Reserved.</value>
   <data name="hold_menu_text" xml:space="preserve">
     <value>保留（_W）</value>
   </data>
-  <data name="job_status_text" xml:space="preserve">
+  <data name="info_type_job_status_text" xml:space="preserve">
     <value>ジョブ状態</value>
   </data>
   <data name="linear_flow_menu_text" xml:space="preserve">
@@ -1165,7 +1166,7 @@ Copyright (C) 2012-2013 FitechForce, Inc. All Rights Reserved.</value>
     <value>ファイル転送</value>
   </data>
   <data name="file_wait_icon_label_text" xml:space="preserve">
-    <value>ファイル</value>
+    <value>ファイル待合せ</value>
   </data>
   <data name="copy_new_context_menu_text" xml:space="preserve">
     <value>コピー新規（_C）</value>
@@ -1275,14 +1276,14 @@ Copyright (C) 2012-2013 FitechForce, Inc. All Rights Reserved.</value>
   <data name="force_reboot_label_text" xml:space="preserve">
     <value>強制リブート</value>
   </data>
-  <data name="reboot_mode_label_text" xml:space="preserve">
+  <data name="process_mode_label_text" xml:space="preserve">
     <value>処理モード</value>
   </data>
   <data name="waiting_reboot_label_text" xml:space="preserve">
     <value>ジョブ待ち合わせ後リブート</value>
   </data>
   <data name="err_message_wait_time" xml:space="preserve">
-    <value>リブートの待合せ時間</value>
+    <value>待合せ時間</value>
   </data>
   <data name="wait_time_label_text" xml:space="preserve">
     <value>待合せ時間(秒)：</value>
@@ -1295,5 +1296,221 @@ Copyright (C) 2012-2013 FitechForce, Inc. All Rights Reserved.</value>
   </data>
   <data name="calendar_id_col_head_text" xml:space="preserve">
     <value>カレンダーID</value>
+  </data>
+  <data name="ERROR_COMMON_016" xml:space="preserve">
+    <value>{0}は半角英数字とハイフン（-）、アンダーバー（_）、スラッシュ（/）で入力してください。</value>
+  </data>
+  <data name="err_message_release_job_id" xml:space="preserve">
+    <value>保留解除ジョブID</value>
+  </data>
+  <data name="file_check_label_text" xml:space="preserve">
+    <value>ファイル存在チェック</value>
+  </data>
+  <data name="file_delete_checkbox_text" xml:space="preserve">
+    <value>ファイル削除：</value>
+  </data>
+  <data name="file_wait_label_text" xml:space="preserve">
+    <value>ファイル待合せ</value>
+  </data>
+  <data name="release_icon_label_text" xml:space="preserve">
+    <value>保留解除</value>
+  </data>
+  <data name="release_job_id_label_text" xml:space="preserve">
+    <value>保留解除ジョブID：</value>
+  </data>
+  <data name="calendar_info_text" xml:space="preserve">
+    <value>カレンダー情報</value>
+  </data>
+  <data name="ERROR_CALENDAR_003" xml:space="preserve">
+    <value>選択されたカレンダーIDが他のユーザによって削除されました。</value>
+  </data>
+  <data name="info_type_running_day_text" xml:space="preserve">
+    <value>稼働日</value>
+  </data>
+  <data name="job_result_tab_text" xml:space="preserve">
+    <value>実行結果表示</value>
+  </data>
+  <data name="day_label_text" xml:space="preserve">
+    <value>日</value>
+  </data>
+  <data name="hour_label_text" xml:space="preserve">
+    <value>時</value>
+  </data>
+  <data name="min_label_text" xml:space="preserve">
+    <value>分</value>
+  </data>
+  <data name="month_label_text" xml:space="preserve">
+    <value>月</value>
+  </data>
+  <data name="search_term_label_text" xml:space="preserve">
+    <value>検索期間：</value>
+  </data>
+  <data name="year_label_text" xml:space="preserve">
+    <value>年</value>
+  </data>
+  <data name="csv_button_text" xml:space="preserve">
+    <value>CSV出力</value>
+  </data>
+  <data name="manage_id_col_head_text" xml:space="preserve">
+    <value>管理ID</value>
+  </data>
+  <data name="manage_id_label_text" xml:space="preserve">
+    <value>管理ID：</value>
+  </data>
+  <data name="return_value_col_head_text" xml:space="preserve">
+    <value>戻り値</value>
+  </data>
+  <data name="run_date_col_head_text" xml:space="preserve">
+    <value>実行日付</value>
+  </data>
+  <data name="search_button_text" xml:space="preserve">
+    <value>検索</value>
+  </data>
+  <data name="std_err_col_head_text" xml:space="preserve">
+    <value>標準エラー</value>
+  </data>
+  <data name="std_out_col_head_text" xml:space="preserve">
+    <value>標準出力</value>
+  </data>
+  <data name="csv_screen_language" xml:space="preserve">
+    <value>ジョブ実行結果CSVファイルの出力先を入力してください。</value>
+  </data>
+  <data name="csv_screen_name" xml:space="preserve">
+    <value>ジョブ実行結果出力画面</value>
+  </data>
+  <data name="ERROR_COMMON_017" xml:space="preserve">
+    <value>{0}は{1}～{2}の数値で入力してください。</value>
+  </data>
+  <data name="ERROR_COMMON_018" xml:space="preserve">
+    <value>{0}は正しい日付で入力してください。</value>
+  </data>
+  <data name="err_message_search_from_date" xml:space="preserve">
+    <value>検索FROM日付</value>
+  </data>
+  <data name="err_message_search_from_day" xml:space="preserve">
+    <value>検索FROM日</value>
+  </data>
+  <data name="err_message_search_from_hour" xml:space="preserve">
+    <value>検索FROM時</value>
+  </data>
+  <data name="err_message_search_from_min" xml:space="preserve">
+    <value>検索FROM分</value>
+  </data>
+  <data name="err_message_search_from_month" xml:space="preserve">
+    <value>検索FROM月</value>
+  </data>
+  <data name="err_message_search_from_time" xml:space="preserve">
+    <value>検索FROM時間</value>
+  </data>
+  <data name="err_message_search_from_year" xml:space="preserve">
+    <value>検索FROM年</value>
+  </data>
+  <data name="err_message_search_to_date" xml:space="preserve">
+    <value>検索TO日付</value>
+  </data>
+  <data name="err_message_search_to_day" xml:space="preserve">
+    <value>検索TO日</value>
+  </data>
+  <data name="err_message_search_to_hour" xml:space="preserve">
+    <value>検索TO時</value>
+  </data>
+  <data name="err_message_search_to_min" xml:space="preserve">
+    <value>検索TO分</value>
+  </data>
+  <data name="err_message_search_to_month" xml:space="preserve">
+    <value>検索TO月</value>
+  </data>
+  <data name="err_message_search_to_time" xml:space="preserve">
+    <value>検索TO時間</value>
+  </data>
+  <data name="err_message_search_to_year" xml:space="preserve">
+    <value>検索TO年</value>
+  </data>
+  <data name="ERROR_COMMON_019" xml:space="preserve">
+    <value>指定されたファイルパスのフォーマットはサポートされていません。</value>
+  </data>
+  <data name="ERROR_COMMON_020" xml:space="preserve">
+    <value>正規表現の指定が誤ってます。</value>
+  </data>
+  <data name="ERROR_COMMON_021" xml:space="preserve">
+    <value>CSV出力データが存在しません。</value>
+  </data>
+  <data name="err_message_user_name" xml:space="preserve">
+    <value>ユーザー名</value>
+  </data>
+  <data name="PROCESS_024" xml:space="preserve">
+    <value>実行結果検索処理</value>
+  </data>
+  <data name="PROCESS_025" xml:space="preserve">
+    <value>実行結果CSV出力処理</value>
+  </data>
+  <data name="ERROR_COMMON_022" xml:space="preserve">
+    <value>ファイルのディレクトリーが存在しません。</value>
+  </data>
+  <data name="ERROR_JOBEDIT_013" xml:space="preserve">
+    <value>当ジョブネットは既に表示中です。</value>
+  </data>
+  <data name="ERROR_COMMON_023" xml:space="preserve">
+    <value>アクセスが拒否されました。</value>
+  </data>
+  <data name="edit_skip_menu_text" xml:space="preserve">
+    <value>スキップ（_K）</value>
+  </data>
+  <data name="ERROR_COMMON_024" xml:space="preserve">
+    <value>該当データが存在しません。</value>
+  </data>
+  <data name="ERROR_COMMON_025" xml:space="preserve">
+    <value>{0}は「"'\,」以外で入力してください。</value>
+  </data>
+  <data name="ERROR_COMMON_026" xml:space="preserve">
+    <value>{0}は正しい時間で入力してください。</value>
+  </data>
+  <data name="detail_col_head_text" xml:space="preserve">
+    <value>詳細</value>
+  </data>
+  <data name="log_detail_screen_name" xml:space="preserve">
+    <value>ジョブ実行結果詳細画面</value>
+  </data>
+  <data name="std_err_label_text" xml:space="preserve">
+    <value>標準エラー：</value>
+  </data>
+  <data name="std_out_label_text" xml:space="preserve">
+    <value>標準出力：</value>
+  </data>
+  <data name="WINDOW_NAME_500" xml:space="preserve">
+    <value>ジョブ実行結果画面</value>
+  </data>
+  <data name="end_time_label_text" xml:space="preserve">
+    <value>終了時間：</value>
+  </data>
+  <data name="ife_icon_screen_name" xml:space="preserve">
+    <value>条件分岐終了アイコンの設定</value>
+  </data>
+  <data name="loop_icon_screen_name" xml:space="preserve">
+    <value>ループアイコンの設定</value>
+  </data>
+  <data name="management_id_col_head_text" xml:space="preserve">
+    <value>管理ID</value>
+  </data>
+  <data name="mte_icon_screen_name" xml:space="preserve">
+    <value>並列終了アイコンの設定</value>
+  </data>
+  <data name="mts_icon_screen_name" xml:space="preserve">
+    <value>並列開始アイコンの設定</value>
+  </data>
+  <data name="release_icon_screen_name" xml:space="preserve">
+    <value>保留解除アイコンの設定</value>
+  </data>
+  <data name="schedule_time_label_text" xml:space="preserve">
+    <value>開始予定時間：</value>
+  </data>
+  <data name="start_icon_screen_name" xml:space="preserve">
+    <value>開始アイコンの設定</value>
+  </data>
+  <data name="start_time_label_text" xml:space="preserve">
+    <value>開始時間：</value>
+  </data>
+  <data name="ERROR_DB_LOCK" xml:space="preserve">
+    <value>データが使用中のため、操作できません。しばらくしてから、再実行してください。</value>
   </data>
 </root>

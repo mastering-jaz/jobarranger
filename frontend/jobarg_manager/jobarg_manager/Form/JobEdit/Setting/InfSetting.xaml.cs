@@ -44,6 +44,12 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
         /// <summary>DBアクセスインスタンス</summary>
         private DBConnect dbAccess = new DBConnect(LoginSetting.ConnectStr);
 
+        /// <summary>カレンダー管理のDAO</summary>
+        private CalendarControlDAO _calendarControlDAO;
+
+        /// <summary>カレンダー管理テーブル</summary>
+        private DataTable _calendarTable;
+
         #endregion
 
         #region コンストラクタ
@@ -54,6 +60,8 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             _myJob = room;
 
             _oldJobId = jobId;
+
+            _calendarControlDAO = new CalendarControlDAO(dbAccess);
 
             SetValues(jobId);
 
@@ -101,20 +109,14 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
         /// <param name="e">イベント</param>
         private void btnToroku_Click(object sender, RoutedEventArgs e)
         {
-            // DB接続をオープン 
-            dbAccess.CreateSqlConnect();
-
             // 入力チェック 
             if (!InputCheck())
             {
-                // DB接続をクローズ 
-                dbAccess.CloseSqlConnect();
-
                 return;
             }
 
-            // DB接続をクローズ 
-            dbAccess.CloseSqlConnect();
+            //処理前現在データで履歴を作成
+            ((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.Container)_myJob.Container).CreateHistData();
 
             // 入力されたジョブID 
             string newJobId = txtJobId.Text;
@@ -139,9 +141,11 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                 if (infoFlag == 0)
                 {
                     rowInfo[0]["get_job_id"] = txtJobIdInfo.Text;
+                    rowInfo[0]["get_calendar_id"] = Convert.DBNull;
                 }
-                else
+                else if (infoFlag == 3)
                 {
+                    rowInfo[0]["get_calendar_id"] = combCalendarId.SelectedValue;
                     rowInfo[0]["get_job_id"] = Convert.DBNull;
                 }
             }
@@ -167,11 +171,28 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             if (Convert.ToInt16(combInfo.SelectedValue) == 0)
             {
                 txtJobIdInfo.IsEnabled = true;
+                combCalendarId.IsEnabled = false;
             }
-            else
+            else if (Convert.ToInt16(combInfo.SelectedValue) == 3)
             {
                 txtJobIdInfo.IsEnabled = false;
+                combCalendarId.IsEnabled = true;
             }
+        }
+
+        /// <summary>カレンダーIDを変える</summary>
+        /// <param name="sender">源</param>
+        /// <param name="e">イベント</param>
+        private void combCalendarId_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            string calendarId = Convert.ToString(combCalendarId.SelectedValue);
+            dbAccess.CreateSqlConnect();
+            DataTable dtCalendar = _calendarControlDAO.GetValidORMaxUpdateDateEntityById(calendarId);
+            if (dtCalendar != null && dtCalendar.Rows.Count > 0)
+            {
+                tbCalendarName.Text = Convert.ToString(dtCalendar.Rows[0]["calendar_name"]);
+            }
+            dbAccess.CloseSqlConnect();
         }
 
         /// <summary>キャンセルをクリック</summary>
@@ -202,6 +223,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             btnToroku.IsEnabled = false;
             txtJobIdInfo.IsEnabled = false;
             combInfo.IsEnabled = false;
+            combCalendarId.IsEnabled = false;
 
         }
         #endregion
@@ -222,11 +244,27 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
 
             // 情報種別 
             Dictionary<int, string> dic = new Dictionary<int, string>();
-            dic.Add(0, Properties.Resources.job_status_text);
+            dic.Add(0, Properties.Resources.info_type_job_status_text);
+            dic.Add(3, Properties.Resources.info_type_running_day_text);
             combInfo.Items.Clear();
             combInfo.ItemsSource = dic;
             combInfo.DisplayMemberPath = "Value";
             combInfo.SelectedValuePath = "Key";
+
+            dbAccess.CreateSqlConnect();
+
+            if (LoginSetting.Authority == Consts.AuthorityEnum.SUPER)
+            {
+                _calendarTable = _calendarControlDAO.GetInfoByUserIdSuper();
+            }
+            else
+            {
+                _calendarTable = _calendarControlDAO.GetInfoByUserId(LoginSetting.UserID);
+            }
+
+            combCalendarId.ItemsSource = _calendarTable.DefaultView;
+            combCalendarId.DisplayMemberPath = Convert.ToString(_calendarTable.Columns["calendar_id"]);
+            combCalendarId.SelectedValuePath = Convert.ToString(_calendarTable.Columns["calendar_id"]);
 
             // 情報取得アイコン設定テーブルのデータを取得 
             DataRow[] rowInfo;
@@ -247,17 +285,30 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                     if (infoFlag == 0)
                     {
                         txtJobIdInfo.Text = Convert.ToString(rowInfo[0]["get_job_id"]);
+                        txtJobIdInfo.IsEnabled = true;
+                        combCalendarId.IsEnabled = false;
                     }
-                    else
+                    else if (infoFlag == 3)
                     {
+                        string calendarId = Convert.ToString(rowInfo[0]["get_calendar_id"]);
+                        combCalendarId.SelectedValue = calendarId;
+
+                        DataTable dtCalendar = _calendarControlDAO.GetValidORMaxUpdateDateEntityById(calendarId);
+                        if (dtCalendar != null && dtCalendar.Rows.Count > 0)
+                        {
+                            tbCalendarName.Text = Convert.ToString(dtCalendar.Rows[0]["calendar_name"]);
+                        }
                         txtJobIdInfo.IsEnabled = false;
+                        combCalendarId.IsEnabled = true;
                     }
                 }
                 else
                 {
                     txtJobIdInfo.IsEnabled = false;
+                    combCalendarId.IsEnabled = false;
                 }
             }
+            dbAccess.CloseSqlConnect();
         }
 
         /// <summary> 各項目のチェック処理</summary>
@@ -280,10 +331,10 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                     new string[] { jobIdForChange, "32" });
                 return false;
             }
-            // 半角英数字とハイフン（-）チェック 
-            if (!CheckUtil.IsHankakuStrAndHyphen(jobId))
+            // 半角英数値、「-」、「_」チェック 
+            if (!CheckUtil.IsHankakuStrAndHyphenAndUnderbar(jobId))
             {
-                CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_005,
+                CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_013,
                     new string[] { jobIdForChange });
                 return false;
             }
@@ -319,6 +370,14 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                 return false;
             }
 
+            // 入力不可文字「"'\,」チェック
+            if (CheckUtil.IsImpossibleStr(jobName))
+            {
+                CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_025,
+                    new string[] { jobNameForChange });
+                return false;
+            }
+
             // ジョブ情報 
             if (Convert.ToInt16(combInfo.SelectedValue) == 0)
             {
@@ -338,10 +397,10 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                         new string[] { jobInfoForChange, "1024" });
                     return false;
                 }
-                // 半角英数字とハイフン、スラッシュチェック 
-                if (!CheckUtil.IsHankakuStrAndHyphenAndSlash(jobInfo))
+                // 半角英数字とハイフン、アンダーバー、スラッシュチェック 
+                if (!CheckUtil.IsHankakuStrAndHyphenUnderbarAndSlash(jobInfo))
                 {
-                    CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_010,
+                    CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_016,
                         new string[] { jobInfoForChange });
                     return false;
                 }
@@ -408,6 +467,29 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                         }
                     }
                 }
+            }
+            else if (Convert.ToInt16(combInfo.SelectedValue) == 3)
+            {
+                // カレンダーID 
+                string calendarIdForChange = Properties.Resources.err_message_calendar_id;
+                String calendarId = Convert.ToString(combCalendarId.SelectedValue);
+                // 未入力の場合 
+                if (CheckUtil.IsNullOrEmpty(calendarId))
+                {
+                    CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_001,
+                        new string[] { calendarIdForChange });
+                    return false;
+                }
+
+                // カレンダーIDの存在チェック 
+                dbAccess.CreateSqlConnect();
+                string count = _calendarControlDAO.GetCountByCalendarId(calendarId);
+                if ("0".Equals(count))
+                {
+                    CommonDialog.ShowErrorDialog(Consts.ERROR_CALENDAR_003);
+                    return false;
+                }
+                dbAccess.CloseSqlConnect();
             }
 
             return true;

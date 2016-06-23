@@ -20,6 +20,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using System.Windows.Data;
+using jp.co.ftf.jobcontroller.Common;
 //*******************************************************************
 //                                                                  *
 //                                                                  *
@@ -40,12 +42,21 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
         public FCopy()
         {
             InitializeComponent();
+            this.DataContext = new IconViewData();
+        }
+
+        public FCopy(RunJobMethodType methodType)
+        {
+            InitializeComponent();
+            _methodType = methodType;
+            this.DataContext = new IconViewData();
         }
         public FCopy(SolidColorBrush color)
         {
             InitializeComponent();
             picFCopy1.Fill = color;
             picFCopy2.Fill = color;
+            this.DataContext = new IconViewData();
         }
         #endregion
 
@@ -77,7 +88,24 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                 _jobId = value;
 
                 // 表示文字をセット
-                tbJobId.Text = CommonUtil.GetOmitString(value, SystemConst.LEN_JOBID_INF);
+                tbJobId.Text = CommonUtil.GetOmitString(value, SystemConst.LEN_JOBID_FCOPY);
+                IconViewData data = (IconViewData)this.DataContext;
+                data.JobId = value;
+            }
+        }
+
+        /// <summary>処理フラグ</summary>
+        private RunJobMethodType _methodType;
+        public RunJobMethodType MethodType
+        {
+            get
+            {
+                return _methodType;
+            }
+            set
+            {
+                _methodType = value;
+
             }
         }
 
@@ -97,7 +125,9 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                 _jobName = value;
 
                 // 表示文字をセット
-                tbJobName.Text = CommonUtil.GetOmitString(value, SystemConst.LEN_JOBNAME_INF);
+                tbJobName.Text = CommonUtil.GetOmitString(value, SystemConst.LEN_JOBNAME_FCOPY);
+                IconViewData data = (IconViewData)this.DataContext;
+                data.JobName = value;
 
             }
         }
@@ -229,6 +259,42 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
 
         #endregion
 
+        #region イベント
+        //*******************************************************************
+        /// <summary>JobId変更時イベント</summary>
+        /// <param name="sender">源</param>
+        /// <param name="e">イベント</param>
+        //*******************************************************************
+        private void textBlockJobId_TargetUpdated(object sender, DataTransferEventArgs e)
+        {
+            bool IsTextTrimmed = false;
+            var textBlock = sender as TextBlock;
+            if (textBlock != null && textBlock.Tag != null && CheckUtil.IsLenOver(textBlock.Tag.ToString(), GetJobIdTrimLimitLength()))
+            {
+                IsTextTrimmed = true;
+            }
+            TextBlockService.SetIsTextTrimmed(textBlock, IsTextTrimmed);
+        }
+
+        //*******************************************************************
+        /// <summary>JobName変更時イベント</summary>
+        /// <param name="sender">源</param>
+        /// <param name="e">イベント</param>
+        //*******************************************************************
+        private void textBlockJobName_TargetUpdated(object sender, DataTransferEventArgs e)
+        {
+            bool IsTextTrimmed = false;
+            var textBlock = sender as TextBlock;
+            if (textBlock != null && textBlock.Tag != null
+                    && CheckUtil.IsLenOver(textBlock.Tag.ToString(), GetJobNameTrimLimitLength()))
+            {
+                IsTextTrimmed = true;
+            }
+            TextBlockService.SetIsTextTrimmed(textBlock, IsTextTrimmed);
+        }
+
+        #endregion
+
         #region privateメッソド
 
         /// <summary>連接点の色をセット</summary>
@@ -242,6 +308,18 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             HotspotRight.Opacity = opacity;
             HotspotBottom.Fill = new SolidColorBrush(color);
             HotspotBottom.Opacity = opacity;
+        }
+
+        /// <summary>JobID表示文字数</summary>//
+        private int GetJobIdTrimLimitLength()
+        {
+            return SystemConst.LEN_JOBID_FCOPY - 3;
+        }
+
+        /// <summary>Job名表示文字数</summary>/// 
+        private int GetJobNameTrimLimitLength()
+        {
+            return SystemConst.LEN_JOBNAME_FCOPY - 3;
         }
 
         #endregion
@@ -294,8 +372,21 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
         /// <summary>色のリセット</summary>
         public void ResetInitColor()
         {
-            picFCopy1.Fill = SystemConst.ColorConst.JobColor;
-            picFCopy2.Fill = SystemConst.ColorConst.JobColor;
+            Brush color;
+            switch (MethodType)
+            {
+                case RunJobMethodType.HOLD:
+                    color = SystemConst.ColorConst.HoldColor;
+                    break;
+                case RunJobMethodType.SKIP:
+                    color = SystemConst.ColorConst.SkipColor;
+                    break;
+                default:
+                    color = SystemConst.ColorConst.JobColor;
+                    break;
+            }
+            picFCopy1.Fill = color;
+            picFCopy2.Fill = color;
         }
 
         /// <summary>部品欄のアイコン色をセット</summary>

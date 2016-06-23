@@ -23,15 +23,16 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
         xmlns:src="clr-namespace:jp.co.ftf.jobcontroller.JobController" 
         WindowStartupLocation="CenterScreen" ResizeMode="NoResize"
-        Title="{x:Static src:Properties.Resources.calc_icon_screen_name}" Height="255" Width="390" FontFamily="MS Gothic" Closing="Window_Closed">
+        Title="{x:Static src:Properties.Resources.calc_icon_screen_name}" Height="286" Width="390" 
+        FontSize="11" FontFamily="Meiryo" Closing="Window_Closed">
     <Grid Background="#FFEEECE1" Name="GridSetting">
         <Grid.RowDefinitions>
             <RowDefinition Height="30" />
             <RowDefinition Height="30" />
             <RowDefinition Height="50" />
-            <RowDefinition Height="30" />
-            <RowDefinition Height="30" />
-            <RowDefinition Height="*" />
+            <RowDefinition Height="37" />
+            <RowDefinition Height="37" />
+            <RowDefinition Height="50*" />
         </Grid.RowDefinitions>
         <Label Grid.Row="0" Content="{x:Static src:Properties.Resources.job_id_label_text}" Height="28" HorizontalAlignment="Left" Margin="12,3,0,0"
                VerticalAlignment="Top" VerticalContentAlignment="Center" />
@@ -41,8 +42,8 @@
                VerticalAlignment="Top" VerticalContentAlignment="Center" />
         <TextBox Grid.Row="1" Name="txtJobName" Height="23" Width="285" Margin="80,6,0,0" HorizontalAlignment="Left"
                  VerticalAlignment="Top" VerticalContentAlignment="Center" MaxLength="64" />
-        <GroupBox Grid.Row="2" Name="gbHandFlag" Header="{x:Static src:Properties.Resources.calc_method_label_text}" Height="43" Width="216" Margin="15,5,0,0" 
-                  VerticalAlignment="Top" HorizontalAlignment="Left">
+        <GroupBox Grid.Row="2" Name="gbHandFlag" Header="{x:Static src:Properties.Resources.calc_method_label_text}" Height="51" Width="216" Margin="15,5,0,0" 
+                  VerticalAlignment="Top" HorizontalAlignment="Left" Grid.RowSpan="2">
             <Grid Width="196">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="88"/>
@@ -55,17 +56,17 @@
                              HorizontalAlignment="Left" Margin="18,7,0,0" VerticalAlignment="Top" Width="80" Grid.ColumnSpan="2" />
             </Grid>
         </GroupBox>
-        <Label Grid.Row="3" Content="{x:Static src:Properties.Resources.formula_label_text}" Height="28" HorizontalAlignment="Left" Margin="12,1,0,0"
-               VerticalAlignment="Top" VerticalContentAlignment="Center" />
-        <TextBox Grid.Row="3" Name="txtFormula" Height="23" Width="282" Margin="83,4,0,0" HorizontalAlignment="Left"
+        <Label Grid.Row="3" Content="{x:Static src:Properties.Resources.formula_label_text}" Height="28" HorizontalAlignment="Left" Margin="12,9,0,0"
+               VerticalAlignment="Top" VerticalContentAlignment="Center" Grid.RowSpan="2" />
+        <TextBox Grid.Row="3" Name="txtFormula" Height="23" Width="274" Margin="91,12,0,0" HorizontalAlignment="Left"
                  VerticalAlignment="Top" VerticalContentAlignment="Center" MaxLength="100" />
-        <Label Grid.Row="4" Content="{x:Static src:Properties.Resources.value_name_label_text}" Height="28" HorizontalAlignment="Left" Margin="12,1,0,0" 
+        <Label Grid.Row="4" Content="{x:Static src:Properties.Resources.value_name_label_text}" Height="28" HorizontalAlignment="Left" Margin="12,4,0,0" 
                VerticalAlignment="Top" VerticalContentAlignment="Center" />
-        <TextBox Grid.Row="4" Name="txtValueName" Height="23" Width="282" Margin="83,4,0,0" HorizontalAlignment="Left" 
+        <TextBox Grid.Row="4" Name="txtValueName" Height="23" Width="274" Margin="91,7,0,0" HorizontalAlignment="Left" 
                  VerticalAlignment="Top" VerticalContentAlignment="Center" MaxLength="128" />
-        <Button Grid.Row="5" Content="{x:Static src:Properties.Resources.regist_button_text}" Height="28" HorizontalAlignment="Left" Margin="195,18,0,0" Name="btnToroku"
+        <Button Grid.Row="5" Content="{x:Static src:Properties.Resources.regist_button_text}" Height="28" HorizontalAlignment="Left" Margin="195,26,0,0" Name="btnToroku"
                 VerticalAlignment="Top" Width="75" Click="btnToroku_Click" IsDefault="True"/>
-        <Button Grid.Row="5" Content="{x:Static src:Properties.Resources.cancel_button_text}" Height="28" HorizontalAlignment="Left" Margin="275,18,0,0" Name="btnCancel"
+        <Button Grid.Row="5" Content="{x:Static src:Properties.Resources.cancel_button_text}" Height="28" HorizontalAlignment="Left" Margin="275,26,0,0" Name="btnCancel"
                 VerticalAlignment="Top" Width="75" Click="btnCancel_Click" IsCancel="True"/>
     </Grid>
 </Window>

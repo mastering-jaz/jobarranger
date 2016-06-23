@@ -23,7 +23,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:src="clr-namespace:jp.co.ftf.jobcontroller.JobController">
+             xmlns:src="clr-namespace:jp.co.ftf.jobcontroller.JobController"
+             FontFamily="Meiryo" FontSize="11">
     <UserControl.Resources>
         <src:BootTimeConverter x:Key="BootTimeConverter"/>
     </UserControl.Resources>
@@ -59,8 +60,8 @@
                 </Style>
             </DataGrid.Resources>
             <DataGrid.Columns>
-                <DataGridTextColumn Header="{x:Static src:Properties.Resources.calendar_id_col_head_text}" CellStyle="{StaticResource IDDataListCellStyle}" Binding="{Binding Path=calendar_id}" Width="Auto" FontFamily="MS Gothic" IsReadOnly="True" />
-                <DataGridTextColumn Header="{x:Static src:Properties.Resources.calendar_name_col_head_text}" Binding="{Binding Path=calendar_name}" Width="*" FontFamily="MS Gothic" IsReadOnly="True">
+                <DataGridTextColumn Header="{x:Static src:Properties.Resources.calendar_id_col_head_text}" CellStyle="{StaticResource IDDataListCellStyle}" Binding="{Binding Path=calendar_id}" Width="Auto" IsReadOnly="True" />
+                <DataGridTextColumn Header="{x:Static src:Properties.Resources.calendar_name_col_head_text}" Binding="{Binding Path=calendar_name}" Width="*" IsReadOnly="True">
                     <DataGridTextColumn.CellStyle>
                         <Style TargetType="{x:Type DataGridCell}">
                             <Setter Property="VerticalAlignment" Value="Stretch"/>
@@ -78,8 +79,7 @@
                         </Style>
                     </DataGridTextColumn.CellStyle>
                 </DataGridTextColumn>
-
-                <DataGridTextColumn Header="{x:Static src:Properties.Resources.boot_time_col_head_text}" Width="Auto" FontFamily="MS Gothic" IsReadOnly="False" >
+                <DataGridTextColumn Header="{x:Static src:Properties.Resources.boot_time_col_head_text}" Width="Auto" IsReadOnly="False" >
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
                             <Setter Property="TextWrapping" Value="Wrap" />
@@ -132,8 +132,8 @@
                 </Style>
             </DataGrid.Resources>
             <DataGrid.Columns>
-                <DataGridTextColumn Header="{x:Static src:Properties.Resources.jobnet_id_col_head_text}" CellStyle="{StaticResource IDDataListCellStyle}" Binding="{Binding Path=jobnet_id}" Width="Auto" FontFamily="MS Gothic" />
-                <DataGridTextColumn Header="{x:Static src:Properties.Resources.jobnet_name_col_head_text}" Binding="{Binding Path=jobnet_name}" Width="*" FontFamily="MS Gothic" >
+                <DataGridTextColumn Header="{x:Static src:Properties.Resources.jobnet_id_col_head_text}" CellStyle="{StaticResource IDDataListCellStyle}" Binding="{Binding Path=jobnet_id}" Width="Auto" />
+                <DataGridTextColumn Header="{x:Static src:Properties.Resources.jobnet_name_col_head_text}" Binding="{Binding Path=jobnet_name}" Width="*" >
                     <DataGridTextColumn.CellStyle>
                         <Style TargetType="{x:Type DataGridCell}">
                             <Setter Property="VerticalAlignment" Value="Stretch"/>

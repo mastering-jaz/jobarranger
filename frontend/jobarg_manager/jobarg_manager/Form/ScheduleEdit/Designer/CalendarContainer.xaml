@@ -24,7 +24,8 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:src="clr-namespace:jp.co.ftf.jobcontroller.JobController" 
-             xmlns:design="clr-namespace:jp.co.ftf.jobcontroller.JobController.Form.CalendarEdit">
+             xmlns:design="clr-namespace:jp.co.ftf.jobcontroller.JobController.Form.CalendarEdit"
+             FontFamily="Meiryo" FontSize="11">
     <Grid  x:Name="LayoutRoot"  Background="WhiteSmoke" ShowGridLines="False" Margin="0,0,5,0" >
         <Grid.RowDefinitions >
             <RowDefinition Height="30"   />
@@ -32,7 +33,7 @@
         </Grid.RowDefinitions >
 
         <TextBlock HorizontalAlignment="Left" Margin="5,10,0,0" Text="{x:Static src:Properties.Resources.operation_day_label_text}" Width="Auto" Grid.Row="0"/>
-        <Button Name="btnLeft" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="85,6,0,0" Width="20" Height="20" Click="left_arrow_click" BorderBrush="Transparent" BorderThickness="0" Background="Transparent" 
+        <Button Name="btnLeft" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="87,6,0,0" Width="20" Height="20" Click="left_arrow_click" BorderBrush="Transparent" BorderThickness="0" Background="Transparent" 
  Foreground="White">
             <Button.Template>
                 <ControlTemplate TargetType="Button">
@@ -41,8 +42,8 @@
             </Button.Template>
             <Image Source="../../../Resources/arrow_left.gif" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
         </Button>
-        <TextBox HorizontalAlignment="Left" Margin="117,6,0,0" Name="textBox_year" VerticalAlignment="Top" Text="" Width="Auto" IsReadOnly="True" Grid.Row="0"/>
-        <Button Name="btnRight" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="162,6,0,0" Width="20" Height="20" Click="right_arrow_click" Grid.Row="0" BorderBrush="Transparent" BorderThickness="0" Background="Transparent" 
+        <TextBox HorizontalAlignment="Left" Margin="119,6,0,0" Name="textBox_year" VerticalAlignment="Top" Text="" Width="Auto" IsReadOnly="True" Grid.Row="0"/>
+        <Button Name="btnRight" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="164,6,0,0" Width="20" Height="20" Click="right_arrow_click" Grid.Row="0" BorderBrush="Transparent" BorderThickness="0" Background="Transparent" 
  Foreground="White">
             <Button.Template>
                 <ControlTemplate TargetType="Button">
@@ -51,15 +52,15 @@
             </Button.Template>
             <Image Source="../../../Resources/arrow_right.gif" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
         </Button>
-        <TextBlock HorizontalAlignment="Left" Margin="210,10,0,0" Text="{x:Static src:Properties.Resources.boot_time_label_text}" Width="Auto" Grid.Row="0"/>
-        <TextBox HorizontalAlignment="Left" Margin="265,7,0,0" Name="textBox_bootTimeHH" VerticalAlignment="Top" HorizontalContentAlignment="Center" 
+        <TextBlock HorizontalAlignment="Left" Margin="214,10,0,0" Text="{x:Static src:Properties.Resources.boot_time_label_text}" Width="Auto" Grid.Row="0"/>
+        <TextBox HorizontalAlignment="Left" Margin="273,7,0,0" Name="textBox_bootTimeHH" VerticalAlignment="Top" HorizontalContentAlignment="Center" 
                  VerticalContentAlignment="Center" Text="" Width="50" Grid.Row="0" MaxLength="2"/>
-        <TextBlock HorizontalAlignment="Left" Margin="321,8,0,0" Text=":" Width="10" Grid.Row="0" FontWeight="ExtraBlack"/>
-        <TextBox HorizontalAlignment="Left" Margin="329,7,0,0" Name="textBox_bootTimeMI" VerticalAlignment="Top" HorizontalContentAlignment="Center" 
+        <TextBlock HorizontalAlignment="Left" Margin="329,8,0,0" Text=":" Width="10" Grid.Row="0" FontWeight="ExtraBlack"/>
+        <TextBox HorizontalAlignment="Left" Margin="337,7,0,0" Name="textBox_bootTimeMI" VerticalAlignment="Top" HorizontalContentAlignment="Center" 
                  VerticalContentAlignment="Center" Text="" Width="50"  Grid.Row="0" MaxLength="2"/>
-        <TextBlock HorizontalAlignment="Left" Margin="570,10,0,0" Text="{x:Static src:Properties.Resources.last_operation_day_label_text}" Width="Auto" Grid.Row="0"/>
+        <TextBlock HorizontalAlignment="Left" Margin="560,10,0,0" Text="{x:Static src:Properties.Resources.last_operation_day_label_text}" Width="Auto" Grid.Row="0"/>
         <TextBlock HorizontalAlignment="Left" Margin="670,10,0,0" Name="last_operation_day_value" Text="" Width="Auto" Grid.Row="0"/>
-        <Border Margin="0" Grid.Row="1" Grid.Column="0"  VerticalAlignment="Stretch" HorizontalAlignment="Stretch" BorderThickness="1" BorderBrush="Black">
+        <Border Margin="2" Grid.Row="1" Grid.Column="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" BorderThickness="1" BorderBrush="Black">
         <ScrollViewer HorizontalAlignment="Stretch"  Name="svContainer" VerticalAlignment="Stretch" HorizontalScrollBarVisibility="Visible">
             <ScrollViewer.Content>
                 <design:ScrollViewerWindowsFormsHost x:Name="winForm" HorizontalAlignment="Left" VerticalAlignment="Stretch"/>

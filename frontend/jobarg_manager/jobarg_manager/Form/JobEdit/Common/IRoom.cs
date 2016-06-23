@@ -110,7 +110,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
         void SetUnFocus();
 
         /// <summary>設定画面を表示</summary>
-        void ShowIconSetting();
+        void ShowIconSetting(bool isSetting);
 
         /// <summary>タイプよって連接点を取得</summary>
         Point GetHotspot(ConnectType hotspotType);

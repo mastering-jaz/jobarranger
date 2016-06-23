@@ -18,9 +18,9 @@
 **/
 
 /*
-** $Date:: 2013-04-22 16:38:33 +0900 #$
-** $Revision: 4446 $
-** $Author: ossinfra@FITECHLABS.CO.JP $
+** $Date:: 2013-10-11 10:26:38 +0900 #$
+** $Revision: 5276 $
+** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
 #include "common.h"
@@ -59,7 +59,7 @@ static char DEFAULT_CONFIG_FILE[] = SYSCONFDIR "/jobarg_agentd.conf";
 #endif
 
 /* application TITLE */
-const char title_message[] = "Job Arranger agent"
+const char title_message[] = "Job Arranger Agent"
 #if defined(_WIN64)
     " Win64"
 #elif defined(WIN32)
@@ -84,14 +84,14 @@ const char usage_message[] = "[-Vh]"
 /* application HELP message */
 const char *help_message[] = {
     "Options:",
-    "",
     "  -c --config <config-file>  Absolute path to the configuration file",
+    "",
+    "Other options:",
     "  -h --help                  Give this help",
     "  -V --version               Display version number",
 #ifdef _WINDOWS
     "",
     "Functions:",
-    "",
     "  -i --install          Install Job arranger agent as service",
     "  -d --uninstall        Uninstall Job arranger agent from service",
     "  -s --start            Start Job arranger agent service",
@@ -129,6 +129,45 @@ unsigned char daemon_type = ZBX_DAEMON_TYPE_AGENT;
 
 /******************************************************************************
  *                                                                            *
+ * Function: help_jobarg                                                      *
+ *                                                                            *
+ * Purpose: show the help message                                             *
+ *                                                                            *
+ * Return value:                                                              *
+ *                                                                            *
+ * Comments:                                                                  *
+ *                                                                            *
+ ******************************************************************************/
+void help_jobarg()
+{
+    const char **p = help_message;
+
+    usage();
+    printf("\n");
+
+    while (NULL != *p)
+        printf("%s\n", *p++);
+}
+
+/******************************************************************************
+ *                                                                            *
+ * Function: version_jobarg                                                   *
+ *                                                                            *
+ * Purpose: show the version of the application                               *
+ *                                                                            *
+ * Return value:                                                              *
+ *                                                                            *
+ * Comments:                                                                  *
+ *                                                                            *
+ ******************************************************************************/
+void version_jobarg()
+{
+    printf("%s v%s (revision %s) (%s)\n", title_message, JOBARG_VERSION, JOBARG_REVISION, JOBARG_REVDATE);
+    printf("Compilation time: %s %s\n", __DATE__, __TIME__);
+}
+
+/******************************************************************************
+ *                                                                            *
  * Function:                                                                  *
  *                                                                            *
  * Purpose:                                                                   *
@@ -146,20 +185,17 @@ static void parse_commandline(int argc, char **argv, ZBX_TASK_EX * t)
     t->task = ZBX_TASK_START;
 
     ch = '\0';
-    while ((char) EOF !=
-           (ch =
-            (char) zbx_getopt_long(argc, argv, shortopts, longopts,
-                                   NULL))) {
+    while ((char) EOF != (ch = (char) zbx_getopt_long(argc, argv, shortopts, longopts, NULL))) {
         switch (ch) {
         case 'c':
             CONFIG_FILE = strdup(zbx_optarg);
             break;
         case 'h':
-            help();
+            help_jobarg();
             exit(FAIL);
             break;
         case 'V':
-            version();
+            version_jobarg();
             exit(FAIL);
             break;
 #ifdef _WINDOWS
@@ -490,7 +526,7 @@ void zbx_on_exit()
 #endif
 
     zabbix_log(LOG_LEVEL_INFORMATION,
-               "Jobarg Agent stopped. Jobarg %s (revision %s).",
+               "Job Arranger Agent stopped. Job Arranger %s (revision %s).",
                JOBARG_VERSION, JOBARG_REVISION);
     zabbix_close_log();
     exit(SUCCEED);

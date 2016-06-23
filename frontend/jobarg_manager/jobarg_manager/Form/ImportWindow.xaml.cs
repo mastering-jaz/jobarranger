@@ -42,15 +42,17 @@ namespace jp.co.ftf.jobcontroller.JobController
     {
         #region フィールド
         private String TABLE_NAME_USER_INFO = "UserInfo";
+        public JobArrangerWindow _jobArrangerWindow;
         #endregion
 
         #region コンストラクタ
         /// <summary>
         /// コンストラクタ 
         /// </summary>
-        public ImportWindow()
+        public ImportWindow(JobArrangerWindow jobArrangerWindow)
         {
             InitializeComponent();
+            _jobArrangerWindow = jobArrangerWindow;
             DataContext = this;
         }
         #endregion
@@ -97,7 +99,7 @@ namespace jp.co.ftf.jobcontroller.JobController
             }
 
             // ファイルのフィルタを設定する
-            openFileDialog1.Filter = "XML File(*.xml)|*.xml";
+            openFileDialog1.Filter = "XML files (*.xml)|*.xml|All files (*.*)|*.*";
 
             // ファイルの種類 の初期設定を 2 番目に設定する (初期値 1)
             openFileDialog1.FilterIndex = 2;
@@ -186,6 +188,7 @@ namespace jp.co.ftf.jobcontroller.JobController
                     }
                     fs.Close();
                     Close();
+                    _jobArrangerWindow.RefreshObjectList();
                 }
                 catch (Exception ex1)
                 {
@@ -196,11 +199,34 @@ namespace jp.co.ftf.jobcontroller.JobController
                     fs.Close();
                 }
             }
+            catch (ArgumentException ex)
+            {
+                CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_019);
+            }
+            catch (NotSupportedException ex)
+            {
+                CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_019);
+            }
+            catch (DirectoryNotFoundException ex)
+            {
+                CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_022);
+            }
             catch (FileNotFoundException ex)
             {
                 CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_011);
             }
-
+            catch (UnauthorizedAccessException ex)
+            {
+                CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_023);
+            }
+            catch (System.IO.IOException ex)
+            {
+                CommonDialog.ShowErrorDialogFromMessage(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                CommonDialog.ShowErrorDialogFromMessage(ex.Message);
+            }
 
             // 終了ログ
             base.WriteEndLog("ok_Click", Consts.PROCESS_013);

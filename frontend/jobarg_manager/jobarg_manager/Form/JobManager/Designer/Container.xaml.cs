@@ -239,65 +239,68 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
 
         #region データ格納場所
 
-        /// <>ジョブネットアイコン設定テーブル</>
+        /// <summary>ジョブネットアイコン設定テーブル</summary>
         public DataTable JobnetControlTable { get; set; }
 
-        /// <>ジョブ管理テーブル</>
+        /// <summary>ジョブ管理テーブル</summary>
         public DataTable JobControlTable { get; set; }
 
-        /// <>フロー管理テーブル</>
+        /// <summary>フロー管理テーブル</summary>
         public DataTable FlowControlTable { get; set; }
 
-        /// <>計算アイコン設定テーブル</>
+        /// <summary>計算アイコン設定テーブル</summary>
         public DataTable IconCalcTable { get; set; }
 
-        /// <>終了アイコン設定テーブル</>
+        /// <summary>終了アイコン設定テーブル</summary>
         public DataTable IconEndTable { get; set; }
 
-        /// <>拡張ジョブアイコン設定テーブル</>
+        /// <summary>拡張ジョブアイコン設定テーブル</summary>
         public DataTable IconExtjobTable { get; set; }
 
-        // <>条件分岐アイコン設定テーブル</>
+        // <summary>条件分岐アイコン設定テーブル</summary>
         public DataTable IconIfTable { get; set; }
 
-        // <>情報取得アイコン設定テーブル</>
+        // <summary>情報取得アイコン設定テーブル</summary>
         public DataTable IconInfoTable { get; set; }
 
-        // <>ジョブネットアイコン設定テーブル</>
+        // <summary>ジョブネットアイコン設定テーブル</summary>
         public DataTable IconJobnetTable { get; set; }
 
-        // <>ジョブアイコン設定テーブル</>
+        // <summary>ジョブアイコン設定テーブル</summary>
         public DataTable IconJobTable { get; set; }
 
-        // <>ジョブコマンド設定テーブル</>
+        // <summary>ジョブコマンド設定テーブル</summary>
         public DataTable JobCommandTable { get; set; }
 
-        // <>ジョブ変数設定テーブル</>
+        // <summary>ジョブ変数設定テーブル</summary>
         public DataTable ValueJobTable { get; set; }
 
-        // <>ジョブコントローラ変数設定テーブル</>
+        // <summary>ジョブコントローラ変数設定テーブル</summary>
         public DataTable ValueJobConTable { get; set; }
 
-        // <>タスクアイコン設定テーブル</>
+        // <summary>タスクアイコン設定テーブル</summary>
         public DataTable IconTaskTable { get; set; }
 
-        // <>ジョブコントローラ変数アイコン設定テーブル</>
+        // <summary>ジョブコントローラ変数アイコン設定テーブル</summary>
         public DataTable IconValueTable { get; set; }
 
-        // <>ジョブコントローラ変数定義テーブル</>
+        // <summary>ジョブコントローラ変数定義テーブル</summary>
         public DataTable DefineValueJobconTable { get; set; }
 
-        // <>拡張ジョブ定義テーブル</>
+        // <summary>拡張ジョブ定義テーブル</summary>
         public DataTable DefineExtJobTable { get; set; }
 
-        // <>ファイル転送アイコン設定テーブル</>
+        // <summary>ファイル転送アイコン設定テーブル</summary>
         public DataTable IconFcopyTable { get; set; }
 
-        // <>ファイル待ち合わせアイコン設定テーブル</>
+        // <summary>ファイル待ち合わせアイコン設定テーブル</summary>
         public DataTable IconFwaitTable { get; set; }
 
-        // <>リブートアイコン設定テーブル</>
+        // <summary>リブートアイコン設定テーブル</summary>
         public DataTable IconRebootTable { get; set; }
+
+        // <summary>保留解除アイコン設定テーブル</summary>
+        public DataTable IconReleaseTable { get; set; }
 
         #endregion
 
@@ -468,16 +471,16 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
         /// <param name="sender">源</param>
         /// <param name="e">マウスイベント</param>
         //*******************************************************************
-        private void MenuitemReserve_Click(object sender, RoutedEventArgs e)
+        private void MenuitemHold_Click(object sender, RoutedEventArgs e)
         {
             // 開始ログ
-            ((jp.co.ftf.jobcontroller.JobController.Form.JobManager.JobnetExecDetail)ParantWindow).WriteStartLog("MenuitemReserve_Click", Consts.PROCESS_018);
+            ((jp.co.ftf.jobcontroller.JobController.Form.JobManager.JobnetExecDetail)ParantWindow).WriteStartLog("MenuitemHold_Click", Consts.PROCESS_018);
 
             List<System.Windows.Controls.Control> selectItems = CurrentSelectedControlCollection;
-            SetReserve((IRoom)selectItems[0]);
+            SetHold((IRoom)selectItems[0]);
 
             // 終了ログ
-            ((jp.co.ftf.jobcontroller.JobController.Form.JobManager.JobnetExecDetail)ParantWindow).WriteEndLog("MenuitemReserve_Click", Consts.PROCESS_018);
+            ((jp.co.ftf.jobcontroller.JobController.Form.JobManager.JobnetExecDetail)ParantWindow).WriteEndLog("MenuitemHold_Click", Consts.PROCESS_018);
         }
 
         //*******************************************************************
@@ -485,16 +488,16 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
         /// <param name="sender">源</param>
         /// <param name="e">マウスイベント</param>
         //*******************************************************************
-        private void MenuitemUnReserve_Click(object sender, RoutedEventArgs e)
+        private void MenuitemUnHold_Click(object sender, RoutedEventArgs e)
         {
             // 開始ログ
-            ((jp.co.ftf.jobcontroller.JobController.Form.JobManager.JobnetExecDetail)ParantWindow).WriteStartLog("MenuitemUnReserve_Click", Consts.PROCESS_019);
+            ((jp.co.ftf.jobcontroller.JobController.Form.JobManager.JobnetExecDetail)ParantWindow).WriteStartLog("MenuitemUnHold_Click", Consts.PROCESS_019);
 
             List<System.Windows.Controls.Control> selectItems = CurrentSelectedControlCollection;
-            SetUnReserve((IRoom)selectItems[0]);
+            SetUnHold((IRoom)selectItems[0]);
 
             // 終了ログ
-            ((jp.co.ftf.jobcontroller.JobController.Form.JobManager.JobnetExecDetail)ParantWindow).WriteEndLog("MenuitemUnReserve_Click", Consts.PROCESS_019);
+            ((jp.co.ftf.jobcontroller.JobController.Form.JobManager.JobnetExecDetail)ParantWindow).WriteEndLog("MenuitemUnHold_Click", Consts.PROCESS_019);
         }
 
         //*******************************************************************
@@ -893,8 +896,8 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
         //*******************************************************************
         private void SetContextStatus()
         {
-            menuitemReserve.IsEnabled = true;
-            menuitemUnReserve.IsEnabled = true;
+            menuitemHold.IsEnabled = true;
+            menuitemUnHold.IsEnabled = true;
             menuitemSkip.IsEnabled = true;
             menuitemUnSkip.IsEnabled = true;
             menuitemStop.IsEnabled = true;
@@ -903,8 +906,8 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
 
             //Viewerの場合
             #if VIEWER
-                menuitemReserve.IsEnabled = false;
-                menuitemUnReserve.IsEnabled = false;
+                menuitemHold.IsEnabled = false;
+                menuitemUnHold.IsEnabled = false;
                 menuitemSkip.IsEnabled = false;
                 menuitemUnSkip.IsEnabled = false;
                 menuitemStop.IsEnabled = false;
@@ -919,8 +922,8 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
                 || ((JobnetExecDetail)ParantWindow).JobnetRunStatus == RunJobStatusType.Normal
                 || ((JobnetExecDetail)ParantWindow).JobnetRunStatus == RunJobStatusType.Abnormal)
             {
-                menuitemReserve.IsEnabled = false;
-                menuitemUnReserve.IsEnabled = false;
+                menuitemHold.IsEnabled = false;
+                menuitemUnHold.IsEnabled = false;
                 menuitemSkip.IsEnabled = false;
                 menuitemUnSkip.IsEnabled = false;
                 menuitemStop.IsEnabled = false;
@@ -934,15 +937,15 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
             string job = item.InnerJobId;
             DataRow[] existJob = JobControlTable.Select("inner_job_id=" + job);
             // 保留可能判定 
-            if (!IsReserveEnable(item, existJob[0]))
+            if (!IsHoldEnable(item, existJob[0]))
             {
-                menuitemReserve.IsEnabled = false;
+                menuitemHold.IsEnabled = false;
             }
 
             // 保留解除可能判定 
-            if (!IsUnReserveEnable(item, existJob[0]))
+            if (!IsUnHoldEnable(item, existJob[0]))
             {
-                menuitemUnReserve.IsEnabled = false;
+                menuitemUnHold.IsEnabled = false;
             }
 
             // スキップ可能判定 
@@ -982,7 +985,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
         //*******************************************************************
         /// <>保留可能判定</>
         //*******************************************************************
-        private bool IsReserveEnable(IElement item, DataRow existJob)
+        private bool IsHoldEnable(IElement item, DataRow existJob)
         {
             // 開始アイコンの場合利用不可 
             if (item is Start)
@@ -992,7 +995,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
             if (!((RunJobStatusType)existJob["status"]).Equals(RunJobStatusType.None))
                 return false;
             //処理フラグが保留の場合利用不可 
-            if (((RunJobMethodType)existJob["method_flag"]).Equals(RunJobMethodType.RESERVE))
+            if (((RunJobMethodType)existJob["method_flag"]).Equals(RunJobMethodType.HOLD))
                 return false;
             return true;
         }
@@ -1000,11 +1003,11 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
         //*******************************************************************
         /// <>保留解除可能判定</>
         //*******************************************************************
-        private bool IsUnReserveEnable(IElement item, DataRow existJob)
+        private bool IsUnHoldEnable(IElement item, DataRow existJob)
         {
 
             //処理フラグが保留以外の場合利用不可 
-            if (!((RunJobMethodType)existJob["method_flag"]).Equals(RunJobMethodType.RESERVE))
+            if (!((RunJobMethodType)existJob["method_flag"]).Equals(RunJobMethodType.HOLD))
                 return false;
             //ステータスが未実行、実行準備以外の場合利用不可 
             if (!(((RunJobStatusType)existJob["status"]).Equals(RunJobStatusType.None) || ((RunJobStatusType)existJob["status"]).Equals(RunJobStatusType.Prepare)))
@@ -1063,7 +1066,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
         private bool IsReStartEnable(IElement item, DataRow existJob)
         {
             // ジョブ、拡張ジョブ、ファイル伝送アイコン以外の場合利用不可 
-            if (!(item is Job || item is ExtJob || item is FCopy || item is Reboot))
+            if (!(item is Job || item is ExtJob || item is FCopy || item is Reboot || item is Release))
                 return false;
 
             //ステータスが実行エラー以外の場合利用不可 
@@ -1083,7 +1086,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
 
             //ステータスが未実行＋処理フラグが保留かステータスが実行エラー以外の場合利用不可 
             if (!(((RunJobStatusType)existJob["status"]).Equals(RunJobStatusType.None) ||
-                    (((RunJobStatusType)existJob["status"]).Equals(RunJobStatusType.Prepare) && ((RunJobMethodType)existJob["method_flag"]).Equals(RunJobMethodType.RESERVE)) ||
+                    (((RunJobStatusType)existJob["status"]).Equals(RunJobStatusType.Prepare) && ((RunJobMethodType)existJob["method_flag"]).Equals(RunJobMethodType.HOLD)) ||
                     ((RunJobStatusType)existJob["status"]).Equals(RunJobStatusType.RunErr)))
                 return false;
             return true;
@@ -1091,7 +1094,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
         //*******************************************************************
         /// <>保留処理</>
         //*******************************************************************
-        private void SetReserve(IRoom room)
+        private void SetHold(IRoom room)
         {
             String jobId = room.ContentItem.InnerJobId;
             //トランザクション開始
@@ -1101,7 +1104,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
             DataRow row = dt.Rows[0];
             if (((RunJobStatusType)row["status"]).Equals(RunJobStatusType.None))
             {
-                row["method_flag"] = (int)RunJobMethodType.RESERVE;
+                row["method_flag"] = (int)RunJobMethodType.HOLD;
                 _dbAccess.ExecuteNonQuery(dt, _runJobControlDAO);
             }
             _dbAccess.TransactionCommit();
@@ -1112,7 +1115,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
         //*******************************************************************
         /// <>保留解除処理</>
         //*******************************************************************
-        private void SetUnReserve(IRoom room)
+        private void SetUnHold(IRoom room)
         {
             String jobId = room.ContentItem.InnerJobId;
             //トランザクション開始
@@ -1120,7 +1123,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
             _dbAccess.BeginTransaction();
             DataTable dt = _runJobControlDAO.GetEntityByPkForUpdate(jobId);
             DataRow row = dt.Rows[0];
-            if ((((RunJobStatusType)row["status"]).Equals(RunJobStatusType.None) || ((RunJobStatusType)row["status"]).Equals(RunJobStatusType.Prepare)) && ((RunJobMethodType)row["method_flag"]).Equals(RunJobMethodType.RESERVE))
+            if ((((RunJobStatusType)row["status"]).Equals(RunJobStatusType.None) || ((RunJobStatusType)row["status"]).Equals(RunJobStatusType.Prepare)) && ((RunJobMethodType)row["method_flag"]).Equals(RunJobMethodType.HOLD))
             {
                 row["method_flag"] = (int)RunJobMethodType.NORMAL;
                 _dbAccess.ExecuteNonQuery(dt, _runJobControlDAO);
@@ -1211,7 +1214,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
             if (((RunJobStatusType)row["status"]).Equals(RunJobStatusType.RunErr))
             {
                 row["status"] = (int)RunJobStatusType.Prepare;
-                row["method_flag"] = (int)RunJobMethodType.NORMAL;
+                row["method_flag"] = (int)RunJobMethodType.RERUN;
                 _dbAccess.ExecuteNonQuery(dt, _runJobControlDAO);
             }
             _dbAccess.TransactionCommit();
@@ -1227,15 +1230,35 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
             _dbAccess.CreateSqlConnect();
             DataTable dt = _runJobControlDAO.GetEntityByPk(jobId);
             DataRow row = dt.Rows[0];
+            _dbAccess.CloseSqlConnect();
             if (((RunJobStatusType)row["status"]).Equals(RunJobStatusType.None) ||
-                (((RunJobStatusType)row["status"]).Equals(RunJobStatusType.Prepare) && ((RunJobMethodType)row["method_flag"]).Equals(RunJobMethodType.RESERVE)) ||
+                (((RunJobStatusType)row["status"]).Equals(RunJobStatusType.Prepare) && ((RunJobMethodType)row["method_flag"]).Equals(RunJobMethodType.HOLD)) ||
                 ((RunJobStatusType)row["status"]).Equals(RunJobStatusType.RunErr))
             {
                 ParameterSetting paremeterSetting = new ParameterSetting(room);
-                paremeterSetting.ShowDialog();
+                paremeterSetting.Owner = (Window)ParantWindow;
+                var parent = paremeterSetting.Owner;
+
+                EventHandler parentDeactivate = (_, __) => { paremeterSetting.Activate(); };
+                parent.Activated += parentDeactivate;
+
+                RoutedEventHandler window_Loaded = (_, __) => { 
+                    ((jp.co.ftf.jobcontroller.JobController.Form.JobManager.JobnetExecDetail)parent).IsHitTestVisible = false; 
+                };
+                EventHandler window_Closed = (_, __) => { 
+                    ((jp.co.ftf.jobcontroller.JobController.Form.JobManager.JobnetExecDetail)parent).IsHitTestVisible = true;
+                    parent.Activated -= parentDeactivate; 
+                };
+                paremeterSetting.Loaded += window_Loaded;
+                paremeterSetting.Closed += window_Closed;
+                paremeterSetting.Show();
             }
-            _dbAccess.CloseSqlConnect();
         }
+
+        private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            e.Cancel = true;
+        } 
 
         //*******************************************************************
         /// <>変数値表示処理</>
@@ -1246,9 +1269,25 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
             _dbAccess.CreateSqlConnect();
             DataTable dt = _runJobControlDAO.GetEntityByPk(jobId);
             DataRow row = dt.Rows[0];
-            ParameterView paremeterView = new ParameterView(room);
-            paremeterView.ShowDialog();
             _dbAccess.CloseSqlConnect();
+            ParameterView paremeterView = new ParameterView(room);
+            paremeterView.Owner = (Window)ParantWindow;
+            var parent = paremeterView.Owner;
+
+            EventHandler parentDeactivate = (_, __) => { paremeterView.Activate(); };
+            parent.Activated += parentDeactivate;
+
+            RoutedEventHandler window_Loaded = (_, __) => {
+                paremeterView.Activate();
+                ((jp.co.ftf.jobcontroller.JobController.Form.JobManager.JobnetExecDetail)parent).IsHitTestVisible = false; };
+            EventHandler window_Closed = (_, __) => { 
+                ((jp.co.ftf.jobcontroller.JobController.Form.JobManager.JobnetExecDetail)parent).IsHitTestVisible = true;
+                parent.Activated -= parentDeactivate; 
+            };
+            paremeterView.Loaded += window_Loaded;
+            paremeterView.Closed += window_Closed;
+            paremeterView.Show();
+
         }
 
 
@@ -1376,9 +1415,13 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
                 case ElementType.FWAIT:
                     rows = IconFwaitTable.Select(where);
                     break;
-                // 15:リブートの場合 
+                // 16:リブートの場合 
                 case ElementType.REBOOT:
                     rows = IconRebootTable.Select(where);
+                    break;
+                // 17:保留解除の場合 
+                case ElementType.RELEASE:
+                    rows = IconReleaseTable.Select(where);
                     break;
             }
             // 削除 

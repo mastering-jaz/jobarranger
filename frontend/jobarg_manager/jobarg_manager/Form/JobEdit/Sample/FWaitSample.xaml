@@ -24,20 +24,28 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:src="clr-namespace:jp.co.ftf.jobcontroller.JobController" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             >
-    <Canvas x:Name="LayoutRoot"    Background="Transparent" >
+             FontSize="11" FontFamily="Meiryo">
+    <Canvas x:Name="LayoutRoot" Background="Transparent" >
 
-        <Path Stroke="Black" StrokeThickness="1" Data="M 0,4 A 35,4 180 0 1 70,4 L 70,4 V 21 A 35,4 180 0 1 0,21 L 0,21 V 4" Fill="White"/>
-
-        <Polyline Name="picInfo" Points="50,7 50,17 60,17 60,21 70,12 60,3 60,7 50,7"
-                  Canvas.Top="0" Canvas.Left="0"
-                  Stroke="DimGray" StrokeThickness="1" >
-        </Polyline>
-
-        <TextBlock   Canvas.ZIndex="101" Name="tbJobName" Foreground="Black" FontSize="11" Text="{x:Static src:Properties.Resources.file_wait_icon_label_text}"    
+        <Path Stroke="Black" Fill="White" StrokeThickness="1">
+            <Path.Data>
+                <PathGeometry>
+                    <PathFigure StartPoint="0,0" IsClosed="False">
+                        <LineSegment Point="75,0"/>
+                        <LineSegment Point="75,23"/>
+                        <BezierSegment Point1="42,20" Point2="13,29" Point3="0,24"/>
+                        <LineSegment Point="0,0"/>
+                    </PathFigure>
+                </PathGeometry>
+            </Path.Data>
+        </Path>
+        <Ellipse Canvas.Top="15" Canvas.Left="60" Height="14" Width="14" Fill="White" StrokeThickness="1" Stroke="Black" />
+        <Label FontSize="9" FontWeight="Bold" Content="W" Canvas.Top="11" Canvas.Left="58" Foreground="Black"/>
+       
+        <TextBlock   Canvas.ZIndex="101" Name="tbJobName" Foreground="Black" FontSize="10" Text="{x:Static src:Properties.Resources.file_wait_icon_label_text}"    
                      VerticalAlignment="Center" HorizontalAlignment="Center" TextWrapping="Wrap"  MaxWidth="90"
-                     Height="15" Width="50"  Canvas.Left="0" Canvas.Top="8"
-                     FontWeight="Normal" TextAlignment="Center" FontFamily="MS Gothic">
+                     Height="15" Width="70"  Canvas.Left="3" Canvas.Top="4"
+                     FontWeight="Normal" TextAlignment="Center">
         </TextBlock>
 
     </Canvas>

@@ -302,10 +302,11 @@ CONSTRAINT ja_define_value_jobcon_pk PRIMARY KEY (value_name)
 
 CREATE TABLE ja_define_extjob_table (
         command_id                      varchar(32)              DEFAULT ''      NOT NULL,
+        lang                            varchar(5)               DEFAULT ''      NOT NULL,
         command_name                    varchar(128)             DEFAULT ''      NOT NULL,
         memo                            text                     DEFAULT ''      NOT NULL,
         created_date                    timestamp                DEFAULT CURRENT_TIMESTAMP  NOT NULL,
-CONSTRAINT ja_define_extjob_pk PRIMARY KEY (command_id)
+CONSTRAINT ja_define_extjob_pk PRIMARY KEY (command_id, lang)
 );
 
 
@@ -330,6 +331,7 @@ CREATE TABLE ja_run_jobnet_summary_table (
         schedule_id                     varchar(32)                              NULL,
         calendar_id                     varchar(32)                              NULL,
         boot_time                       char(4)                                  NULL,
+        execution_user_name             varchar(100)             DEFAULT ''      NOT NULL,
 CONSTRAINT ja_run_jobnet_summary_pk PRIMARY KEY (inner_jobnet_id)
 );
 
@@ -359,6 +361,7 @@ CREATE TABLE ja_run_jobnet_table (
         schedule_id                     varchar(32)                              NULL,
         calendar_id                     varchar(32)                              NULL,
         boot_time                       char(4)                                  NULL,
+        execution_user_name             varchar(100)             DEFAULT ''      NOT NULL,
 CONSTRAINT ja_run_jobnet_pk PRIMARY KEY (inner_jobnet_id)
 );
 

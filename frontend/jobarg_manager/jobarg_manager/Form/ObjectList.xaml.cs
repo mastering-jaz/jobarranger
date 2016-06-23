@@ -26,6 +26,9 @@ using System.Data;
 using System.Windows.Controls;
 using jp.co.ftf.jobcontroller.JobController.Form.JobEdit;
 using jp.co.ftf.jobcontroller.Common;
+using jp.co.ftf.jobcontroller.JobController.Form.CalendarEdit;
+using jp.co.ftf.jobcontroller.JobController.Form.ScheduleEdit;
+using jp.co.ftf.jobcontroller.JobController.Form.JobEdit;
 
 namespace jp.co.ftf.jobcontroller.JobController
 {
@@ -357,6 +360,51 @@ namespace jp.co.ftf.jobcontroller.JobController
             }
         }
 
+        //*******************************************************************
+        /// <summary>新規追加メニュークリック</summary>
+        /// <param name="sender">源</param>
+        /// <param name="e">イベント</param>
+        //*******************************************************************
+        private void MenuitemAdd_Click(object sender, RoutedEventArgs e)
+        {
+            // 開始ログ
+            base.WriteStartLog("MenuitemAdd_Click", Consts.PROCESS_003);
+
+            DadWindow.ObjectEdit = null;
+
+            if (_objectType != null)
+            {
+                switch (_objectType)
+                {
+                    case Consts.ObjectEnum.CALENDAR:
+                        DadWindow.ObjectEdit = new CalendarEdit(DadWindow);
+                        break;
+
+                    case Consts.ObjectEnum.SCHEDULE:
+                        DadWindow.ObjectEdit = new ScheduleEdit(DadWindow);
+                        break;
+
+                    case Consts.ObjectEnum.JOBNET:
+                        DadWindow.ObjectEdit = new JobEdit(DadWindow);
+                        break;
+                }
+            }
+            else
+            {
+                DadWindow.ObjectEdit = new CalendarEdit(DadWindow);
+            }
+            if (DadWindow.ObjectEdit.SuccessFlg)
+            {
+                DadWindow.ClearGridContent();
+
+                DadWindow.JobNetGrid.Children.Add(DadWindow.ObjectEdit);
+
+                DadWindow.Title = MessageUtil.GetMsgById(DadWindow.ObjectEdit.GamenId) + " - " + LoginSetting.JobconName;
+            }
+            // 終了ログ
+            base.WriteEndLog("MenuitemAdd_Click", Consts.PROCESS_003);
+        }
+
 
         /// <summary>オブジェクトを編集</summary>
         /// <param name="sender"></param>
@@ -454,7 +502,22 @@ namespace jp.co.ftf.jobcontroller.JobController
                 }
             }
 
-            DBUtil.SetObjectValid(_objectId, updDate, _objectType);
+            try
+            {
+                DBUtil.SetObjectValid(_objectId, updDate, _objectType);
+            }
+            catch (DBException ex)
+            {
+                if (ex.MessageID.Equals(Consts.ERROR_DB_LOCK))
+                {
+                    CommonDialog.ShowErrorDialog(Consts.ERROR_DB_LOCK);
+                }
+                else
+                {
+                    throw ex;
+                }
+            }
+
             SetList();
 
             // 終了ログ
@@ -468,8 +531,21 @@ namespace jp.co.ftf.jobcontroller.JobController
         {
             // 開始ログ
             base.WriteStartLog("MenuitemInValid_Click", Consts.PROCESS_008);
-
-            DBUtil.SetObjectsInValid(_objectId, _objectType, GetSelectedRows());
+            try
+            {
+                DBUtil.SetObjectsInValid(_objectId, _objectType, GetSelectedRows());
+            }
+            catch (DBException ex)
+            {
+                if (ex.MessageID.Equals(Consts.ERROR_DB_LOCK))
+                {
+                    CommonDialog.ShowErrorDialog(Consts.ERROR_DB_LOCK);
+                }
+                else
+                {
+                    throw ex;
+                }
+            }
             SetList();
 
             // 終了ログ
@@ -516,6 +592,11 @@ namespace jp.co.ftf.jobcontroller.JobController
         /// <param name="rows">選択されたオブジェクトデータ</param>
         public void DelObject(String objectId, Consts.ObjectEnum objectType, DataRow[] rows)
         {
+            if (!DBUtil.CheckForRelation4Del(objectId, objectType, rows))
+            {
+                CommonDialog.ShowErrorDialog(Consts.MSG_COMMON_007);
+                return;
+            }
             MessageBoxResult result = CommonDialog.ShowDeleteDialog();
             if (result == MessageBoxResult.Yes)
             {
@@ -523,14 +604,23 @@ namespace jp.co.ftf.jobcontroller.JobController
                 DataTable dt = DBUtil.GetObjectsById(objectId, objectType);
                 if (dt.Rows.Count > 0 && (Int32)(dt.Rows[0]["public_flag"]) == 1)
                     publicFlag = true;
-                if (DBUtil.DelObject(objectId, objectType, rows))
+                try
                 {
+                    DBUtil.DelObject(objectId, objectType, rows);
                     SetList();
                     DadWindow.SetTreeObject(publicFlag, objectType, objectId);
+
                 }
-                else
+                catch (DBException e)
                 {
-                    CommonDialog.ShowErrorDialog(Consts.MSG_COMMON_007);
+                    if (e.MessageID.Equals(Consts.ERROR_DB_LOCK))
+                    {
+                        CommonDialog.ShowErrorDialog(Consts.ERROR_DB_LOCK);
+                    }
+                    else
+                    {
+                        throw e;
+                    }
                 }
             }
         }
@@ -611,6 +701,7 @@ namespace jp.co.ftf.jobcontroller.JobController
 
         private void SetContextStatus()
         {
+            menuitemAdd.IsEnabled = true;
             menuitemEdit.IsEnabled = true;
             menuitemCopyNew.IsEnabled = true;
             menuitemCopyVer.IsEnabled = true;
@@ -618,6 +709,15 @@ namespace jp.co.ftf.jobcontroller.JobController
             menuitemInValid.IsEnabled = true;
             menuitemDel.IsEnabled = true;
             menuitemExport.IsEnabled = true;
+
+            if (LoginSetting.Mode == Consts.ActionMode.USE)
+            {
+                menuitemAdd.IsEnabled = false;
+                menuitemEdit.IsEnabled = false;
+                menuitemCopyNew.IsEnabled = false;
+                menuitemCopyVer.IsEnabled = false;
+                menuitemDel.IsEnabled = false;
+            }
 
             if (dgObject.SelectedItems.Count < 1)
             {
@@ -630,13 +730,7 @@ namespace jp.co.ftf.jobcontroller.JobController
                 menuitemExport.IsEnabled = false;
                 return;
             }
-            if (LoginSetting.Mode == Consts.ActionMode.USE)
-            {
-                menuitemEdit.IsEnabled = false;
-                menuitemCopyNew.IsEnabled = false;
-                menuitemCopyVer.IsEnabled = false;
-                menuitemDel.IsEnabled = false;
-            }
+
             if (_objectOwnType == Consts.ObjectOwnType.Other && !(LoginSetting.Authority == Consts.AuthorityEnum.SUPER))
             {
                 menuitemEdit.IsEnabled = false;
@@ -729,6 +823,8 @@ namespace jp.co.ftf.jobcontroller.JobController
                     case ElementType.FWAIT:
                     // リブートアイコン 
                     case ElementType.REBOOT:
+                    // 保留解除アイコン 
+                    case ElementType.RELEASE:
                         {
                             // INフローの本数≠1、またはOUTフローの本数≠1の場合 
                             if (inFlowNum != 1 || outFlowNum != 1)

@@ -24,7 +24,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:src="clr-namespace:jp.co.ftf.jobcontroller.JobController"
-             mc:Ignorable="d">
+             mc:Ignorable="d" FontSize="11" FontFamily="Meiryo">
     
     <UserControl.Resources>
         <src:FlagConverter x:Key="FlagConverter"/>
@@ -41,9 +41,8 @@
                   PreviewMouseRightButtonDown="dgObject_PreviewMouseRightButtonDown" 
                   KeyboardNavigation.TabNavigation="Once" >
             <DataGrid.Columns>
-                <DataGridTextColumn Header="{x:Static src:Properties.Resources.valid_col_head_text}" CellStyle="{StaticResource CenterDataListCellStyle}" Binding="{Binding Path=valid_flag, Converter={StaticResource FlagConverter}}" Width="Auto"
-                                    FontFamily="MS Gothic" />
-                <DataGridTextColumn Header="{x:Static src:Properties.Resources.update_date_col_head_text}" Binding="{Binding Path=update_date, Converter={StaticResource DateConverter}}" Width="Auto" FontFamily="MS Gothic" >
+                <DataGridTextColumn Header="{x:Static src:Properties.Resources.valid_col_head_text}" CellStyle="{StaticResource CenterDataListCellStyle}" Binding="{Binding Path=valid_flag, Converter={StaticResource FlagConverter}}" Width="Auto"/>
+                <DataGridTextColumn Header="{x:Static src:Properties.Resources.update_date_col_head_text}" Binding="{Binding Path=update_date, Converter={StaticResource DateConverter}}" Width="Auto">
                     <DataGridTextColumn.CellStyle>
                         <Style TargetType="{x:Type DataGridCell}">
                             <Setter Property="VerticalAlignment" Value="Stretch"/>
@@ -102,7 +101,6 @@
                 <DataGridTextColumn Header="{x:Static src:Properties.Resources.object_id_col_head_text}" Binding="{Binding Path=object_id}" Width="Auto" >
                     <DataGridTextColumn.CellStyle>
                         <Style TargetType="{x:Type DataGridCell}">
-                            <Setter Property="FontFamily" Value="MS Gothic"/>
                             <Setter Property="VerticalAlignment" Value="Stretch"/>
                             <Setter Property="VerticalContentAlignment" Value="Center"/>
                             <Setter Property="Template">
@@ -158,7 +156,7 @@
 
             <DataGrid.ContextMenu>
                 <ContextMenu Opened="ContextMenu_Open" Name="contextMenu">
-                    <MenuItem Header="{x:Static src:Properties.Resources.new_context_menu_text}"  Name="menuitemAdd" IsEnabled="False"></MenuItem>
+                    <MenuItem Header="{x:Static src:Properties.Resources.new_context_menu_text}"  Name="menuitemAdd" Click="MenuitemAdd_Click"></MenuItem>
                     <MenuItem Header="{x:Static src:Properties.Resources.copy_new_context_menu_text}"  Name="menuitemCopyNew" Click="MenuitemCopyNew_Click"></MenuItem>
                     <MenuItem Header="{x:Static src:Properties.Resources.update_context_menu_text}"  Name="menuitemEdit" Click="MenuitemEdit_Click"></MenuItem>
                     <MenuItem Header="{x:Static src:Properties.Resources.new_version_context_menu_text}"  Name="menuitemCopyVer" Click="MenuitemCopyVer_Click"></MenuItem> 　　　　　

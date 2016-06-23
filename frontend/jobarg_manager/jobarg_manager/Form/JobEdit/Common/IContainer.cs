@@ -138,6 +138,9 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
         // <summary>リブート設定テーブル</summary>
         DataTable IconRebootTable { get; set; }
 
+        // <summary>保留解除アイコン設定テーブル</summary>
+        DataTable IconReleaseTable { get; set; }
+
         #endregion
 
         #endregion

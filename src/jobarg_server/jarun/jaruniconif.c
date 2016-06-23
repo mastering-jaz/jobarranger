@@ -18,9 +18,9 @@
 **/
 
 /*
-** $Date:: 2013-05-17 16:53:37 +0900 #$
-** $Revision: 4641 $
-** $Author: ossinfra@FITECHLABS.CO.JP $
+** $Date:: 2013-12-16 18:11:48 +0900 #$
+** $Revision: 5633 $
+** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
 #include "common.h"
@@ -119,10 +119,14 @@ int jarun_icon_if(const zbx_uint64_t inner_job_id, const int test_flag)
                    __function_name, inner_job_id);
         } else {
             comp = jarun_icon_if_comp(atoi(row[0]), row[2], row[1]);
-            if (comp == 0)
+            if (comp == 0) {
                 flow_type = JA_FLOW_TYPE_FALSE;
-            else if (comp == 1)
+            } else if (comp == 1) {
                 flow_type = JA_FLOW_TYPE_TRUE;
+            } else {
+                ja_log("JARUNICONIF200004", 0, NULL, inner_job_id,
+                       __function_name, row[0], row[1], row[2], inner_job_id);
+            }
         }
     } else {
         ja_log("JARUNICONIF200003", 0, NULL, inner_job_id, __function_name,

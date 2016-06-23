@@ -114,6 +114,12 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
         /// <summary> 実行リブートアイコン設定テーブル </summary>
         private RunIconRebootDAO _runIconRebootDAO;
 
+        /// <summary> 実行保留解除アイコン設定テーブル </summary>
+        private RunIconReleaseDAO _runIconReleaseDAO;
+
+        /// <summary>実行ジョブネットサマリ管理テーブル</summary>
+        public DataTable RunJobnetSummaryTable { get; set; }
+
         /// <summary> DispatcherTimer </summary>
         public DispatcherTimer dispatcherTimer;
 
@@ -137,7 +143,6 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
             else
                 _successFlg = false;
 
-            //this.LostFocus += new RoutedEventHandler(Window_LostFocus);
             _needFocus = needFocus;
 
         }
@@ -263,7 +268,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
         private void UserControl_MouseDoubleClick4Read(object sender, MouseButtonEventArgs e)
         {
             CommonItem room = (CommonItem)sender;
-            room.ShowIconSetting();
+            room.ShowIconSetting(false);
         }
 
         /// <summary>フォーカスロス</summary>
@@ -289,22 +294,6 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
         private void Window_GotKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
         {
             this.Topmost = false;
-        }
-
-        /// <summary>フォーカスロス</summary>
-        /// <param name="sender">源</param>
-        /// <param name="e">イベント</param>
-        private void Window_LostFocus(object sender, EventArgs e)
-        {
-            this.Topmost = false;
-        }
-
-        /// <summary>フォーカス取得</summary>
-        /// <param name="sender">源</param>
-        /// <param name="e">イベント</param>
-        private void Window_GotFocus(object sender, EventArgs e)
-        {
-            this.Topmost = true;
         }
         #endregion
 
@@ -417,6 +406,9 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
 
             /// 実行リブートアイコン設定テーブル 
             _runIconRebootDAO = new RunIconRebootDAO(_dbAccess);
+
+            /// 実行リブートアイコン設定テーブル 
+            _runIconReleaseDAO = new RunIconReleaseDAO(_dbAccess);
         }
 
 
@@ -428,8 +420,8 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
         //*******************************************************************
         private void FillTables(string innerJobnetId)
         {
-            DataTable dt = _runJobnetSummaryDAO.GetEntityByPk(innerJobnetId);
-            if (dt.Rows.Count > 0) JobnetRunStatus = (RunJobStatusType)dt.Rows[0]["status"];
+            RunJobnetSummaryTable = _runJobnetSummaryDAO.GetEntityByPk(innerJobnetId);
+            if (RunJobnetSummaryTable.Rows.Count > 0) JobnetRunStatus = (RunJobStatusType)RunJobnetSummaryTable.Rows[0]["status"];
             // 実行ジョブネット管理テーブル 
             container.JobnetControlTable = _runJobnetDAO.GetEntityByPk(innerJobnetId);
 
@@ -483,6 +475,9 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
 
             // 実行リブートアイコン設定テーブル 
             container.IconRebootTable = _runIconRebootDAO.GetEntityByJobnet(innerJobnetId);
+
+            // 実行保留解除アイコン設定テーブル 
+            container.IconReleaseTable = _runIconReleaseDAO.GetEntityByJobnet(innerJobnetId);
 
         }
 
@@ -588,6 +583,31 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
         //*******************************************************************
         private void SetInfoArea()
         {
+            lblManageId.Text = Convert.ToString(container.JobnetControlTable.Rows[0]["inner_jobnet_id"]);
+            if (Convert.ToDecimal(container.JobnetControlTable.Rows[0]["scheduled_time"]) > 0)
+            {
+                lblScheduledTime.Text = ConvertUtil.ConverIntYYYYMMDDHHMI2Date(Convert.ToDecimal(container.JobnetControlTable.Rows[0]["scheduled_time"])).ToString("yyyy/MM/dd HH:mm:ss");
+            }
+            else
+            {
+                lblScheduledTime.Text = "";
+            }
+            if (Convert.ToDecimal(container.JobnetControlTable.Rows[0]["start_time"]) > 0)
+            {
+                lblStartTime.Text = ConvertUtil.ConverIntYYYYMMDDHHMISS2Date(Convert.ToDecimal(container.JobnetControlTable.Rows[0]["start_time"])).ToString("yyyy/MM/dd HH:mm:ss");
+            }
+            else
+            {
+                lblStartTime.Text = "";
+            }
+            if (Convert.ToDecimal(container.JobnetControlTable.Rows[0]["end_time"]) > 0)
+            {
+                lblEndTime.Text = ConvertUtil.ConverIntYYYYMMDDHHMISS2Date(Convert.ToDecimal(container.JobnetControlTable.Rows[0]["end_time"])).ToString("yyyy/MM/dd HH:mm:ss");
+            }
+            else
+            {
+                lblEndTime.Text = "";
+            }
             DataRow row = container.JobnetControlTable.Select()[0];
             // 実行ジョブネットIDをセット 
             lblJobNetId.Text = Convert.ToString(row["jobnet_id"]);
@@ -605,7 +625,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
             // 説明 
             lblComment.Text = Convert.ToString(row["memo"]);
             //更新日
-            lblUpdDate.Text = (ConvertUtil.ConverIntYYYYMMDDHHMISS2Date(Convert.ToInt64(row["update_date"]))).ToString();
+            lblUpdDate.Text = (ConvertUtil.ConverIntYYYYMMDDHHMISS2Date(Convert.ToInt64(row["update_date"]))).ToString("yyyy/MM/dd HH:mm:ss");
             //ユーザー名
             lblUserName.Text = Convert.ToString(row["user_name"]);
         }
@@ -623,11 +643,11 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
             switch ((RunJobStatusType)row["status"])
             {
                 case RunJobStatusType.None:
-                    if (method_flag.Equals(RunJobMethodType.RESERVE)) color = new SolidColorBrush(Colors.SteelBlue);
+                    if (method_flag.Equals(RunJobMethodType.HOLD)) color = new SolidColorBrush(Colors.MediumOrchid);
                     if (method_flag.Equals(RunJobMethodType.SKIP)) color = new SolidColorBrush(Colors.Gray);
                     break;
                 case RunJobStatusType.Prepare:
-                    if (method_flag.Equals(RunJobMethodType.RESERVE)) color = new SolidColorBrush(Colors.SteelBlue);
+                    if (method_flag.Equals(RunJobMethodType.HOLD)) color = new SolidColorBrush(Colors.MediumOrchid);
                     if (method_flag.Equals(RunJobMethodType.SKIP)) color = new SolidColorBrush(Colors.Gray);
                     break;
                 case RunJobStatusType.During:

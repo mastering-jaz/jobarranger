@@ -23,7 +23,8 @@ if %file_wait_time% gtr 0 if %i% geq %file_wait_time% (
 )
 
 if not exist "%filename%" (
-    ping -n 2 localhost > NUL
+    timeout /t 1 > NUL
+rem    ping -n 2 localhost > NUL
     set /a i=i+1
     goto LOOP
 )

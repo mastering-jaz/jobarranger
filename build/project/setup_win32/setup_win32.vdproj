@@ -21,6 +21,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_18BFFAA514B89939ACA136CE976C8D6F"
+        "OwnerKey" = "8:_D14943851881443491FCB66590F760AB"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_21928728EE974A2D8A44737132979722"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -28,6 +34,12 @@
         "Entry"
         {
         "MsmKey" = "8:_30C20E09D2E54034BB0EA7B2E6E71CA3"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_41C41639293B4750B4E60F166E963593"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -51,6 +63,18 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_BC63E771FA8A4457846FA7F819A92F4E"
+        "OwnerKey" = "8:_D14943851881443491FCB66590F760AB"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_D14943851881443491FCB66590F760AB"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_DE6A8226485D439496B916CB53C5D265"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -69,7 +93,7 @@
         "DisplayName" = "8:Debug"
         "IsDebugOnly" = "11:TRUE"
         "IsReleaseOnly" = "11:FALSE"
-        "OutputFilename" = "8:Debug\\Job Arranger Agent.msi"
+        "OutputFilename" = "8:Debug\\Job_Arranger_Agent_x86.msi"
         "PackageFilesAs" = "3:2"
         "PackageFileSize" = "3:-2147483648"
         "CabType" = "3:1"
@@ -88,14 +112,9 @@
             "ComponentsUrl" = "8:"
                 "Items"
                 {
-                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.0,Profile=Client"
-                    {
-                    "Name" = "8:Microsoft .NET Framework 4 Client Profile (x86 and x64)"
-                    "ProductCode" = "8:.NETFramework,Version=v4.0,Profile=Client"
-                    }
                     "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:Microsoft.Windows.Installer.3.1"
                     {
-                    "Name" = "8:Windows Installer 3.1"
+                    "Name" = "8:Windows インストーラー 3.1"
                     "ProductCode" = "8:Microsoft.Windows.Installer.3.1"
                     }
                 }
@@ -106,7 +125,7 @@
         "DisplayName" = "8:Release"
         "IsDebugOnly" = "11:FALSE"
         "IsReleaseOnly" = "11:TRUE"
-        "OutputFilename" = "8:Release\\Job Arranger Agent.msi"
+        "OutputFilename" = "8:Release\\Job_Arranger_Agent_x86.msi"
         "PackageFilesAs" = "3:2"
         "PackageFileSize" = "3:-2147483648"
         "CabType" = "3:1"
@@ -125,14 +144,9 @@
             "ComponentsUrl" = "8:"
                 "Items"
                 {
-                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.0,Profile=Client"
-                    {
-                    "Name" = "8:Microsoft .NET Framework 4 Client Profile (x86 and x64)"
-                    "ProductCode" = "8:.NETFramework,Version=v4.0,Profile=Client"
-                    }
                     "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:Microsoft.Windows.Installer.3.1"
                     {
-                    "Name" = "8:Windows Installer 3.1"
+                    "Name" = "8:Windows インストーラー 3.1"
                     "ProductCode" = "8:Microsoft.Windows.Installer.3.1"
                     }
                 }
@@ -152,7 +166,7 @@
             "InstallAction" = "3:4"
             "Arguments" = "8:--uninstall --config \"[TARGETDIR]\\conf\\jobarg_agentd.conf\""
             "EntryPoint" = "8:"
-            "Sequence" = "3:1"
+            "Sequence" = "3:2"
             "Identifier" = "8:_6E88A38A_D278_4528_9D50_B54D14A8A7F3"
             "InstallerClass" = "11:FALSE"
             "CustomActionData" = "8:"
@@ -168,6 +182,34 @@
             "EntryPoint" = "8:"
             "Sequence" = "3:1"
             "Identifier" = "8:_BEBD5F46_DCAB_4258_ACC3_2A1221AAA182"
+            "InstallerClass" = "11:FALSE"
+            "CustomActionData" = "8:"
+            }
+            "{4AA51A2D-7D85-4A59-BA75-B0809FC8B380}:_719DF8AC320046D2B0DFB95276C09B55"
+            {
+            "Name" = "8:Installer (Release Win32) の プライマリ出力"
+            "Condition" = "8:"
+            "Object" = "8:_D14943851881443491FCB66590F760AB"
+            "FileType" = "3:1"
+            "InstallAction" = "3:2"
+            "Arguments" = "8:"
+            "EntryPoint" = "8:InstallerCommit"
+            "Sequence" = "3:1"
+            "Identifier" = "8:_3AA1D133_8F27_4BA7_9951_8C9D02429C5B"
+            "InstallerClass" = "11:FALSE"
+            "CustomActionData" = "8:[TARGETDIR]"
+            }
+            "{4AA51A2D-7D85-4A59-BA75-B0809FC8B380}:_D4B731E5833C4FE28889166D1B02B281"
+            {
+            "Name" = "8:Installer (Release Win32) の プライマリ出力"
+            "Condition" = "8:"
+            "Object" = "8:_D14943851881443491FCB66590F760AB"
+            "FileType" = "3:1"
+            "InstallAction" = "3:4"
+            "Arguments" = "8:"
+            "EntryPoint" = "8:UnInstall"
+            "Sequence" = "3:1"
+            "Identifier" = "8:_54F67ABD_086E_43A4_B8C8_66060C08C5F6"
             "InstallerClass" = "11:FALSE"
             "CustomActionData" = "8:"
             }
@@ -206,6 +248,26 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_18BFFAA514B89939ACA136CE976C8D6F"
+            {
+            "SourcePath" = "8:msi.dll"
+            "TargetName" = "8:msi.dll"
+            "Tag" = "8:"
+            "Folder" = "8:_0967AEB0E9374BC38FB720EBD1833E64"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:TRUE"
+            "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_21928728EE974A2D8A44737132979722"
             {
             "SourcePath" = "8:..\\..\\..\\jaconf\\extendedjob\\jafwait.bat"
@@ -232,6 +294,26 @@
             "TargetName" = "8:jareboot.bat"
             "Tag" = "8:"
             "Folder" = "8:_38B49AA3FCD84BE48DFE584991754F5A"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_41C41639293B4750B4E60F166E963593"
+            {
+            "SourcePath" = "8:..\\jobarg_agent\\jobarg_agentd.bat"
+            "TargetName" = "8:jobarg_agentd.bat"
+            "Tag" = "8:"
+            "Folder" = "8:_06CF643B56B441C39B67FDA41247BFAC"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -478,7 +560,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Job Arranger Agent"
         "ProductCode" = "8:{6B44126B-6400-4AA1-B112-0E5165461BBA}"
-        "PackageCode" = "8:{7A4FCC17-D7AE-4C27-B0F5-A31D82AD2B2C}"
+        "PackageCode" = "8:{DDA8534A-725A-416A-9DED-CB716EC874C4}"
         "UpgradeCode" = "8:{502F8540-FAA4-45ED-BC11-14C428F77035}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
@@ -601,12 +683,12 @@
             "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_8BC4EF9A8FF04962A00EB144526A3FF7"
             {
             "Name" = "8:Start Job Arranger Agent"
-            "Arguments" = "8:--start --config \"[TARGETDIR]\\conf\\jobarg_agentd.conf\""
+            "Arguments" = "8:\"[TARGETDIR]\\bin\\jobarg_agentd.exe\" --start --config \"[TARGETDIR]\\conf\\jobarg_agentd.conf\""
             "Description" = "8:"
             "ShowCmd" = "3:1"
             "IconIndex" = "3:0"
             "Transitive" = "11:FALSE"
-            "Target" = "8:_16347BAC1CC449699C1D47DB54B66AE6"
+            "Target" = "8:_41C41639293B4750B4E60F166E963593"
             "Folder" = "8:_1823754893ED42609565AA7051FB4C6F"
             "WorkingFolder" = "8:_06CF643B56B441C39B67FDA41247BFAC"
             "Icon" = "8:_EA5DDDA4C64E4B1883F48B0D143725AE"
@@ -615,12 +697,12 @@
             "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_E104136843D542AEA8B5492E89EB03BF"
             {
             "Name" = "8:Stop Job Arranger Agent"
-            "Arguments" = "8:--stop --config \"[TARGETDIR]\\conf\\jobarg_agentd.conf\""
+            "Arguments" = "8:\"[TARGETDIR]\\bin\\jobarg_agentd.exe\" --stop --config \"[TARGETDIR]\\conf\\jobarg_agentd.conf\""
             "Description" = "8:"
             "ShowCmd" = "3:1"
             "IconIndex" = "3:0"
             "Transitive" = "11:FALSE"
-            "Target" = "8:_16347BAC1CC449699C1D47DB54B66AE6"
+            "Target" = "8:_41C41639293B4750B4E60F166E963593"
             "Folder" = "8:_1823754893ED42609565AA7051FB4C6F"
             "WorkingFolder" = "8:_06CF643B56B441C39B67FDA41247BFAC"
             "Icon" = "8:_EA5DDDA4C64E4B1883F48B0D143725AE"
@@ -1026,7 +1108,7 @@
             {
             "UseDynamicProperties" = "11:TRUE"
             "IsDependency" = "11:FALSE"
-            "SourcePath" = "8:C:\\Program Files (x86)\\Common Files\\Merge Modules\\microsoft_vc100_crt_x86.msm"
+            "SourcePath" = "8:c:\\Program Files\\Common Files\\Merge Modules\\microsoft_vc100_crt_x86.msm"
                 "Properties"
                 {
                 }
@@ -1039,6 +1121,34 @@
         }
         "ProjectOutput"
         {
+            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_D14943851881443491FCB66590F760AB"
+            {
+            "SourcePath" = "8:..\\Installer\\bin\\Win32\\Release\\Installer.dll"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_0967AEB0E9374BC38FB720EBD1833E64"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            "ProjectOutputGroupRegister" = "3:1"
+            "OutputConfiguration" = "8:Release|Win32"
+            "OutputGroupCanonicalName" = "8:Built"
+            "OutputProjectGuid" = "8:{4C4DE837-EE02-4430-9BB0-D5A34A77E1C4}"
+            "ShowKeyOutput" = "11:TRUE"
+                "ExcludeFilters"
+                {
+                }
+            }
         }
     }
 }

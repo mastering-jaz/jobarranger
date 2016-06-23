@@ -85,12 +85,12 @@ int jatrap_jobrelease(ja_telegram_object * obj)
     int ret;
     json_object *jp_data_req, *jp_data_res, *jp, *jp_jobnet;
     char *err;
-    char *start_time, *job_id, *jobnet_id, *get_job_id;
+    char *start_time, *job_id, *jobnet_id, *get_job_id, *get_job_id_2;
     char *str;
-    zbx_uint64_t inner_job_id, inner_jobnet_id;
+    zbx_uint64_t userid, inner_job_id, inner_jobnet_id;
     DB_RESULT result;
     DB_ROW row;
-    int len;
+    int len = 0;
     const char *__function_name = "jatrap_jobrelease";
 
     zabbix_log(LOG_LEVEL_DEBUG, "In %s()", __function_name);
@@ -103,7 +103,8 @@ int jatrap_jobrelease(ja_telegram_object * obj)
     result = NULL;
     if (ja_telegram_check(obj) == FAIL)
         return FAIL;
-    if (jatrap_auth_user(obj) == 0)
+    userid = jatrap_auth_user(obj);
+    if (userid == 0)
         return FAIL;
 
     jp_data_req = json_object_object_get(obj->request, JA_PROTO_TAG_DATA);
@@ -133,28 +134,34 @@ int jatrap_jobrelease(ja_telegram_object * obj)
     if (jp != NULL)
         start_time = (char *) json_object_get_string(jp);
     jp = json_object_object_get(jp_data_req, "inner_jobnet_id");
-    if (jp != NULL)
-        ZBX_STR2UINT64(inner_jobnet_id,
-                       (char *) json_object_get_string(jp));
-
-    if (start_time == NULL && inner_jobnet_id <= 0) {
-        err =
-            zbx_dsprintf(NULL,
-                         "can not find the tag 'start_time' or 'inner_jobnet_id' from the request telegram: %s",
-                         json_object_to_json_string(obj->request));
-        goto error;
+    if (jp != NULL) {
+        ZBX_STR2UINT64(inner_jobnet_id, (char *) json_object_get_string(jp));
+        if (inner_jobnet_id <= 0) {
+            err =
+                zbx_dsprintf(NULL, "registry-number '%s' is not correct",
+                             (char *) json_object_get_string(jp));
+            goto error;
+        }
     }
 
     jp_jobnet = json_object_new_array();
     json_object_object_add(jp_data_res, "inner_jobnet_id", jp_jobnet);
     if (inner_jobnet_id > 0) {
-        result = DBselect("select inner_jobnet_id from ja_run_jobnet_table"
+        if (jatrap_auth_jobnet(userid, inner_jobnet_id) == FAIL) {
+            err =
+                zbx_dsprintf(NULL,
+                             "can not access the job. inner_jobnet_id: "
+                             ZBX_FS_UI64, inner_jobnet_id);
+            goto error;
+        }
+        result = DBselect("select inner_jobnet_id from ja_run_jobnet_summary_table"
                           " where inner_jobnet_id = " ZBX_FS_UI64
-                          " and jobnet_id = '%s'", inner_jobnet_id,
-                          jobnet_id);
+                          " and jobnet_id = '%s' and status = 2",
+                          inner_jobnet_id, jobnet_id);
         if ((row = DBfetch(result)) != NULL) {
-            inner_job_id =
-                ja_jobnet_get_job_id(inner_jobnet_id, get_job_id);
+            get_job_id_2 = zbx_strdup(NULL, get_job_id);
+            inner_job_id = ja_jobnet_get_job_id(inner_jobnet_id, get_job_id_2);
+            zbx_free(get_job_id_2);
             if (inner_job_id == 0) {
                 err =
                     zbx_dsprintf(NULL,
@@ -166,7 +173,7 @@ int jatrap_jobrelease(ja_telegram_object * obj)
             if (jatrap_jobrelease_jobid(inner_job_id) == FAIL) {
                 err =
                     zbx_dsprintf(NULL,
-                                 "can not update the method_flag. inner_jobnet_id: "
+                                 "icon is not pending. inner_jobnet_id: "
                                  ZBX_FS_UI64 ", jobnet_id: '%s'",
                                  inner_jobnet_id, jobnet_id);
                 goto error;
@@ -176,21 +183,29 @@ int jatrap_jobrelease(ja_telegram_object * obj)
             zbx_free(str);
         }
     } else {
-        len = strlen(start_time);
-        if (!(len == 8 || len == 12)) {
-            err = zbx_dsprintf(NULL, "unknowed start_time %s", start_time);
-            goto error;
+        if (start_time != NULL) {
+            len = strlen(start_time);
+            if (!(len == 8 || len == 12)) {
+                err =
+                    zbx_dsprintf(NULL, "unknowed start_time %s",
+                                 start_time);
+                goto error;
+            }
         }
         result =
             DBselect
-            ("select inner_jobnet_id, start_time from ja_run_jobnet_table where jobnet_id = '%s'",
+            ("select inner_jobnet_id, start_time from ja_run_jobnet_summary_table"
+             " where jobnet_id = '%s' and status = 2",
              jobnet_id);
         while ((row = DBfetch(result)) != NULL) {
             ZBX_STR2UINT64(inner_jobnet_id, row[0]);
-            if (strncmp(start_time, row[1], len) != 0)
-                continue;
-            inner_job_id =
-                ja_jobnet_get_job_id(inner_jobnet_id, get_job_id);
+            if (start_time != NULL) {
+                if (strncmp(start_time, row[1], len) != 0)
+                    continue;
+            }
+            get_job_id_2 = zbx_strdup(NULL, get_job_id);
+            inner_job_id = ja_jobnet_get_job_id(inner_jobnet_id, get_job_id_2);
+            zbx_free(get_job_id_2);
             if (inner_job_id == 0) {
                 err =
                     zbx_dsprintf(NULL,
@@ -199,10 +214,12 @@ int jatrap_jobrelease(ja_telegram_object * obj)
                                  inner_jobnet_id, jobnet_id);
                 goto error;
             }
+            if (jatrap_auth_jobnet(userid, inner_jobnet_id) == FAIL)
+                continue;
             if (jatrap_jobrelease_jobid(inner_job_id) == FAIL) {
                 err =
                     zbx_dsprintf(NULL,
-                                 "can not update the method_flag. inner_jobnet_id: "
+                                 "icon is not pending. inner_jobnet_id: "
                                  ZBX_FS_UI64 ", jobnet_id: '%s'",
                                  inner_jobnet_id, jobnet_id);
                 goto error;
@@ -214,14 +231,13 @@ int jatrap_jobrelease(ja_telegram_object * obj)
     }
 
     if (json_object_array_length(jp_jobnet) == 0) {
-        err = zbx_dsprintf(NULL, "can not match the the job");
+        err = zbx_dsprintf(NULL, "can not match the jobnet");
         goto error;
     }
     ret = SUCCEED;
   error:
     if (ret == FAIL) {
-        zabbix_log(LOG_LEVEL_ERR, "In %s() error: %s", __function_name,
-                   err);
+        zabbix_log(LOG_LEVEL_ERR, "In %s() error: %s", __function_name, err);
         ja_telegram_seterr(obj, err);
         DBrollback();
     } else {

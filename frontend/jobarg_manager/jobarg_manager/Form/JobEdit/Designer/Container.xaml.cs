@@ -56,6 +56,21 @@ public partial class Container : UserControl,IContainer
 
     #region フィールド
 
+    /// <summary>最大UNDO値</summary> stat
+    private static int MAX_UNDO = 50;
+
+    /// <summary>JOBデータ区別詞</summary>
+    private static string JOB_DIST="JOB";
+
+    /// <summary>COMMANDデータ区別詞</summary>
+    private static string COMMAND_DIST = "COMMAND";
+
+    /// <summary>job Valueデータ区別詞</summary>
+    private static string JOB_VALUE_DIST = "JOB_VALUE";
+
+    /// <summary>Jobcontrol Valueデータ区別詞</summary>
+    private static string JOBCON_VALUE_DIST = "JOBCON_VALUE";
+
     /// <summary>マウスの位置</summary>
     private Point mousePosition;
 
@@ -77,6 +92,12 @@ public partial class Container : UserControl,IContainer
     /// <summary>inner_flow_id index取得SQL</summary>
     private String GET_INNER_FLOW_ID_SQL1 = "select nextid from ja_index_table where count_id=30 for update";
 
+    private List<HistoryData> HistoryDataList = new List<HistoryData>();
+
+    private Hashtable TempHash = new Hashtable();
+    private int TempJobNo = 0;
+
+ 
     /// <summary>画布</summary>
     public Canvas ContainerCanvas
     {
@@ -357,6 +378,9 @@ public partial class Container : UserControl,IContainer
     // <summary>リブートアイコン設定テーブル</summary>
     public DataTable IconRebootTable { get; set; }
 
+    // <summary>保留解除アイコン設定テーブル</summary>
+    public DataTable IconReleaseTable { get; set; }
+
     #endregion
 
     public double getLeftX()
@@ -543,8 +567,25 @@ public partial class Container : UserControl,IContainer
             e.Handled = true;
             return;
         }
+        if ((e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) || e.KeyboardDevice.IsKeyDown(Key.RightCtrl)) && e.Key == Key.C)
+        {
+            SaveSelectedControlCollection();
+            e.Handled = true;
+            return;
+        }
+        if ((e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) || e.KeyboardDevice.IsKeyDown(Key.RightCtrl)) && e.Key == Key.V)
+        {
+            PasteSelectedControlCollection();
+            e.Handled = true;
+            return;
+        }
+        if ((e.KeyboardDevice.IsKeyDown(Key.LeftCtrl) || e.KeyboardDevice.IsKeyDown(Key.RightCtrl)) && e.Key == Key.Z)
+        {
+            Undo();
+            e.Handled = true;
+            return;
+        }
     }
-
 
     //*******************************************************************
     /// <summary>左マウスの解放処理</summary>
@@ -812,6 +853,18 @@ public partial class Container : UserControl,IContainer
         DragDrop.DoDragDrop((RebootSample)sender, data, DragDropEffects.Copy);
     }
 
+    //*******************************************************************
+    /// <summary>保留解除をドラッグ</summary>
+    /// <param name="sender">源</param>
+    /// <param name="e">マウスイベント</param>
+    //*******************************************************************
+    public void ReleaseSample_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        JobData data = new JobData();
+        data.JobType = ElementType.RELEASE;
+        DragDrop.DoDragDrop((ReleaseSample)sender, data, DragDropEffects.Copy);
+    }
+
     //************************************************************************
     /// <summary>ドラッグ部品を受け入れる</summary>
     /// <param name="sender">源</param>
@@ -819,6 +872,9 @@ public partial class Container : UserControl,IContainer
     //************************************************************************
     public void Target_Drop(object sender, DragEventArgs e)
     {
+        //処理前現在データで履歴を作成
+        CreateHistData();
+
         JobData data = (JobData)e.Data.GetData
             ("jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobData");
         //アイコンの存在チェック 
@@ -828,7 +884,7 @@ public partial class Container : UserControl,IContainer
             return;
         }
 
-        CommonItem item = new CommonItem((IContainer)this, data, Consts.EditType.Add);
+        CommonItem item = new CommonItem((IContainer)this, data, Consts.EditType.Add, RunJobMethodType.NORMAL);
 
         ((Canvas)sender).Children.Add(item);
         this.JobItems.Add(item.JobId,item);
@@ -880,6 +936,9 @@ public partial class Container : UserControl,IContainer
     //*******************************************************************
     private void MenuitemLine_Click(object sender, RoutedEventArgs e)
     {
+        //処理前現在データで履歴を作成
+        CreateHistData();
+
         List<System.Windows.Controls.Control> selectItems = CurrentSelectedControlCollection;
         MakeFlow(FlowLineType.Line, (IRoom)selectItems[0], (IRoom)selectItems[1], 0, Consts.EditType.Add);
     }
@@ -891,6 +950,9 @@ public partial class Container : UserControl,IContainer
     //*******************************************************************
     private void MenuitemCurve_Click(object sender, RoutedEventArgs e)
     {
+        //処理前現在データで履歴を作成
+        CreateHistData();
+
         List<System.Windows.Controls.Control> selectItems = CurrentSelectedControlCollection;
         MakeFlow(FlowLineType.Curve, (IRoom)selectItems[0], (IRoom)selectItems[1],0, Consts.EditType.Add);
 
@@ -908,6 +970,9 @@ public partial class Container : UserControl,IContainer
             || !(CurrentSelectedControlCollection[0] is IFlow))
             return;
 
+        //処理前現在データで履歴を作成
+        CreateHistData();
+
         IFlow flow = (IFlow)CurrentSelectedControlCollection[0];
         flow.SetTrue(Consts.EditType.Add);
     }
@@ -923,6 +988,9 @@ public partial class Container : UserControl,IContainer
             || CurrentSelectedControlCollection.Count != 1
             || !(CurrentSelectedControlCollection[0] is IFlow))
             return;
+
+        //処理前現在データで履歴を作成
+        CreateHistData();
 
         IFlow flow = (IFlow)CurrentSelectedControlCollection[0];
         flow.SetFalse(Consts.EditType.Add);
@@ -957,7 +1025,7 @@ public partial class Container : UserControl,IContainer
     {
         if (_currentSelectedControlCollection.Count == 1)
         {
-            ((IRoom)_currentSelectedControlCollection[0]).ShowIconSetting();
+            ((IRoom)_currentSelectedControlCollection[0]).ShowIconSetting(true);
         }
     }
 
@@ -977,6 +1045,91 @@ public partial class Container : UserControl,IContainer
             JobRun(((CommonItem)_currentSelectedControlCollection[0]).JobId);
         }
     }
+
+    //*******************************************************************
+    /// <summary>保留をクリック</summary>
+    /// <param name="sender">源</param>
+    /// <param name="e">マウスイベント</param>
+    //*******************************************************************
+    private void MenuitemHold_Click(object sender, RoutedEventArgs e)
+    {
+        // 開始ログ
+        ((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)ParantWindow).WriteStartLog("MenuitemHold_Click", Consts.PROCESS_018);
+
+        //処理前現在データで履歴を作成
+        CreateHistData();
+
+        List<System.Windows.Controls.Control> selectItems = CurrentSelectedControlCollection;
+        SetHold(((IRoom)selectItems[0]).ContentItem);
+
+        // 終了ログ
+        ((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)ParantWindow).WriteEndLog("MenuitemHold_Click", Consts.PROCESS_018);
+    }
+
+    //*******************************************************************
+    /// <summary>保留解除をクリック</summary>
+    /// <param name="sender">源</param>
+    /// <param name="e">マウスイベント</param>
+    //*******************************************************************
+    private void MenuitemUnHold_Click(object sender, RoutedEventArgs e)
+    {
+        // 開始ログ
+        ((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)ParantWindow).WriteStartLog("MenuitemUnHold_Click", Consts.PROCESS_018);
+
+        //処理前現在データで履歴を作成
+        CreateHistData();
+
+        List<System.Windows.Controls.Control> selectItems = CurrentSelectedControlCollection;
+        SetUnHoldORUnSkip(((IRoom)selectItems[0]).ContentItem);
+
+        // 終了ログ
+        ((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)ParantWindow).WriteEndLog("MenuitemUnHold_Click", Consts.PROCESS_018);
+    }
+    //*******************************************************************
+    /// <summary>スキップをクリック</summary>
+    /// <param name="sender">源</param>
+    /// <param name="e">マウスイベント</param>
+    //*******************************************************************
+    private void MenuitemSkip_Click(object sender, RoutedEventArgs e)
+    {
+        // 開始ログ
+        ((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)ParantWindow).WriteStartLog("MenuitemSkip_Click", Consts.PROCESS_018);
+
+        //処理前現在データで履歴を作成
+        CreateHistData();
+
+        List<System.Windows.Controls.Control> selectItems = CurrentSelectedControlCollection;
+        SetSkip(((IRoom)selectItems[0]).ContentItem);
+
+        // 終了ログ
+        ((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)ParantWindow).WriteEndLog("MenuitemSkip_Click", Consts.PROCESS_018);
+    }
+
+    //*******************************************************************
+    /// <summary>スキップ解除をクリック</summary>
+    /// <param name="sender">源</param>
+    /// <param name="e">マウスイベント</param>
+    //*******************************************************************
+    private void MenuitemUnSkip_Click(object sender, RoutedEventArgs e)
+    {
+        // 開始ログ
+        ((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)ParantWindow).WriteStartLog("MenuitemUnSkip_Click", Consts.PROCESS_018);
+
+        //処理前現在データで履歴を作成
+        CreateHistData();
+
+        List<System.Windows.Controls.Control> selectItems = CurrentSelectedControlCollection;
+        SetUnHoldORUnSkip(((IRoom)selectItems[0]).ContentItem);
+
+        // 終了ログ
+        ((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)ParantWindow).WriteEndLog("MenuitemUnSkip_Click", Consts.PROCESS_018);
+    }
+
+    #endregion
+
+    #endregion
+
+    #region publicメッソド
 
     //*******************************************************************
     /// <summary>設定をクリック</summary>
@@ -1052,11 +1205,43 @@ public partial class Container : UserControl,IContainer
             flow.SetFalse(editType);
 
         }
-    #endregion
 
-    #endregion
+    //*******************************************************************
+    /// <summary>UNDO処理用履歴データ作成</summary>
+    //*******************************************************************
+    public void CreateHistData()
+    {
+        HistoryData hist = new HistoryData();
+        hist.JobControlTable = JobControlTable.Copy();
+        hist.IconCalcTable = IconCalcTable.Copy();
+        hist.IconEndTable = IconEndTable.Copy();
+        hist.IconExtjobTable = IconExtjobTable.Copy();
+        hist.IconFcopyTable = IconFcopyTable.Copy();
+        hist.IconFwaitTable = IconFwaitTable.Copy();
+        hist.IconIfTable = IconIfTable.Copy();
+        hist.IconInfoTable = IconInfoTable.Copy();
+        hist.IconJobnetTable = IconJobnetTable.Copy();
+        hist.IconJobTable = IconJobTable.Copy();
+        hist.IconRebootTable = IconRebootTable.Copy();
+        hist.IconReleaseTable = IconReleaseTable.Copy();
+        hist.IconTaskTable = IconTaskTable.Copy();
+        hist.IconValueTable = IconValueTable.Copy();
+        hist.JobCommandTable = JobCommandTable.Copy();
+        hist.ValueJobConTable = ValueJobConTable.Copy();
+        hist.ValueJobTable = ValueJobTable.Copy();
+        hist.FlowControlTable = FlowControlTable.Copy();
+        hist.SetedJobIds = (Hashtable)SetedJobIds.Clone();
+        hist.JobIdNos = (Hashtable)((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)ParantWindow).JobNoHash.Clone();
 
-    #region publicメッソド 
+        HistoryDataList.Add(hist);
+
+        if (HistoryDataList.Count > MAX_UNDO)
+        {
+            HistoryDataList.RemoveAt(0);
+        }
+    }
+
+
 
     //*******************************************************************
     /// <summary>選択モジュールを追加</summary>
@@ -1068,7 +1253,7 @@ public partial class Container : UserControl,IContainer
         {
             _currentSelectedControlCollection.Add(uc);
         }
-                
+               
     }
 
     //*******************************************************************
@@ -1120,16 +1305,22 @@ public partial class Container : UserControl,IContainer
     //*******************************************************************
     public void SetWorkFlowElementSelected(System.Windows.Controls.Control uc, bool isSelected)
     {
-        if (isSelected)
-        {
-            AddSelectedControl(uc);
-            //_leftXOfSelection = getLeftX();
-            //_topYOfSelection = getTopY();
-        }   
-        else
-            RemoveSelectedControl(uc);
         if (!ShiftKeyIsPress)
+        {
             ClearSelectFlowElement(uc);
+            AddSelectedControl(uc);
+        }
+        else
+        {
+            if (isSelected)
+            {
+                AddSelectedControl(uc);
+                //_leftXOfSelection = getLeftX();
+                //_topYOfSelection = getTopY();
+            }
+            else
+                RemoveSelectedControl(uc);
+        }
 
     }
 
@@ -1236,23 +1427,6 @@ public partial class Container : UserControl,IContainer
         }
     }
 
-    // 2012.11.1一旦削除（線の連接点を別のアイコンに変更用）
-
-    ///// <summary>
-    ///// 位置によって部品を取得。
-
-    ///// </summary>
-    ///// <param name="point">位置</param>
-    //public CommonItem GetItemByPoint(Point point)
-    //{
-    //    for (int i = 0; i < this.JobItems.Count; i++)
-    //    {
-    //        if (((CommonItem)this.JobItems[i]).PointIsInside(point))
-    //            return (CommonItem)this.JobItems[i];
-    //    }
-    //    return null;
-    //}
-
     //*******************************************************************
     /// <summary>コンテナに部品を含むかどうかの判定</summary>
     /// <param name="uie">部品</param>
@@ -1260,84 +1434,6 @@ public partial class Container : UserControl,IContainer
     public bool Contains(UIElement uie)
     {
         return cnsDesignerContainer.Children.Contains(uie);
-    }
-
-    //*******************************************************************
-    /// <summary>選択部品を削除</summary>
-    //*******************************************************************
-    public void DeleteSelectedControl()
-    {
-        //if (_currentSelectedControlCollection == null
-        //    || _currentSelectedControlCollection.Count < 1
-        //    || !(_currentSelectedControlCollection[0] is IRoom))
-        //    return;
-
-        if (_currentSelectedControlCollection == null
-            || _currentSelectedControlCollection.Count < 1)
-            return;
-
-        for (int i = CurrentSelectedControlCollection.Count - 1; i >= 0; i--) 
-        {
-            if (CurrentSelectedControlCollection[i] is CommonItem)
-            {
-                // ジョブを削除 
-                CommonItem item = (CommonItem)_currentSelectedControlCollection[i];
-
-                string jobid = item.JobId;
-
-                DataRow[] rows = JobControlTable.Select("job_id='" + jobid + "'");
-
-                // アイコン設定テーブルにデータを削除 
-                ElementType type = (ElementType)(Convert.ToInt16(rows[0]["job_type"]));
-                DeleteIconSetting(jobid, type);
-
-                // ジョブ管理テーブルから削除 
-                if (rows != null && rows.Count() > 0)
-                    rows[0].Delete();
-
-                //JobControlTable.AcceptChanges();
-
-                // フローを削除 
-                DataRow[] rowsFlow = FlowControlTable.Select("start_job_id='" + jobid + "' or end_job_id='" + jobid + "'");
-
-                foreach (DataRow row in rowsFlow)
-                    row.Delete();
-
-                // アイコンを削除 
-                ((IRoom)_currentSelectedControlCollection[i]).Delete();
-                _currentSelectedControlCollection.Remove(item);
-
-                _jobItems.Remove(jobid);
-                SetedJobIds.Remove(jobid);
-            }
-        }
-           
-    }
-
-    //*******************************************************************
-    /// <summary>選択フローを削除</summary>
-    //*******************************************************************
-    public void DeleteSelectedFlow()
-    {
-        //if (CurrentSelectedControlCollection == null
-        //    || CurrentSelectedControlCollection.Count != 1
-        //    || !(CurrentSelectedControlCollection[0] is IFlow))
-        //    return;
-
-        if (CurrentSelectedControlCollection == null
-            || CurrentSelectedControlCollection.Count != 1)
-            return;
-        IFlow flow = (IFlow)_currentSelectedControlCollection[0] ;
-
-        string beginJobId = flow.BeginItem.JobId;
-        string endJobId = flow.EndItem.JobId;
-
-        DataRow[] rows = FlowControlTable.Select("start_job_id='" + beginJobId + "' and end_job_id='" + endJobId + "'");
-
-        if(rows != null && rows.Count() > 0)
-            rows[0].Delete();
-
-        RemoveFlow(flow);
     }
 
     //*******************************************************************
@@ -1360,10 +1456,108 @@ public partial class Container : UserControl,IContainer
             cnsDesignerContainer.Children.Remove((UIElement)a);
     }
 
+    /// <summary>MouseMoveイベントを削除</summary>
+    public void RemoveContainerMoveEvent()
+    {
+        cnsDesignerContainer.MouseMove -= Container_MouseMove;
+    }
+    //*******************************************************************
+    /// <summary>選択部品を削除</summary>
+    //*******************************************************************
+    public void DeleteSelectedControl()
+    {
+        //if (_currentSelectedControlCollection == null
+        //    || _currentSelectedControlCollection.Count < 1
+        //    || !(_currentSelectedControlCollection[0] is IRoom))
+        //    return;
+
+        if (_currentSelectedControlCollection == null
+            || _currentSelectedControlCollection.Count < 1)
+            return;
+
+        //処理前現在データで履歴を作成
+        CreateHistData();
+
+        for (int i = CurrentSelectedControlCollection.Count - 1; i >= 0; i--)
+        {
+            if (CurrentSelectedControlCollection[i] is CommonItem)
+            {
+                // ジョブを削除 
+                CommonItem item = (CommonItem)_currentSelectedControlCollection[i];
+
+                string jobid = item.JobId;
+
+                DataRow[] rows = JobControlTable.Select("job_id='" + jobid + "'");
+
+                // アイコン設定テーブルにデータを削除 
+                ElementType type = (ElementType)(Convert.ToInt16(rows[0]["job_type"]));
+
+                DeleteIconSetting(jobid, type);
+
+                // ジョブ管理テーブルから削除 
+                if (rows != null && rows.Count() > 0)
+                {
+                    rows[0].Delete();
+                }
+
+                //JobControlTable.AcceptChanges();
+
+                // フローを削除 
+                DataRow[] rowsFlow = FlowControlTable.Select("start_job_id='" + jobid + "' or end_job_id='" + jobid + "'");
+
+                foreach (DataRow row in rowsFlow)
+                {
+                    row.Delete();
+                }
+
+                // アイコンを削除 
+                ((IRoom)_currentSelectedControlCollection[i]).Delete();
+                _currentSelectedControlCollection.Remove(item);
+
+                _jobItems.Remove(jobid);
+                SetedJobIds.Remove(jobid);
+            }
+        }
+
+    }
+
+    //*******************************************************************
+    /// <summary>選択フローを削除</summary>
+    //*******************************************************************
+    public void DeleteSelectedFlow()
+    {
+        //if (CurrentSelectedControlCollection == null
+        //    || CurrentSelectedControlCollection.Count != 1
+        //    || !(CurrentSelectedControlCollection[0] is IFlow))
+        //    return;
+
+        if (CurrentSelectedControlCollection == null
+            || CurrentSelectedControlCollection.Count != 1)
+            return;
+
+        //処理前現在データで履歴を作成
+        CreateHistData();
+
+        IFlow flow = (IFlow)_currentSelectedControlCollection[0];
+
+        string beginJobId = flow.BeginItem.JobId;
+        string endJobId = flow.EndItem.JobId;
+
+        DataRow[] rows = FlowControlTable.Select("start_job_id='" + beginJobId + "' and end_job_id='" + endJobId + "'");
+
+        if (rows != null && rows.Count() > 0)
+            rows[0].Delete();
+
+        RemoveFlow(flow);
+    }
+    #endregion
+
+    #region privateメッソド
+
     //*******************************************************************
     /// <summary>ジョブ起動</summary>
     //*******************************************************************
-    public void JobRun(Object JobId)
+    private void JobRun(Object JobId)
     {        
         DateTime now = DBUtil.GetSysTime();
         String startXPoint = DBUtil.GetParameterVelue("JOBNET_DUMMY_START_X");
@@ -1393,7 +1587,7 @@ public partial class Container : UserControl,IContainer
         int nameLen = runJobnetName.Length;
         if (nameLen > 64)
         {
-            jobnetName = jobnetName.Substring(0, jobnetName.Length + 64 - nameLen);
+            jobnetName = jobnetName.Substring(0,jobnetName.Length+64-nameLen);
         }
         runJobnetName = jobnetName + "/" + JobId;
 
@@ -1422,8 +1616,8 @@ public partial class Container : UserControl,IContainer
         }
         String insertRunJobnet = "insert into ja_run_jobnet_table "
                 + "(inner_jobnet_id, inner_jobnet_main_id, inner_job_id, update_date, run_type, "
-                + "main_flag, status, start_time, end_time, public_flag, jobnet_id, user_name, jobnet_name, memo) "
-                + "VALUES (?,?,0,?,?,0,0,0,0,0,?,?,?,null)";
+                + "main_flag, status, start_time, end_time, public_flag, jobnet_id, user_name, jobnet_name, memo, execution_user_name) "
+                + "VALUES (?,?,0,?,?,0,0,0,0,0,?,?,?,null,?)";
         List<ComSqlParam> insertRunJobnetSqlParams = new List<ComSqlParam>();
         insertRunJobnetSqlParams.Add(new ComSqlParam(DbType.String, "@inner_jobnet_id", strInnerJobnetNextId));
         insertRunJobnetSqlParams.Add(new ComSqlParam(DbType.String, "@inner_jobnet_main_id", strInnerJobnetNextId));
@@ -1432,6 +1626,7 @@ public partial class Container : UserControl,IContainer
         insertRunJobnetSqlParams.Add(new ComSqlParam(DbType.String, "@jobnet_id", strJobnetNextId));
         insertRunJobnetSqlParams.Add(new ComSqlParam(DbType.String, "@user_name", LoginSetting.UserName));
         insertRunJobnetSqlParams.Add(new ComSqlParam(DbType.String, "@jobnet_name", runJobnetName));
+        insertRunJobnetSqlParams.Add(new ComSqlParam(DbType.String, "@execution_user_name", LoginSetting.UserName));
         dbAccess.ExecuteNonQuery(insertRunJobnet, insertRunJobnetSqlParams);
 
         String insertRunJobnetSummary = "insert into ja_run_jobnet_summary_table "
@@ -1463,14 +1658,15 @@ public partial class Container : UserControl,IContainer
 
 
         String insertRunJobJob = "insert into ja_run_job_table "
-                + "(inner_job_id, inner_jobnet_id, inner_jobnet_main_id, job_type, invo_flag,"
+                + "(inner_job_id, inner_jobnet_id, inner_jobnet_main_id, job_type, method_flag, invo_flag,"
                 + "boot_count, start_time, end_time, point_x, point_y, job_id, job_name) "
-                + "VALUES (?,?,?,?,1,1,0,0,?,?,?,?)";
+                + "VALUES (?,?,?,?,?,1,1,0,0,?,?,?,?)";
         List<ComSqlParam> insertRunJobJobSqlParams = new List<ComSqlParam>();
         insertRunJobJobSqlParams.Add(new ComSqlParam(DbType.String, "@inner_job_id", strInnerJobNextIdJob));
         insertRunJobJobSqlParams.Add(new ComSqlParam(DbType.String, "@inner_jobnet_id", strInnerJobnetNextId));
         insertRunJobJobSqlParams.Add(new ComSqlParam(DbType.String, "@inner_jobnet_main_id", strInnerJobnetNextId));
         insertRunJobJobSqlParams.Add(new ComSqlParam(DbType.String, "@job_type", (int)ElementType.JOB));
+        insertRunJobJobSqlParams.Add(new ComSqlParam(DbType.String, "@method_flag", rowJob[0]["method_flag"]));
         insertRunJobJobSqlParams.Add(new ComSqlParam(DbType.String, "@point_x", jobXPoint));
         insertRunJobJobSqlParams.Add(new ComSqlParam(DbType.String, "@point_y", jobYPoint));
         insertRunJobJobSqlParams.Add(new ComSqlParam(DbType.String, "@job_id", rowIconJob[0]["job_id"]));
@@ -1533,7 +1729,7 @@ public partial class Container : UserControl,IContainer
         insertRunFlow2SqlParams.Add(new ComSqlParam(DbType.String, "@end_inner_job_id", strInnerJobNextIdEnd));
         dbAccess.ExecuteNonQuery(insertRunFlow2, insertRunFlow2SqlParams);
 
-
+        
         String insertRunJobCommand = "";
         foreach (DataRow row in rowJobCommand)
         {
@@ -1588,73 +1784,708 @@ public partial class Container : UserControl,IContainer
         detail.Show();
     }
 
-    /// <summary>MouseMoveイベントを削除</summary>
-    public void RemoveContainerMoveEvent()
+    //*******************************************************************
+    /// <summary>選択部品をコピー</summary>
+    //*******************************************************************
+    private void SaveSelectedControlCollection()
     {
-        cnsDesignerContainer.MouseMove -= Container_MouseMove;
+        //前のコピーをクリアする
+        ClearSaveCollection();
+        if (_currentSelectedControlCollection == null
+            || _currentSelectedControlCollection.Count < 1)
+            return;
+        String where;
+        String whereFlowStart="";
+        String whereFlowEnd="";
+        DataRow endRow;
+        DataRow ifRow;
+        DataRow envRow;
+        DataRow jobRow;
+        DataRow commandRow;
+        DataRow valueRow;
+        DataRow jobconValueRow;
+        DataRow jobnetRow;
+        DataRow extJobRow;
+        DataRow calcRow;
+        DataRow taskRow;
+        DataRow infoRow;
+        DataRow fcopyRow;
+        DataRow fwaitRow;
+        DataRow rebootRow;
+        DataRow releaseRow;
+        Hashtable jobAllData;
+
+        int iconCount = 0;
+        for (int i = CurrentSelectedControlCollection.Count - 1; i >= 0; i--)
+        {
+            if (CurrentSelectedControlCollection[i] is CommonItem)
+            {
+                iconCount++;
+                // ジョブを削除 
+                CommonItem item = (CommonItem)_currentSelectedControlCollection[i];
+
+                string jobid = item.JobId;
+                where = "job_id='" + jobid + "'";
+                if (iconCount == 1)
+                {
+                    whereFlowStart = "start_job_id='" + jobid + "'";
+                    whereFlowEnd = "end_job_id='" + jobid + "'";
+                }
+                else
+                {
+                    whereFlowStart = whereFlowStart+" or start_job_id='" + jobid + "'";
+                    whereFlowEnd = whereFlowEnd + " or end_job_id='" + jobid + "'";
+                }
+                DataRow[] rows = JobControlTable.Select(where);
+                DataRow jobControlRow = JobControlTable.NewRow();
+                jobControlRow.ItemArray = rows[0].ItemArray;
+
+                ((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)ParantWindow).ParantWindow.SaveJobControlRows.Add(rows[0]);
+
+                // アイコン設定テーブルにデータを削除 
+                ElementType type = (ElementType)(Convert.ToInt16(rows[0]["job_type"]));
+                switch (type)
+                {
+                    // 0:開始、6:並行処理開始、7：並行処理終了、8：ループの場合 
+                    case ElementType.START:
+                    case ElementType.LOOP:
+                    case ElementType.MTS:
+                    case ElementType.MTE:
+                    case ElementType.IFE:
+                        ((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)ParantWindow).ParantWindow.SaveItems.Add(jobControlRow, null);
+                        break;
+                    // 1:終了の場合 
+                    case ElementType.END:
+                        endRow = IconEndTable.NewRow();
+                        endRow.ItemArray = IconEndTable.Select(where)[0].ItemArray;
+                        ((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)ParantWindow).ParantWindow.SaveItems.Add(jobControlRow, endRow);
+                        break;
+                    // 2:条件分岐の場合 
+                    case ElementType.IF:
+                        ifRow = IconIfTable.NewRow();
+                        ifRow.ItemArray = IconIfTable.Select(where)[0].ItemArray;
+                        ((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)ParantWindow).ParantWindow.SaveItems.Add(jobControlRow, ifRow);
+                        break;
+                    // 3:ジョブコントローラ変数の場合 
+                    case ElementType.ENV:
+                        if (IconValueTable.Select(where).Length > 0)
+                        {
+                            List<DataRow> valuedDataList = new List<DataRow>();
+                            foreach (DataRow row in IconValueTable.Select(where))
+                            {
+                                envRow = IconValueTable.NewRow();
+                                envRow.ItemArray = row.ItemArray;
+                                valuedDataList.Add(envRow);
+                            }
+                            ((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)ParantWindow).ParantWindow.SaveItems.Add(jobControlRow, valuedDataList);
+                        }
+                        else
+                        {
+                            ((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)ParantWindow).ParantWindow.SaveItems.Add(jobControlRow, null);
+                        }
+                        break;
+                    // 4:ジョブの場合 
+                    case ElementType.JOB:
+                        jobRow = IconJobTable.NewRow();
+                        jobRow.ItemArray = IconJobTable.Select(where)[0].ItemArray;
+                        jobAllData = new Hashtable();
+                        jobAllData.Add(JOB_DIST, jobRow);
+                        if (JobCommandTable.Select(where).Length > 0)
+                        {
+                            List<DataRow> commandDataList = new List<DataRow>();
+                            foreach (DataRow row in JobCommandTable.Select(where))
+                            {
+                                commandRow = JobCommandTable.NewRow();
+                                commandRow.ItemArray = row.ItemArray;
+                                commandDataList.Add(commandRow);
+                            }
+                            jobAllData.Add(COMMAND_DIST, commandDataList);
+                        }
+                        if (ValueJobTable.Select(where).Length > 0)
+                        {
+                            List<DataRow> valueDataList = new List<DataRow>();
+                            foreach (DataRow row in ValueJobTable.Select(where))
+                            {
+                                valueRow = ValueJobTable.NewRow();
+                                valueRow.ItemArray = row.ItemArray;
+                                valueDataList.Add(valueRow);
+                            }
+                            jobAllData.Add(JOB_VALUE_DIST, valueDataList);
+                        }
+
+                        if (ValueJobConTable.Select(where).Length > 0)
+                        {
+                            List<DataRow> jobconValueDataList = new List<DataRow>();
+                            foreach (DataRow row in ValueJobConTable.Select(where))
+                            {
+                                jobconValueRow = ValueJobConTable.NewRow();
+                                jobconValueRow.ItemArray = row.ItemArray;
+                                jobconValueDataList.Add(jobconValueRow);
+                            }
+                            jobAllData.Add(JOBCON_VALUE_DIST, jobconValueDataList);
+                        }
+
+                        ((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)ParantWindow).ParantWindow.SaveItems.Add(jobControlRow, jobAllData);
+                        break;
+                    // 5:ジョブネットの場合 
+                    case ElementType.JOBNET:
+                        jobnetRow = IconJobnetTable.NewRow();
+                        jobnetRow.ItemArray = IconJobnetTable.Select(where)[0].ItemArray;
+                        ((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)ParantWindow).ParantWindow.SaveItems.Add(jobControlRow, jobnetRow);
+                        break;
+                    // 9：拡張ジョブの場合 
+                    case ElementType.EXTJOB:
+                        extJobRow = IconExtjobTable.NewRow();
+                        extJobRow.ItemArray = IconExtjobTable.Select(where)[0].ItemArray;
+                        ((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)ParantWindow).ParantWindow.SaveItems.Add(jobControlRow, extJobRow);
+                        break;
+                    //  10：計算の場合 
+                    case ElementType.CAL:
+                        calcRow = IconCalcTable.NewRow();
+                        calcRow.ItemArray = IconCalcTable.Select(where)[0].ItemArray;
+                        ((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)ParantWindow).ParantWindow.SaveItems.Add(jobControlRow, calcRow);
+                        break;
+                    // 11：タスク場合 
+                    case ElementType.TASK:
+                        taskRow = IconTaskTable.NewRow();
+                        taskRow.ItemArray = IconTaskTable.Select(where)[0].ItemArray;
+                        ((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)ParantWindow).ParantWindow.SaveItems.Add(jobControlRow, taskRow);
+                        break;
+                    // 12：情報取得場合 
+                    case ElementType.INF:
+                        infoRow = IconInfoTable.NewRow();
+                        infoRow.ItemArray = IconInfoTable.Select(where)[0].ItemArray;
+                        ((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)ParantWindow).ParantWindow.SaveItems.Add(jobControlRow, infoRow);
+                        break;
+                    // 14：ファイル転送場合 
+                    case ElementType.FCOPY:
+                        fcopyRow = IconFcopyTable.NewRow();
+                        fcopyRow.ItemArray = IconFcopyTable.Select(where)[0].ItemArray;
+                        ((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)ParantWindow).ParantWindow.SaveItems.Add(jobControlRow, fcopyRow);
+                        break;
+                    // 15：ファイル待ち合わせ場合 
+                    case ElementType.FWAIT:
+                        fwaitRow = IconFwaitTable.NewRow();
+                        fwaitRow.ItemArray = IconFwaitTable.Select(where)[0].ItemArray;
+                        ((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)ParantWindow).ParantWindow.SaveItems.Add(jobControlRow, fwaitRow);
+                        break;
+                    // 16：リブートの場合 
+                    case ElementType.REBOOT:
+                        rebootRow = IconRebootTable.NewRow();
+                        rebootRow.ItemArray = IconRebootTable.Select(where)[0].ItemArray;
+                        ((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)ParantWindow).ParantWindow.SaveItems.Add(jobControlRow, rebootRow);
+                        break;
+                    // 17：保留解除の場合 
+                    case ElementType.RELEASE:
+                        releaseRow = IconReleaseTable.NewRow();
+                        releaseRow.ItemArray = IconReleaseTable.Select(where)[0].ItemArray;
+                        ((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)ParantWindow).ParantWindow.SaveItems.Add(jobControlRow, releaseRow);
+                        break;
+                }
+                if (SetedJobIds.Contains(jobid))
+                {
+                    ((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)ParantWindow).ParantWindow.SaveSetedJobIds[jobid] = "1";
+                }
+            }
+        }
+
+        IEnumerable<DataRow> query = FlowControlTable.Select("(" + whereFlowStart + ") and (" + whereFlowEnd + ")");
+        if (query.Count()>0)
+            ((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)ParantWindow).ParantWindow.SaveFlows = query.CopyToDataTable();
+        ((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)ParantWindow).ParantWindow.SaveMinX = ((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)ParantWindow).ParantWindow.SaveJobControlRows.Min(r => Convert.ToDouble(r["point_x"]));
+        ((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)ParantWindow).ParantWindow.SaveMinY = ((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)ParantWindow).ParantWindow.SaveJobControlRows.Min(r => Convert.ToDouble(r["point_y"]));
+
     }
 
-    #endregion
-
-    #region privateメッソド
-
-    internal void ScrollIfNeeded(Point mouseLocation)
+    //*******************************************************************
+    /// <summary>選択部品をコピー</summary>
+    //*******************************************************************
+    private void PasteSelectedControlCollection()
     {
-        if (svContainer != null)
+        TempHash.Clear();
+        TempJobNo = 0;
+        if (((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)ParantWindow).ParantWindow.SaveItems.Keys.Count > 0)
         {
-            double scrollVerticalOffset = 0.0;
-            double scrollHorizontalOffset = 0.0;
+            Point p = Mouse.GetPosition(cnsDesignerContainer);
 
-            // See if we need to scroll down 
-            if (svContainer.ViewportHeight - mouseLocation.Y < 15.0)
+            //キャンバス内ではない場合、コピーしない
+            if (p.X*zoomSlider.Value - svContainer.HorizontalOffset <= 0 || p.Y*zoomSlider.Value - svContainer.VerticalOffset <= 0)
             {
-                scrollVerticalOffset = 1.0;
+                return;
             }
-            else if (mouseLocation.Y < 15.0)
+            if (p.X*zoomSlider.Value - svContainer.HorizontalOffset >= svContainer.ViewportWidth || p.Y*zoomSlider.Value - svContainer.VerticalOffset >= svContainer.ViewportHeight)
             {
-                scrollVerticalOffset = -1.0;
-            }
-            if (svContainer.ViewportWidth - mouseLocation.X < 15.0)
-            {
-                scrollHorizontalOffset = 1.0;
-            }
-            else if (mouseLocation.X < 15.0)
-            {
-                scrollHorizontalOffset = -1.0;
+                return;
             }
 
-            // Scroll the tree down or up 
-            if (scrollVerticalOffset != 0.0)
-            {
-                scrollVerticalOffset += svContainer.VerticalOffset;
+            //処理前現在データで履歴を作成
+            CreateHistData();
 
-                if (scrollVerticalOffset < 0.0)
+            double deltaX = p.X - ((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)ParantWindow).ParantWindow.SaveMinX;
+            double deltaY = p.Y - ((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)ParantWindow).ParantWindow.SaveMinY;
+            DataRow jobControlRow;
+            DataTable workFlowTable = new DataTable();
+            DataRow flowControlRow;
+            DataRow iconRow;
+            DataRow commandRow;
+            DataRow jobValueRow;
+            DataRow jobconValueRow;
+            String oldJobId;
+            String tmpJobId="";
+            String jobId;
+            ElementType type;
+            CommonItem room;
+            Hashtable jobHash;
+            DataRow jobnetIconRow = null;
+            // ジョブデータ（ジョブアイコンの生成用） 
+            JobData jobData = null;
+            bool needFlow = false;
+            needFlow = ((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)ParantWindow).ParantWindow.SaveFlows.Rows.Count > 0;
+            if (needFlow)
+                workFlowTable = ((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)ParantWindow).ParantWindow.SaveFlows.Copy();
+            foreach (DictionaryEntry item in ((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)ParantWindow).ParantWindow.SaveItems)
+            {
+                jobControlRow = JobControlTable.NewRow();
+                oldJobId = (String)((DataRow)item.Key)["job_id"];
+                jobControlRow.ItemArray = ((DataRow)item.Key).ItemArray;
+                type = (ElementType)jobControlRow["job_type"];
+                jobId = CommonUtil.GetJobId(((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)ParantWindow).JobNoHash, type);
+                if (type == ElementType.JOBNET)
                 {
-                    scrollVerticalOffset = 0.0;
+                    jobnetIconRow = (DataRow)item.Value;
+                    jobId = oldJobId;
                 }
-                else if (scrollVerticalOffset > svContainer.ScrollableHeight)
+
+                // 既存の場合、繰り返して取得 
+                int count = 0;
+                while (ElementType.START != type
+                    && JobItems.ContainsKey(jobId))
                 {
-                    scrollVerticalOffset = svContainer.ScrollableHeight;
+                    count++;
+                    jobId = CommonUtil.GetJobId(((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)ParantWindow).JobNoHash, type);
+                    if (type == ElementType.JOBNET)
+                    {
+                        jobId = jobnetIconRow["link_jobnet_id"].ToString() + "-" + count;
+                    }
+                }
+                jobControlRow["job_id"] = jobId;
+                jobControlRow["jobnet_id"] = JobnetId;
+                jobData = new JobData();
+                // ジョブタイプ 
+                jobData.JobType = type;
+                room = new CommonItem(this, jobData, Consts.EditType.Modify, (RunJobMethodType)jobControlRow["method_flag"]);
+                // ジョブID 
+                room.JobId = jobId;
+                //ジョブ名 
+                room.JobName = Convert.ToString(jobControlRow["job_name"]);
+                // X位置 
+                room.SetValue(Canvas.LeftProperty, Convert.ToDouble(jobControlRow["point_x"]) + deltaX);
+                // Y位置 
+                room.SetValue(Canvas.TopProperty, Convert.ToDouble(jobControlRow["point_y"]) + deltaY);
+                jobControlRow["point_x"] = Convert.ToDouble(jobControlRow["point_x"]) + deltaX;
+                jobControlRow["point_y"] = Convert.ToDouble(jobControlRow["point_y"]) + deltaY;
+
+                if (JobControlTable.Select("job_type=0").Count() == 0 || ElementType.START != type)
+                {
+                    JobControlTable.Rows.Add(jobControlRow);
+                    // ジョブフロー領域に追加 
+                    ContainerCanvas.Children.Add(room);
+                    JobItems.Add(room.JobId, room);
+                    if (needFlow)
+                    {
+                        if (workFlowTable.Select("start_job_id='" + jobId + "' or end_job_id='" + jobId + "'").Count() > 0)
+                        {
+                            tmpJobId = GetNextTempJobId();
+                            workFlowTable.Select("start_job_id='" + jobId + "'").ToList<DataRow>().ForEach(r => r["start_job_id"] = tmpJobId);
+                            workFlowTable.Select("end_job_id='" + jobId + "'").ToList<DataRow>().ForEach(r => r["end_job_id"] = tmpJobId);
+                            TempHash[jobId] = tmpJobId;
+                        }
+                        if (TempHash.Contains(oldJobId))
+                        {
+                            workFlowTable.Select("start_job_id='" + TempHash[oldJobId] + "'").ToList<DataRow>().ForEach(r => r["start_job_id"] = jobId);
+                            workFlowTable.Select("end_job_id='" + TempHash[oldJobId] + "'").ToList<DataRow>().ForEach(r => r["end_job_id"] = jobId);
+                        }
+                        else
+                        {
+                            workFlowTable.Select("start_job_id='" + oldJobId + "'").ToList<DataRow>().ForEach(r => r["start_job_id"] = jobId);
+                            workFlowTable.Select("end_job_id='" + oldJobId + "'").ToList<DataRow>().ForEach(r => r["end_job_id"] = jobId);
+                        }
+                    }
+                }
+                else
+                {
+                    if (needFlow)
+                    {
+                        DataRow[] deleteRows = workFlowTable.Select("start_job_id='" + oldJobId + "'");
+                        foreach (DataRow row in deleteRows)
+                            workFlowTable.Rows.Remove(row);
+                    }
+                        
                 }
 
-                svContainer.ScrollToVerticalOffset(scrollVerticalOffset);
-            }
+                if (((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)ParantWindow).ParantWindow.SaveSetedJobIds.Contains(((DataRow)item.Key)["job_id"].ToString()))
+                {
+                    SetedJobIds[jobId] = "1";
+                }
+                switch (type)
+                {
+                    // 0:開始、6:並行処理開始、7：並行処理終了、8：ループの場合 
+                    case ElementType.START:
+                    case ElementType.LOOP:
+                    case ElementType.MTS:
+                    case ElementType.MTE:
+                    case ElementType.IFE:
+                        break;
+                    // 1:終了の場合 
+                    case ElementType.END:
+                        iconRow = IconEndTable.NewRow();
+                        iconRow.ItemArray = ((DataRow)item.Value).ItemArray;
+                        iconRow["job_id"] = jobId;
+                        iconRow["jobnet_id"] = JobnetId;
+                        IconEndTable.Rows.Add(iconRow);
+                        break;
+                    // 2:条件分岐の場合 
+                    case ElementType.IF:
+                        iconRow = IconIfTable.NewRow();
+                        iconRow.ItemArray = ((DataRow)item.Value).ItemArray;
+                        iconRow["job_id"] = jobId;
+                        iconRow["jobnet_id"] = JobnetId;
+                        IconIfTable.Rows.Add(iconRow);
+                        break;
+                    // 3:ジョブコントローラ変数の場合 
+                    case ElementType.ENV:
+                        if (item.Value != null)
+                        {
+                            foreach (DataRow row in (List<DataRow>)item.Value)
+                            {
+                                iconRow = IconValueTable.NewRow();
+                                iconRow.ItemArray = row.ItemArray;
+                                iconRow["job_id"] = jobId;
+                                iconRow["jobnet_id"] = JobnetId;
+                                IconValueTable.Rows.Add(iconRow);
+                            }
+                        }
+                        break;
+                    // 4:ジョブの場合 
+                    case ElementType.JOB:
+                        iconRow = IconJobTable.NewRow();
+                        jobHash = (Hashtable)item.Value;
+                        iconRow.ItemArray = ((DataRow)jobHash[JOB_DIST]).ItemArray;
+                        iconRow["job_id"] = jobId;
+                        iconRow["jobnet_id"] = JobnetId;
+                        IconJobTable.Rows.Add(iconRow);
+                        if (jobHash.Contains(COMMAND_DIST))
+                        {
+                            foreach (DataRow row in (List<DataRow>)jobHash[COMMAND_DIST])
+                            {
+                                commandRow = JobCommandTable.NewRow();
+                                commandRow.ItemArray = row.ItemArray;
+                                commandRow["job_id"] = jobId;
+                                commandRow["jobnet_id"] = JobnetId;
+                                JobCommandTable.Rows.Add(commandRow);
+                            }
+                        }
+                        if (jobHash.Contains(JOB_VALUE_DIST))
+                        {
+                            foreach (DataRow row in (List<DataRow>)jobHash[JOB_VALUE_DIST])
+                            {
+                                jobValueRow = ValueJobTable.NewRow();
+                                jobValueRow.ItemArray = row.ItemArray;
+                                jobValueRow["job_id"] = jobId;
+                                jobValueRow["jobnet_id"] = JobnetId;
+                                ValueJobTable.Rows.Add(jobValueRow);
+                            }
+                        }
 
-            if (scrollHorizontalOffset != 0.0)
+                        if (jobHash.Contains(JOBCON_VALUE_DIST))
+                        {
+                            foreach (DataRow row in (List<DataRow>)jobHash[JOBCON_VALUE_DIST])
+                            {
+                                jobconValueRow = ValueJobConTable.NewRow();
+                                jobconValueRow.ItemArray = row.ItemArray;
+                                jobconValueRow["job_id"] = jobId;
+                                jobconValueRow["jobnet_id"] = JobnetId;
+                                ValueJobConTable.Rows.Add(jobconValueRow);
+                            }
+                        }
+
+                        break;
+                    // 5:ジョブネットの場合 
+                    case ElementType.JOBNET:
+                        iconRow = IconJobnetTable.NewRow();
+                        iconRow.ItemArray = ((DataRow)item.Value).ItemArray;
+                        iconRow["job_id"] = jobId;
+                        iconRow["jobnet_id"] = JobnetId;
+                        IconJobnetTable.Rows.Add(iconRow);
+                        break;
+                    // 9：拡張ジョブの場合 
+                    case ElementType.EXTJOB:
+                        iconRow = IconExtjobTable.NewRow();
+                        iconRow.ItemArray = ((DataRow)item.Value).ItemArray;
+                        iconRow["job_id"] = jobId;
+                        iconRow["jobnet_id"] = JobnetId;
+                        IconExtjobTable.Rows.Add(iconRow);
+                        break;
+                    //  10：計算の場合 
+                    case ElementType.CAL:
+                        iconRow = IconCalcTable.NewRow();
+                        iconRow.ItemArray = ((DataRow)item.Value).ItemArray;
+                        iconRow["job_id"] = jobId;
+                        iconRow["jobnet_id"] = JobnetId;
+                        IconCalcTable.Rows.Add(iconRow);
+                        break;
+                    // 11：タスク場合 
+                    case ElementType.TASK:
+                        iconRow = IconTaskTable.NewRow();
+                        iconRow.ItemArray = ((DataRow)item.Value).ItemArray;
+                        iconRow["job_id"] = jobId;
+                        iconRow["jobnet_id"] = JobnetId;
+                        IconTaskTable.Rows.Add(iconRow);
+                        break;
+                    // 12：情報取得場合 
+                    case ElementType.INF:
+                        iconRow = IconInfoTable.NewRow();
+                        iconRow.ItemArray = ((DataRow)item.Value).ItemArray;
+                        iconRow["job_id"] = jobId;
+                        iconRow["jobnet_id"] = JobnetId;
+                        IconInfoTable.Rows.Add(iconRow);
+                        break;
+                    // 14：ファイル転送場合 
+                    case ElementType.FCOPY:
+                        iconRow = IconFcopyTable.NewRow();
+                        iconRow.ItemArray = ((DataRow)item.Value).ItemArray;
+                        iconRow["job_id"] = jobId;
+                        iconRow["jobnet_id"] = JobnetId;
+                        IconFcopyTable.Rows.Add(iconRow);
+                        break;
+                    // 15：ファイル待ち合わせ場合 
+                    case ElementType.FWAIT:
+                        iconRow = IconFwaitTable.NewRow();
+                        iconRow.ItemArray = ((DataRow)item.Value).ItemArray;
+                        iconRow["job_id"] = jobId;
+                        iconRow["jobnet_id"] = JobnetId;
+                        IconFwaitTable.Rows.Add(iconRow);
+                        break;
+                    // 16：リブートの場合 
+                    case ElementType.REBOOT:
+                        iconRow = IconRebootTable.NewRow();
+                        iconRow.ItemArray = ((DataRow)item.Value).ItemArray;
+                        iconRow["job_id"] = jobId;
+                        iconRow["jobnet_id"] = JobnetId;
+                        IconRebootTable.Rows.Add(iconRow);
+                        break;
+                    // 17：保留解除の場合 
+                    case ElementType.RELEASE:
+                        iconRow = IconReleaseTable.NewRow();
+                        iconRow.ItemArray = ((DataRow)item.Value).ItemArray;
+                        iconRow["job_id"] = jobId;
+                        iconRow["jobnet_id"] = JobnetId;
+                        IconReleaseTable.Rows.Add(iconRow);
+                        break;
+                }
+            }
+            // フローを表示------------------
+            // 開始ジョブID、終了ジョブId 
+            string startJobId, endJobId;
+            // 開始ジョブ、終了ジョブ 
+            IRoom startJob, endJob;
+            // フロー幅 
+            int flowWidth;
+            // フロータイプ(直線、曲線) 
+            FlowLineType lineType;
+            // フロータイプ（　0：通常、　1：TURE、　2：FALSE） 
+            int flowType = 0;
+            foreach (DataRow row in workFlowTable.Rows)
             {
-                scrollHorizontalOffset += svContainer.HorizontalOffset;
+                flowControlRow = FlowControlTable.NewRow();
+                flowControlRow.ItemArray = row.ItemArray;
+                flowControlRow["jobnet_id"] = JobnetId;
+                FlowControlTable.Rows.Add(flowControlRow);
+                startJobId = Convert.ToString(flowControlRow["start_job_id"]);
+                endJobId = Convert.ToString(flowControlRow["end_job_id"]);
+                flowWidth = Convert.ToInt16(flowControlRow["flow_width"]);
+                flowType = Convert.ToInt16(flowControlRow["flow_type"]);
 
-                if (scrollHorizontalOffset < 0.0)
+                // フロータイプの判定 
+                if (flowWidth == 0)
                 {
-                    scrollHorizontalOffset = 0.0;
+                    lineType = FlowLineType.Line;
                 }
-                else if (scrollHorizontalOffset > svContainer.ScrollableHeight)
+                else
                 {
-                    scrollHorizontalOffset = svContainer.ScrollableHeight;
+                    lineType = FlowLineType.Curve;
                 }
 
-                svContainer.ScrollToHorizontalOffset(scrollHorizontalOffset);
+                startJob = (IRoom)JobItems[startJobId];
+                endJob = (IRoom)JobItems[endJobId];
+
+                MakeFlow(lineType, startJob, endJob, flowType, Consts.EditType.Modify);
             }
+
+        }
+
+    }
+
+    private String GetNextTempJobId()
+    {
+        TempJobNo = TempJobNo + 1;
+        return "temp_" + TempJobNo;
+    }
+
+    //*******************************************************************
+    /// <summary>コピーをクリア</summary>
+    //*******************************************************************
+    private void ClearSaveCollection()
+    {
+        ((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)ParantWindow).ParantWindow.SaveJobControlRows.Clear();
+        ((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)ParantWindow).ParantWindow.SaveItems.Clear();
+        ((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)ParantWindow).ParantWindow.SaveFlows.Clear();
+    }
+
+    //*******************************************************************
+    /// <summary>UNDO処理</summary>
+    //********a***********************************************************
+    private void Undo()
+    {
+        if (HistoryDataList.Count > 0)
+        {
+            HistoryData lastHist = HistoryDataList.Last<HistoryData>();
+            UndoDatas(lastHist);
+            UndoViews();
+            HistoryDataList[HistoryDataList.Count - 1] = null;
+            HistoryDataList.RemoveAt(HistoryDataList.Count - 1);
+        }
+    }
+
+    //*******************************************************************
+    /// <summary>保留処理</summary>
+    //*******************************************************************
+    private void SetHold(IElement item)
+    {
+        String jobId = item.JobId;
+        DataRow[] rows = JobControlTable.Select("job_id='" + jobId + "'");
+
+        rows[0]["method_flag"] = (int)RunJobMethodType.HOLD;
+        item.MethodType = RunJobMethodType.HOLD;
+    }
+    //*******************************************************************
+    /// <summary>スキップ処理</summary>
+    //*******************************************************************
+    private void SetSkip(IElement item)
+    {
+        String jobId = item.JobId;
+        DataRow[] rows = JobControlTable.Select("job_id='" + jobId + "'");
+
+        rows[0]["method_flag"] = (int)RunJobMethodType.SKIP;
+        item.MethodType = RunJobMethodType.SKIP;
+    }
+
+    //*******************************************************************
+    /// <summary>保留、スキップ解除処理</summary>
+    //*******************************************************************
+    private void SetUnHoldORUnSkip(IElement item)
+    {
+        String jobId = item.JobId;
+        DataRow[] rows = JobControlTable.Select("job_id='" + jobId + "'");
+
+        rows[0]["method_flag"] = (int)RunJobMethodType.NORMAL;
+        item.MethodType = RunJobMethodType.NORMAL;
+    }
+
+    //*******************************************************************
+    /// <summary>データのUNDO</summary>
+    //*******************************************************************
+    private void UndoDatas(HistoryData hist)
+    {
+        JobControlTable = hist.JobControlTable.Copy();
+        JobControlTable.AcceptChanges();
+        IconCalcTable = hist.IconCalcTable.Copy();
+        IconEndTable = hist.IconEndTable.Copy();
+        IconExtjobTable = hist.IconExtjobTable.Copy();
+        IconFcopyTable = hist.IconFcopyTable.Copy();
+        IconFwaitTable = hist.IconFwaitTable.Copy();
+        IconIfTable = hist.IconIfTable.Copy();
+        IconInfoTable = hist.IconInfoTable.Copy();
+        IconJobnetTable = hist.IconJobnetTable.Copy();
+        IconJobTable = hist.IconJobTable.Copy();
+        IconRebootTable = hist.IconRebootTable.Copy();
+        IconReleaseTable = hist.IconReleaseTable.Copy();
+        IconTaskTable = hist.IconTaskTable.Copy();
+        IconValueTable = hist.IconValueTable.Copy();
+        JobCommandTable = hist.JobCommandTable.Copy();
+        ValueJobConTable = hist.ValueJobConTable.Copy();
+        ValueJobTable = hist.ValueJobTable.Copy();
+        FlowControlTable = hist.FlowControlTable.Copy();
+        ((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)ParantWindow).ResetDataSet();
+        SetedJobIds = (Hashtable)hist.SetedJobIds.Clone();
+        ((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)ParantWindow).JobNoHash =  (Hashtable)hist.JobIdNos.Clone();
+    }
+
+    //*******************************************************************
+    /// <summary>表示のUNDO</summary>
+    //*******************************************************************
+    private void UndoViews()
+    {
+        ContainerCanvas.Children.Clear();
+        JobItems.Clear();
+        // ジョブデータ（ジョブアイコンの生成用） 
+        JobData jobData = null;
+
+        // ジョブを表示------------------
+        foreach (DataRow row in JobControlTable.Select())
+        {
+            jobData = new JobData();
+            // ジョブタイプ 
+            jobData.JobType = (ElementType)row["job_type"];
+
+            CommonItem room = new CommonItem(this, jobData, Consts.EditType.Modify, (RunJobMethodType)row["method_flag"]);
+            // ジョブID 
+            room.JobId = Convert.ToString(row["job_id"]);
+            //ジョブ名 
+            room.JobName = Convert.ToString(row["job_name"]);
+            // X位置 
+            room.SetValue(Canvas.LeftProperty, Convert.ToDouble(row["point_x"]));
+            // Y位置 
+            room.SetValue(Canvas.TopProperty, Convert.ToDouble(row["point_y"]));
+
+
+            // ジョブフロー領域に追加 
+            ContainerCanvas.Children.Add(room);
+            JobItems.Add(room.JobId, room);
+        }
+
+        // フローを表示------------------
+        // 開始ジョブID、終了ジョブId 
+        string startJobId, endJobId;
+        // 開始ジョブ、終了ジョブ 
+        IRoom startJob, endJob;
+        // フロー幅 
+        int flowWidth;
+        // フロータイプ(直線、曲線) 
+        FlowLineType lineType;
+        // フロータイプ（　0：通常、　1：TURE、　2：FALSE） 
+        int flowType = 0;
+        foreach (DataRow row in FlowControlTable.Select())
+        {
+            startJobId = Convert.ToString(row["start_job_id"]);
+            endJobId = Convert.ToString(row["end_job_id"]);
+            flowWidth = Convert.ToInt16(row["flow_width"]);
+            flowType = Convert.ToInt16(row["flow_type"]);
+
+            // フロータイプの判定 
+            if (flowWidth == 0)
+            {
+                lineType = FlowLineType.Line;
+            }
+            else
+            {
+                lineType = FlowLineType.Curve;
+            }
+
+            startJob = (IRoom)JobItems[startJobId];
+            endJob = (IRoom)JobItems[endJobId];
+
+            MakeFlow(lineType, startJob, endJob, flowType, Consts.EditType.Modify);
         }
     }
 
@@ -1712,6 +2543,30 @@ public partial class Container : UserControl,IContainer
             menuitemJobRun.IsEnabled = false;
         else
             menuitemJobRun.IsEnabled = true;
+
+        // 保留可能判定 
+        if (!IsHoldEnable())
+            menuitemHold.IsEnabled = false;
+        else
+            menuitemHold.IsEnabled = true;
+
+        // 保留解除可能判定 
+        if (!IsUnHoldEnable())
+            menuitemUnHold.IsEnabled = false;
+        else
+            menuitemUnHold.IsEnabled = true;
+
+        // スキップ可能判定 
+        if (!IsSkipEnable())
+            menuitemSkip.IsEnabled = false;
+        else
+            menuitemSkip.IsEnabled = true;
+
+        // スキップ解除可能判定 
+        if (!IsUnSkipEnable())
+            menuitemUnSkip.IsEnabled = false;
+        else
+            menuitemUnSkip.IsEnabled = true;
     }
 
     //*******************************************************************
@@ -1912,9 +2767,6 @@ public partial class Container : UserControl,IContainer
             ("start_job_id ='" + job1 + "' and end_job_id='" + job2 + "'");
         if (existFlows != null && existFlows.Count() > 0)
             return false;
-
-        // 最初に選択されたアイコンが開始アイコンで、
-
 
         // フロー管理テーブル（OUTフロージョブIDをキー）に１件以上のデータが存在する 
         if (item1 is Start)
@@ -2176,11 +3028,70 @@ public partial class Container : UserControl,IContainer
 
         return true;
     }
+
+    //*******************************************************************
+    /// <summary>保留を利用可能判定</summary>
+    //*******************************************************************
+    private bool IsHoldEnable()
+    {
+        // 全ての保留、スキップ設定されてないアイコンで可能 
+        if (_currentSelectedControlCollection == null
+            || _currentSelectedControlCollection.Count != 1
+            || !(_currentSelectedControlCollection[0] is IRoom)
+            || !(((CommonItem)_currentSelectedControlCollection[0]).ContentItem.MethodType == RunJobMethodType.NORMAL))
+            return false;
+
+        return true;
+    }
+    //*******************************************************************
+    /// <summary>保留解除を利用可能判定</summary>
+    //*******************************************************************
+    private bool IsUnHoldEnable()
+    {
+        if (_currentSelectedControlCollection == null
+            || _currentSelectedControlCollection.Count != 1
+            || !(_currentSelectedControlCollection[0] is IRoom)
+            || !(((CommonItem)_currentSelectedControlCollection[0]).ContentItem.MethodType == RunJobMethodType.HOLD))
+            return false;
+
+        return true;
+    }
+    //*******************************************************************
+    /// <summary>スキップ可能判定</summary>
+    //*******************************************************************
+    private bool IsSkipEnable()
+    {
+        if (_currentSelectedControlCollection == null
+            || _currentSelectedControlCollection.Count != 1
+            || !(_currentSelectedControlCollection[0] is IRoom)
+            || !(((CommonItem)_currentSelectedControlCollection[0]).ContentItem.MethodType == RunJobMethodType.NORMAL))
+            return false;
+        IElement item = ((CommonItem)_currentSelectedControlCollection[0]).ContentItem;
+
+        // 開始、終了、条件分岐、並行処理、ループアイコンの場合利用不可 
+        if (item is Start || item is End || item is If || item is Ife || item is Mts || item is Mte || item is Loop)
+            return false;
+
+        return true;
+    }
+    //*******************************************************************
+    /// <summary>スキップ解除を利用可能判定</summary>
+    //*******************************************************************
+    private bool IsUnSkipEnable()
+    {
+        // スキップされたアイコンで可能 
+        if (_currentSelectedControlCollection == null
+            || _currentSelectedControlCollection.Count != 1
+            || !(_currentSelectedControlCollection[0] is IRoom)
+            || !(((CommonItem)_currentSelectedControlCollection[0]).ContentItem.MethodType == RunJobMethodType.SKIP))
+            return false;
+
+        return true;
+    }
+    #endregion
     #endregion
 
     #region DB処理
-
-
     //*******************************************************************
     /// <summary>ジョブ位置設定</summary>
     /// <param name="jobId">ジョブID</param>
@@ -2252,7 +3163,9 @@ public partial class Container : UserControl,IContainer
                 if(rowsTmp != null)
                 {
                     foreach (DataRow row in rowsTmp)
-                    row.Delete();
+                    {
+                        row.Delete();
+                    }
                 }
                
                 // ジョブ変数設定テーブル 
@@ -2260,7 +3173,9 @@ public partial class Container : UserControl,IContainer
                 if(rowsTmp != null)
                 {
                     foreach (DataRow row in rowsTmp)
-                    row.Delete();
+                    {
+                        row.Delete();
+                    }
                 }
                     
                 // ジョブコントローラ変数設定テーブル 
@@ -2268,7 +3183,9 @@ public partial class Container : UserControl,IContainer
                 if (rowsTmp != null)
                 {
                     foreach (DataRow row in rowsTmp)
+                    {
                         row.Delete();
+                    }
                 }
                     
                 break;
@@ -2304,16 +3221,25 @@ public partial class Container : UserControl,IContainer
             case ElementType.REBOOT:
                 rows = IconRebootTable.Select(where);
                 break;
+            // 17：保留解除場合 
+            case ElementType.RELEASE:
+                rows = IconReleaseTable.Select(where);
+                break;
         }
         // 削除 
         if (rows != null)
         {
             foreach (DataRow row in rows)
+            {
                 row.Delete();
+            }
         }
     }
+    #endregion
 
-    private bool IsCanArrowMove(double deltaX, double deltaY)
+    #region internalメソッド
+
+    internal bool IsCanArrowMove(double deltaX, double deltaY)
     {
         CommonItem tmpItem = null;
         bool canMove = false;
@@ -2332,7 +3258,7 @@ public partial class Container : UserControl,IContainer
         return canMove;
     }
 
-    private bool[] IsNeedScrollMove(double deltaX, double deltaY)
+    internal bool[] IsNeedScrollMove(double deltaX, double deltaY)
     {
         CommonItem tmpItem = null;
         bool[] need = { false, false };
@@ -2350,7 +3276,65 @@ public partial class Container : UserControl,IContainer
         return need;
     }
 
-    #endregion
+    internal void ScrollIfNeeded(Point mouseLocation)
+    {
+        if (svContainer != null)
+        {
+            double scrollVerticalOffset = 0.0;
+            double scrollHorizontalOffset = 0.0;
+
+            // See if we need to scroll down 
+            if (svContainer.ViewportHeight - mouseLocation.Y < 15.0)
+            {
+                scrollVerticalOffset = 1.0;
+            }
+            else if (mouseLocation.Y < 15.0)
+            {
+                scrollVerticalOffset = -1.0;
+            }
+            if (svContainer.ViewportWidth - mouseLocation.X < 15.0)
+            {
+                scrollHorizontalOffset = 1.0;
+            }
+            else if (mouseLocation.X < 15.0)
+            {
+                scrollHorizontalOffset = -1.0;
+            }
+
+            // Scroll the tree down or up 
+            if (scrollVerticalOffset != 0.0)
+            {
+                scrollVerticalOffset += svContainer.VerticalOffset;
+
+                if (scrollVerticalOffset < 0.0)
+                {
+                    scrollVerticalOffset = 0.0;
+                }
+                else if (scrollVerticalOffset > svContainer.ScrollableHeight)
+                {
+                    scrollVerticalOffset = svContainer.ScrollableHeight;
+                }
+
+                svContainer.ScrollToVerticalOffset(scrollVerticalOffset);
+            }
+
+            if (scrollHorizontalOffset != 0.0)
+            {
+                scrollHorizontalOffset += svContainer.HorizontalOffset;
+
+                if (scrollHorizontalOffset < 0.0)
+                {
+                    scrollHorizontalOffset = 0.0;
+                }
+                else if (scrollHorizontalOffset > svContainer.ScrollableHeight)
+                {
+                    scrollHorizontalOffset = svContainer.ScrollableHeight;
+                }
+
+                svContainer.ScrollToHorizontalOffset(scrollHorizontalOffset);
+            }
+        }
+    }
 
     #endregion
 

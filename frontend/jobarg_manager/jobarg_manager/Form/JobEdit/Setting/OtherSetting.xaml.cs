@@ -37,10 +37,30 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
     public partial class OtherSetting : Window
     {
         #region コンストラクタ
-        public OtherSetting(IRoom room, string jobId)
+        public OtherSetting(IRoom room, string jobId, ElementType ElementType)
         {
             InitializeComponent();
 
+            switch (ElementType)
+            {
+                case ElementType.START:
+                    this.Title = Properties.Resources.start_icon_screen_name;
+                    break;
+                case ElementType.LOOP:
+                    this.Title = Properties.Resources.loop_icon_screen_name;
+                    break;
+                case ElementType.MTS:
+                    this.Title = Properties.Resources.mts_icon_screen_name;
+                    break;
+                case ElementType.MTE:
+                    this.Title = Properties.Resources.mte_icon_screen_name;
+                    break;
+                case ElementType.IFE:
+                    this.Title = Properties.Resources.ife_icon_screen_name;
+                    break;
+                default:
+                    break;
+            }
             _myJob = room;
 
             _oldJobId = jobId;
@@ -96,6 +116,9 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             {
                 return;
             }
+
+            //処理前現在データで履歴を作成
+            ((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.Container)_myJob.Container).CreateHistData();
 
             // 入力されたジョブID 
             string newJobId = txtJobId.Text;
@@ -205,10 +228,10 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                     new string[] { jobIdForChange, "32" });
                 return false;
             }
-            // 半角英数字とハイフン（-）チェック 
-            if (!CheckUtil.IsHankakuStrAndHyphen(jobId))
+            // 半角英数値、「-」、「_」チェック 
+            if (!CheckUtil.IsHankakuStrAndHyphenAndUnderbar(jobId))
             {
-                CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_005,
+                CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_013,
                     new string[] { jobIdForChange });
                 return false;
             }
@@ -245,6 +268,14 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             {
                 CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_003,
                     new string[] { jobNameForChange, "64" });
+                return false;
+            }
+
+            // 入力不可文字「"'\,」チェック
+            if (CheckUtil.IsImpossibleStr(jobName))
+            {
+                CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_025,
+                    new string[] { jobNameForChange });
                 return false;
             }
 

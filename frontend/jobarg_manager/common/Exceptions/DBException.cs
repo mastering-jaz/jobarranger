@@ -41,6 +41,13 @@ namespace jp.co.ftf.jobcontroller.Common
 
         /// <summary>コンストラクタ</summary>
         /// <param name="messageID">例外メッセージＩＤ</param>
+        public DBException()
+            : base()
+        {
+        }
+
+        /// <summary>コンストラクタ</summary>
+        /// <param name="messageID">例外メッセージＩＤ</param>
         public DBException(string messageID)
             : base(messageID)
         {

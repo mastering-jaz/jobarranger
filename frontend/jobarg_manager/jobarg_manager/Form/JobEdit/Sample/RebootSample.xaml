@@ -24,19 +24,19 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:src="clr-namespace:jp.co.ftf.jobcontroller.JobController" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             >
+             FontSize="11" FontFamily="Meiryo">
     <Canvas x:Name="LayoutRoot" Background="Transparent" >
 
         <Rectangle Canvas.ZIndex="100"  Name="picReboot" Height="25" Width="70" RadiusX="8" RadiusY="8" Stroke="Black"
                    Canvas.Top="0" Canvas.Left="0" Fill="White">
         </Rectangle>
 
-        <Path Stroke="Black" StrokeThickness="2"  Canvas.ZIndex="100">
+        <Path Stroke="Black" StrokeThickness="1.5"  Canvas.ZIndex="100">
             <Path.Data>
                 <PathGeometry>
-                    <PathFigure StartPoint="56,5.5" IsClosed="False">
-                        <ArcSegment Point="64,5.5"
-                                    Size="6,6"
+                    <PathFigure StartPoint="57,15.5" IsClosed="False">
+                        <ArcSegment Point="65,15.5"
+                                    Size="5,5"
                                     IsLargeArc="True"
                                     SweepDirection="Counterclockwise"
                                     RotationAngle="60"/>
@@ -46,15 +46,15 @@
             </Path.Data>
         </Path>
         <Line  Canvas.ZIndex="100"
-     X1="60" Y1="0"
-     X2="60" Y2="11"
+     X1="61" Y1="11"
+     X2="61" Y2="21"
      Stroke="Black"
-     StrokeThickness="2"/>
+     StrokeThickness="1.5"/>
 
-        <TextBlock   Canvas.ZIndex="101" Name="tbJobName" Foreground="Black" FontSize="11" Text="{x:Static src:Properties.Resources.reboot_icon_label_text}"    
+        <TextBlock   Canvas.ZIndex="101" Name="tbJobName" Foreground="Black" Text="{x:Static src:Properties.Resources.reboot_icon_label_text}"    
                      VerticalAlignment="Center" HorizontalAlignment="Center" TextWrapping="Wrap"  MaxWidth="90"
-                     Height="15" Width="65"  Canvas.Left="0" Canvas.Top="8"
-                     FontWeight="Normal" TextAlignment="Center" FontFamily="MS Gothic">
+                     Height="15" Width="65"  Canvas.Left="3" Canvas.Top="5"
+                     FontWeight="Normal" TextAlignment="Center">
         </TextBlock>
     </Canvas>
 </UserControl>

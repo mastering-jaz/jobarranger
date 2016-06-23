@@ -19,7 +19,7 @@ dnl
 
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT(jobarranger, 1.3.0)
+AC_INIT(jobarranger, 1.4.1)
 AC_CONFIG_SRCDIR(src/jobarg_server/server.c)
 AM_INIT_AUTOMAKE([tar-pax])
 
@@ -1162,6 +1162,7 @@ AC_OUTPUT([
 	src/jobarg_exec/Makefile
 	src/jobarg_get/Makefile
 	src/jobarg_release/Makefile
+	src/jobarg_joblogput/Makefile
 	src/jobarg_monitor/Makefile
 	src/jobarg_agent/Makefile
 	src/jobarg_server/Makefile
@@ -1212,6 +1213,6 @@ echo "***********************************************************"
 echo "*            Now run '${am_make} install'                       *"
 echo "*                                                         *"
 echo "*            Thank you for using Job Arranger!            *"
-echo "*              <http://www.fitechforce.co.jp>             *"
+echo "*            <https://ftf-support.fitechforce.com>        *"
 echo "***********************************************************"
 echo

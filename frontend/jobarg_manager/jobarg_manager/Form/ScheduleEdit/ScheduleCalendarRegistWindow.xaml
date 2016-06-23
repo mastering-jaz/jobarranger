@@ -23,7 +23,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:design="clr-namespace:jp.co.ftf.jobcontroller.JobController.Form.ScheduleEdit"
         xmlns:src="clr-namespace:jp.co.ftf.jobcontroller.JobController" 
-        Title="{x:Static src:Properties.Resources.WINDOW_NAME_221}" Height="650" Width="1050">
+        Title="{x:Static src:Properties.Resources.WINDOW_NAME_221}" Height="650" Width="1070"
+        FontFamily="Meiryo" FontSize="11">
     <Grid  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0,0,0,0" DockPanel.Dock="Top" >
         <Grid Name="grid" Margin="0">
             <Grid.ColumnDefinitions>
@@ -53,17 +54,17 @@
                         <RowDefinition Height="25" />
                         <RowDefinition Height="25"/>
                     </Grid.RowDefinitions>
-                    <TextBlock Grid.Row="0" Text="{x:Static src:Properties.Resources.calendar_id_label_text}" Height="23" HorizontalAlignment="Left" Margin="10,5,0,0" VerticalAlignment="Bottom" />
-                    <TextBlock Grid.Row="0" Height="23" Width="246" HorizontalAlignment="Left" Margin="94,5,0,0" Name="lblCalendarId" VerticalAlignment="Bottom" FontFamily="MS Gothic" />
+                    <TextBlock Grid.Row="0" Text="{x:Static src:Properties.Resources.calendar_id_label_text}" Height="23" HorizontalAlignment="Left" Margin="6,5,0,0" VerticalAlignment="Bottom" />
+                    <TextBlock Grid.Row="0" Height="23" Width="246" HorizontalAlignment="Left" Margin="94,5,0,0" Name="lblCalendarId" VerticalAlignment="Bottom" />
                     <TextBlock Grid.Row="0" Text="{x:Static src:Properties.Resources.public_label_text}" Height="23" HorizontalAlignment="Left" Margin="400,5,0,0" VerticalAlignment="Bottom" />
                     <TextBlock Grid.Row="0" Height="23" HorizontalAlignment="Left" Margin="440,5,0,0" Name="lblOpen" VerticalAlignment="Bottom" />
                     <TextBlock Grid.Row="0" Text="{x:Static src:Properties.Resources.update_date_label_text}" Height="23" HorizontalAlignment="Left" Margin="560,5,0,0" VerticalAlignment="Bottom" />
-                    <TextBlock Grid.Row="0" Text="" Height="23" Width="120" HorizontalAlignment="Left" Margin="630,5,0,0" Name="lblUpdDate" VerticalAlignment="Bottom" />
-                    <TextBlock Grid.Row="1" Height="23" Text="{x:Static src:Properties.Resources.calendar_name_label_text}" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Bottom"/>
+                    <TextBlock Grid.Row="0" Text="" Height="23" Width="140" HorizontalAlignment="Left" Margin="630,5,0,0" Name="lblUpdDate" VerticalAlignment="Bottom" />
+                    <TextBlock Grid.Row="1" Height="23" Text="{x:Static src:Properties.Resources.calendar_name_label_text}" HorizontalAlignment="Left" Margin="6,0,0,0" VerticalAlignment="Bottom"/>
                     <TextBlock Grid.Row="1" Height="23" Width="450" HorizontalAlignment="Left" Margin="94,0,0,0" Name="lblCalendarName" VerticalAlignment="Bottom" TextWrapping="WrapWithOverflow" />
                     <TextBlock Grid.Row="1" Height="23" Text="{x:Static src:Properties.Resources.user_name_label_text}" HorizontalAlignment="Left" Margin="560,0,0,0" VerticalAlignment="Bottom" />
-                    <TextBlock Grid.Row="1" Height="23" Width="100" HorizontalAlignment="Left" Margin="620,0,0,0" Name="lblUserName" VerticalAlignment="Bottom" TextWrapping="WrapWithOverflow" />
-                    <TextBlock Grid.Row="2" Text="{x:Static src:Properties.Resources.memo_label_text}" Height="23" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Bottom" />
+                    <TextBlock Grid.Row="1" Height="23" Width="100" HorizontalAlignment="Left" Margin="630,0,0,0" Name="lblUserName" VerticalAlignment="Bottom" TextWrapping="WrapWithOverflow" />
+                    <TextBlock Grid.Row="2" Text="{x:Static src:Properties.Resources.memo_label_text}" Height="23" HorizontalAlignment="Left" Margin="6,0,0,0" VerticalAlignment="Bottom" />
                     <TextBlock Grid.Row="2" Height="23" Margin="94,0,0,0" Name="lblComment" VerticalAlignment="Bottom" TextWrapping="WrapWithOverflow"/>
                 </Grid>
                 <design:CalendarContainer x:Name="container" Grid.Row="1" Loaded="container_Loaded"></design:CalendarContainer>

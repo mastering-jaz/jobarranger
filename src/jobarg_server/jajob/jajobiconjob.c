@@ -18,9 +18,9 @@
 **/
 
 /*
-** $Date:: 2013-05-17 16:54:38 +0900 #$
-** $Revision: 4642 $
-** $Author: ossinfra@FITECHLABS.CO.JP $
+** $Date:: 2013-12-13 15:44:50 +0900 #$
+** $Revision: 5621 $
+** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
 #include "common.h"
@@ -99,7 +99,14 @@ int jajob_icon_job_timeout(zbx_uint64_t inner_job_id, char *start_time)
     zbx_uint64_t inner_jobnet_id;
     char timeout[64];
     DB_RESULT result;
+    DB_RESULT result2;
     DB_ROW row;
+    DB_ROW row2;
+    int exit_flag, idx, len;
+    zbx_uint64_t w_inner_job_id;
+    char w_main_jobnet_id[70];
+    char w_execution_user_name[110];
+    char w_job_id[3000];
     const char *__function_name = "jajob_icon_job_timeout";
 
     zabbix_log(LOG_LEVEL_DEBUG, "In %s() inner_job_id: " ZBX_FS_UI64,
@@ -122,8 +129,84 @@ int jajob_icon_job_timeout(zbx_uint64_t inner_job_id, char *start_time)
 
     if (ja_timeout_check(timeout, start_time) == FAIL)
         return SUCCEED;
+
+    w_main_jobnet_id[0] = '\0';
+    w_execution_user_name[0] = '\0';
+
+    /* main jobnet id and user name get */
+    result = DBselect("select inner_jobnet_main_id, job_id from ja_run_job_table"
+                      " where inner_job_id = " ZBX_FS_UI64, inner_job_id);
+    if (NULL != (row = DBfetch(result))) {
+        result2 = DBselect("select jobnet_id, execution_user_name from ja_run_jobnet_table"
+                           " where inner_jobnet_id = %s", row[0]);
+        if (NULL != (row2 = DBfetch(result2))) {
+            zbx_strlcpy(w_main_jobnet_id, row2[0], sizeof(w_main_jobnet_id));
+            zbx_strlcpy(w_execution_user_name, row2[1], sizeof(w_execution_user_name));
+        }
+        DBfree_result(result2);
+    }
+    DBfree_result(result);
+
+    /* job id get */
+    idx = sizeof(w_job_id) - 1;
+    w_job_id[idx] = '\0';
+    w_inner_job_id = inner_job_id;
+
+    /* sub jobnet search */
+    exit_flag = 0;
+    while (exit_flag == 0) {
+        result = DBselect("select inner_jobnet_id, inner_jobnet_main_id, job_id"
+                           " from ja_run_job_table"
+                           " where inner_job_id = " ZBX_FS_UI64, w_inner_job_id);
+        if (NULL == (row = DBfetch(result))) {
+            DBfree_result(result);
+            exit_flag = 1;
+            continue;
+        }
+
+        len = strlen(row[2]);
+        if (((idx - 1) - len) < 0) {
+            DBfree_result(result);
+            exit_flag = 1;
+            continue;
+        } else {
+            idx = idx - len;
+            memcpy(&w_job_id[idx], row[2], len);
+            idx = idx - 1;
+            memcpy(&w_job_id[idx], "/", 1);
+        }
+
+        if (strcmp(row[0], row[1]) == 0) {
+            DBfree_result(result);
+            exit_flag = 1;
+            continue;
+        }
+
+        /* get the job id of the jobnet icon */
+        result2 = DBselect("select inner_job_id from ja_run_icon_jobnet_table"
+                           " where link_inner_jobnet_id = %s", row[0]);
+        if (NULL == (row2 = DBfetch(result2))) {
+            DBfree_result(result);
+            DBfree_result(result2);
+            exit_flag = 1;
+            continue;
+        }
+        ZBX_STR2UINT64(w_inner_job_id, row2[0]);
+        DBfree_result(result);
+        DBfree_result(result2);
+    }
+
+    /* jobnet id set */
+    len = strlen(w_main_jobnet_id);
+    if ((idx - len) >= 0 && len > 0) {
+        idx = idx - len;
+        memcpy(&w_job_id[idx], w_main_jobnet_id, len);
+    }
+
     ja_log("JAJOBICONJOB300001", inner_jobnet_id, NULL, inner_job_id,
-           __function_name, inner_job_id, timeout, start_time);
+           __function_name, inner_job_id, timeout, start_time,
+           w_main_jobnet_id, &w_job_id[idx], w_execution_user_name);
+
     db_ret =
         DBexecute
         ("update ja_run_job_table set timeout_flag = 1 where inner_job_id = "

@@ -190,11 +190,9 @@ namespace jp.co.ftf.jobcontroller.DAO
                 }
 
                 // テーブルの名前を再設定
-
                 dt.TableName = baseEntity.TableName;
 
                 // テーブルのキーを設定
-
                 dt.PrimaryKey = this.GetPrimaryKey(ref dt, baseEntity.PrimaryKey);
 
                 using (OdbcDataAdapter sqlAdapter = new OdbcDataAdapter())

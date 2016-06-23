@@ -51,6 +51,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
 
 
         #endregion
+
         #region コンストラクタ
         public TaskSetting(IRoom room, string jobId)
         {
@@ -113,6 +114,9 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                 return;
             }
 
+            //処理前現在データで履歴を作成
+            ((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.Container)_myJob.Container).CreateHistData();
+
             // 入力されたジョブID 
             string newJobId = txtJobId.Text;
             // 入力されたジョブ名 
@@ -143,7 +147,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             _myJob.Container.JobItems.Add(newJobId, _myJob);
             _myJob.JobId = newJobId;
             _myJob.JobName = newJobNm;
-            _myJob.Container.SetedJobIds[_myJob.JobId] = "1";
+            _myJob.Container.SetedJobIds[_myJob.JobId]="1";
             this.Close();
         }
 
@@ -266,10 +270,10 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                     new string[] { jobIdForChange, "32" });
                 return false;
             }
-            // 半角英数字とハイフン（-）チェック 
-            if (!CheckUtil.IsHankakuStrAndHyphen(jobId))
+            // 半角英数値、「-」、「_」チェック 
+            if (!CheckUtil.IsHankakuStrAndHyphenAndUnderbar(jobId))
             {
-                CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_005,
+                CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_013,
                     new string[] { jobIdForChange });
                 return false;
             }
@@ -302,6 +306,14 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             {
                 CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_003,
                     new string[] { jobNameForChange, "64" });
+                return false;
+            }
+
+            // 入力不可文字「"'\,」チェック
+            if (CheckUtil.IsImpossibleStr(jobName))
+            {
+                CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_025,
+                    new string[] { jobNameForChange });
                 return false;
             }
 

@@ -85,6 +85,15 @@ namespace jp.co.ftf.jobcontroller.JobController
         /// エラーダイアログ
         /// </summary>
         /// <param name="msgId">メッセージＩＤ</param>
+        public static MessageBoxResult ShowErrorDialogFromMessage(String msg)
+        {
+            return MessageBox.Show(msg, errDialogTitle, MessageBoxButton.OK);
+        }
+
+        /// <summary>
+        /// エラーダイアログ
+        /// </summary>
+        /// <param name="msgId">メッセージＩＤ</param>
         public static MessageBoxResult ShowErrorDialog(String msgId)
         {
             string msg = MessageUtil.GetMsgById(msgId);
@@ -108,9 +117,9 @@ namespace jp.co.ftf.jobcontroller.JobController
         /// </summary>
         public static MessageBoxResult ShowEndDialog()
         {
-            return MessageBox.Show(endDialogMessage, endDialogTitle, 
-                                   MessageBoxButton.YesNo,
-                                   MessageBoxImage.None, MessageBoxResult.No);
+            return System.Windows.MessageBox.Show(endDialogMessage, endDialogTitle,
+                                   System.Windows.MessageBoxButton.YesNo,
+                                   System.Windows.MessageBoxImage.None, MessageBoxResult.No);
         }
 
         /// <summary>
@@ -118,8 +127,8 @@ namespace jp.co.ftf.jobcontroller.JobController
         /// </summary>
         public static MessageBoxResult ShowEditRegistDialog()
         {
-            return MessageBox.Show(editRegistMessage, editRegistDialogTitle, 
-                                   MessageBoxButton.YesNo);
+            return System.Windows.MessageBox.Show(editRegistMessage, editRegistDialogTitle,
+                                   System.Windows.MessageBoxButton.YesNo);
         }
 
         /// <summary>
@@ -127,8 +136,8 @@ namespace jp.co.ftf.jobcontroller.JobController
         /// </summary>
         public static MessageBoxResult ShowCancelDialog()
         {
-            return MessageBox.Show(cancelMessage, cancelDialogTitle,
-                                   MessageBoxButton.YesNo);
+            return System.Windows.MessageBox.Show(cancelMessage, cancelDialogTitle,
+                                   System.Windows.MessageBoxButton.YesNo);
         }
 
         /// <summary>
@@ -136,8 +145,8 @@ namespace jp.co.ftf.jobcontroller.JobController
         /// </summary>
         public static void ShowVersionDialog()
         {
-            MessageBox.Show(versionDialogMessage,versionDialogTitle, 
-                            MessageBoxButton.OK);
+            jp.co.ftf.jobcontroller.JobController.JobArrangerMessageBox.Show(versionDialogTitle, versionDialogMessage,
+                            System.Windows.MessageBoxButton.OK);
         }
 
         /// <summary>
@@ -145,9 +154,9 @@ namespace jp.co.ftf.jobcontroller.JobController
         /// </summary>
         public static MessageBoxResult ShowDeleteDialog()
         {
-            return MessageBox.Show(deleteMessage, deleteDialogTitle,
-                                   MessageBoxButton.YesNo,
-                                   MessageBoxImage.None, MessageBoxResult.No);
+            return System.Windows.MessageBox.Show(deleteMessage, deleteDialogTitle,
+                                   System.Windows.MessageBoxButton.YesNo,
+                                  System.Windows.MessageBoxImage.None, MessageBoxResult.No);
         }
 
         /// <summary>
@@ -155,9 +164,9 @@ namespace jp.co.ftf.jobcontroller.JobController
         /// </summary>
         public static MessageBoxResult ShowJobnetStartDialog()
         {
-            return MessageBox.Show(jobnetStartMessage, jobnetStartDialogTitle,
-                                   MessageBoxButton.YesNo,
-                                   MessageBoxImage.None, MessageBoxResult.No);
+            return System.Windows.MessageBox.Show(jobnetStartMessage, jobnetStartDialogTitle,
+                                   System.Windows.MessageBoxButton.YesNo,
+                                   System.Windows.MessageBoxImage.None, MessageBoxResult.No);
         }
         #endregion
 

@@ -91,6 +91,11 @@ namespace jp.co.ftf.jobcontroller.Common
 
         /// <summary>コンストラクタ</summary>
         /// <param name="messageID">例外メッセージＩＤ</param>
+        public BaseException()
+            : this(string.Empty, string.Empty, string.Empty, null) { }
+
+        /// <summary>コンストラクタ</summary>
+        /// <param name="messageID">例外メッセージＩＤ</param>
         public BaseException(string messageID)
             : this(string.Empty, messageID, string.Empty, null) { }
 

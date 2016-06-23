@@ -102,6 +102,15 @@ namespace jp.co.ftf.jobcontroller.Common
 
         /// <summary> 4- 0．ジョブネット起動中画面 </summary>
         public static readonly String WINDOW_400 = "WINDOW_NAME_400";
+
+        /// <summary> 5- 0．実行結果画面 </summary>
+        public static readonly String WINDOW_500 = "WINDOW_NAME_500";
+
+        /// <summary> 5-1．CSV出力画面<summary>
+        public static readonly String WINDOW_510 = "WINDOW_NAME_510";
+
+        /// <summary> 5-2．実行結果詳細画面<summary>
+        public static readonly String WINDOW_520 = "WINDOW_NAME_520";
         #endregion
 
         #region メッセージID
@@ -138,6 +147,9 @@ namespace jp.co.ftf.jobcontroller.Common
 
         /// <summary>SYSERR_004<summary>
         public static readonly String SYSERR_004 = "SYSERR_004";
+
+        /// <summary>ERROR_DB_LOCK<summary>
+        public static readonly String ERROR_DB_LOCK = "ERROR_DB_LOCK";
 
         /// <summary>ERROR_COMMON_001<summary>
         public static readonly String ERROR_COMMON_001 = "ERROR_COMMON_001";
@@ -184,6 +196,39 @@ namespace jp.co.ftf.jobcontroller.Common
         /// <summary>ERROR_COMMON_015<summary>
         public static readonly String ERROR_COMMON_015 = "ERROR_COMMON_015";
 
+        /// <summary>ERROR_COMMON_016<summary>
+        public static readonly String ERROR_COMMON_016 = "ERROR_COMMON_016";
+
+        /// <summary>ERROR_COMMON_017<summary>
+        public static readonly String ERROR_COMMON_017 = "ERROR_COMMON_017";
+
+        /// <summary>ERROR_COMMON_018<summary>
+        public static readonly String ERROR_COMMON_018 = "ERROR_COMMON_018";
+
+        /// <summary>ERROR_COMMON_019<summary>
+        public static readonly String ERROR_COMMON_019 = "ERROR_COMMON_019";
+
+        /// <summary>ERROR_COMMON_020<summary>
+        public static readonly String ERROR_COMMON_020 = "ERROR_COMMON_020";
+
+        /// <summary>ERROR_COMMON_021<summary>
+        public static readonly String ERROR_COMMON_021 = "ERROR_COMMON_021";
+
+        /// <summary>ERROR_COMMON_022<summary>
+        public static readonly String ERROR_COMMON_022 = "ERROR_COMMON_022";
+
+        /// <summary>ERROR_COMMON_023<summary>
+        public static readonly String ERROR_COMMON_023 = "ERROR_COMMON_023";
+
+        /// <summary>ERROR_COMMON_024<summary>
+        public static readonly String ERROR_COMMON_024 = "ERROR_COMMON_024";
+
+        /// <summary>ERROR_COMMON_025<summary>
+        public static readonly String ERROR_COMMON_025 = "ERROR_COMMON_025";
+
+        /// <summary>ERROR_COMMON_026<summary>
+        public static readonly String ERROR_COMMON_026 = "ERROR_COMMON_026";
+
         /// <summary>ERROR_JOBEDIT_001<summary>
         public static readonly String ERROR_JOBEDIT_001 = "ERROR_JOBEDIT_001";
 
@@ -220,6 +265,9 @@ namespace jp.co.ftf.jobcontroller.Common
         /// <summary>ERROR_JOBEDIT_012<summary>
         public static readonly String ERROR_JOBEDIT_012 = "ERROR_JOBEDIT_012";
 
+        /// <summary>ERROR_JOBEDIT_013<summary>
+        public static readonly String ERROR_JOBEDIT_013 = "ERROR_JOBEDIT_013";
+
         /// <summary> ERROR_LOGIN_001 </summary>
         public static readonly String ERROR_LOGIN_001 = "ERROR_LOGIN_001";
 
@@ -243,6 +291,9 @@ namespace jp.co.ftf.jobcontroller.Common
 
         /// <summary>ERROR_CALENDAR_002<summary>
         public static readonly String ERROR_CALENDAR_002 = "ERROR_CALENDAR_002";
+
+        /// <summary>ERROR_CALENDAR_003<summary>
+        public static readonly String ERROR_CALENDAR_003 = "ERROR_CALENDAR_003";
 
         /// <summary> ERROR_CALENDAR_FILE_READ_001 </summary>
         public static readonly String ERROR_CALENDAR_FILE_READ_001 = "ERROR_CALENDAR_FILE_READ_001";
@@ -365,11 +416,20 @@ namespace jp.co.ftf.jobcontroller.Common
         /// <summary>PROCESS_023<summary>
         public static readonly String PROCESS_023 = "PROCESS_023";
 
+        /// <summary>PROCESS_024<summary>
+        public static readonly String PROCESS_024 = "PROCESS_024";
+
+        /// <summary>PROCESS_025<summary>
+        public static readonly String PROCESS_025 = "PROCESS_025";
+
         /// <summary>IMPORT_PATH<summary>
         public static String IMPORT_PATH = "";
 
         /// <summary>IMPORT_PATH<summary>
         public static String EXPORT_PATH = "";
+
+        /// <summary>CSV_PATH<summary>
+        public static String CSV_PATH = "";
 
         /// <summary>IMPORT_PATH<summary>
         public static String FILEREAD_PATH = "";

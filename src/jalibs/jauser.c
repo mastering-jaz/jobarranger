@@ -18,8 +18,8 @@
 **/
 
 /*
-** $Date:: 2013-06-19 10:27:36 +0900 #$
-** $Revision: 4928 $
+** $Date:: 2013-07-18 16:21:01 +0900 #$
+** $Revision: 5200 $
 ** $Author: ossinfra@FITECHLABS.CO.JP $
 **/
 
@@ -232,4 +232,42 @@ int ja_user_type(zbx_uint64_t userid)
 
     DBfree_result(result);
     return type;
+}
+
+/******************************************************************************
+ *                                                                            *
+ * Function:                                                                  *
+ *                                                                            *
+ * Purpose:                                                                   *
+ *                                                                            *
+ * Parameters:                                                                *
+ *                                                                            *
+ * Return value:                                                              *
+ *                                                                            *
+ * Comments:                                                                  *
+ *                                                                            *
+ ******************************************************************************/
+int ja_user_groups(zbx_uint64_t userid1, zbx_uint64_t userid2)
+{
+    int cnt;
+    DB_RESULT result;
+    DB_ROW row;
+    const char *__function_name = "ja_user_groups";
+
+    zabbix_log(LOG_LEVEL_DEBUG,
+               "In %s() userid1: " ZBX_FS_UI64 " userid2: " ZBX_FS_UI64,
+               __function_name, userid1, userid2);
+
+    cnt = 0;
+    result =
+        DBselect
+        ("select count(*) from users_groups g1, users_groups g2 where g1.usrgrpid = g2.usrgrpid and g1.userid = "
+         ZBX_FS_UI64 " and g2.userid = " ZBX_FS_UI64, userid1, userid2);
+    row = DBfetch(result);
+    if (row != NULL) {
+        cnt = atoi(row[0]);
+    }
+
+    DBfree_result(result);
+    return cnt;
 }

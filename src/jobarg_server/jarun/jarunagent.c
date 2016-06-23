@@ -53,7 +53,7 @@
  *                                                                            *
  ******************************************************************************/
 int jarun_agent(ja_job_object * job, const char *host_name,
-                const int host_flag)
+                const int host_flag, const zbx_uint64_t inner_job_id)
 {
     int ret;
     char host[128];
@@ -68,10 +68,8 @@ int jarun_agent(ja_job_object * job, const char *host_name,
                __function_name, job->jobid);
 
     if (ja_host_getname(job->jobid, host_flag, host_name, host) == FAIL) {
-        zabbix_log(LOG_LEVEL_ERR,
-                   "In %s() can get host name %s. host_flag: %d, job id: "
-                   ZBX_FS_UI64, __function_name, host_name, host_flag,
-                   job->jobid);
+        ja_log("JARUNAGENT200001", 0, NULL, inner_job_id,
+               __function_name, host_name, host_flag, inner_job_id);
         return ja_set_runerr(job->jobid);
     }
 
@@ -88,7 +86,7 @@ int jarun_agent(ja_job_object * job, const char *host_name,
     zbx_snprintf(job->serverid, sizeof(job->serverid), "%s", serverid);
     zbx_snprintf(job->hostname, sizeof(job->hostname), "%s", host);
 
-    if (job->method == JA_JOB_METHOD_ABORT) {
+    if (job->method == JA_AGENT_METHOD_KILL) {
         if (ja_set_status_job(job->jobid, JA_JOB_STATUS_ABORT, -1, -1) ==
             FAIL)
             return FAIL;
@@ -96,10 +94,9 @@ int jarun_agent(ja_job_object * job, const char *host_name,
 
     pid = ja_fork();
     if (pid == -1) {
-        zabbix_log(LOG_LEVEL_ERR,
-                   "In %s() can not fork(). job id: " ZBX_FS_UI64,
-                   __function_name, job->jobid);
-        if (job->method == JA_JOB_METHOD_ABORT)
+        ja_log("JARUNAGENT200002", 0, NULL, inner_job_id,
+               __function_name, inner_job_id);
+        if (job->method == JA_AGENT_METHOD_KILL)
             return FAIL;
         else
             return ja_set_runerr(job->jobid);
@@ -112,9 +109,8 @@ int jarun_agent(ja_job_object * job, const char *host_name,
     ja_job_object_init(&job_res);
     DBconnect(ZBX_DB_CONNECT_ONCE);
     if (ja_connect(&sock, host) == FAIL) {
-        zabbix_log(LOG_LEVEL_ERR,
-                   "In %s() can not connect the host %s. job id: "
-                   ZBX_FS_UI64, __function_name, host, job->jobid);
+        ja_log("JARUNAGENT200003", 0, NULL, inner_job_id,
+               __function_name, host, inner_job_id);
         ja_set_runerr(job->jobid);
         DBclose();
         exit(1);
@@ -139,10 +135,9 @@ int jarun_agent(ja_job_object * job, const char *host_name,
         exit(0);
     } else {
         DBconnect(ZBX_DB_CONNECT_ONCE);
-        zabbix_log(LOG_LEVEL_ERR,
-                   "In %s() job id: " ZBX_FS_UI64 " message: %s",
-                   __function_name, job->jobid, job_res.message);
-        if (job->method != JA_JOB_METHOD_ABORT)
+        ja_log("JARUNAGENT200004", 0, NULL, inner_job_id,
+               __function_name, inner_job_id, job_res.message);
+        if (job->method != JA_AGENT_METHOD_KILL)
             ja_set_runerr(job->jobid);
         DBclose();
         exit(1);

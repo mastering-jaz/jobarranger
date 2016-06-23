@@ -54,6 +54,7 @@
     <Compile Include="DAO\IconFcopyDAO.cs" />
     <Compile Include="DAO\IconFwaitDAO.cs" />
     <Compile Include="DAO\IconRebootDAO.cs" />
+    <Compile Include="DAO\IconReleaseDAO.cs" />
     <Compile Include="DAO\JobControlDAO.cs" />
     <Compile Include="DAO\JobnetControlDAO.cs" />
     <Compile Include="DAO\FlowControlDAO.cs" />
@@ -76,10 +77,12 @@
     <Compile Include="DAO\RunIconJobDAO.cs" />
     <Compile Include="DAO\RunIconJobnetDAO.cs" />
     <Compile Include="DAO\RunIconRebootDAO.cs" />
+    <Compile Include="DAO\RunIconReleaseDAO.cs" />
     <Compile Include="DAO\RunIconTaskDAO.cs" />
     <Compile Include="DAO\RunIconValueDAO.cs" />
     <Compile Include="DAO\RunJobCommandDAO.cs" />
     <Compile Include="DAO\RunJobDAO.cs" />
+    <Compile Include="DAO\RunLogDAO.cs" />
     <Compile Include="DAO\RunValueBeforeDAO.cs" />
     <Compile Include="DAO\RunValueJobDAO.cs" />
     <Compile Include="DAO\RunValueJobConDAO.cs" />

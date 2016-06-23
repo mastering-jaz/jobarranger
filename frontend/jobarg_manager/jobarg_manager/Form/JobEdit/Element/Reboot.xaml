@@ -23,19 +23,19 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             >
+             FontSize="10" FontFamily="Meiryo">
     <Canvas x:Name="LayoutRoot" Background="Transparent" >
 
-        <Rectangle Canvas.ZIndex="100"  Name="picReboot" Height="30" Width="80" RadiusX="10" RadiusY="10" Stroke="Black"
+        <Rectangle Canvas.ZIndex="100"  Name="picReboot" Height="30" Width="80" RadiusX="10" RadiusY="10" Stroke="Gray"
                    Canvas.Top="0" Canvas.Left="0" Fill="White">
         </Rectangle>
 
-        <Path  Canvas.ZIndex="100" Stroke="Black" StrokeThickness="2">
+        <Path  Canvas.ZIndex="100" Stroke="Black" StrokeThickness="1.5">
             <Path.Data>
                 <PathGeometry>
-                    <PathFigure StartPoint="66,6" IsClosed="False">
-                        <ArcSegment Point="75,6"
-                                    Size="7,7"
+                    <PathFigure StartPoint="66,17" IsClosed="False">
+                        <ArcSegment Point="75,17"
+                                    Size="6,6"
                                     IsLargeArc="True"
                                     SweepDirection="Counterclockwise"
                                     RotationAngle="60"/>
@@ -45,22 +45,24 @@
             </Path.Data>
         </Path>
         <Line  Canvas.ZIndex="100"
-     X1="71" Y1="0"
-     X2="71" Y2="11"
-     Stroke="Black"
-     StrokeThickness="2"/>
+                    X1="70.5" Y1="12"
+                    X2="70.5" Y2="21"
+                    Stroke="Black"
+                    StrokeThickness="1.5"/>
 
-        <TextBlock   Canvas.ZIndex="101" Name="tbJobId" Foreground="Black" FontSize="11" Text=""    
+        <TextBlock Style="{StaticResource TextBlockServiceStyle}" Canvas.ZIndex="101" Name="tbJobId" Foreground="Black" Text=""
+                     Tag="{Binding Path=JobId, NotifyOnTargetUpdated=True}" TargetUpdated="textBlockJobId_TargetUpdated"
                      VerticalAlignment="Center" HorizontalAlignment="Center"
                      TextWrapping="Wrap"  MaxWidth="90"
-                     Height="11" Width="80" 
-                     Canvas.Left="0" Canvas.Top="4" FontWeight="Normal" 
-                     TextAlignment="Center" FontFamily="MS Gothic">
+                     Height="13" Width="80" 
+                     Canvas.Left="0" Canvas.Top="3" FontWeight="Normal" 
+                     TextAlignment="Center">
         </TextBlock>
-        <TextBlock   Canvas.ZIndex="101" Name="tbJobName" Foreground="Black" FontSize="11" Text="リブート"    
+        <TextBlock Style="{StaticResource TextBlockServiceStyle}" Canvas.ZIndex="101" Name="tbJobName" Foreground="Black" Text="リブート"
+                     Tag="{Binding Path=JobName, NotifyOnTargetUpdated=True}" TargetUpdated="textBlockJobName_TargetUpdated"
                      VerticalAlignment="Center" HorizontalAlignment="Center" TextWrapping="Wrap"  MaxWidth="90"
                      Height="15" Width="80"  Canvas.Left="0" Canvas.Top="15"
-                     FontWeight="Normal" TextAlignment="Center" FontFamily="MS Gothic">
+                     FontWeight="Normal" TextAlignment="Center" >
         </TextBlock>
 
         <Rectangle Name="HotspotLeft" Width="5" Height="5" Canvas.ZIndex="1000" Fill="Blue" Stroke="White" 

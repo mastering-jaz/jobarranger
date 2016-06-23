@@ -23,9 +23,9 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:src="clr-namespace:jp.co.ftf.jobcontroller.JobController" 
         Title="{x:Static src:Properties.Resources.during_startup_jobnet_screen_name}" Height="150" Width="300"
-        ResizeMode="NoResize" 
+        ResizeMode="NoResize" FontSize="11" FontFamily="Meiryo"
         src:WindowBehavior.HideCloseButton="True">
     <Grid>
-        <TextBlock Height="23" HorizontalAlignment="Center" VerticalAlignment="Center" Name="textBlock1" Text="{x:Static src:Properties.Resources.during_startup_jobnet_screen_language}" />
+        <TextBlock Height="37" HorizontalAlignment="Center" VerticalAlignment="Center" Name="textBlock1" Text="{x:Static src:Properties.Resources.during_startup_jobnet_screen_language}" Margin="46,44,29,30" Width="203" />
     </Grid>
 </src:BaseWindow>

@@ -29,6 +29,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Data;
+using System.IO;
 using jp.co.ftf.jobcontroller.Common;
 using jp.co.ftf.jobcontroller.DAO;
 
@@ -147,19 +148,44 @@ namespace jp.co.ftf.jobcontroller.JobController
             // 入力チェック 
             if (!InputCheck())
                 return;
+            try
+            {
+                System.IO.StreamWriter file =
+                    new System.IO.StreamWriter(textBox_fileName.Text, false);
+                DataSet ds = DBUtil.Export(_objectId, _objectType, _rows);
+                ds.WriteXml(file);
+                file.Close();
+                this.Close();
 
-            System.IO.StreamWriter file =
-                new System.IO.StreamWriter(textBox_fileName.Text, false);
-            DataSet ds = DBUtil.Export(_objectId, _objectType, _rows);
-            ds.WriteXml(file);
-            file.Close();
-            this.Close();
+                System.IO.DirectoryInfo dirInfoBar = new System.IO.DirectoryInfo(textBox_fileName.Text);
+                System.IO.DirectoryInfo dirInfo = dirInfoBar.Parent;
 
-            System.IO.DirectoryInfo dirInfoBar = new System.IO.DirectoryInfo(textBox_fileName.Text);
-            System.IO.DirectoryInfo dirInfo = dirInfoBar.Parent;
-
-            Consts.EXPORT_PATH = dirInfo.FullName;
-
+                Consts.EXPORT_PATH = dirInfo.FullName;
+            }
+            catch (ArgumentException ex)
+            {
+                CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_019);
+            }
+            catch (NotSupportedException ex)
+            {
+                CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_019);
+            }
+            catch (DirectoryNotFoundException ex)
+            {
+                CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_022);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_023);
+            }
+            catch (System.IO.IOException ex)
+            {
+                CommonDialog.ShowErrorDialogFromMessage(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                CommonDialog.ShowErrorDialogFromMessage(ex.Message);
+            }
             // 終了ログ
             base.WriteEndLog("ok_Click", Consts.PROCESS_012);
         }

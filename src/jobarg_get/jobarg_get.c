@@ -18,9 +18,9 @@
 **/
 
 /*
-** $Date:: 2013-06-10 11:07:40 +0900 #$
-** $Revision: 4881 $
-** $Author: ossinfra@FITECHLABS.CO.JP $
+** $Date:: 2013-12-13 10:32:07 +0900 #$
+** $Revision: 5620 $
+** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
 #include "common.h"
@@ -42,13 +42,14 @@ static struct zbx_option longopts[] = {
     {"user-name", 1, NULL, 'U'},
     {"password", 1, NULL, 'P'},
     {"registry-number", 1, NULL, 'r'},
+    {"variable-display", 0, NULL, 'e'},
     {"help", 0, NULL, 'h'},
     {"version", 0, NULL, 'V'},
     {NULL}
 };
 
 /* short options */
-static char shortopts[] = "z:p:U:P:r:hV";
+static char shortopts[] = "z:p:U:P:r:ehV";
 
 /* end of COMMAND LINE OPTIONS */
 
@@ -58,27 +59,29 @@ static char *JOBARG_SOURCE_IP = NULL;
 static char *JOBARG_SERVER = NULL;
 unsigned short JOBARG_SERVER_PORT = 0;
 unsigned short JOBARG_DEFAULT_SERVER_PORT = 10061;
-zbx_uint64_t JOBARG_REGISTRY_NUMBER = 0;
+static char *JOBARG_REGISTRY_NUMBER = NULL;
 static char *JOBARG_USERNAME = NULL;
 static char *JOBARG_PASSWORD = NULL;
+static int JOBARG_VARIABLE_FORMAT = 0;
 
 const char *progname = NULL;
-const char title_message[] = "Jobarranger Get";
+const char title_message[] = "Job Arranger Get";
 const char usage_message[] =
-    "[-hV] -z <hostname or IP> [-p <port>] -U <username> -P <password> -r <registrynumber>";
+    "[-hV] -z <hostname or IP> [-p <port>] -U <username> -P <password> -r <registry number> [-e]";
 
 const char *help_message[] = {
     "Options:",
-    "  -z --jobarranger-server <server>				Hostname or IP address of Job Arranger server",
-    "  -p --port <server port>					Specify port number of server trapper running on the server. Default is "
+    "  -z --jobarranger-server <server>            Hostname or IP address of Job Arranger server",
+    "  -p --port <server port>                     Specify port number of server trapper running on the server. Default is "
         JOBARG_DEFAULT_SERVER_PORT_STR,
-    "  -U --user-name <user-name>					Specify user name",
-    "  -P --password <password>					Specify password",
-    "  -r --registry-number <registry-number>			Specify registry number",
+    "  -U --user-name <user-name>                  Specify user name",
+    "  -P --password <password>                    Specify password",
+    "  -r --registry-number <registry-number>      Specify registry number",
+    "  -e --variable-format                        Specify output in the environment variable format (with bash format)",
     "",
     "Other options:",
-    "  -h --help							Give this help",
-    "  -V --version							Display version number",
+    "  -h --help                                   Give this help",
+    "  -V --version                                Display version number",
     NULL                        /* end of text */
 };
 
@@ -109,11 +112,8 @@ void help_jobarg()
 
 void version_jobarg()
 {
-
-    printf("%s v%s (revision %s) (%s)\n", title_message, JOBARG_VERSION,
-           JOBARG_REVISION, JOBARG_REVDATE);
+    printf("%s v%s (revision %s) (%s)\n", title_message, JOBARG_VERSION, JOBARG_REVISION, JOBARG_REVDATE);
     printf("Compilation time: %s %s\n", __DATE__, __TIME__);
-
 }
 
 int reginum_check(const char *str)
@@ -143,10 +143,13 @@ static int check_response(char *response)
     char *jobnetruntype = NULL;
     char *jobnetstatus = NULL;
     char *jobstatus = NULL;
+    char *lastexitcd = NULL;
+    char *laststdout = NULL;
+    char *laststderr = NULL;
     zbx_uint64_t scheduled_time;
     zbx_uint64_t start_time;
     zbx_uint64_t end_time;
-    int ch;
+    int ch, jobnet_status = 0;
 
     if (SUCCEED == zbx_json_open(response, &jp)) {
         if (SUCCEED ==
@@ -281,8 +284,8 @@ static int check_response(char *response)
                             zbx_json_value_by_name(&jp_row,
                                                    JA_PROTO_TAG_JOBNETSTATUS,
                                                    value, sizeof(value))) {
-                            ch = atoi(value);
-                            switch (ch) {
+                            jobnet_status = atoi(value);
+                            switch (jobnet_status) {
                             case 0:
                                 jobnetstatus = "BEGIN";
                                 break;
@@ -324,9 +327,15 @@ static int check_response(char *response)
                                 break;
                             case 1:
                                 jobstatus = "TIMEOUT";
+                                if (jobnet_status == JA_JOBNET_STATUS_RUN) {
+                                    jobnet_status = 21;
+                                }
                                 break;
                             case 2:
                                 jobstatus = "ERROR";
+                                if (jobnet_status == JA_JOBNET_STATUS_RUN) {
+                                    jobnet_status = 22;
+                                }
                                 break;
                             default:
                                 exit(FAIL);
@@ -337,17 +346,72 @@ static int check_response(char *response)
                                        "Succeeded, but could not get Status");
                         }
 
-                        zabbix_log(LOG_LEVEL_INFORMATION,
-                                   "\n\njobnetid\t\t:%s\njobnetname\t\t:%s\nTime of a schedule\t:"
-                                   ZBX_FS_UI64 "\n" "Time of a start\t\t:"
-                                   ZBX_FS_UI64 "\nTime of a end\t\t:"
-                                   ZBX_FS_UI64
-                                   "\nThe run type of a jobnet:%s\n"
-                                   "Status of a jobnet\t:%s\nStatus of a job\t\t:%s\n",
-                                   jobnetid, jobnetname, scheduled_time,
-                                   start_time, end_time, jobnetruntype,
-                                   jobnetstatus, jobstatus);
-                        ret = SUCCEED;
+                        if (SUCCEED ==
+                            zbx_json_value_by_name(&jp_row,
+                                                   JA_PROTO_TAG_LASTEXITCD,
+                                                   value, sizeof(value))) {
+                            lastexitcd = strdup(value);
+                        } else {
+                            zabbix_log(LOG_LEVEL_INFORMATION,
+                                       "Succeeded, but could not get Status");
+                        }
+
+                        if (SUCCEED ==
+                            zbx_json_value_by_name(&jp_row,
+                                                   JA_PROTO_TAG_LASTSTDOUT,
+                                                   value, sizeof(value))) {
+                            laststdout = strdup(value);
+                        } else {
+                            zabbix_log(LOG_LEVEL_INFORMATION,
+                                       "Succeeded, but could not get Status");
+                        }
+
+                        if (SUCCEED ==
+                            zbx_json_value_by_name(&jp_row,
+                                                   JA_PROTO_TAG_LASTSTDERR,
+                                                   value, sizeof(value))) {
+                            laststderr = strdup(value);
+                        } else {
+                            zabbix_log(LOG_LEVEL_INFORMATION,
+                                       "Succeeded, but could not get Status");
+                        }
+
+                        if (JOBARG_VARIABLE_FORMAT == 0) {
+                            zabbix_log(LOG_LEVEL_INFORMATION,
+                                       "\n\n"
+                                       "jobnetid                 : %s\n"
+                                       "jobnetname               : %s\n"
+                                       "Time of a schedule       : " ZBX_FS_UI64 "\n"
+                                       "Time of a start          : " ZBX_FS_UI64 "\n"
+                                       "Time of a end            : " ZBX_FS_UI64 "\n"
+                                       "The run type of a jobnet : %s\n"
+                                       "Status of a jobnet       : %s\n"
+                                       "Status of a job          : %s\n"
+                                       "Last job return value    : %s\n"
+                                       "Last job standard output : %s\n"
+                                       "Last job standard error  : %s\n",
+                                       jobnetid, jobnetname, scheduled_time,
+                                       start_time, end_time, jobnetruntype,
+                                       jobnetstatus, jobstatus, lastexitcd, laststdout, laststderr);
+                        } else {
+                            fprintf(stdout,
+                                    "export JA_JOBNETID=\"%s\"\n"
+                                    "export JA_JOBNETNAME=\"%s\"\n"
+                                    "export JA_SCHEDULEDTIME=\"" ZBX_FS_UI64 "\"\n"
+                                    "export JA_STARTTIME=\"" ZBX_FS_UI64 "\"\n"
+                                    "export JA_ENDTIME=\"" ZBX_FS_UI64 "\"\n"
+                                    "export JA_JOBNETRUNTYPE=\"%s\"\n"
+                                    "export JA_JOBNETSTATUS=\"%s\"\n"
+                                    "export JA_JOBSTATUS=\"%s\"\n"
+                                    "export JA_LASTEXITCD=\"%s\"\n"
+                                    "export JA_LASTSTDOUT=\"%s\"\n"
+                                    "export JA_LASTSTDERR=\"%s\"\n",
+                                     jobnetid, jobnetname, scheduled_time,
+                                     start_time, end_time, jobnetruntype,
+                                     jobnetstatus, jobstatus, lastexitcd, laststdout, laststderr);
+                        }
+
+                        ret = jobnet_status;
 
                     } else if (result == 1) {
 
@@ -418,9 +482,13 @@ static void parse_commandline(int argc, char **argv)
             break;
         case 'r':
             if (SUCCEED == reginum_check(zbx_optarg)) {
-                ZBX_STR2UINT64(JOBARG_REGISTRY_NUMBER, zbx_optarg);
+                JOBARG_REGISTRY_NUMBER =
+                    zbx_strdup(JOBARG_REGISTRY_NUMBER, zbx_optarg);
                 break;
             }
+        case 'e':
+            JOBARG_VARIABLE_FORMAT = 1;
+            break;
         default:
             usage();
             exit(FAIL);
@@ -429,7 +497,7 @@ static void parse_commandline(int argc, char **argv)
     }
 
     if (NULL == JOBARG_SERVER || NULL == JOBARG_USERNAME
-        || NULL == JOBARG_PASSWORD || 0 == JOBARG_REGISTRY_NUMBER) {
+        || NULL == JOBARG_PASSWORD || NULL == JOBARG_REGISTRY_NUMBER) {
         usage();
         exit(FAIL);
     }
@@ -479,8 +547,8 @@ int main(int argc, char **argv)
                        ZBX_JSON_TYPE_STRING);
     zbx_json_addstring(&json, JA_PROTO_TAG_PASSWORD, JOBARG_PASSWORD,
                        ZBX_JSON_TYPE_STRING);
-    zbx_json_adduint64(&json, JA_PROTO_TAG_REGISTRYNUMBER,
-                       JOBARG_REGISTRY_NUMBER);
+    zbx_json_addstring(&json, JA_PROTO_TAG_REGISTRYNUMBER,
+                       JOBARG_REGISTRY_NUMBER, ZBX_JSON_TYPE_STRING);
     zbx_json_close(&json);
     zbx_json_close(&json);
 
@@ -501,7 +569,7 @@ int main(int argc, char **argv)
             if (SUCCEED == (tcp_ret = zbx_tcp_recv(&sock, &answer))) {
                 zabbix_log(LOG_LEVEL_DEBUG, "Answer from server [%s]",
                            answer);
-                if (NULL == answer || SUCCEED != check_response(answer)) {
+                if (NULL == answer || FAIL == (ret = check_response(answer))) {
                     tcp_ret = FAIL;
                 }
             }

@@ -23,6 +23,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libtar", "libtar\libtar.vcx
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libarchive", "libarchive\libarchive.vcxproj", "{A1657AC2-4056-497D-968C-4D305E54971E}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Installer", "Installer\Installer.vcxproj", "{4C4DE837-EE02-4430-9BB0-D5A34A77E1C4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -83,6 +85,13 @@ Global
 		{A1657AC2-4056-497D-968C-4D305E54971E}.Debug|x64.ActiveCfg = Debug|Win32
 		{A1657AC2-4056-497D-968C-4D305E54971E}.Release|Win32.ActiveCfg = Release|Win32
 		{A1657AC2-4056-497D-968C-4D305E54971E}.Release|x64.ActiveCfg = Release|Win32
+		{4C4DE837-EE02-4430-9BB0-D5A34A77E1C4}.Debug|Win32.ActiveCfg = Debug|Win32
+		{4C4DE837-EE02-4430-9BB0-D5A34A77E1C4}.Debug|Win32.Build.0 = Debug|Win32
+		{4C4DE837-EE02-4430-9BB0-D5A34A77E1C4}.Debug|x64.ActiveCfg = Debug|x64
+		{4C4DE837-EE02-4430-9BB0-D5A34A77E1C4}.Release|Win32.ActiveCfg = Release|Win32
+		{4C4DE837-EE02-4430-9BB0-D5A34A77E1C4}.Release|Win32.Build.0 = Release|Win32
+		{4C4DE837-EE02-4430-9BB0-D5A34A77E1C4}.Release|x64.ActiveCfg = Release|x64
+		{4C4DE837-EE02-4430-9BB0-D5A34A77E1C4}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

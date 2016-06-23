@@ -18,9 +18,9 @@
 **/
 
 /*
-** $Date:: 2013-06-10 11:04:56 +0900 #$
-** $Revision: 4879 $
-** $Author: ossinfra@FITECHLABS.CO.JP $
+** $Date:: 2013-08-15 14:22:47 +0900 #$
+** $Revision: 5240 $
+** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
 #include "common.h"
@@ -35,7 +35,7 @@
 #include "jacommon.h"
 #include "jastr.h"
 
-#define JOBARG_DEFAULT_SERVER_PORT_STR	"10061"
+#define JOBARG_DEFAULT_SERVER_PORT_STR  "10061"
 
 /* long options */
 static struct zbx_option longopts[] = {
@@ -69,24 +69,24 @@ static char *JOBARG_START_TIME = NULL;
 static char *JOBARG_ENV_VARIABLES = NULL;
 
 const char *progname = NULL;
-const char title_message[] = "Jobarranger Exec";
+const char title_message[] = "Job Arranger Exec";
 const char usage_message[] =
     "[-hV] -z <hostname or IP> [-p <port>] -U <username> -P <password> -j <jobnetid> [-t <YYYYMMDDHHMM>] [-E <environment-variables>,...]";
 
 const char *help_message[] = {
     "Options:",
-    "  -z --jobarranger-server <server>			Hostname or IP address of Job Arranger server",
-    "  -p --port <server port>				Specify port number of server trapper running on the server. Default is "
+    "  -z --jobarranger-server <server>                       Hostname or IP address of Job Arranger server",
+    "  -p --port <server port>                                Specify port number of server trapper running on the server. Default is "
         JOBARG_DEFAULT_SERVER_PORT_STR,
-    "  -U --user-name <user-name>				Specify user name",
-    "  -P --password <password>				Specify password",
-    "  -j --jobnet-id <jobnetid>				Specify jobnetid",
-    "  -t --start-time <YYYYMMDDHHSS>			Specify start time",
-    "  -E --environment-variable <environment-variable>,...	Specify environment variables",
+    "  -U --user-name <user-name>                             Specify user name",
+    "  -P --password <password>                               Specify password",
+    "  -j --jobnet-id <jobnetid>                              Specify jobnetid",
+    "  -t --start-time <YYYYMMDDHHSS>                         Specify start time",
+    "  -E --environment-variable <environment-variable>,...   Specify environment variables",
     "",
     "Other options:",
-    "  -h --help						Give this help",
-    "  -V --version						Display version number",
+    "  -h --help                                              Give this help",
+    "  -V --version                                           Display version number",
     NULL                        /* end of text */
 };
 
@@ -113,6 +113,12 @@ void help_jobarg()
 
     while (NULL != *p)
         printf("%s\n", *p++);
+}
+
+void version_jobarg()
+{
+    printf("%s v%s (revision %s) (%s)\n", title_message, JOBARG_VERSION, JOBARG_REVISION, JOBARG_REVDATE);
+    printf("Compilation time: %s %s\n", __DATE__, __TIME__);
 }
 
 int is_number(const char *str)
@@ -386,7 +392,7 @@ static void parse_commandline(int argc, char **argv)
                 zbx_strdup(JOBARG_ENV_VARIABLES, zbx_optarg);
             break;
         case 'V':
-            version();
+            version_jobarg();
             exit(-1);
             break;
         default:

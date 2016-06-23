@@ -55,6 +55,9 @@ namespace jp.co.ftf.jobcontroller.DAO
         private string _selectSqlByPk = "select * from ja_define_extjob_table " +
                                         "where command_id = ? ";
 
+        private string _selectLangSql = "select command_id, command_name, memo from ja_define_extjob_table where lang = ?" +
+                               "order by command_id ASC";
+
         private DBConnect _db = null;
 
         #endregion
@@ -150,6 +153,22 @@ namespace jp.co.ftf.jobcontroller.DAO
             sqlParams.Add(new ComSqlParam(DbType.String, "@command_id", command_id));
 
             DataTable dt = _db.ExecuteQuery(this._selectSqlByPk, sqlParams, TableName);
+
+            return dt;
+        }
+
+        //************************************************************************
+        /// <summary> データの取得</summary>
+        /// <param name="lang">言語</param>
+        /// <return>検索結果</return>
+        //************************************************************************
+        public DataTable GetEntityByLang(object lang)
+        {
+            _db.CreateSqlConnect();
+
+            List<ComSqlParam> sqlParams = new List<ComSqlParam>();
+            sqlParams.Add(new ComSqlParam(DbType.String, "@lang", lang));
+            DataTable dt = _db.ExecuteQuery(this._selectLangSql, sqlParams, TableName);
 
             return dt;
         }

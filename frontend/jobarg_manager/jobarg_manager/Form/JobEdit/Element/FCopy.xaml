@@ -23,9 +23,9 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             >
+             FontSize="10" FontFamily="Meiryo">
     <Canvas Name="LayoutRoot"  Background="Transparent">
-        <Path Name="picFCopy1" Stroke="Black" Fill="White"  StrokeThickness="1">
+        <Path Name="picFCopy1" Stroke="Gray" Fill="White"  StrokeThickness="1">
             <Path.Data>
                 <PathGeometry>
                     <PathFigure StartPoint="0,0" IsClosed="False">
@@ -52,17 +52,19 @@
                 </PathGeometry>
             </Path.Data>
         </Path>
-        <TextBlock   Canvas.ZIndex="101" Name="tbJobId" Foreground="Black" FontSize="11" Text=""    
+        <TextBlock Style="{StaticResource TextBlockServiceStyle}" Canvas.ZIndex="101" Name="tbJobId" Foreground="Black" Text="" 
+                     Tag="{Binding Path=JobId, NotifyOnTargetUpdated=True}" TargetUpdated="textBlockJobId_TargetUpdated"
                      VerticalAlignment="Center" HorizontalAlignment="Center"
                      TextWrapping="Wrap"  MaxWidth="90"
-                     Height="11" Width="80" 
-                     Canvas.Left="0" Canvas.Top="4" FontWeight="Normal" 
-                     TextAlignment="Center" FontFamily="MS Gothic">
+                     Height="13" Width="80" 
+                     Canvas.Left="0" Canvas.Top="3" FontWeight="Normal" 
+                     TextAlignment="Center">
         </TextBlock>
-        <TextBlock   Canvas.ZIndex="101" Name="tbJobName" Foreground="Black" FontSize="11" Text="ファイル転送"    
+        <TextBlock Style="{StaticResource TextBlockServiceStyle}" Canvas.ZIndex="101" Name="tbJobName" Foreground="Black" Text="ファイル転送" 
+                     Tag="{Binding Path=JobName, NotifyOnTargetUpdated=True}" TargetUpdated="textBlockJobName_TargetUpdated"
                      VerticalAlignment="Center" HorizontalAlignment="Center" TextWrapping="Wrap"  MaxWidth="90"
                      Height="15" Width="80"  Canvas.Left="0" Canvas.Top="15"
-                     FontWeight="Normal" TextAlignment="Center" FontFamily="MS Gothic">
+                     FontWeight="Normal" TextAlignment="Center">
         </TextBlock>
         
         <Rectangle Name="HotspotLeft" Width="5" Height="5" Canvas.ZIndex="1000" Fill="Blue" Stroke="White" 

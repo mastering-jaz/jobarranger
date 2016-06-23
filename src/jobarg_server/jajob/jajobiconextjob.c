@@ -18,8 +18,8 @@
 **/
 
 /*
-** $Date:: 2013-04-12 10:28:21 +0900 #$
-** $Revision: 4390 $
+** $Date:: 2013-07-18 18:02:46 +0900 #$
+** $Revision: 5205 $
 ** $Author: ossinfra@FITECHLABS.CO.JP $
 **/
 
@@ -137,9 +137,6 @@ int jajob_icon_extjob_kill(const zbx_uint64_t inner_job_id)
 
     if (pid <= 0)
         return SUCCEED;
-
-    if (ja_kill(pid) == SUCCEED)
-        return ja_set_runerr(inner_job_id);
-
+    ja_kill(pid);
     return SUCCEED;
 }

@@ -22,15 +22,15 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:src="clr-namespace:jp.co.ftf.jobcontroller.JobController" 
-        WindowStartupLocation="CenterScreen" ResizeMode="NoResize"
-        Title="{x:Static src:Properties.Resources.task_icon_screen_name}" Height="205" Width="390" FontFamily="MS Gothic">
-    <Grid Background="#FFEEECE1" Name="GridSetting">
+        WindowStartupLocation="CenterScreen" ResizeMode="NoResize" Closing="Window_Closed"
+        Title="{x:Static src:Properties.Resources.task_icon_screen_name}" Height="252" Width="390" FontSize="11" FontFamily="Meiryo">
+    <Grid Background="#FFEEECE1" Name="GridSetting" Height="212">
         <Grid.RowDefinitions>
             <RowDefinition Height="30" />
             <RowDefinition Height="30" />
             <RowDefinition Height="30" />
-            <RowDefinition Height="44" />
-            <RowDefinition Height="*" />
+            <RowDefinition Height="59" />
+            <RowDefinition Height="38*" />
         </Grid.RowDefinitions>
         <Label Grid.Row="0" Content="{x:Static src:Properties.Resources.job_id_label_text}" Height="28" HorizontalAlignment="Left" Margin="12,3,0,0" 
                VerticalAlignment="Top" VerticalContentAlignment="Center" />
@@ -41,17 +41,18 @@
         <TextBox Grid.Row="1" Name="txtJobName" Height="23" Width="270" Margin="95,6,0,0" HorizontalAlignment="Left" 
                  VerticalAlignment="Top" VerticalContentAlignment="Center" MaxLength="64" />
         <Label Grid.Row="2" Content="{x:Static src:Properties.Resources.jobnet_id_label_text}" Height="28" HorizontalAlignment="Left" Margin="12,3,0,0" 
-               VerticalAlignment="Top" VerticalContentAlignment="Center" />
-        <ComboBox Grid.Row="2" Name="combJobNetId" Height="23" Width="251" HorizontalAlignment="Left" 
-                  Margin="114,6,0,0" VerticalAlignment="Top" SelectionChanged="combJobNetId_SelectionChanged">
+               VerticalAlignment="Top" VerticalContentAlignment="Center" Grid.RowSpan="2" Width="103" />
+        <ComboBox Grid.Row="2" Name="combJobNetId" Height="23" Width="249" HorizontalAlignment="Left" 
+                  Margin="116,6,0,0" VerticalAlignment="Top" SelectionChanged="combJobNetId_SelectionChanged">
         </ComboBox>
-        <Label Grid.Row="3" Content="{x:Static src:Properties.Resources.jobnet_name_label_text}" Height="28" HorizontalAlignment="Left" Margin="12,3,0,0" 
-               VerticalAlignment="Top" VerticalContentAlignment="Center" />
-        <TextBlock Grid.Row="3" Height="22" Width="251" Name="tbJobNetName" Padding="2" Text="" TextWrapping="Wrap" 
-                   Margin="114,9,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" />
-        <Button Grid.Row="4" Content="{x:Static src:Properties.Resources.regist_button_text}" Height="28" HorizontalAlignment="Left" Margin="193,1,0,0" 
+        <Label Grid.Row="3" Content="{x:Static src:Properties.Resources.jobnet_name_label_text}" Height="28" HorizontalAlignment="Left" Margin="12,10,0,0" 
+               VerticalAlignment="Top" VerticalContentAlignment="Center" Width="103" />
+        <Border Grid.Row="3" Height="40" Width="251" BorderBrush="{x:Null}" Margin="110,4,3,15">
+            <TextBlock Name="tbJobNetName" Text="" TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+        </Border>
+        <Button Grid.Row="4" Content="{x:Static src:Properties.Resources.regist_button_text}" Height="28" HorizontalAlignment="Left" Margin="193,22,0,0" 
                 Name="btnToroku" VerticalAlignment="Top" Width="75" Click="btnToroku_Click" IsDefault="True" />
-        <Button Grid.Row="4" Content="{x:Static src:Properties.Resources.cancel_button_text}" Height="28" HorizontalAlignment="Right" Margin="0,1,20,0" 
+        <Button Grid.Row="4" Content="{x:Static src:Properties.Resources.cancel_button_text}" Height="28" HorizontalAlignment="Right" Margin="0,22,20,0" 
                 Name="btnCancel" VerticalAlignment="Top" Width="75" Click="btnCancel_Click" IsCancel="True"/>
     </Grid>
 </Window>

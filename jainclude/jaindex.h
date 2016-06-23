@@ -18,9 +18,9 @@
 **/
 
 /*
-** $Date:: 2012-11-26 13:25:18 +0900 #$
-** $Revision: 2727 $
-** $Author: ossinfra@FITECHLABS.CO.JP $
+** $Date:: 2013-12-18 16:41:02 +0900 #$
+** $Revision: 5657 $
+** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
 #ifndef JOBARG_JAINDEX_H
@@ -31,6 +31,6 @@
 #define	JA_RUN_ID_JOB			20
 #define	JA_RUN_ID_FLOW			30
 
-zbx_uint64_t	get_next_id(int count_id, zbx_uint64_t inner_jobnet_id, char *jobnet_id);
+zbx_uint64_t	get_next_id(int count_id, zbx_uint64_t inner_jobnet_id, char *jobnet_id, zbx_uint64_t inner_job_id);
 
 #endif

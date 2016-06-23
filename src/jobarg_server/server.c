@@ -18,8 +18,8 @@
 **/
 
 /*
-** $Date:: 2013-05-27 15:55:18 +0900 #$
-** $Revision: 4665 $
+** $Date:: 2013-12-13 16:48:28 +0900 #$
+** $Revision: 5622 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -49,7 +49,7 @@
 			server_num, ja_get_process_type_string(process_type), process_num)
 
 const char	*progname = NULL;
-const char	title_message[] = "Job Arranger server";
+const char	title_message[] = "Job Arranger Server";
 const char	usage_message[] = "[-hV] [-c <file>]";
 
 const char	*help_message[] = {
@@ -185,6 +185,45 @@ int	CONFIG_PROXYDATA_FREQUENCY	= 1;	/* 1s */
 
 /******************************************************************************
  *                                                                            *
+ * Function: help_jobarg                                                      *
+ *                                                                            *
+ * Purpose: show the help message                                             *
+ *                                                                            *
+ * Return value:                                                              *
+ *                                                                            *
+ * Comments:                                                                  *
+ *                                                                            *
+ ******************************************************************************/
+void help_jobarg()
+{
+    const char **p = help_message;
+
+    usage();
+    printf("\n");
+
+    while (NULL != *p)
+        printf("%s\n", *p++);
+}
+
+/******************************************************************************
+ *                                                                            *
+ * Function: version_jobarg                                                   *
+ *                                                                            *
+ * Purpose: show the version of the application                               *
+ *                                                                            *
+ * Return value:                                                              *
+ *                                                                            *
+ * Comments:                                                                  *
+ *                                                                            *
+ ******************************************************************************/
+void version_jobarg()
+{
+	printf("%s v%s (revision %s) (%s)\n", title_message, JOBARG_VERSION, JOBARG_REVISION, JOBARG_REVDATE);
+	printf("Compilation time: %s %s\n", __DATE__, __TIME__);
+}
+
+/******************************************************************************
+ *                                                                            *
  * Function: zbx_set_defaults                                                 *
  *                                                                            *
  * Purpose: set configuration defaults                                        *
@@ -246,7 +285,7 @@ static void zbx_load_config()
 		{"JaBootInterval",	&CONFIG_JABOOT_INTERVAL,	TYPE_INT,		PARM_OPT,	1,	9999999},
 		{"JaJobnetInterval",	&CONFIG_JAJOBNET_INTERVAL,	TYPE_INT,		PARM_OPT,	1,	9999999},
 		{"JaJobInterval",	&CONFIG_JAJOB_INTERVAL,		TYPE_INT,		PARM_OPT,	1,	9999999},
-		{"JaJobTimeout",	&CONFIG_JA_JOB_TIMEOUT,		TYPE_INT,		PARM_OPT,	30,	600},
+		{"JaJobTimeout",	&CONFIG_JA_JOB_TIMEOUT,		TYPE_INT,		PARM_OPT,	0,	600},
 		{"JaRunInterval",	&CONFIG_JARUN_INTERVAL,		TYPE_INT,		PARM_OPT,	1,	9999999},
 		{"JaStartTrappers",	&CONFIG_JATRAPPER_FORKS,	TYPE_INT,		PARM_OPT,	0,	1000},
 		{"JaTrapperListenPort",	&CONFIG_LISTEN_PORT,		TYPE_INT,		PARM_OPT,	1,	65535},
@@ -319,11 +358,11 @@ int main(int argc, char **argv)
 			CONFIG_FILE = zbx_strdup(CONFIG_FILE, zbx_optarg);
 			break;
 		case 'h':
-			help();
+			help_jobarg();
 			exit(-1);
 			break;
 		case 'V':
-			version();
+			version_jobarg();
 			exit(-1);
 			break;
 		default:

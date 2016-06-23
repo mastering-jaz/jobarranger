@@ -18,9 +18,9 @@
 **/
 
 /*
-** $Date:: 2013-06-19 19:33:57 +0900 #$
-** $Revision: 4933 $
-** $Author: ossinfra@FITECHLABS.CO.JP $
+** $Date:: 2013-12-16 16:44:34 +0900 #$
+** $Revision: 5628 $
+** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
 #include <json/json.h>
@@ -81,19 +81,16 @@ int jarun_icon_reboot(const zbx_uint64_t inner_job_id, const int method)
         reboot_wait_time = atoi(row[2]);
         zbx_snprintf(host_name, sizeof(host_name), "%s", row[3]);
     } else {
-        zabbix_log(LOG_LEVEL_ERR,
-                   "In %s() can not find inner_job_id from ja_run_icon_reboot_table. inner_job_id: "
-                   ZBX_FS_UI64, __function_name, inner_job_id);
+        ja_log("JARUNICONREBOOT200001", 0, NULL, inner_job_id,
+               __function_name, inner_job_id);
         DBfree_result(result);
         return ja_set_runerr(inner_job_id);
     }
     DBfree_result(result);
 
     if (ja_host_getname(inner_job_id, host_flag, host_name, host) == FAIL) {
-        zabbix_log(LOG_LEVEL_ERR,
-                   "In %s() can get host name %s. host_flag: %d, inner_job_id: "
-                   ZBX_FS_UI64, __function_name, host_name, host_flag,
-                   inner_job_id);
+        ja_log("JARUNICONREBOOT200002", 0, NULL, inner_job_id,
+               __function_name, host_name, host_flag, inner_job_id);
         return ja_set_runerr(inner_job_id);
     }
 
@@ -111,18 +108,16 @@ int jarun_icon_reboot(const zbx_uint64_t inner_job_id, const int method)
         }
 
         if (ja_host_lock(host) == FAIL) {
-            zabbix_log(LOG_LEVEL_ERR,
-                       "In %s() can not lock host '%s'. inner_job_id: "
-                       ZBX_FS_UI64, __function_name, host, inner_job_id);
+            ja_log("JARUNICONREBOOT200003", 0, NULL, inner_job_id,
+                   __function_name, host, inner_job_id);
             return FAIL;
         }
     }
 
     pid = ja_fork();
     if (pid == -1) {
-        zabbix_log(LOG_LEVEL_ERR,
-                   "In %s() can not fork(). inner_job_id: " ZBX_FS_UI64,
-                   __function_name, inner_job_id);
+        ja_log("JARUNICONREBOOT200004", 0, NULL, inner_job_id,
+               __function_name, inner_job_id);
         if (method != JA_JOB_METHOD_ABORT) {
             ja_host_unlock(host);
             return ja_set_runerr(inner_job_id);
@@ -138,9 +133,8 @@ int jarun_icon_reboot(const zbx_uint64_t inner_job_id, const int method)
     ret = FAIL;
     DBconnect(ZBX_DB_CONNECT_ONCE);
     if (ja_connect(&sock, host) == FAIL) {
-        zabbix_log(LOG_LEVEL_ERR,
-                   "In %s() can not connect the host %s. inner_job_id: "
-                   ZBX_FS_UI64, __function_name, host, inner_job_id);
+        ja_log("JARUNICONREBOOT200005", 0, NULL, inner_job_id,
+               __function_name, host, inner_job_id);
         if (method != JA_JOB_METHOD_ABORT) {
             ja_host_unlock(host);
             ja_set_runerr(inner_job_id);
@@ -176,9 +170,8 @@ int jarun_icon_reboot(const zbx_uint64_t inner_job_id, const int method)
     if (ja_tcp_recv_to(&sock, &job_res, CONFIG_TIMEOUT) == FAIL)
         goto error;
     if (job_res.result != JA_RESPONSE_SUCCEED) {
-        zabbix_log(LOG_LEVEL_ERR,
-                   "In %s() inner_job_id: " ZBX_FS_UI64 " message: %s",
-                   __function_name, inner_job_id, job_res.message);
+        ja_log("JARUNICONREBOOT200006", 0, NULL, inner_job_id,
+               __function_name, inner_job_id, job_res.message);
         goto error;
     }
     ret = SUCCEED;

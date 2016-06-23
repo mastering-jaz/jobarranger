@@ -18,8 +18,8 @@
 **/
 
 /*
-** $Date:: 2013-06-12 16:30:57 +0900 #$
-** $Rev: 4903 $
+** $Date:: 2013-12-18 16:41:02 +0900 #$
+** $Rev: 5657 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -695,7 +695,7 @@ static int	load_icon_jobnet(zbx_uint64_t inner_jobnet_id, zbx_uint64_t inner_job
 	zabbix_log(LOG_LEVEL_DEBUG, "In %s(" ZBX_FS_UI64 " " ZBX_FS_UI64 " %s %s %s)",
 		__function_name, inner_jobnet_id, inner_job_id, jobnet_id, job_id, update_date);
 
-	link_inner_jobnet_id = get_next_id(JA_RUN_ID_JOBNET_LD, inner_jobnet_id, jobnet_id);
+	link_inner_jobnet_id = get_next_id(JA_RUN_ID_JOBNET_LD, inner_jobnet_id, jobnet_id, 0);
 	if (link_inner_jobnet_id == 0)
 	{
 		return FAIL;
@@ -828,24 +828,17 @@ static int	load_icon_task(zbx_uint64_t inner_jobnet_id, zbx_uint64_t inner_job_i
 				char *jobnet_id, char *job_id, char *update_date)
 {
 	int		rc;
-	zbx_uint64_t	submit_inner_jobnet_id;
 	const char	*__function_name = "load_icon_task";
 
 	zabbix_log(LOG_LEVEL_DEBUG, "In %s(" ZBX_FS_UI64 " " ZBX_FS_UI64 " %s %s %s)",
 		__function_name, inner_jobnet_id, inner_job_id, jobnet_id, job_id, update_date);
 
-	submit_inner_jobnet_id = get_next_id(JA_RUN_ID_JOBNET_LD, inner_jobnet_id, jobnet_id);
-	if (submit_inner_jobnet_id == 0)
-	{
-		return FAIL;
-	}
-
 	rc = DBexecute("insert into ja_run_icon_task_table ("
 			" inner_job_id, inner_jobnet_id, submit_inner_jobnet_id, submit_jobnet_id)"
-			" select '" ZBX_FS_UI64 "','" ZBX_FS_UI64 "','" ZBX_FS_UI64 "', submit_jobnet_id"
+			" select '" ZBX_FS_UI64 "','" ZBX_FS_UI64 "', 0, submit_jobnet_id"
 			" from ja_icon_task_table"
 			" where jobnet_id = '%s' and job_id = '%s' and update_date = %s",
-			inner_job_id, inner_jobnet_id, submit_inner_jobnet_id, jobnet_id, job_id, update_date);
+			inner_job_id, inner_jobnet_id, jobnet_id, job_id, update_date);
 
 	if (rc <= ZBX_DB_OK)
 	{
@@ -1114,7 +1107,7 @@ static int	load_job_definition(zbx_uint64_t inner_jobnet_main_id, zbx_uint64_t i
 	DB_RESULT	result;
 	DB_ROW		row;
 	int		rc, job_type, boot_count;
-	char		*job_name;
+	char		*job_name, *job_name_esc = NULL;
 	zbx_uint64_t	inner_job_id, inner_job_id_fs_link, inner_flow_id, start_inner_job_id, end_inner_job_id;
 	const char	*__function_name = "load_job_definition";
 
@@ -1133,7 +1126,7 @@ static int	load_job_definition(zbx_uint64_t inner_jobnet_main_id, zbx_uint64_t i
 	{
 		job_type = atoi(row[3]);
 
-		inner_job_id = get_next_id(JA_RUN_ID_JOB, inner_jobnet_main_id, jobnet_id);
+		inner_job_id = get_next_id(JA_RUN_ID_JOB, inner_jobnet_main_id, jobnet_id, 0);
 		if (inner_job_id == 0)
 		{
 			DBfree_result(result);
@@ -1143,7 +1136,7 @@ static int	load_job_definition(zbx_uint64_t inner_jobnet_main_id, zbx_uint64_t i
 		inner_job_id_fs_link = 0;
 		if (job_type == JA_JOB_TYPE_JOB)
 		{
-			inner_job_id_fs_link = get_next_id(JA_RUN_ID_JOB, inner_jobnet_main_id, jobnet_id);
+			inner_job_id_fs_link = get_next_id(JA_RUN_ID_JOB, inner_jobnet_main_id, jobnet_id, 0);
 			if (inner_job_id_fs_link == 0)
 			{
 				DBfree_result(result);
@@ -1160,7 +1153,8 @@ static int	load_job_definition(zbx_uint64_t inner_jobnet_main_id, zbx_uint64_t i
 
 		if (SUCCEED != DBis_null(row[6]))
 		{
-			job_name = row[6];
+			job_name_esc = DBdyn_escape_string(row[6]);
+			job_name     = job_name_esc;
 		}
 		else
 		{
@@ -1177,6 +1171,8 @@ static int	load_job_definition(zbx_uint64_t inner_jobnet_main_id, zbx_uint64_t i
 				inner_job_id, inner_jobnet_id, inner_jobnet_main_id, inner_job_id_fs_link,
 				JA_JOB_INVO_FLAG_OFF, job_type, test_flag, row[7], JA_JOB_STATUS_BEGIN,
 				boot_count, row[4], row[5], row[1], job_name);
+
+		zbx_free(job_name_esc);
 
 		if (rc <= ZBX_DB_OK)
 		{
@@ -1278,7 +1274,7 @@ static int	load_job_definition(zbx_uint64_t inner_jobnet_main_id, zbx_uint64_t i
 
 	while (NULL != (row = DBfetch(result)))
 	{
-		inner_flow_id = get_next_id(JA_RUN_ID_FLOW, inner_jobnet_main_id, jobnet_id);
+		inner_flow_id = get_next_id(JA_RUN_ID_FLOW, inner_jobnet_main_id, jobnet_id, 0);
 		if (inner_flow_id == 0)
 		{
 			DBfree_result(result);
@@ -1331,6 +1327,7 @@ static int	load_job_definition(zbx_uint64_t inner_jobnet_main_id, zbx_uint64_t i
  *             run_type (in) - run type                                       *
  *             jobnet_id (in) - jobnet id                                     *
  *             schedule_id (in) - schedule id                                 *
+ *             execution_user_name (in) - execution user name                 *
  *                                                                            *
  * Return value:  SUCCEED - processed successfully                            *
  *                FAIL - an error occurred                                    *
@@ -1339,7 +1336,8 @@ static int	load_job_definition(zbx_uint64_t inner_jobnet_main_id, zbx_uint64_t i
  *                                                                            *
  ******************************************************************************/
 static int	load_sub_jobnet_definition(zbx_uint64_t inner_jobnet_main_id,
-				int run_type, char *jobnet_id, char *schedule_id)
+				int run_type, char *jobnet_id, char *schedule_id,
+				char *execution_user_name)
 {
 	DB_RESULT	result;
 	DB_RESULT	result2;
@@ -1349,7 +1347,8 @@ static int	load_sub_jobnet_definition(zbx_uint64_t inner_jobnet_main_id,
 	DB_ROW		row3;
 	int		hit, test_flag, rc;
 	zbx_uint64_t	link_inner_jobnet_id;
-	char		*memo;
+	char		*memo, *memo_esc = NULL, *jobnet_name_esc = NULL, *user_name_esc = NULL;
+	char		*execution_user_name_esc = NULL;
 	const char	*__function_name = "load_sub_jobnet_definition";
 
 	zabbix_log(LOG_LEVEL_DEBUG, "In %s(" ZBX_FS_UI64 " %d)",
@@ -1398,23 +1397,33 @@ static int	load_sub_jobnet_definition(zbx_uint64_t inner_jobnet_main_id,
 
 			if (SUCCEED != DBis_null(row3[5]))
 			{
-				memo = row3[5];
+				memo_esc = DBdyn_escape_string(row3[5]);
+				memo     = memo_esc;
 			}
 			else
 			{
 				memo = "";
 			}
 
+			user_name_esc           = DBdyn_escape_string(row3[3]);
+			jobnet_name_esc         = DBdyn_escape_string(row3[4]);
+			execution_user_name_esc = DBdyn_escape_string(execution_user_name);
+
 			rc = DBexecute("insert into ja_run_jobnet_table ("
 					" inner_jobnet_id, inner_jobnet_main_id, inner_job_id, update_date, run_type, main_flag,"
 					" timeout_flag, status, scheduled_time, start_time, end_time, public_flag,"
-					" jobnet_id, user_name, jobnet_name, memo)"
+					" jobnet_id, user_name, jobnet_name, memo, execution_user_name)"
 					" values (" ZBX_FS_UI64 ", " ZBX_FS_UI64 ", %s, %s, %d, %d,"
 					" 0, %d, 0, 0, 0, %s,"
-					" '%s', '%s', '%s', '%s')",
+					" '%s', '%s', '%s', '%s', '%s')",
 					link_inner_jobnet_id, inner_jobnet_main_id, row[0], row3[1], run_type, JA_JOBNET_MAIN_FLAG_SUB,
 					JA_JOBNET_STATUS_BEGIN, row3[2],
-					row3[0], row3[3], row3[4], memo);
+					row3[0], user_name_esc, jobnet_name_esc, memo, execution_user_name_esc);
+
+			zbx_free(memo_esc);
+			zbx_free(user_name_esc);
+			zbx_free(jobnet_name_esc);
+			zbx_free(execution_user_name_esc);
 
 			if (rc <= ZBX_DB_OK)
 			{
@@ -1489,7 +1498,7 @@ static int	load_jobnet_definition(char *jobnet_id, char *scheduled_time,
 	DB_ROW		row;
 	int		count = 0, rc;
 	zbx_uint64_t	inner_jobnet_main_id;
-	char		*memo;
+	char		*memo, *memo_esc = NULL, *jobnet_name_esc = NULL, *user_name_esc = NULL;
 	const char	*__function_name = "load_jobnet_definition";
 
 	zabbix_log(LOG_LEVEL_DEBUG, "In %s(%s %s %s %s %s)",
@@ -1525,7 +1534,7 @@ static int	load_jobnet_definition(char *jobnet_id, char *scheduled_time,
 
 	DBbegin();
 
-	inner_jobnet_main_id = get_next_id(JA_RUN_ID_JOBNET_LD, 0, jobnet_id);
+	inner_jobnet_main_id = get_next_id(JA_RUN_ID_JOBNET_LD, 0, jobnet_id, 0);
 	if (inner_jobnet_main_id == 0)
 	{
 		DBrollback();
@@ -1549,32 +1558,39 @@ static int	load_jobnet_definition(char *jobnet_id, char *scheduled_time,
 
 	if (SUCCEED != DBis_null(row[5]))
 	{
-		memo = row[5];
+		memo_esc = DBdyn_escape_string(row[5]);
+		memo     = memo_esc;
 	}
 	else
 	{
 		memo = "";
 	}
 
+	user_name_esc   = DBdyn_escape_string(row[3]);
+	jobnet_name_esc = DBdyn_escape_string(row[4]);
+
 	rc = DBexecute("insert into ja_run_jobnet_table ("
 			" inner_jobnet_id, inner_jobnet_main_id, inner_job_id, update_date,"
 			" run_type, main_flag, timeout_flag, status,"
 			" scheduled_time, start_time, end_time, public_flag,"
-			" jobnet_id, user_name, jobnet_name, memo, schedule_id, calendar_id, boot_time)"
+			" jobnet_id, user_name, jobnet_name, memo, schedule_id, calendar_id, boot_time, execution_user_name)"
 			" values (" ZBX_FS_UI64 ", " ZBX_FS_UI64 ", 0, %s,"
 			" %d, %d, 0, %d,"
 			" %s, 0, 0, %s,"
-			" '%s', '%s', '%s', '%s', '%s', '%s', '%s')",
+			" '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')",
 			inner_jobnet_main_id, inner_jobnet_main_id, row[1],
 			JA_JOBNET_RUN_TYPE_NORMAL, JA_JOBNET_MAIN_FLAG_MAIN, JA_JOBNET_STATUS_BEGIN,
 			scheduled_time, row[2],
-			row[0], row[3], row[4], memo, schedule_id, calendar_id, boot_time);
+			row[0], user_name_esc, jobnet_name_esc, memo, schedule_id, calendar_id, boot_time, user_name_esc);
 
 	if (rc <= ZBX_DB_OK)
 	{
 		zbx_snprintf(msgwork, sizeof(msgwork), "%s %s", row[0], row[1]);
 		ja_log("JALOADER200002", 0, jobnet_id, 0, "ja_run_jobnet_table", msgwork);
 		DBfree_result(result);
+		zbx_free(memo_esc);
+		zbx_free(user_name_esc);
+		zbx_free(jobnet_name_esc);
 		DBrollback();
 		return FAIL;
 	}
@@ -1582,13 +1598,17 @@ static int	load_jobnet_definition(char *jobnet_id, char *scheduled_time,
 	rc = DBexecute("insert into ja_run_jobnet_summary_table ("
 			" inner_jobnet_id, update_date, invo_flag, run_type, status, job_status, jobnet_abort_flag, load_status,"
 			" scheduled_time, start_time, end_time, public_flag, jobnet_id, user_name, jobnet_name, memo,"
-			" schedule_id, calendar_id, boot_time)"
+			" schedule_id, calendar_id, boot_time, execution_user_name)"
 			" values (" ZBX_FS_UI64 ", %s, 1, %d, %d, 0, 0, %d,"
 			" %s, 0, 0, %s, '%s', '%s', '%s', '%s',"
-			" '%s', '%s', '%s')",
+			" '%s', '%s', '%s', '%s')",
 			inner_jobnet_main_id, row[1], JA_JOBNET_RUN_TYPE_NORMAL, JA_JOBNET_STATUS_BEGIN, JA_SUMMARY_LOAD_STATUS_NORMAL,
-			scheduled_time, row[2], row[0], row[3], row[4], memo,
-			schedule_id, calendar_id, boot_time);
+			scheduled_time, row[2], row[0], user_name_esc, jobnet_name_esc, memo,
+			schedule_id, calendar_id, boot_time, user_name_esc);
+
+	zbx_free(memo_esc);
+	zbx_free(user_name_esc);
+	zbx_free(jobnet_name_esc);
 
 	if (rc <= ZBX_DB_OK)
 	{
@@ -1610,7 +1630,7 @@ static int	load_jobnet_definition(char *jobnet_id, char *scheduled_time,
 	}
 
 	/* expand the sub jobnet */
-	rc = load_sub_jobnet_definition(inner_jobnet_main_id, JA_JOBNET_RUN_TYPE_NORMAL, row[0], schedule_id);
+	rc = load_sub_jobnet_definition(inner_jobnet_main_id, JA_JOBNET_RUN_TYPE_NORMAL, row[0], schedule_id, row[3]);
 	if (rc != SUCCEED)
 	{
 		DBfree_result(result);
@@ -1856,14 +1876,15 @@ static int	jobnet_load_immediate()
 	time_t		now;
 	int		run_type, test_flag, rc;
 	zbx_uint64_t	inner_jobnet_id;
-	char		*memo;
+	char		*memo, *memo_esc = NULL, *jobnet_name_esc = NULL, *user_name_esc = NULL;
+	char		*execution_user_name_esc = NULL;
 	char		now_time[20];
 	const char	*__function_name = "jobnet_load_immediate";
 
 	zabbix_log(LOG_LEVEL_DEBUG, "In %s()", __function_name);
 
 	result = DBselect("select inner_jobnet_id, inner_job_id, update_date, run_type, scheduled_time,"
-			" public_flag, jobnet_id, user_name, jobnet_name, memo"
+			" public_flag, jobnet_id, user_name, jobnet_name, memo, execution_user_name"
 			" from ja_run_jobnet_table"
 			" where run_type <> %d and main_flag = %d and status = %d",
 			JA_JOBNET_RUN_TYPE_NORMAL, JA_JOBNET_MAIN_FLAG_MAIN, JA_JOBNET_STATUS_BEGIN);
@@ -1886,12 +1907,17 @@ static int	jobnet_load_immediate()
 
 		if (SUCCEED != DBis_null(row[9]))
 		{
-			memo = row[9];
+			memo_esc = DBdyn_escape_string(row[9]);
+			memo     = memo_esc;
 		}
 		else
 		{
 			memo = "";
 		}
+
+		user_name_esc           = DBdyn_escape_string(row[7]);
+		jobnet_name_esc         = DBdyn_escape_string(row[8]);
+		execution_user_name_esc = DBdyn_escape_string(row[10]);
 
 		run_type = atoi(row[3]);
 		if (run_type == JA_JOBNET_RUN_TYPE_TEST)
@@ -1908,11 +1934,15 @@ static int	jobnet_load_immediate()
 		if (rc != SUCCEED)
 		{
 			DBrollback();
+			zbx_free(memo_esc);
+			zbx_free(user_name_esc);
+			zbx_free(jobnet_name_esc);
+			zbx_free(execution_user_name_esc);
 			continue;
 		}
 
 		/* expand the sub jobnet */
-		rc = load_sub_jobnet_definition(inner_jobnet_id, run_type, row[6], "none");
+		rc = load_sub_jobnet_definition(inner_jobnet_id, run_type, row[6], "none", row[10]);
 		if (rc != SUCCEED)
 		{
 			DBrollback();
@@ -1934,39 +1964,60 @@ static int	jobnet_load_immediate()
 					zbx_snprintf(msgwork, sizeof(msgwork), "%s", row[0]);
 					ja_log("JALOADER200003", inner_jobnet_id, NULL, 0, "ja_run_jobnet_table", msgwork);
 					DBrollback();
+					zbx_free(memo_esc);
+					zbx_free(user_name_esc);
+					zbx_free(jobnet_name_esc);
+					zbx_free(execution_user_name_esc);
 					continue;
 				}
 
 				rc = DBexecute("insert into ja_run_jobnet_summary_table ("
 						" inner_jobnet_id, update_date, invo_flag, run_type, status,"
 						" job_status, jobnet_abort_flag, load_status,"
-						" scheduled_time, start_time, end_time, public_flag, jobnet_id, user_name, jobnet_name, memo)"
+						" scheduled_time, start_time, end_time, public_flag, jobnet_id, user_name, jobnet_name, memo,"
+						" execution_user_name)"
 						" values (%s, %s, 1, %s, %d,"
 						" 2, 0, %d,"
-						" %s, %s, %s, %s, '%s', '%s', '%s', '%s')",
+						" %s, %s, %s, %s, '%s', '%s', '%s', '%s', '%s')",
 						row[0], row[2], row[3], JA_JOBNET_STATUS_ENDERR,
 						JA_SUMMARY_LOAD_STATUS_ERROR,
-						row[4], now_time, now_time, row[5], row[6], row[7], row[8], memo);
+						row[4], now_time, now_time, row[5], row[6], user_name_esc, jobnet_name_esc, memo,
+						execution_user_name_esc);
 
 				if (rc <= ZBX_DB_OK)
 				{
 					zbx_snprintf(msgwork, sizeof(msgwork), "%s %s", row[0], row[6]);
 					ja_log("JALOADER200002", inner_jobnet_id, NULL, 0, "ja_run_jobnet_summary_table", msgwork);
 					DBrollback();
+					zbx_free(memo_esc);
+					zbx_free(user_name_esc);
+					zbx_free(jobnet_name_esc);
+					zbx_free(execution_user_name_esc);
 					continue;
 				}
 				DBcommit();
 			}
+			zbx_free(memo_esc);
+			zbx_free(user_name_esc);
+			zbx_free(jobnet_name_esc);
+			zbx_free(execution_user_name_esc);
 			continue;
 		}
 
 		rc = DBexecute("insert into ja_run_jobnet_summary_table ("
 				" inner_jobnet_id, update_date, invo_flag, run_type, status, job_status, jobnet_abort_flag, load_status,"
-				" scheduled_time, start_time, end_time, public_flag, jobnet_id, user_name, jobnet_name, memo)"
+				" scheduled_time, start_time, end_time, public_flag, jobnet_id, user_name, jobnet_name, memo,"
+				" execution_user_name)"
 				" values (%s, %s, 1, %s, %d, 0, 0, %d,"
-				" %s, 0, 0, %s, '%s', '%s', '%s', '%s')",
+				" %s, 0, 0, %s, '%s', '%s', '%s', '%s', '%s')",
 				row[0], row[2], row[3], JA_JOBNET_STATUS_BEGIN, JA_SUMMARY_LOAD_STATUS_NORMAL,
-				row[4], row[5], row[6], row[7], row[8], memo);
+				row[4], row[5], row[6], user_name_esc, jobnet_name_esc, memo,
+				execution_user_name_esc);
+
+		zbx_free(memo_esc);
+		zbx_free(user_name_esc);
+		zbx_free(jobnet_name_esc);
+		zbx_free(execution_user_name_esc);
 
 		if (rc <= ZBX_DB_OK)
 		{

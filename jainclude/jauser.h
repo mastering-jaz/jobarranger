@@ -18,8 +18,8 @@
 **/
 
 /*
-** $Date:: 2013-06-06 10:33:56 +0900 #$
-** $Revision: 4862 $
+** $Date:: 2013-07-18 16:21:01 +0900 #$
+** $Revision: 5200 $
 ** $Author: ossinfra@FITECHLABS.CO.JP $
 **/
 
@@ -31,5 +31,6 @@ zbx_uint64_t ja_user_id(const char *username);
 zbx_uint64_t ja_user_usrgrpid(zbx_uint64_t userid);
 int ja_user_status(zbx_uint64_t userid);
 int ja_user_type(zbx_uint64_t userid);
+int ja_user_groups(zbx_uint64_t userid1, zbx_uint64_t userid2);
 
 #endif

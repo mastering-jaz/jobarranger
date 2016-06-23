@@ -43,22 +43,22 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
         public static readonly int LEN_JOBNAME_JOB = 13;
 
         /// <summary>条件(ID)</summary>
-        public static readonly int LEN_JOBID_IF = 11;
+        public static readonly int LEN_JOBID_IF = 13;
 
         /// <summary>条件(名)</summary>
-        public static readonly int LEN_JOBNAME_IF = 11;
+        public static readonly int LEN_JOBNAME_IF = 13;
 
         /// <summary>変数(ID)</summary>
-        public static readonly int LEN_JOBID_ENV = 11;
+        public static readonly int LEN_JOBID_ENV = 13;
 
         /// <summary>変数(名)</summary>
-        public static readonly int LEN_JOBNAME_ENV = 11;
+        public static readonly int LEN_JOBNAME_ENV = 13;
 
         /// <summary>拡張ジョブ(ID)</summary>
-        public static readonly int LEN_JOBID_EXTJOB = 11;
+        public static readonly int LEN_JOBID_EXTJOB = 13;
 
         /// <summary>拡張ジョブ(名)</summary>
-        public static readonly int LEN_JOBNAME_EXTJOB = 11;
+        public static readonly int LEN_JOBNAME_EXTJOB = 13;
 
         /// <summary>開始(ID)</summary>
         public static readonly int LEN_JOBID_START = 13;
@@ -76,13 +76,13 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
         public static readonly int LEN_JOBID_CAL = 13;
 
         /// <summary>計算(名)</summary>
-        public static readonly int LEN_JOBNAME_CAL = 11;
+        public static readonly int LEN_JOBNAME_CAL = 13;
 
         /// <summary>タスク(ID)</summary>
-        public static readonly int LEN_JOBID_TASK = 11;
+        public static readonly int LEN_JOBID_TASK = 13;
 
         /// <summary>タスク(名)</summary>
-        public static readonly int LEN_JOBNAME_TASK = 11;
+        public static readonly int LEN_JOBNAME_TASK = 13;
 
         /// <summary>情報取得(ID)</summary>
         public static readonly int LEN_JOBID_INF = 13;
@@ -95,6 +95,30 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
 
         /// <summary>ジョブネット(名)</summary>
         public static readonly int LEN_JOBNAME_JOBNET = 13;
+
+        /// <summary>ファイル転送(ID)</summary>
+        public static readonly int LEN_JOBID_FCOPY = 13;
+
+        /// <summary>ファイル転送(名)</summary>
+        public static readonly int LEN_JOBNAME_FCOPY = 13;
+
+        /// <summary>ファイル待ち合わせ((ID)</summary>
+        public static readonly int LEN_JOBID_FWAIT = 13;
+
+        /// <summary>ファイル待ち合わせ(名)</summary>
+        public static readonly int LEN_JOBNAME_FWAIT = 13;
+
+        /// <summary>リブート(ID)</summary>
+        public static readonly int LEN_JOBID_REBOOT = 13;
+
+        /// <summary>リブート(名)</summary>
+        public static readonly int LEN_JOBNAME_REBOOT = 13;
+
+        /// <summary>保留解除(ID)</summary>
+        public static readonly int LEN_JOBID_RELEASE = 13;
+
+        /// <summary>保留解除(名)</summary>
+        public static readonly int LEN_JOBNAME_RELEASE = 13;
 
         /// <summary>アイコン表示用の接尾辞</summary>
         public static readonly string SUFFIX_JOB = "...";
@@ -171,7 +195,24 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                     return brush;
                 }
             }
-            
+            /// <summary>保留色</summary>
+            public static Brush HoldColor
+            {
+                get
+                {
+                    SolidColorBrush brush = new SolidColorBrush(Colors.MediumOrchid);
+                    return brush;
+                }
+            }
+            /// <summary>スキップ色</summary>
+            public static Brush SkipColor
+            {
+                get
+                {
+                    SolidColorBrush brush = new SolidColorBrush(Colors.Gray);
+                    return brush;
+                }
+            }            
         }
     }
 }

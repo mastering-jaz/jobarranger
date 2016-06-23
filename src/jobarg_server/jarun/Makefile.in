@@ -67,6 +67,7 @@ am_libjarun_a_OBJECTS = libjarun_a-jarunvalue.$(OBJEXT) \
 	libjarun_a-jaruniconfcopy.$(OBJEXT) \
 	libjarun_a-jaruniconfwait.$(OBJEXT) \
 	libjarun_a-jaruniconreboot.$(OBJEXT) \
+	libjarun_a-jaruniconrelease.$(OBJEXT) \
 	libjarun_a-jarunagent.$(OBJEXT) \
 	libjarun_a-jarunnormal.$(OBJEXT) \
 	libjarun_a-jarunskip.$(OBJEXT) libjarun_a-jarun.$(OBJEXT)
@@ -223,6 +224,7 @@ libjarun_a_SOURCES = \
 	jaruniconfcopy.c jaruniconfcopy.h \
 	jaruniconfwait.c jaruniconfwait.h \
 	jaruniconreboot.c jaruniconreboot.h \
+	jaruniconrelease.c jaruniconrelease.h \
 	jarunagent.c jarunagent.h \
 	jarunnormal.c jarunnormal.h \
 	jarunskip.c jarunskip.h \
@@ -289,6 +291,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjarun_a-jaruniconjob.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjarun_a-jaruniconjobnet.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjarun_a-jaruniconreboot.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjarun_a-jaruniconrelease.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjarun_a-jarunicontask.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjarun_a-jaruniconvalue.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjarun_a-jarunnormal.Po@am__quote@
@@ -504,6 +507,20 @@ libjarun_a-jaruniconreboot.obj: jaruniconreboot.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='jaruniconreboot.c' object='libjarun_a-jaruniconreboot.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjarun_a_CFLAGS) $(CFLAGS) -c -o libjarun_a-jaruniconreboot.obj `if test -f 'jaruniconreboot.c'; then $(CYGPATH_W) 'jaruniconreboot.c'; else $(CYGPATH_W) '$(srcdir)/jaruniconreboot.c'; fi`
+
+libjarun_a-jaruniconrelease.o: jaruniconrelease.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjarun_a_CFLAGS) $(CFLAGS) -MT libjarun_a-jaruniconrelease.o -MD -MP -MF $(DEPDIR)/libjarun_a-jaruniconrelease.Tpo -c -o libjarun_a-jaruniconrelease.o `test -f 'jaruniconrelease.c' || echo '$(srcdir)/'`jaruniconrelease.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libjarun_a-jaruniconrelease.Tpo $(DEPDIR)/libjarun_a-jaruniconrelease.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='jaruniconrelease.c' object='libjarun_a-jaruniconrelease.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjarun_a_CFLAGS) $(CFLAGS) -c -o libjarun_a-jaruniconrelease.o `test -f 'jaruniconrelease.c' || echo '$(srcdir)/'`jaruniconrelease.c
+
+libjarun_a-jaruniconrelease.obj: jaruniconrelease.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjarun_a_CFLAGS) $(CFLAGS) -MT libjarun_a-jaruniconrelease.obj -MD -MP -MF $(DEPDIR)/libjarun_a-jaruniconrelease.Tpo -c -o libjarun_a-jaruniconrelease.obj `if test -f 'jaruniconrelease.c'; then $(CYGPATH_W) 'jaruniconrelease.c'; else $(CYGPATH_W) '$(srcdir)/jaruniconrelease.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libjarun_a-jaruniconrelease.Tpo $(DEPDIR)/libjarun_a-jaruniconrelease.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='jaruniconrelease.c' object='libjarun_a-jaruniconrelease.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjarun_a_CFLAGS) $(CFLAGS) -c -o libjarun_a-jaruniconrelease.obj `if test -f 'jaruniconrelease.c'; then $(CYGPATH_W) 'jaruniconrelease.c'; else $(CYGPATH_W) '$(srcdir)/jaruniconrelease.c'; fi`
 
 libjarun_a-jarunagent.o: jarunagent.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjarun_a_CFLAGS) $(CFLAGS) -MT libjarun_a-jarunagent.o -MD -MP -MF $(DEPDIR)/libjarun_a-jarunagent.Tpo -c -o libjarun_a-jarunagent.o `test -f 'jarunagent.c' || echo '$(srcdir)/'`jarunagent.c

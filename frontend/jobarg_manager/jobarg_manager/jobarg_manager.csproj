@@ -135,6 +135,7 @@
     <Compile Include="Form\CalendarEdit\FileReadWindow.xaml.cs">
       <DependentUpon>FileReadWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Form\DetailVisibilityConverter.cs" />
     <Compile Include="Form\DuringStartupJobnetWindow.xaml.cs">
       <DependentUpon>DuringStartupJobnetWindow.xaml</DependentUpon>
     </Compile>
@@ -144,6 +145,9 @@
     <Compile Include="Form\HankakuTextChangeEvent.cs" />
     <Compile Include="Form\ImportWindow.xaml.cs">
       <DependentUpon>ImportWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Form\JobArrangerMessageBox.xaml.cs">
+      <DependentUpon>JobArrangerMessageBox.xaml</DependentUpon>
     </Compile>
     <Compile Include="Form\JobArrangerWindow.xaml.cs">
       <DependentUpon>JobArrangerWindow.xaml</DependentUpon>
@@ -160,6 +164,11 @@
     <Compile Include="Form\JobEdit\Element\Reboot.xaml.cs">
       <DependentUpon>Reboot.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Form\JobEdit\Element\Release.xaml.cs">
+      <DependentUpon>Release.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Form\JobEdit\HistoryData.cs" />
+    <Compile Include="Form\JobEdit\IconViewData.cs" />
     <Compile Include="Form\JobEdit\Sample\FCopySample.xaml.cs">
       <DependentUpon>FCopySample.xaml</DependentUpon>
     </Compile>
@@ -171,6 +180,9 @@
     </Compile>
     <Compile Include="Form\JobEdit\Sample\RebootSample.xaml.cs">
       <DependentUpon>RebootSample.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Form\JobEdit\Sample\ReleaseSample.xaml.cs">
+      <DependentUpon>ReleaseSample.xaml</DependentUpon>
     </Compile>
     <Compile Include="Form\JobEdit\Setting\FCopySetting.xaml.cs">
       <DependentUpon>FCopySetting.xaml</DependentUpon>
@@ -186,6 +198,12 @@
     </Compile>
     <Compile Include="Form\JobEdit\Setting\RebootSetting.xaml.cs">
       <DependentUpon>RebootSetting.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Form\JobEdit\Setting\ReleaseSetting.xaml.cs">
+      <DependentUpon>ReleaseSetting.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Form\JobEdit\SubJobEdit.xaml.cs">
+      <DependentUpon>SubJobEdit.xaml</DependentUpon>
     </Compile>
     <Compile Include="Form\JobManager\Designer\Container.xaml.cs">
       <DependentUpon>Container.xaml</DependentUpon>
@@ -211,6 +229,16 @@
     <Compile Include="Form\JobManager\Setting\ParameterView.xaml.cs">
       <DependentUpon>ParameterView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Form\JobResult\CsvWindow.xaml.cs">
+      <DependentUpon>CsvWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Form\JobResult\JobnetExecResultPage.xaml.cs">
+      <DependentUpon>JobnetExecResultPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Form\JobResult\JobResultDetail.xaml.cs">
+      <DependentUpon>JobResultDetail.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Form\NumericTextBoxBehavior.cs" />
     <Compile Include="Form\ScheduleEdit\Designer\CalendarContainer.xaml.cs">
       <DependentUpon>CalendarContainer.xaml</DependentUpon>
     </Compile>
@@ -221,6 +249,7 @@
     <Compile Include="Form\ScheduleEdit\ScheduleJobnetRegistWindow.xaml.cs">
       <DependentUpon>ScheduleJobnetRegistWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Form\TextBlockService.cs" />
     <Compile Include="Form\WindowBehavior.cs" />
     <Compile Include="Form\DateConverter.cs" />
     <Compile Include="Form\BootTimeConverter.cs" />
@@ -449,6 +478,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Form\JobArrangerMessageBox.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Form\JobArrangerWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -469,6 +502,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Form\JobEdit\Element\Release.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Form\JobEdit\Sample\FCopySample.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -484,6 +521,10 @@
     <Page Include="Form\JobEdit\Sample\RebootSample.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Form\JobEdit\Sample\ReleaseSample.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Form\JobEdit\Setting\FCopySetting.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -504,6 +545,14 @@
     <Page Include="Form\JobEdit\Setting\RebootSetting.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Form\JobEdit\Setting\ReleaseSetting.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Form\JobEdit\SubJobEdit.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Form\JobManager\Designer\Container.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -626,6 +675,18 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Form\JobManager\Setting\ParameterView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Form\JobResult\CsvWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Form\JobResult\JobnetExecResultPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Form\JobResult\JobResultDetail.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -766,6 +827,7 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>

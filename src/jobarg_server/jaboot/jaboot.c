@@ -18,8 +18,8 @@
 **/
 
 /*
-** $Date:: 2013-06-13 11:55:05 +0900 #$
-** $Rev: 4908 $
+** $Date:: 2013-08-05 13:45:29 +0900 #$
+** $Rev: 5232 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -486,7 +486,7 @@ static int	joblog_purge(char *joblog_purge_date)
 	zabbix_log(LOG_LEVEL_DEBUG, "In %s(%s)", __function_name, joblog_purge_date);
 
 	result = DBselect("select inner_jobnet_main_id from ja_run_log_table"
-			" where log_date <= %s59 group by inner_jobnet_main_id",
+			" where log_date <= %s59999 group by inner_jobnet_main_id",
 			joblog_purge_date);
 
 	while (NULL != (row = DBfetch(result)))

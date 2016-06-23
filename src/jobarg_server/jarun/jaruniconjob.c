@@ -18,9 +18,9 @@
 **/
 
 /*
-** $Date:: 2013-06-11 16:58:14 +0900 #$
-** $Revision: 4896 $
-** $Author: ossinfra@FITECHLABS.CO.JP $
+** $Date:: 2013-11-14 11:51:12 +0900 #$
+** $Revision: 5320 $
+** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
 #include <json/json.h>
@@ -84,8 +84,12 @@ int jarun_icon_job_getenv(zbx_uint64_t inner_job_id, ja_job_object * job)
     while (NULL != (row = DBfetch(result))) {
         zbx_snprintf(value, sizeof(value), "");
         p = row[1];
-        if (*p == '$')
+        if (*p == '$') {
             ja_get_value_before(inner_job_id, p + 1, value);
+        } else {
+            zbx_strlcpy(value, row[1], sizeof(value));
+        }
+        
         json_object_object_add(jp_env, row[0],
                                json_object_new_string(value));
     }
@@ -139,17 +143,14 @@ int jarun_icon_job(zbx_uint64_t inner_job_id, int flag)
         command_type = atoi(row[2]);
         zbx_snprintf(host_name, sizeof(host_name), "%s", row[3]);
     } else {
-        ja_log("JARUNICONJOB200017", inner_jobnet_id, NULL, inner_job_id);
+        ja_log("JARUNICONJOB200017", inner_jobnet_id, NULL, inner_job_id, inner_job_id);
         DBfree_result(result);
         return ja_set_runerr(inner_job_id);
     }
     DBfree_result(result);
 
     if (ja_host_getname(inner_job_id, host_flag, host_name, host) == FAIL) {
-        zabbix_log(LOG_LEVEL_ERR,
-                   "In %s() can get host name %s. host_flag: %d, inner_job_id: "
-                   ZBX_FS_UI64, __function_name, host_name, host_flag,
-                   inner_job_id);
+        ja_log("JARUNICONJOB200028", inner_jobnet_id, NULL, inner_job_id, host_name, host_flag, inner_job_id);
         return ja_set_runerr(inner_job_id);
     }
 
@@ -180,8 +181,7 @@ int jarun_icon_job(zbx_uint64_t inner_job_id, int flag)
                      " where inner_job_id = " ZBX_FS_UI64, inner_job_id);
         row = DBfetch(result);
         if (row == NULL) {
-            ja_log("JARUNICONJOB200024", inner_jobnet_id, NULL,
-                   inner_job_id);
+            ja_log("JARUNICONJOB200024", inner_jobnet_id, NULL, inner_job_id, inner_job_id);
             DBfree_result(result);
             return ja_set_runerr(inner_job_id);
         }
@@ -199,8 +199,7 @@ int jarun_icon_job(zbx_uint64_t inner_job_id, int flag)
                      " and command_cls = %d", inner_job_id, command_type);
         row = DBfetch(result);
         if (row == NULL) {
-            ja_log("JARUNICONJOB200024", inner_jobnet_id, NULL,
-                   inner_job_id);
+            ja_log("JARUNICONJOB200024", inner_jobnet_id, NULL, inner_job_id, inner_job_id);
             DBfree_result(result);
             return ja_set_runerr(inner_job_id);
         }
@@ -211,7 +210,7 @@ int jarun_icon_job(zbx_uint64_t inner_job_id, int flag)
 
     pid = ja_fork();
     if (pid == -1) {
-        ja_log("JARUNICONJOB200027", inner_jobnet_id, NULL, inner_job_id);
+        ja_log("JARUNICONJOB200027", inner_jobnet_id, NULL, inner_job_id, inner_job_id);
         return ja_set_runerr(inner_job_id);
     } else if (pid != 0) {
         waitpid(pid, NULL, WNOHANG);
@@ -224,8 +223,7 @@ int jarun_icon_job(zbx_uint64_t inner_job_id, int flag)
     if (ja_connect(&sock, host) == FAIL) {
         zbx_snprintf(job_res.message, sizeof(job_res.message),
                      "Can not connect the host: %s", host);
-        ja_log("JARUNICONJOB200012", inner_jobnet_id, NULL, inner_job_id,
-               inner_job_id, job_res.message);
+        ja_log("JARUNICONJOB200012", inner_jobnet_id, NULL, inner_job_id, inner_job_id, job_res.message);
         ja_set_runerr(inner_job_id);
         DBclose();
         exit(1);
@@ -249,8 +247,7 @@ int jarun_icon_job(zbx_uint64_t inner_job_id, int flag)
         exit(0);
     } else {
         DBconnect(ZBX_DB_CONNECT_ONCE);
-        ja_log("JARUNICONJOB200012", inner_jobnet_id, NULL, inner_job_id,
-               inner_job_id, job_res.message);
+        ja_log("JARUNICONJOB200012", inner_jobnet_id, NULL, inner_job_id, inner_job_id, job_res.message);
         ja_set_runerr(inner_job_id);
         DBclose();
         exit(1);

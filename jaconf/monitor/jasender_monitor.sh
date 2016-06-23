@@ -14,17 +14,17 @@
 
 ZABBIX_SERVER="127.0.0.1"
 ZABBIX_PORT="10051"
-ZABBIX_SENDER="/usr/bin/zabbix_sender"
+ZABBIX_SENDER="zabbix_sender"
 KEY=""
 HOST=""
 
 
 case "$1" in
     "1") 
-        MESSAGE="ジョブネットが事前展開されていません： ジョブネット[$4]  起動予定時刻[$6]  カレンダー[$2]  スケジュール[$3]  ユーザー名[$5]"
+        MESSAGE="Jobnet has not been pre-deployment: jobnet[$4]  scheduled time[$6]  calendar[$2]  schedule[$3]  user name[$5]"
         ;;
     "2")
-        MESSAGE="ジョブネットが起動していません： ジョブネット[$4]  起動予定時刻[$6]  カレンダー[$2]  スケジュール[$3]  ユーザー名[$5]"
+        MESSAGE="Jobnet has not started: jobnet[$4]  scheduled time[$6]  calendar[$2]  schedule[$3]  user name[$5]"
         ;;
     *)
         exit 1

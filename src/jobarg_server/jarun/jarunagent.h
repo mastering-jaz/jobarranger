@@ -29,7 +29,7 @@
 extern int CONFIG_TIMEOUT;
 extern char serverid[JA_SERVERID_LEN];
 
-int jarun_agent(ja_job_object * job, const char *host_name,
-                const int host_flag);
+int jarun_agent(ja_job_object * job, const char *host_name, const int host_flag,
+                const zbx_uint64_t inner_job_id);
 
 #endif

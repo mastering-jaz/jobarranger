@@ -40,7 +40,7 @@ namespace jp.co.ftf.jobcontroller.JobController
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             UInt64 updateDate = System.Convert.ToUInt64(value);
-            return ConvertUtil.ConverIntYYYYMMDDHHMISS2Date(updateDate).ToString();
+            return ConvertUtil.ConverIntYYYYMMDDHHMISS2Date(updateDate).ToString("yyyy/MM/dd HH:mm:ss");
         }
 
 

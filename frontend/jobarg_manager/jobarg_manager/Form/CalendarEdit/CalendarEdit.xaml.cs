@@ -18,6 +18,7 @@
 **/
 using System;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Controls;
 using jp.co.ftf.jobcontroller.Common;
 using System.Data;
@@ -81,9 +82,12 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.CalendarEdit
         #region コンストラクタ
 
         /// <summary>コンストラクタ(新規追加用)</summary>
-        public CalendarEdit()
+        public CalendarEdit(JobArrangerWindow parentWindow)
         {
+            ParantWindow = parentWindow;
+
             InitializeComponent();
+            tbxCalendarId.SetValue(InputMethod.IsInputMethodEnabledProperty, false);
             // 初期化 
             LoadForAdd();
 
@@ -95,11 +99,13 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.CalendarEdit
         /// <summary>コンストラクタ(編集、コピー新規用)</summary>
         /// <param name="calendarId">カレンダーID</param>
         /// <param name="updDate">更新日</param>
-        public CalendarEdit(string calendarId, string updDate, Consts.EditType editType)
+        public CalendarEdit(JobArrangerWindow parentWindow, string calendarId, string updDate, Consts.EditType editType)
         {
+            ParantWindow = parentWindow;
             if (LoadForUpd(calendarId, updDate, editType))
             {
                 InitializeComponent();
+                tbxCalendarId.SetValue(InputMethod.IsInputMethodEnabledProperty, false);
                 HankakuTextChangeEvent.AddTextChangedEventHander(tbxCalendarId);
                 _successFlg = true;
             }
@@ -257,19 +263,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.CalendarEdit
 
                 this.Commit();
 
-                if (oldPublicFlg != cbOpen.IsChecked &&
-                    _editType != Consts.EditType.Add &&
-                    _editType != Consts.EditType.CopyNew)
-                {
-                    ParantWindow.SetTreeObject(!cbOpen.IsChecked.Value, Consts.ObjectEnum.CALENDAR, tbxCalendarId.Text);
-                }
-
-                if (oldPublicFlg != cbOpen.IsChecked ||
-                    _editType == Consts.EditType.Add ||
-                    _editType == Consts.EditType.CopyNew)
-                {
-                    ParantWindow.SetTreeObject(cbOpen.IsChecked.Value, Consts.ObjectEnum.CALENDAR, tbxCalendarId.Text);
-                }
+                ResetTree(tbxCalendarId.Text);
 
                 // オブジェクト一覧画面を表示する
                 ParantWindow.ShowObjectList(tbxCalendarId.Text, Consts.ObjectEnum.CALENDAR);
@@ -298,7 +292,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.CalendarEdit
                     this.Rollback();
 
                     // オブジェクト一覧画面を表示する 
-                    ParantWindow.ShowObjectList(_calendarId, Consts.ObjectEnum.CALENDAR);
+                    ParantWindow.ShowObjectList(null, Consts.ObjectEnum.CALENDAR);
 
                 }
             }
@@ -308,7 +302,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.CalendarEdit
                 this.Rollback();
 
                 // オブジェクト一覧画面を表示する 
-                ParantWindow.ShowObjectList(_calendarId, Consts.ObjectEnum.CALENDAR);
+                ParantWindow.ShowObjectList(null, Consts.ObjectEnum.CALENDAR);
             }
 
             // 終了ログ
@@ -371,19 +365,22 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.CalendarEdit
         /// Treeを再セット 
         /// </summary>
         //*******************************************************************
-        public override void ResetTree()
+        public override void ResetTree(String objectId)
         {
+            if (objectId == null && (_editType == Consts.EditType.Modify || _editType == Consts.EditType.READ))
+                objectId = ((TreeViewItem)ParantWindow.treeView1.SelectedItem).Header.ToString();
+
             if (oldPublicFlg != cbOpen.IsChecked &&
                 _editType != Consts.EditType.Add &&
                 _editType != Consts.EditType.CopyNew)
             {
-                ParantWindow.SetTreeObject(!cbOpen.IsChecked.Value, Consts.ObjectEnum.CALENDAR, null);
+                ParantWindow.SetTreeObject(!cbOpen.IsChecked.Value, Consts.ObjectEnum.CALENDAR, objectId);
             }
             if (oldPublicFlg != cbOpen.IsChecked ||
                 _editType == Consts.EditType.Add ||
                 _editType == Consts.EditType.CopyNew)
             {
-                ParantWindow.SetTreeObject(cbOpen.IsChecked.Value, Consts.ObjectEnum.CALENDAR, null);
+                ParantWindow.SetTreeObject(cbOpen.IsChecked.Value, Consts.ObjectEnum.CALENDAR, objectId);
             }
 
         }
@@ -394,8 +391,8 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.CalendarEdit
         public override void Commit()
         {
             // ロックをリリース
-            if (_editType == Consts.EditType.Modify && Consts.DBTYPE.MYSQL == LoginSetting.DBType)
-                this.RealseLock(_calendarId, _oldUpdateDate);
+            if ((_editType == Consts.EditType.Modify || _editType == Consts.EditType.CopyVer) && Consts.DBTYPE.MYSQL == LoginSetting.DBType)
+                this.RealseLock(_calendarId);
             if (_healthCheckFlag)
                 _dispatcherTimer.Stop();
             dbAccess.TransactionCommit();
@@ -408,8 +405,8 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.CalendarEdit
         public override void Rollback()
         {
             // ロックをリリース
-            if (_editType == Consts.EditType.Modify && Consts.DBTYPE.MYSQL == LoginSetting.DBType)
-                this.RealseLock(_calendarId, _oldUpdateDate);
+            if ((_editType == Consts.EditType.Modify || _editType == Consts.EditType.CopyVer) && Consts.DBTYPE.MYSQL == LoginSetting.DBType)
+                this.RealseLock(_calendarId);
             if (_healthCheckFlag)
                 _dispatcherTimer.Stop();
             dbAccess.TransactionRollback();
@@ -541,42 +538,36 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.CalendarEdit
         }
 
         //*******************************************************************
-        /// <summary> 存在チェックANDDBのロック取得４UPD</summary>
+        /// <summary> DBのロック取得、存在チェック</summary>
         //*******************************************************************
         private bool ExistCheckAndGetLockForUpd(string calendarId, string updDate, Consts.EditType editType)
         {
-            // スケジュールが存在しない場合、メッセージを表示し、処理終了する 
-            bool exitFlg = false;
-            try
+            //編集モード時、calendar_idベースでロックする。
+            if (editType == Consts.EditType.Modify || editType == Consts.EditType.CopyVer)
             {
-                exitFlg = ExistCheck(calendarId, updDate, editType);
+                dbAccess.BeginTransaction();
+                try
+                {
+                    GetLock(calendarId);
+                }
+                catch (DBException ex)
+                {
+                    CommonDialog.ShowErrorDialog(Consts.ERROR_CALENDAR_002);
+                    return false;
+                }
+            }
 
-            }
-            catch (DBException ex)
-            {
-                CommonDialog.ShowErrorDialog(Consts.ERROR_CALENDAR_002);
-                dbAccess.CloseSqlConnect();
-                return false;
-            }
+            //存在チェック
+            bool exitFlg = ExistCheck(calendarId, updDate);
 
             // 存在しない場合 
             if (exitFlg == false)
             {
                 CommonDialog.ShowErrorDialog(Consts.ERROR_CALENDAR_001);
-                dbAccess.CloseSqlConnect();
+                Rollback();
                 return false;
             }
 
-            //開発モード、Mysqlの場合、ロックを取得 
-            if (Consts.ActionMode.DEVELOP == LoginSetting.Mode && Consts.DBTYPE.MYSQL == LoginSetting.DBType)
-            {
-                if (editType == Consts.EditType.Modify && !GetLock(calendarId, updDate))
-                {
-                    CommonDialog.ShowErrorDialog(Consts.ERROR_CALENDAR_002);
-                    Rollback();
-                    return false;
-                }
-            }
             return true;
 
         }
@@ -655,53 +646,34 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.CalendarEdit
 
         }
 
+
         //*******************************************************************
-        /// <summary> ロックを取得</summary>
+        /// <summary> DBがMysql時、ロックをリリース</summary>
         //*******************************************************************
-        private bool GetLock(string calendarId, string updDate)
+        private void RealseLock(string calendarId)
         {
-            string count = _calendarControlDAO.GetLockByPk(calendarId, updDate);
-
-            // 成功にロックの場合 
-            if ("1".Equals(count))
-                return true;
-
-            return false;
+            _calendarControlDAO.RealseLock(calendarId);
         }
 
         //*******************************************************************
-        /// <summary> ロックをリリース</summary>
+        /// <summary> カレンダーロック</summary>
         //*******************************************************************
-        private bool RealseLock(string calendarId, string updDate)
+        private void GetLock(string calendarId)
         {
-            string count = _calendarControlDAO.RealseLockByPk(calendarId, updDate);
+            _calendarControlDAO.GetLock(calendarId, LoginSetting.DBType);
 
-            // 成功にリリースの場合 
-            if ("1".Equals(count))
-                return true;
-
-            return false;
         }
 
         //*******************************************************************
         /// <summary> カレンダー存在チェック</summary>
         //*******************************************************************
-        private bool ExistCheck(string calendarId, string updDate, Consts.EditType editType)
+        private bool ExistCheck(string calendarId, string updDate)
         {
-            string count;
+            int count = 0; ;
 
-            if (_editType == Consts.EditType.Modify)
-                dbAccess.BeginTransaction();
+            count = _calendarControlDAO.GetCountByPk(calendarId, updDate);
 
-            // 運用モード、またはMysqlの場合、ロックしない 
-            if (Consts.ActionMode.USE == LoginSetting.Mode || Consts.DBTYPE.MYSQL == LoginSetting.DBType || !(_editType == Consts.EditType.Modify))
-                count = Convert.ToString(_calendarControlDAO.GetCountByPk(calendarId, updDate));
-            // Postgresqlの場合 
-            else
-                count = Convert.ToString(_calendarControlDAO.GetCountByPkForUpdate(calendarId, updDate));
-
-
-            if (!"1".Equals(count))
+            if (count != 1)
             {
                 return false;
             }
@@ -810,7 +782,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.CalendarEdit
             DateTime now = DBUtil.GetSysTime();
             _updateDate = now.ToString("yyyyMMddHHmmss");
             container.TmpUpdDate = _updateDate;
-            lblUpdDate.Content = now.ToString("yyyy/MM/dd HH:mm");
+            //lblUpdDate.Content = now.ToString("yyyy/MM/dd HH:mm");
         }
 
         //*******************************************************************
@@ -878,6 +850,16 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.CalendarEdit
                 lblUserName.Content = Convert.ToString(row["user_name"]);
             }
 
+            //更新日
+            if (_editType == Consts.EditType.READ || _editType == Consts.EditType.Modify)
+            {
+                lblUpdDate.Content = ConvertUtil.ConverIntYYYYMMDDHHMISS2Date(Convert.ToDecimal(row["update_date"])).ToString("yyyy/MM/dd HH:mm:ss");
+            }
+            else
+            {
+                lblUpdDate.Content = "";
+            }
+
         }
 
 
@@ -906,12 +888,28 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.CalendarEdit
                 return false;
             }
 
+            // 入力不可文字「"'\,」チェック
+            if (CheckUtil.IsImpossibleStr(calendarName))
+            {
+                CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_025,
+                    new string[] { Properties.Resources.err_message_calendar_name });
+                return false;
+            }
+
             // 説明のチェック 
             string comment = tbComment.Text.Trim();
             if (CheckUtil.IsLenOver(comment, 100))
             {
                 CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_003,
                     new string[] { Properties.Resources.err_message_memo, "100" });
+                return false;
+            }
+
+            // 入力不可文字「"'\,」チェック
+            if (CheckUtil.IsImpossibleStr(comment))
+            {
+                CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_025,
+                    new string[] { Properties.Resources.err_message_memo });
                 return false;
             }
 

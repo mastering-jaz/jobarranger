@@ -22,6 +22,7 @@ using System.Windows;
 using jp.co.ftf.jobcontroller.Common;
 using System.Data;
 using System.Configuration;
+using System.Collections;
 //*******************************************************************
 //                                                                  *
 //                                                                  *
@@ -38,9 +39,8 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
     /// </summary>
     public class CommonUtil
     {
-        #region フィールド 
 
-        #region 定数
+        #region 定数フィールド
         /// <summary> 開始アイコンの識別子</summary>
         private const string START_SIGN = "START";
 
@@ -93,85 +93,14 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
         /// <summary> リブートの識別子</summary>
         private const string REBOOT_SIGN = "REBOOT-";
 
+        /// <summary> 保留解除の識別子</summary>
+        private const string RELEASE_SIGN = "REL-";
         #endregion
 
-        #region 変数
-        /// <summary> 終了アイコンの連番</summary>
-        private static int _endNo = 1;
 
-        /// <summary> 条件分岐アイコンの連番</summary>
-        private static int _ifNo = 1;
-
-        /// <summary> ジョブコントローラ変数アイコンの識別子</summary>
-        private static int _envNo = 1;
-
-        /// <summary> ジョブアイコンの識別子</summary>
-        private static int _jobNo = 1;
-
-        /// <summary> ジョブネットアイコンの識別子</summary>
-        private static int _jobnetNo = 1;
-
-        /// <summary> 並行処理開始アイコンの連番</summary>
-        private static int _mtsNo = 1;
-
-        /// <summary> 並行処理終了アイコンの連番</summary>
-        private static int _mteNo = 1;
-
-        /// <summary> ループアイコンの連番</summary>
-        private static int _loopNo = 1;
-
-        /// <summary> 拡張ジョブアイコンの連番</summary>
-        private static int _extJobNo = 1;
-
-        /// <summary> 計算アイコンの連番</summary>
-        private static int _calNo = 1;
-
-        /// <summary> タスクアイコンの連番</summary>
-        private static int _taskNo = 1;
-
-        /// <summary> 情報取得アイコンの連番</summary>
-        private static int _infNo = 1;
-
-        //added by kim 2012/11/14
-        /// <summary> 分岐終了アイコンの連番</summary>
-        private static int _ifeNo = 1;
-
-        /// <summary> ファイル転送アイコンの連番</summary>
-        private static int _fcopyNo = 1;
-
-        /// <summary> ファイル待ち合わせアイコンの連番</summary>
-        private static int _fwaitNo = 1;
-
-        /// <summary> リブートイコンの連番</summary>
-        private static int _rebootNo = 1;
-
-        #endregion
-
-        #endregion
-
-        #region public メッソド
-
-
-        /// <summary>DBタイプを取得</summary>
-        /// <returns>DBタイプ</returns>
-        /*public static DBTYPE GetDbType()
-        {
-            if ("MySqlDAL".Equals(ConfigurationManager.AppSettings["DBDAL"]))
-            {
-                return DBTYPE.MYSQL;
-            }
-            else if ("PostgreSqlDAL".Equals(ConfigurationManager.AppSettings["DBDAL"]))
-            {
-                return DBTYPE.POSTGRES;
-            }
-            else
-            {
-                return DBTYPE.NONE;
-            }
-        }*/
-        
+        #region public メッソド     
         /// <summary>ジョブＩＤを取得</summary>
-        public static string GetJobId(ElementType type)
+        public static string GetJobId(Hashtable JobNoHash, ElementType type)
         {
             string jobId = "";
             switch (type)
@@ -182,67 +111,87 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                     break;
                 // 終了の場合 
                 case ElementType.END:
-                    jobId = END_SIGN + _endNo++;
+                    JobNoHash[type] = (int)JobNoHash[type] + 1;
+                    jobId = END_SIGN + (int)JobNoHash[type];
                     break;
                 // 条件分岐の場合 
                 case ElementType.IF:
-                    jobId = IF_SIGN + _ifNo++;
+                    JobNoHash[type] = (int)JobNoHash[type] + 1;
+                    jobId = IF_SIGN + (int)JobNoHash[type];
                     break;
                 // ジョブコントローラ変数の場合 
                 case ElementType.ENV:
-                    jobId = ENV_SIGN + _envNo++;
+                    JobNoHash[type] = (int)JobNoHash[type] + 1;
+                    jobId = ENV_SIGN + (int)JobNoHash[type];
                     break;
                 // ジョブの場合 
                 case ElementType.JOB:
-                    jobId = JOB_SIGN + _jobNo++;
+                    JobNoHash[type] = (int)JobNoHash[type] + 1;
+                    jobId = JOB_SIGN + (int)JobNoHash[type];
                     break;
                 // ジョブネットの場合 
                 case ElementType.JOBNET:
-                    jobId = JOBNET_SIGN + _jobnetNo++;
+                    JobNoHash[type] = (int)JobNoHash[type] + 1;
+                    jobId = JOBNET_SIGN + (int)JobNoHash[type];
                     break;
                 // 並行処理開始の場合 
                 case ElementType.MTS:
-                    jobId = MTS_SIGN + _mtsNo++;
+                    JobNoHash[type] = (int)JobNoHash[type] + 1;
+                    jobId = MTS_SIGN + (int)JobNoHash[type];
                     break;
                 // 並行処理終了の場合 
                 case ElementType.MTE:
-                    jobId = MTE_SIGN + _mteNo++;
+                    JobNoHash[type] = (int)JobNoHash[type] + 1;
+                    jobId = MTE_SIGN + (int)JobNoHash[type];
                     break;
                 // ループの場合 
                 case ElementType.LOOP:
-                    jobId = LOOP_SIGN + _loopNo++;
+                    JobNoHash[type] = (int)JobNoHash[type] + 1;
+                    jobId = LOOP_SIGN + (int)JobNoHash[type];
                     break;
                 // 拡張ジョブの場合 
                 case ElementType.EXTJOB:
-                    jobId = EXTJOB_SIGN + _extJobNo++;
+                    JobNoHash[type] = (int)JobNoHash[type] + 1;
+                    jobId = EXTJOB_SIGN + (int)JobNoHash[type];
                     break;
                 // 計算の場合 
                 case ElementType.CAL:
-                    jobId = CAL_SIGN + _calNo++;
+                    JobNoHash[type] = (int)JobNoHash[type] + 1;
+                    jobId = CAL_SIGN + (int)JobNoHash[type];
                     break;
                 // タスクの場合 
                 case ElementType.TASK:
-                    jobId = TASK_SIGN + _taskNo++;
+                    JobNoHash[type] = (int)JobNoHash[type] + 1;
+                    jobId = TASK_SIGN + (int)JobNoHash[type];
                     break;
                 // 情報の場合 
                 case ElementType.INF:
-                    jobId = INF_SIGN + _infNo++;
+                    JobNoHash[type] = (int)JobNoHash[type] + 1;
+                    jobId = INF_SIGN + (int)JobNoHash[type];
                     break;
-                //added by kim 2011/11/14
                 case ElementType.IFE:
-                    jobId = IFE_SIGN + _ifeNo++;
+                    JobNoHash[type] = (int)JobNoHash[type] + 1;
+                    jobId = IFE_SIGN + (int)JobNoHash[type];
                     break;
                 // ファイル転送の場合 
                 case ElementType.FCOPY:
-                    jobId = FCOPY_SIGN + _fcopyNo++;
+                    JobNoHash[type] = (int)JobNoHash[type] + 1;
+                    jobId = FCOPY_SIGN + (int)JobNoHash[type];
                     break;
                 // ファイル待合せの場合 
                 case ElementType.FWAIT:
-                    jobId = FWAIT_SIGN + _fwaitNo++;
+                    JobNoHash[type] = (int)JobNoHash[type] + 1;
+                    jobId = FWAIT_SIGN + (int)JobNoHash[type];
                     break;
                 // リブートの場合 
                 case ElementType.REBOOT:
-                    jobId = REBOOT_SIGN + _rebootNo++;
+                    JobNoHash[type] = (int)JobNoHash[type] + 1;
+                    jobId = REBOOT_SIGN + (int)JobNoHash[type];
+                    break;
+                // 保留解除の場合 
+                case ElementType.RELEASE:
+                    JobNoHash[type] = (int)JobNoHash[type] + 1;
+                    jobId = RELEASE_SIGN + (int)JobNoHash[type];
                     break;
             }
 
@@ -250,55 +199,59 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
         }
 
         /// <summary>ジョブID用の番号を初期化</summary>
-        public static void InitJobNo()
+        public static void InitJobNo(Hashtable JobNoHash)
         {
+
             //終了アイコンの連番 
-            _endNo = 1;
+            JobNoHash[ElementType.END] = 0;
 
             //条件分岐アイコンの連番 
-            _ifNo = 1;
+            JobNoHash[ElementType.IF] = 0;
 
             //ジョブコントローラ変数アイコンの識別子 
-            _envNo = 1;
+            JobNoHash[ElementType.ENV] = 0;
 
             //ジョブアイコンの識別子 
-            _jobNo = 1;
+            JobNoHash[ElementType.JOB] = 0;
 
             //ジョブネットアイコンの識別子 
-            _jobnetNo = 1;
+            JobNoHash[ElementType.JOBNET] = 0;
 
             //並行処理開始アイコンの連番 
-            _mtsNo = 1;
+            JobNoHash[ElementType.MTS] = 0;
 
             //並行処理終了アイコンの連番 
-            _mteNo = 1;
+            JobNoHash[ElementType.MTE] = 0;
 
             //ループアイコンの連番 
-            _loopNo = 1;
+            JobNoHash[ElementType.LOOP] = 0;
 
             //拡張ジョブアイコンの連番 
-            _extJobNo = 1;
+            JobNoHash[ElementType.EXTJOB] = 0;
 
             //計算アイコンの連番 
-            _calNo = 1;
+            JobNoHash[ElementType.CAL] = 0;
 
             // タスクアイコンの連番 
-            _taskNo = 1;
+            JobNoHash[ElementType.TASK] = 0;
 
             //情報取得アイコンの連番 
-            _infNo = 1;
+            JobNoHash[ElementType.INF] = 0;
 
             //分岐終了アイコンの連番 
-            _ifeNo = 1;
+            JobNoHash[ElementType.IFE] = 0;
 
             //ファイル転送アイコンの連番 
-            _fcopyNo = 1;
+            JobNoHash[ElementType.FCOPY] = 0;
 
             //ファイル待ち合わせアイコンの連番 
-            _fwaitNo = 1;
+            JobNoHash[ElementType.FWAIT] = 0;
 
             //リブートアイコンの連番 
-            _rebootNo = 1;
+            JobNoHash[ElementType.REBOOT] = 0;
+
+            //保留解除アイコンの連番 
+            JobNoHash[ElementType.RELEASE] = 0;
         }
 
         /// <summary>線の連接点を取得</summary>

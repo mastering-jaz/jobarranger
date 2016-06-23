@@ -1,3 +1,58 @@
+Changes for 1.4.1 (Rev:5710) GA
+
+2014-01-06  FitechForce Business Dept.
+
+	* jakill.c : ジョブアイコンの強制停止時にユーザープロセスのKillに失敗すると
+	ジョブエージェントがダウンする不具合に対応。
+
+Changes for 1.4.1 (Rev:5658) GA
+
+2013-12-18  FitechForce Business Dept.
+
+	* Job Arranger : ジョブ実行結果画面を追加。
+	* Job Arranger : ファイル待合せアイコンを追加。
+	* Job Arranger : 保留解除アイコンを追加。
+	* Job Arranger : 事前保留機能を追加。
+	* Job Arranger : 事前スキップ機能を追加。
+	* Job Arranger : 拡張ジョブアイコンのコマンド名と説明のマルチ言語化に対応。
+	* Job Arranger : CentOS（RHEL）6.X 32bit版のrpmパッケージを追加。
+	* jaruniconinfo.c : カレンダー稼働日参照機能を追加。
+	* jajobnetready.c : ジョブコントローラ変数に「JOBNET_BOOT_TIME」、
+	「CURRENT_TIME」、「MANAGEMENT_ID」を追加。
+	* jaruniconvalue.c : ジョブコントローラ変数アイコンの値に変数名指定を追加。
+	* jarunicontask.c : ループフロー内でのタスクアイコンの実行を許可。
+	* jobarg_joblogput.c : ジョブ実行結果取得コマンド（jobarg_joblogput）を追加。
+	* jobarg_release.c : 保留解除コマンド（jobarg_release）を追加。
+	* server.c : ジョブアイコン・タイムアウトチェック間隔（JaJobTimeout）の最少値を
+	「30」から「0」に変更。
+	* jobarg_get.c : ジョブネット情報取得コマンド（jobarg_get）にオプション「-e」
+	を追加。また、取得結果と戻り値の内容を変更。
+	* jaflow.c : 並行処理終了アイコンで次アイコンに処理を継続しない不具合に対応。
+	* jarun.c : ジョブネット強制停止時にループ処理が停止しない不具合に対応。
+	* jaruniconextjob.c : サブジョブネットで拡張ジョブアイコン（TIME）が
+	開始時刻取得エラーとなる不具合に対応。
+	* jobarranger.spec : MySQL版rpmパッケージによるインストール時のエラーに対応。
+	* jobarranger.spec : rpmパッケージによるジョブサーバーのインストール時に
+	「/var/tmp/jobarranger」を作成しない不具合に対応。
+	* jobarranger.spec : 「jobarg_monitor.log」のログローテーション漏れに対応。
+	* Job Arranger : ジョブエラー停止時のログメッセージ（RUNERR）の
+	メッセージフォーマットを変更。
+	* Job Manager : ジョブマネージャーの対応OSに Windows 7 と Windows 8 を追加。
+	* Job Manager : インポート時のオブジェクト依存性チェックを廃止。
+	* Job Manager : ジョブ実行結果のCSVファイル出力画面を追加。
+	* Job Manager : ジョブIDにアンダーバーの利用を許可。
+	* Job Manager : ジョブネットアイコンの登録時、ジョブIDにジョブネット名を
+	自動設定する方式に変更。
+	* jp.co.ftf.jobcontroller.JobController.Form.JobEdit.Container.xaml.cs :
+	ジョブ編集画面でのアイコンコピー＆ペースト、および操作取り消し（Undo）に対応。
+	* jp.co.ftf.jobcontroller.JobController.Form.JobManager.JobnetExecControlAllPage.xaml :
+	実行ジョブ管理画面のリスト項目に管理IDを追加。
+	* jp.co.ftf.jobcontroller.JobController.Form.JobManager.ParameterView.xaml :
+	実行ジョブ詳細画面の変数表示ダイアログのサイズを変更。
+	* jp.co.ftf.jobcontroller.DAO.JobnetControlDAO.cs :
+	DBにPostgreSQLを使用している場合、情報取得アイコンのジョブID登録でエラーが発生する
+	不具合に対応。
+
 Changes for 1.3.0 GA
 
 2013-07-08  FitechForce Business Dept.

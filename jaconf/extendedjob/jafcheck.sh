@@ -20,16 +20,16 @@ fi
 
 if [ -e "$file_name" ]; then
     if [ -f "$file_name" ]; then
-        echo "the file '$file_name' exists"
+        echo "the file $file_name exists"
         if [ $file_delete_flag -eq 1 ]; then
-            echo "Delete the file '$file_name'"
-            /bin/rm -f "$file_name" || failure "Can not delete the file '$file_name'"
+            echo "Delete the file $file_name"
+            /bin/rm -f "$file_name" || failure "Can not delete the file $file_name"
         fi
-        exit 0
+        exit 1
     else
-        failure "The file '$file_name' is not a regular file"
+        failure "The file $file_name is not a regular file"
     fi
 fi
 
-echo "the file 'file_name' does not exist"
-exit 1
+echo "the file $file_name does not exist"
+exit 0

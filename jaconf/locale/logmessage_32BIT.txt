@@ -1,5 +1,5 @@
 
-# Job Arranger application log message  - 2013/04/24 -
+# Job Arranger application log message  - 2013/12/16 -
 
 # Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
 
@@ -15,7 +15,7 @@ JAJOB300001,3,0,In %s() can not update inner_job_id: %llu job_type: %d
 
 JAJOBICONJOB200001,2,1,In %s() can not insert an abort icon. inner_job_id: %llu, inner_job_id_fs_link: %llu
 JAJOBICONJOB200002,2,1,In %s() can not match inner_job_id: %llu
-JAJOBICONJOB300001,3,0,In %s() timeout occurrence. inner_job_id: %llu, timeout: %s, start_time: %s
+JAJOBICONJOB300001,3,0,In %s() timeout occurrence. inner_job_id: %llu, timeout: %s, start_time: %s, jobnet_id: %s, job_id: %s, user_name: %s
 
 JAJOBNET000001,0,0,In %s() inner_jobnet_id: %llu
 JAJOBNET000002,0,0,In %s() inner_jobnet_id: %llu, ready_cnt: %d, run_cnt: %d
@@ -23,8 +23,8 @@ JAJOBNET000002,0,0,In %s() inner_jobnet_id: %llu, ready_cnt: %d, run_cnt: %d
 JAJOBNETREADY200001,2,1,In %s() can not find inner_jobnet_id: %llu
 JAJOBNETREADY200002,2,1,In %s() the number of start icons %d is wrong. inner_jobnet_id: %llu
 
-JAJOBNETRUN000001,0,0,In %s() inner_job_id: %llu status is RUNERR
-JAJOBNETRUN200001,2,1,In %s() inner_job_id: %llu status is ENDERR
+JAJOBNETRUN000001,0,0,In %s() job execution error. inner_job_id: %llu status is RUNERR jobnet_id: %s, job_id: %s, user_name: %s
+JAJOBNETRUN200001,2,1,In %s() job abnormal termination. inner_job_id: %llu status is ENDERR jobnet_id: %s, job_id: %s, user_name: %s
 JAJOBNETRUN200002,2,1,In %s() multiple end icons are executed. inner_jobnet_id: %llu
 JAJOBNETRUN200003,2,1,In %s() the number of start icons (%d) is not 1. inner_jobnet_id: %llu
 JAJOBNETRUN200004,2,1,In %s() can not find end icon. inner_jobnet_id: %llu
@@ -33,6 +33,11 @@ JAJOBNETRUN200005,2,1,In %s() other icons are running. inner_jobnet_id: %llu, re
 JARUN200001,2,1,Unsupported method_flag %d (inner_job_id: %llu job_type: %d)
 JARUN200002,2,1,Can not update inner_job_id: %llu, job_type: %d
 JARUN300001,3,0,In %s() Abort method is wrong. inner_job_id: %llu
+
+JARUNAGENT200001,2,1,In %s() host name can not be found [%s]. host_flag: %d, inner_job_id: %llu
+JARUNAGENT200002,2,1,In %s() can not fork(). inner_job_id: %llu
+JARUNAGENT200003,2,1,In %s() can not connect the host [%s]. inner_job_id: %llu
+JARUNAGENT200004,2,1,In %s() error response received. inner_job_id: %llu message: [%s]
 
 JARUNICONCALC200001,2,1,In %s() can not find inner_job_id: %llu
 JARUNICONCALC200002,2,1,In %s() fork() failed
@@ -49,14 +54,17 @@ JARUNICONEXTJOB200003,2,1,In %s() execl() failed. command: %s [%s]
 JARUNICONEXTJOB200004,2,1,In %s() can not match inner_job_id: %llu
 JARUNICONEXTJOB200005,2,1,In %s() can not get start_time. inner_jobnet_id: %llu
 JARUNICONEXTJOB200006,2,1,In %s() can not save the pid: %d, inner_job_id: %llu
+JARUNICONEXTJOB200007,2,1,In %s() can not match inner_jobnet_id: %llu
 
 JARUNICONIF200001,2,1,In %s() unsupport hand_flag: %d
 JARUNICONIF200002,2,1,In %s() hand_flag or comparison_value or before_value is NULL. inner_job_id: %llu
 JARUNICONIF200003,2,1,In %s() can not find inner_job_id: %llu or value_name
+JARUNICONIF200004,2,1,In %s() compared with non-numeric OR comparison range is invalid. hand_flag: [%s], comparison value: [%s], value: [%s] inner_job_id: %llu
 
 JARUNICONINFO200001,2,1,In %s() can not find inner_job_id: %llu from ja_run_icon_jobnet_table
-JARUNICONINFO200002,2,1,In %s() can not find inner_jobnet_id: %llu, job_id: %s
-JARUNICONINFO200003,2,1,In %s() can not find inner_job_id: %llu
+JARUNICONINFO200002,2,1,In %s() can not find job id [%s]. inner_job_id: %llu
+JARUNICONINFO200003,2,1,In %s() can not find from ja_run_icon_info_table. inner_job_id: %llu
+JARUNICONINFO200004,2,1,In %s() calendar does not exist or is not valid. get_calendar_id: %s
 
 JARUNICONJOB200001,2,1,Cannot update job status: inner_job_id [%llu]
 JARUNICONJOB200002,2,1,Received message error: [kind] is not [jobrun-res], inner_job_id [%llu]
@@ -85,17 +93,39 @@ JARUNICONJOB200024,2,1,Cannot get inner_job_id_fs_link from DB: inner_jobid [%ll
 JARUNICONJOB200025,2,1,flag range error: inner_jobid [%llu], flag [%d]
 JARUNICONJOB200026,3,1,Double execution happened: inner_jobid [%llu]
 JARUNICONJOB200027,2,1,ja_fork() failed: inner_jobid [%llu]
+JARUNICONJOB200028,2,1,Host name can not be found [%s]. host_flag [%d], inner_job_id [%llu]
 
 JARUNICONJOBNET200001,2,1,In %s() can not find inner_job_id: %llu
 
 JARUNICONTASK200001,2,1,In %s() can not find inner_job_id: %llu
 JARUNICONTASK200002,2,1,In %s() inner_jobnet_id: %llu is already existed
 JARUNICONTASK200003,2,1,In %s() can not insert jobnet_id: %s ret %d
-JARUNICONTASK200004,2,1,In %s() can not insert jobnet_id: %s
+JARUNICONTASK200004,2,1,In %s() jobnet_id is not found, or not valid jobnet_id: %s
+JARUNICONTASK200005,2,1,In %s() can not find inner_jobnet_id: %s
+
+JARUNICONVALUE200001,2,1,In %s() failed to insert the %s: value_name:%s inner_job_id: %llu
+JARUNICONVALUE200002,2,1,In %s() cat not find the value [%s]. inner_job_id: %llu
 
 JARUNICONFCOPY200001,2,1,In %s() can not find inner_job_id: %llu
 JARUNICONFCOPY200002,2,1,In %s() can not fork(). inner_job_id: %llu
 JARUNICONFCOPY200003,2,1,In %s() error message: %s, inner_job_id: %llu
+JARUNICONFCOPY200004,2,1,In %s() cat not find the value [%s]. inner_job_id: %llu
+JARUNICONFCOPY200005,2,1,In %s() host name (FROM) can not be found [%s]. from_host_flag: %d, inner_job_id: %llu
+JARUNICONFCOPY200006,2,1,In %s() host name (TO) can not be found [%s]. to_host_flag: %d, inner_job_id: %llu
+
+JARUNICONFWAIT200001,2,1,In %s() can not find inner_job_id: %llu
+JARUNICONFWAIT200002,2,1,In %s() cat not find the value [%s]. inner_job_id: %llu
+
+JARUNICONREBOOT200001,2,1,In %s() can not find inner_job_id from ja_run_icon_reboot_table. inner_job_id: %llu
+JARUNICONREBOOT200002,2,1,In %s() host name can not be found [%s]. host_flag: %d, inner_job_id: %llu
+JARUNICONREBOOT200003,2,1,In %s() can not lock host [%s]. inner_job_id: %llu
+JARUNICONREBOOT200004,2,1,In %s() can not fork(). inner_job_id: %llu
+JARUNICONREBOOT200005,2,1,In %s() can not connect the host [%s]. inner_job_id: %llu
+JARUNICONREBOOT200006,2,1,In %s() error response received. inner_job_id: %llu message: [%s]
+
+JARUNICONRELEASE200001,2,1,In %s() can not find inner_job_id: %llu
+JARUNICONRELEASE200002,2,1,In %s() icon is not a pending state. release_job_id [%s] release_job_id : %llu
+JARUNICONRELEASE200003,2,1,In %s() can not get the release job id. release_job_id [%s] inner_job_id: %llu
 
 JARUNNORMAL200001,2,1,In %s() Unsupported job_type: %d,inner_job_id: %llu
 
@@ -149,7 +179,7 @@ JATRAPPER200042,2,1,Stop command error: inner_job_id [%llu], jobnet_name [%s]
 JATRAPPER200043,2,1,Execution error happened: inner_job_id [%llu]
 JATRAPPER200044,2,1,Cannot insert ja_run_value_after_table: inner_job_id [%llu]
 JATRAPPER200045,2,1,Cannot update ja_run_value_after_table: inner_job_id [%llu]
-JATRAPPER200046,2,1,Cannot find jobnet_id from DB: jobnet_id [%s]
+JATRAPPER200046,2,1,jobnet_id is not found, or not valid: jobnet_id [%s]
 JATRAPPER200047,2,1,jobnet_id is not valid: jobnet_id [%s]
 JATRAPPER200048,2,1,Cannot find user_name from DB: user_name [%s]
 JATRAPPER200049,2,1,User has no authority: user_name [%s]

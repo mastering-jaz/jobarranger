@@ -8,6 +8,7 @@ libjatrapper_a_SOURCES = \
 	jatrapjobresult.c jatrapjobresult.h \
 	jatrapjobnetrun.c jatrapjobnetrun.h \
 	jatrapjobrelease.c jatrapjobrelease.h \
+	jatrapjoblogput.c jatrapjoblogput.h \
 	jatrapkind.c jatrapkind.h \
 	jatrapauth.c jatrapauth.h \
 	jatrapper.c jatrapper.h

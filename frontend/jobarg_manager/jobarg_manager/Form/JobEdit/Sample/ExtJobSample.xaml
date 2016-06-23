@@ -24,17 +24,17 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:src="clr-namespace:jp.co.ftf.jobcontroller.JobController" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             >
+             FontSize="11" FontFamily="Meiryo">
     <Canvas x:Name="LayoutRoot"    Background="Transparent" >
 
         <Rectangle Canvas.ZIndex="100"  Name="picJobExt" Height="25" Width="80" Stroke="Black"
                    Canvas.Top="0" Canvas.Left="0" Fill="White">
         </Rectangle>
 
-        <TextBlock   Canvas.ZIndex="101" Name="tbJobName" Foreground="Black" FontSize="12" Text="{x:Static src:Properties.Resources.extend_job_icon_text}"   
+        <TextBlock   Canvas.ZIndex="101" Name="tbJobName" Foreground="Black" Text="{x:Static src:Properties.Resources.extend_job_icon_text}"   
                      VerticalAlignment="Center" HorizontalAlignment="Center" TextWrapping="Wrap"  MaxWidth="90"
-                     Height="15" Width="80"  Canvas.Left="0" Canvas.Top="7"
-                     FontWeight="Normal" TextAlignment="Center" FontFamily="MS Gothic">
+                     Height="15" Width="80"  Canvas.Left="0" Canvas.Top="5"
+                     FontWeight="Normal" TextAlignment="Center">
         </TextBlock>
 
         <Line X1="8" Y1="0" X2="8" Y2="25" Canvas.Left="0" Canvas.Top="0" Canvas.ZIndex="101" Stroke="Black"></Line>

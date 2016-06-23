@@ -24,19 +24,18 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:src="clr-namespace:jp.co.ftf.jobcontroller.JobController" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             >
+             FontSize="11" FontFamily="Meiryo">
     <Canvas x:Name="LayoutRoot"    Background="Transparent" >
 
-        <Polyline Name="picVar" Points="0,25 15,0 70,0 55,25 0,25"
+        <Polyline Name="picVar" Points="0,25 13,0 70,0 57,25 0,25"
                   Canvas.Top="0" Canvas.Left="0" Stroke="Black" Fill="White">
         </Polyline>
 
         <TextBlock   Canvas.ZIndex="101" Name="tbJobName" Foreground="Black" Text="{x:Static src:Properties.Resources.variable_icon_label_text}"
                      VerticalAlignment="Center" HorizontalAlignment="Center" TextWrapping="Wrap"
                      Height="15" Width="70"
-                     Canvas.Left="0" Canvas.Top="7"
-                     FontWeight="Normal" TextAlignment="Center"
-                     FontFamily="MS Gothic" FontSize="12">
+                     Canvas.Left="0" Canvas.Top="5"
+                     FontWeight="Normal" TextAlignment="Center">
         </TextBlock>
 
     </Canvas>

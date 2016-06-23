@@ -18,8 +18,8 @@
 **/
 
 /*
-** $Date:: 2013-05-02 16:36:39 +0900 #$
-** $Revision: 4571 $
+** $Date:: 2013-07-12 15:12:54 +0900 #$
+** $Revision: 5180 $
 ** $Author: ossinfra@FITECHLABS.CO.JP $
 **/
 
@@ -440,8 +440,8 @@ int ja_set_runerr_jobnet(const zbx_uint64_t inner_jobnet_id)
     if (ja_clean_value_jobnet_after(inner_jobnet_id) == FAIL)
         return FAIL;
 
-    if (ja_joblog(JC_JOBNET_ERR_END, inner_jobnet_id, 0) == FAIL)
-        return FAIL;
+    //if (ja_joblog(JC_JOBNET_ERR_END, inner_jobnet_id, 0) == FAIL)
+    //    return FAIL;
 
     return ja_set_status_jobnet(inner_jobnet_id, JA_JOBNET_STATUS_RUNERR,
                                 -1, 1);
@@ -500,8 +500,8 @@ int ja_set_run(const zbx_uint64_t inner_job_id)
     if (ja_clean_value_before(inner_job_id) == FAIL)
         return FAIL;
 
-    if (ja_joblog(JC_JOB_START, 0, inner_job_id) == FAIL)
-        return FAIL;
+    //if (ja_joblog(JC_JOB_START, 0, inner_job_id) == FAIL)
+    //    return FAIL;
 
     return ja_set_status_job(inner_job_id, JA_JOB_STATUS_RUN, 1, 0);
 }

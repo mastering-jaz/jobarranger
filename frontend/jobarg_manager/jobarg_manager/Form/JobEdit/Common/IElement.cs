@@ -30,7 +30,7 @@ using System.Windows.Media;
 namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
 {
     /// <summary>各ジョブタイプ</summary>
-    public enum ElementType { START = 0, END, IF, ENV, JOB, JOBNET, MTS, MTE, LOOP, EXTJOB, CAL, TASK, INF, IFE, FCOPY, FWAIT, REBOOT, NONE  }
+    public enum ElementType { START = 0, END, IF, ENV, JOB, JOBNET, MTS, MTE, LOOP, EXTJOB, CAL, TASK, INF, IFE, FCOPY, FWAIT, REBOOT, RELEASE, NONE  }
 
     /// <summary>線のタイプ：直線、曲線</summary>
     public enum FlowLineType { Line = 0, Curve }
@@ -51,10 +51,23 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
     public enum RunJobStatusType { None = 0, Prepare, During, Normal, RunErr, Abnormal,ForceStop };
 
     /// <summary>ジョブ実行処理フラグ</summary>
-    public enum RunJobMethodType { NORMAL = 0, RESERVE, SKIP, STOP };
+    public enum RunJobMethodType { NORMAL = 0, HOLD, SKIP, STOP, RERUN };
 
     /// <summary>ジョブ実行タイムアウト</summary>
     public enum RunJobTimeoutType { NORMAL = 0, TIMEOUT };
+
+    /// <summary>画面操作種別</summary>
+    public enum OperationType { NONE, ADD_ITEMS, DEL_ITEMS, ADD_FLOW, DEL_FLOW, SET_TRUE_FLOW, 
+                                SET_FALSE_FLOW, UPDATE_ICON, MOVE_ITEM, 
+                                SET_HOLD, SET_UNHOLD, SET_SKIP, SET_UNSKIP};
+
+    /// <summary>データ種別</summary>
+    public enum DataType
+    {
+        JOB_CONTROL, FLOW, JOB, COMMAND, VALUE_JOB, VALUE_JOBCON, JOBNET, 
+        CAL, END, IF, ENV, EXTJOB, INF, TASK, FCOPY, FWAIT, REBOOT, RELEASE
+    };
+
 
     /// <summary>
     /// ジョブインターフェイス
@@ -91,6 +104,9 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
 
         /// <summary>内部実行処理用ジョブID</summary>
         string InnerJobId { get; set; }
+
+        /// <summary>処理フラグ</summary>
+        RunJobMethodType MethodType { get; set; }
 
         //Point HotspotLeft { get; set; }
         //Point HotspotTop { get; set; }

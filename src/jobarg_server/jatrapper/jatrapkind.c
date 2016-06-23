@@ -33,6 +33,7 @@
 #include "jatrapjobresult.h"
 #include "jatrapjobnetrun.h"
 #include "jatrapjobrelease.h"
+#include "jatrapjoblogput.h"
 #include "jahost.h"
 #include "jatrapauth.h"
 #include "jatrapkind.h"
@@ -87,10 +88,10 @@ int jatrap_kind(zbx_sock_t * sock, ja_telegram_object * obj)
     if (strcmp(kind, JA_PROTO_VALUE_JOBRESULT) == 0) {
         if (jatrap_auth_host(sock, obj) == SUCCEED)
             jatrap_jobresult(obj);
-        //} else if (strcmp(kind, JA_PROTO_VALUE_JOBNETRUN) == SUCCEED) {
-        //    jatrap_jobnetrun(obj);
     } else if (strcmp(kind, "job.release") == 0) {
         jatrap_jobrelease(obj);
+    } else if (strcmp(kind, "job.logput") == 0) {
+        jatrap_joblogput(obj);
     } else {
         return FAIL;
     }
