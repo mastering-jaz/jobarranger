@@ -1,0 +1,145 @@
+Changes for 1.3.0 GA
+
+2013-07-08  FitechForce Business Dept.
+
+	* Job Arranger : リブートアイコンを追加。
+	* jobarg_monitor.c : ジョブモニター機能を追加。
+	* jp.co.ftf.jobcontroller.JobController.Form.JobEdit.Container.xaml.csJobRun
+	(Object JobId): ジョブ編集画面のコンテキストメニューに「ジョブ起動(J)」を追加。
+	* jp.co.ftf.jobcontroller.JobController.Form.JobEdit.Container.xaml :
+	ジョブフローを縮小表示するズームバーを追加。
+	* jp.co.ftf.jobcontroller.JobController.Form.ScheduleEdit.ScheduleEdit.xaml :
+	スケジュール編集画面のカレンダーリストにカレンダーIDを追加。
+	* jp.co.ftf.jobcontroller.JobController.JobArrangerWindow.xaml :
+	オブジェクト一覧画面のコンテキストメニューに「即時起動(R)」、「保留実行(W)」、
+	「テスト実行(T)」を追加。
+
+Changes for 1.2.1 GA
+
+2013-05-02  FitechForce Business Dept.
+
+	* Job Arranger : Zabbix 2.0.x に対応。
+	* Job Arranger : 参照専用のジョブマネージャーを追加。
+	* Job Arranger : アイコン実行エラー時のログメッセージを格納する
+	ジョブコントローラ変数（JOBARG_MESSAGE）を追加。
+	* jp.co.ftf.jobcontroller.JobController.Form.JobEdit.FCopySample :
+	ファイル転送アイコンのデザインを変更。
+	* jatelegram.c : ジョブアイコンの強制停止に失敗する不具合に対応。
+
+Changes for 1.2.0 GA
+
+2013-03-15  FitechForce Technology Dept.
+
+	* Job Arranger : リリース版として公開。
+
+Changes for 1.1.0 RC
+
+2013-02-28  FitechForce Technology Dept.
+
+	* Job Arranger : ファイル転送アイコンを追加。
+	* jp.co.ftf.jobcontroller.JobController.ObjectList.xaml.cs
+	 (MenuitemCopyNew_Click): オブジェクト一覧のコンテキストメニューに
+	「コピー新規(C)」を追加。
+	* jp.co.ftf.jobcontroller.JobController.Form.ScheduleEdit.Container.xaml.cs
+	 (DataGrid_CellEditEnded): スケジュールの起動時刻の編集機能を追加。
+	* jp.co.ftf.jobcontroller.JobController.Form.ScheduleEdit.Container.xaml.cs
+	 (DataGrid_CellEditEnded): エクスポート画面、インポート画面、稼働日ファイル
+	読込み画面のファイル未選択登録でエラーが発生する不具合に対応。
+	* jp.co.ftf.jobcontroller.DAO.RunJobnetSummaryDAO.cs: 実行ジョブ管理画面の
+	リスト行位置がランダムに変化する不具合に対応。
+	* jp.co.ftf.jobcontroller.JobController.Form.CalendarEdit.CalendarEdit.xaml.cs
+	 (cancel_Click): カレンダー、スケジュール、ジョブの編集画面でキャンセル
+	ボタン押下時に確認ダイアログの表示を追加。
+	* jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobSetting.xaml.cs
+	 (Toroku): ジョブ編集画面で削除アイコンのジョブIDが再利用できない不具合に対応。
+	* jp.co.ftf.jobcontroller.JobController.Form.JobEdit.EnvSetting.xaml.cs
+	 (btnToroku_Click): ジョブIDを変更すると登録済みの変数が削除される不具合に対応。
+	* jp.co.ftf.jobcontroller.JobController.Form.ScheduleEdit.Container.xaml.cs
+	 (OnPreviewKeyDown): Deleteキーによるスケジュール編集画面のリスト行削除と
+	ジョブ編集画面のアイコン削除に対応。
+	* jp.co.ftf.jobcontroller.JobController.Form.CalendarEdit.Container.xaml.cs
+	 (Container、SetYearCalendarDetail): カレンダー初期登録画面により初期値を登録後、
+	個別に変更した稼働日が反映されない不具合に対応。
+	* jobarg_exec.c (parse_commandline): jobarg_exec のパラメータより「-s」と「-I」
+	を削除。
+	* jobarg_get.c : jobarg_exec で起動したジョブネットの情報を表示する jobarg_get
+	コマンドを追加。
+
+Changes for 1.0.0 GA (Official release)
+
+2012-12-28  FitechForce Technology Dept.
+
+	* Job Arranger : 英語表記に対応。
+	* Job Arranger : PostgreSQLに対応。
+	* jp.co.ftf.jobcontroller.JobController.Form.JobManager.Container.xaml.cs
+	 (IsStopEnable、IsReStartEnable): 拡張ジョブアイコンの強制停止と
+	再実行に対応。
+	* jp.co.ftf.jobcontroller.JobController.Form.JobManager.
+	JobnetExecControlPage.xaml.cs (AllStopCommandBinding_Executed): 
+	実行予定のジョブネットに対する実行キャンセルを追加。
+	* Job Arranger Manager.msi : 上書きインストールに対応。
+	* jp.co.ftf.jobcontroller.JobController.LoginWindow.xaml.cs (login): 
+	Zabbixのユーザーグループが無効の場合はログイン不可に変更。
+	* jp.co.ftf.jobcontroller.JobController.ObjectList.xaml.cs (SetList): 
+	オブジェクト一覧にオブジェクトのユーザーIDを表示。
+	* jp.co.ftf.jobcontroller.JobController.Form.JobManager.
+	JobnetExecControlPage.xaml.cs (createJobnetExecInfo): 
+	ジョブネット運行情報の状況欄に「展開エラー」の表示を追加。
+	* jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobSetting.xaml.cs
+	 (btnDel_Click): ジョブコントローラ変数アイコンとジョブアイコンの
+	設定画面に変数の削除ボタンを追加。
+	* jp.co.ftf.jobcontroller.JobController.Form.JobEdit.Container.xaml.cs
+	 (Container_MouseMove): マウスによるアイコンの範囲選択時、
+	カーソルによる自動スクロールに対応。
+	* jatrapper.c (process_jatrapper): DB接続タイミングを変更。
+	* jp.co.ftf.jobcontroller.JobController.Form.CalendarEdit.CalendarEdit.
+	xaml.cs (SetHealthCheck): MySQLのコネクションタイムアウトに対応。
+	* jp.co.ftf.jobcontroller.JobController.ObjectList.xaml : 
+	オブジェクト一覧で有効に設定された行のカラー表示に対応。
+	* jp.co.ftf.jobcontroller.JobController.Properties.Resources.resx : 
+	オブジェクト一覧のコンテキストメニュー「コピー新規(C)」を
+	「新バージョン作成(V)」に名称変更。
+	* jp.co.ftf.jobcontroller.JobController.Form.JobEdit.Container.xaml.cs
+	 (OnPreviewKeyDown): アイコンの矢印キー移動に対応。
+
+Changes for 0.9.2 Beta
+
+2012-12-14  FitechForce Technology Dept.
+
+	* jobarg_agentd.c (jobarg_load_config): ジョブエージェントの
+	rootユーザー起動に対応。
+	* jatrapper.c (process_jatrapper): MySQLのコネクションタイムアウトに
+	対応。
+	* jatrapper.c (process_jatrap): メモリリークに対応
+	* JobnetExecControlPage.xaml.cs (viewJobnetList、viewErrJobnetList、
+	viewRunningJobnetList): 実行ジョブ管理画面のリスト行選択表示不備に
+	対応。
+	* ScheduleEdit.xaml : ウインドウサイズ変更による画面表示不備に対応。
+	* IfSetting.xaml.cs (InputCheck): アイコン設定の変数値入力に日本語を
+	許可。
+	* CalendarEdit.xaml.cs (LoadForAdd): カレンダーIDとスケジュールIDの
+	初期フォーマットを「プレフィックス」+「_」+「連番」に変更。
+	* ObjectList.xaml.cs (ConformJobnetCheck): ジョブネットの有効化で
+	開始アイコンと終了アイコンの存在チェックを追加。
+	* JobArrangerWindow.xaml.cs (Jobnet_MouseLeftButtonDown): ジョブネット
+	アイコンで自ジョブネットを選択不可に変更。
+
+Changes for 0.9.1 Beta
+
+2012-12-05  FitechForce Technology Dept.
+
+	* Job Arranger Agent.msi (Job Arranger Agent): Visual Studio が
+	未インストールの環境でセットアップに失敗する不具合に対応。
+	* jaruniconjob.c (jarun_icon_job): ジョブアイコンのジョブ変数値に
+	ジョブコントローラ変数の指定を追加。
+	* server.c (zbx_load_config): コンフィグファイルに指定された
+	未知のパラメータを無視するように変更。
+	* Setup.vdproj (jobarg_manager): ジョブマネージャーのセットアップで
+	ログディレクトリの指定を追加。
+	* CommonItem.xaml.cs (UserControl_MouseMove): ジョブ編集画面でマウス
+	による複数アイコン同時選択機能を追加。
+
+Changes for 0.9.0 Beta
+
+	* Job Arranger : Beta release
+

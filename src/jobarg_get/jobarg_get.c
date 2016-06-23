@@ -1,0 +1,522 @@
+/*
+** Job Arranger for ZABBIX
+** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+**
+** This program is free software; you can redistribute it and/or modify
+** it under the terms of the GNU General Public License as published by
+** the Free Software Foundation; either version 2 of the License, or
+** (at your option) any later version.
+**
+** This program is distributed in the hope that it will be useful,
+** but WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+** GNU General Public License for more details.
+**
+** You should have received a copy of the GNU General Public License
+** along with this program; if not, write to the Free Software
+** Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+**/
+
+/*
+** $Date:: 2013-06-10 11:07:40 +0900 #$
+** $Revision: 4881 $
+** $Author: ossinfra@FITECHLABS.CO.JP $
+**/
+
+#include "common.h"
+
+#include "threads.h"
+#include "comms.h"
+#include "log.h"
+#include "zbxgetopt.h"
+#include "zbxjson.h"
+
+#include "jacommon.h"
+
+#define JOBARG_DEFAULT_SERVER_PORT_STR  "10061"
+
+/* long options */
+static struct zbx_option longopts[] = {
+    {"zabbix-server", 1, NULL, 'z'},
+    {"port", 1, NULL, 'p'},
+    {"user-name", 1, NULL, 'U'},
+    {"password", 1, NULL, 'P'},
+    {"registry-number", 1, NULL, 'r'},
+    {"help", 0, NULL, 'h'},
+    {"version", 0, NULL, 'V'},
+    {NULL}
+};
+
+/* short options */
+static char shortopts[] = "z:p:U:P:r:hV";
+
+/* end of COMMAND LINE OPTIONS */
+
+static int CONFIG_LOG_LEVEL = LOG_LEVEL_WARNING;
+
+static char *JOBARG_SOURCE_IP = NULL;
+static char *JOBARG_SERVER = NULL;
+unsigned short JOBARG_SERVER_PORT = 0;
+unsigned short JOBARG_DEFAULT_SERVER_PORT = 10061;
+zbx_uint64_t JOBARG_REGISTRY_NUMBER = 0;
+static char *JOBARG_USERNAME = NULL;
+static char *JOBARG_PASSWORD = NULL;
+
+const char *progname = NULL;
+const char title_message[] = "Jobarranger Get";
+const char usage_message[] =
+    "[-hV] -z <hostname or IP> [-p <port>] -U <username> -P <password> -r <registrynumber>";
+
+const char *help_message[] = {
+    "Options:",
+    "  -z --jobarranger-server <server>				Hostname or IP address of Job Arranger server",
+    "  -p --port <server port>					Specify port number of server trapper running on the server. Default is "
+        JOBARG_DEFAULT_SERVER_PORT_STR,
+    "  -U --user-name <user-name>					Specify user name",
+    "  -P --password <password>					Specify password",
+    "  -r --registry-number <registry-number>			Specify registry number",
+    "",
+    "Other options:",
+    "  -h --help							Give this help",
+    "  -V --version							Display version number",
+    NULL                        /* end of text */
+};
+
+/* COMMAND LINE OPTIONS */
+
+#if !defined(_WINDOWS)
+
+static void send_signal_handler(int sig)
+{
+    if (SIGALRM == sig)
+        zabbix_log(LOG_LEVEL_WARNING, "Timeout while executing operation");
+
+    exit(FAIL);
+}
+
+#endif                          /* NOT _WINDOWS */
+
+void help_jobarg()
+{
+    const char **p = help_message;
+
+    usage();
+    printf("\n");
+
+    while (NULL != *p)
+        printf("%s\n", *p++);
+}
+
+void version_jobarg()
+{
+
+    printf("%s v%s (revision %s) (%s)\n", title_message, JOBARG_VERSION,
+           JOBARG_REVISION, JOBARG_REVDATE);
+    printf("Compilation time: %s %s\n", __DATE__, __TIME__);
+
+}
+
+int reginum_check(const char *str)
+{
+    int i;
+
+    for (i = 0; str[i]; i++) {
+        if ((str[i] < '0') || (str[i] > '9')) {
+            zabbix_log(LOG_LEVEL_ERR, "argument check error: %s", str);
+            exit(FAIL);
+        }
+    }
+    return SUCCEED;
+}
+
+static int check_response(char *response)
+{
+    struct zbx_json_parse jp, jp_row;
+    char value[MAX_STRING_LEN];
+    char *message;
+    const char *p;
+    int ret = FAIL;
+    int result;
+    int version;
+    char *jobnetid = NULL;
+    char *jobnetname = NULL;
+    char *jobnetruntype = NULL;
+    char *jobnetstatus = NULL;
+    char *jobstatus = NULL;
+    zbx_uint64_t scheduled_time;
+    zbx_uint64_t start_time;
+    zbx_uint64_t end_time;
+    int ch;
+
+    if (SUCCEED == zbx_json_open(response, &jp)) {
+        if (SUCCEED ==
+            zbx_json_value_by_name(&jp, JA_PROTO_TAG_KIND, value,
+                                   sizeof(value))) {
+            if (0 != strcmp(value, JA_PROTO_VALUE_JOBNETSTATUSRQ_RES)) {
+                zabbix_log(LOG_LEVEL_ERR,
+                           "Received message error: [kind] is not [jobnetstatusrq-res]");
+                return ret;
+            }
+        } else {
+            zabbix_log(LOG_LEVEL_ERR,
+                       "Received message error: [kind] not found");
+            return ret;
+        }
+
+        if (SUCCEED ==
+            zbx_json_value_by_name(&jp, JA_PROTO_TAG_VERSION, value,
+                                   sizeof(value))) {
+            version = atoi(value);
+            if (version != JA_PROTO_VALUE_VERSION_1) {
+                zabbix_log(LOG_LEVEL_ERR,
+                           "Received message error: [version] is not [%d]",
+                           JA_PROTO_VALUE_VERSION_1);
+                return ret;
+            }
+        } else {
+            zabbix_log(LOG_LEVEL_ERR,
+                       "Received message error: [version] not found");
+            return ret;
+        }
+
+        if (NULL == (p = zbx_json_pair_by_name(&jp, JA_PROTO_TAG_DATA))) {
+            zabbix_log(LOG_LEVEL_ERR,
+                       "Received message error: [data] not found");
+            return ret;
+
+        } else {
+            if (FAIL == zbx_json_brackets_open(p, &jp_row)) {
+                zabbix_log(LOG_LEVEL_ERR,
+                           "Received message error: Cannot open [data] object");
+                return ret;
+
+            } else {
+                if (SUCCEED ==
+                    zbx_json_value_by_name(&jp_row, JA_PROTO_TAG_RESULT,
+                                           value, sizeof(value))) {
+                    result = atoi(value);
+                    if (result == 0) {
+
+                        if (SUCCEED ==
+                            zbx_json_value_by_name(&jp_row,
+                                                   JA_PROTO_TAG_JOBNETID,
+                                                   value, sizeof(value))) {
+                            jobnetid = strdup(value);
+                        } else {
+                            zabbix_log(LOG_LEVEL_INFORMATION,
+                                       "Succeeded, but could not get Status");
+                        }
+
+                        if (SUCCEED ==
+                            zbx_json_value_by_name(&jp_row,
+                                                   JA_PROTO_TAG_JOBNETNAME,
+                                                   value, sizeof(value))) {
+                            jobnetname = strdup(value);
+                        } else {
+                            zabbix_log(LOG_LEVEL_INFORMATION,
+                                       "Succeeded, but could not get Status");
+                        }
+
+                        if (SUCCEED ==
+                            zbx_json_value_by_name(&jp_row,
+                                                   JA_PROTO_TAG_SCHEDULEDTIME,
+                                                   value, sizeof(value))) {
+                            ZBX_STR2UINT64(scheduled_time, value);
+                        } else {
+                            zabbix_log(LOG_LEVEL_INFORMATION,
+                                       "Succeeded, but could not get Status");
+                        }
+
+                        if (SUCCEED ==
+                            zbx_json_value_by_name(&jp_row,
+                                                   JA_PROTO_TAG_STARTTIME,
+                                                   value, sizeof(value))) {
+                            ZBX_STR2UINT64(start_time, value);
+                        } else {
+                            zabbix_log(LOG_LEVEL_INFORMATION,
+                                       "Succeeded, but could not get Status");
+                        }
+
+                        if (SUCCEED ==
+                            zbx_json_value_by_name(&jp_row,
+                                                   JA_PROTO_TAG_ENDTIME,
+                                                   value, sizeof(value))) {
+                            ZBX_STR2UINT64(end_time, value);
+                        } else {
+                            zabbix_log(LOG_LEVEL_INFORMATION,
+                                       "Succeeded, but could not get Status");
+                        }
+
+                        if (SUCCEED ==
+                            zbx_json_value_by_name(&jp_row,
+                                                   JA_PROTO_TAG_JOBNETRUNTYPE,
+                                                   value, sizeof(value))) {
+                            ch = atoi(value);
+                            switch (ch) {
+                            case 0:
+                                jobnetruntype = "NORMAL";
+                                break;
+                            case 1:
+                                jobnetruntype = "IMMEDIATE";
+                                break;
+                            case 2:
+                                jobnetruntype = "WAIT";
+                                break;
+                            case 3:
+                                jobnetruntype = "TEST";
+                                break;
+                            case 4:
+                                jobnetruntype = "TIME";
+                                break;
+                            default:
+                                exit(FAIL);
+                                break;
+                            }
+                        } else {
+                            zabbix_log(LOG_LEVEL_INFORMATION,
+                                       "Succeeded, but could not get Status");
+                        }
+
+                        if (SUCCEED ==
+                            zbx_json_value_by_name(&jp_row,
+                                                   JA_PROTO_TAG_JOBNETSTATUS,
+                                                   value, sizeof(value))) {
+                            ch = atoi(value);
+                            switch (ch) {
+                            case 0:
+                                jobnetstatus = "BEGIN";
+                                break;
+                            case 1:
+                                jobnetstatus = "READY";
+                                break;
+                            case 2:
+                                jobnetstatus = "RUN";
+                                break;
+                            case 3:
+                                jobnetstatus = "END";
+                                break;
+                            case 4:
+                                jobnetstatus = "RUNERR";
+                                break;
+                            case 5:
+                                jobnetstatus = "ENDERR";
+                                break;
+                            case 6:
+                                jobnetstatus = "ABORT";
+                                break;
+                            default:
+                                exit(FAIL);
+                                break;
+                            }
+                        } else {
+                            zabbix_log(LOG_LEVEL_INFORMATION,
+                                       "Succeeded, but could not get Status");
+                        }
+
+                        if (SUCCEED ==
+                            zbx_json_value_by_name(&jp_row,
+                                                   JA_PROTO_TAG_JOBSTATUS,
+                                                   value, sizeof(value))) {
+                            ch = atoi(value);
+                            switch (ch) {
+                            case 0:
+                                jobstatus = "NORMAL";
+                                break;
+                            case 1:
+                                jobstatus = "TIMEOUT";
+                                break;
+                            case 2:
+                                jobstatus = "ERROR";
+                                break;
+                            default:
+                                exit(FAIL);
+                                break;
+                            }
+                        } else {
+                            zabbix_log(LOG_LEVEL_INFORMATION,
+                                       "Succeeded, but could not get Status");
+                        }
+
+                        zabbix_log(LOG_LEVEL_INFORMATION,
+                                   "\n\njobnetid\t\t:%s\njobnetname\t\t:%s\nTime of a schedule\t:"
+                                   ZBX_FS_UI64 "\n" "Time of a start\t\t:"
+                                   ZBX_FS_UI64 "\nTime of a end\t\t:"
+                                   ZBX_FS_UI64
+                                   "\nThe run type of a jobnet:%s\n"
+                                   "Status of a jobnet\t:%s\nStatus of a job\t\t:%s\n",
+                                   jobnetid, jobnetname, scheduled_time,
+                                   start_time, end_time, jobnetruntype,
+                                   jobnetstatus, jobstatus);
+                        ret = SUCCEED;
+
+                    } else if (result == 1) {
+
+                        if (SUCCEED ==
+                            zbx_json_value_by_name(&jp_row,
+                                                   JA_PROTO_TAG_MESSAGE,
+                                                   value, sizeof(value))) {
+                            message = strdup(value);
+                            zabbix_log(LOG_LEVEL_ERR,
+                                       "Cannnot send data: message [%s]",
+                                       message);
+                        } else {
+                            zabbix_log(LOG_LEVEL_ERR,
+                                       "Cannnot send data: cannnot get message from agent response");
+                            return ret;
+                        }
+
+                    } else {
+                        zabbix_log(LOG_LEVEL_ERR,
+                                   "result range error : result [%d]",
+                                   result);
+                        return ret;
+                    }
+
+                } else {
+                    zabbix_log(LOG_LEVEL_ERR,
+                               "Received message error: [result] not found");
+                    return ret;
+                }
+            }
+        }
+    } else {
+        zabbix_log(LOG_LEVEL_ERR, "Cannot open received data.");
+    }
+
+    return ret;
+}
+
+static void parse_commandline(int argc, char **argv)
+{
+    char ch = '\0';
+
+    /* parse the command-line */
+    while ((char) EOF !=
+           (ch =
+            (char) zbx_getopt_long(argc, argv, shortopts, longopts,
+                                   NULL))) {
+        switch (ch) {
+        case 'h':
+            help_jobarg();
+            exit(-1);
+            break;
+        case 'V':
+            version_jobarg();
+            exit(-1);
+            break;
+        case 'z':
+            JOBARG_SERVER = zbx_strdup(JOBARG_SERVER, zbx_optarg);
+            break;
+        case 'p':
+            JOBARG_SERVER_PORT = (unsigned short) atoi(zbx_optarg);
+            break;
+        case 'U':
+            JOBARG_USERNAME = zbx_strdup(JOBARG_USERNAME, zbx_optarg);
+            break;
+        case 'P':
+            JOBARG_PASSWORD = zbx_strdup(JOBARG_PASSWORD, zbx_optarg);
+            break;
+        case 'r':
+            if (SUCCEED == reginum_check(zbx_optarg)) {
+                ZBX_STR2UINT64(JOBARG_REGISTRY_NUMBER, zbx_optarg);
+                break;
+            }
+        default:
+            usage();
+            exit(FAIL);
+            break;
+        }
+    }
+
+    if (NULL == JOBARG_SERVER || NULL == JOBARG_USERNAME
+        || NULL == JOBARG_PASSWORD || 0 == JOBARG_REGISTRY_NUMBER) {
+        usage();
+        exit(FAIL);
+    }
+}
+
+int main(int argc, char **argv)
+{
+    int ret = SUCCEED;
+    struct zbx_json json;
+    int tcp_ret;
+    zbx_sock_t sock;
+    char *answer = NULL;
+
+    progname = get_program_name(argv[0]);
+
+    parse_commandline(argc, argv);
+
+    /*output to stderr */
+    zabbix_open_log(LOG_TYPE_UNDEFINED, CONFIG_LOG_LEVEL, NULL);
+
+    if (NULL == JOBARG_SERVER) {
+        zabbix_log(LOG_LEVEL_ERR, "'Server' parameter required");
+        ret = FAIL;
+        goto exit;
+    }
+    if (0 == JOBARG_SERVER_PORT) {
+        JOBARG_SERVER_PORT = JOBARG_DEFAULT_SERVER_PORT;
+    }
+    if (MIN_ZABBIX_PORT > JOBARG_SERVER_PORT) {
+        zabbix_log(LOG_LEVEL_ERR,
+                   "Incorrect port number [%d]. Allowed [%d:%d]",
+                   (int) JOBARG_SERVER_PORT, (int) MIN_ZABBIX_PORT,
+                   (int) MAX_ZABBIX_PORT);
+        ret = FAIL;
+        goto exit;
+    }
+
+    /*JSON data */
+    zbx_json_init(&json, ZBX_JSON_STAT_BUF_LEN);
+    zbx_json_addstring(&json, JA_PROTO_TAG_KIND,
+                       JA_PROTO_VALUE_JOBNETSTATUSRQ,
+                       ZBX_JSON_TYPE_STRING);
+    zbx_json_adduint64(&json, JA_PROTO_TAG_VERSION,
+                       JA_PROTO_VALUE_VERSION_1);
+    zbx_json_addobject(&json, JA_PROTO_TAG_DATA);
+    zbx_json_addstring(&json, JA_PROTO_TAG_USERNAME, JOBARG_USERNAME,
+                       ZBX_JSON_TYPE_STRING);
+    zbx_json_addstring(&json, JA_PROTO_TAG_PASSWORD, JOBARG_PASSWORD,
+                       ZBX_JSON_TYPE_STRING);
+    zbx_json_adduint64(&json, JA_PROTO_TAG_REGISTRYNUMBER,
+                       JOBARG_REGISTRY_NUMBER);
+    zbx_json_close(&json);
+    zbx_json_close(&json);
+
+    zabbix_log(LOG_LEVEL_DEBUG, "JSON before sending [%s]", json.buffer);
+
+#if !defined(_WINDOWS)
+    signal(SIGINT, send_signal_handler);
+    signal(SIGTERM, send_signal_handler);
+    signal(SIGQUIT, send_signal_handler);
+    signal(SIGALRM, send_signal_handler);
+#endif                          /* NOT _WINDOWS */
+
+    if (SUCCEED ==
+        (tcp_ret =
+         zbx_tcp_connect(&sock, JOBARG_SOURCE_IP, JOBARG_SERVER,
+                         JOBARG_SERVER_PORT, GET_SENDER_TIMEOUT))) {
+        if (SUCCEED == (tcp_ret = zbx_tcp_send(&sock, json.buffer))) {
+            if (SUCCEED == (tcp_ret = zbx_tcp_recv(&sock, &answer))) {
+                zabbix_log(LOG_LEVEL_DEBUG, "Answer from server [%s]",
+                           answer);
+                if (NULL == answer || SUCCEED != check_response(answer)) {
+                    tcp_ret = FAIL;
+                }
+            }
+        }
+        zbx_tcp_close(&sock);
+    }
+
+    if (FAIL == tcp_ret) {
+        zabbix_log(LOG_LEVEL_ERR, "send value error: %s",
+                   zbx_tcp_strerror());
+        ret = FAIL;
+    }
+
+  exit:
+    zabbix_close_log();
+
+    return ret;
+}

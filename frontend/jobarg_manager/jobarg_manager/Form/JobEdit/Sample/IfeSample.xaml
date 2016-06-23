@@ -1,0 +1,38 @@
+﻿<!--
+/*
+** Job Arranger for ZABBIX
+** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+**
+** This program is free software; you can redistribute it and/or modify
+** it under the terms of the GNU General Public License as published by
+** the Free Software Foundation; either version 2 of the License, or
+** (at your option) any later version.
+**
+** This program is distributed in the hope that it will be useful,
+** but WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+** GNU General Public License for more details.
+**
+** You should have received a copy of the GNU General Public License
+** along with this program; if not, write to the Free Software
+** Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+**/
+-->
+    <UserControl x:Class="jp.co.ftf.jobcontroller.JobController.Form.JobEdit.IfeSample"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             >
+    <Canvas x:Name="LayoutRoot"    Background="Transparent">
+
+        <Polyline Name="picIf" Points="0,12.5 15,0 30,12.5 15,25 0,12.5" 
+                  Canvas.Top="0" Canvas.Left="0"
+                  Stroke="Black" Fill="White">
+        </Polyline>
+
+        <Polyline Canvas.ZIndex="101" Name="charParStart1" Points="15,5 15,20 "
+                  Canvas.Top="0" Canvas.Left="0" Stroke="Black"  StrokeThickness="2">
+        </Polyline>
+    </Canvas>
+</UserControl>

@@ -1,0 +1,176 @@
+﻿<!--
+/*
+** Job Arranger for ZABBIX
+** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+**
+** This program is free software; you can redistribute it and/or modify
+** it under the terms of the GNU General Public License as published by
+** the Free Software Foundation; either version 2 of the License, or
+** (at your option) any later version.
+**
+** This program is distributed in the hope that it will be useful,
+** but WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+** GNU General Public License for more details.
+**
+** You should have received a copy of the GNU General Public License
+** along with this program; if not, write to the Free Software
+** Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+**/
+-->
+<src:BaseUserControl x:Class="jp.co.ftf.jobcontroller.JobController.ObjectList"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:src="clr-namespace:jp.co.ftf.jobcontroller.JobController"
+             mc:Ignorable="d">
+    
+    <UserControl.Resources>
+        <src:FlagConverter x:Key="FlagConverter"/>
+        <src:DateConverter x:Key="DateConverter"/>
+    </UserControl.Resources>
+    <Grid>
+        <DataGrid Name="dgObject" AutoGenerateColumns="False"  
+                  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="White" 
+                  BorderBrush="Black" GridLinesVisibility="None" RowHeight="18" CanUserAddRows="False"
+                  SelectionMode="Single" RowHeaderWidth="0" IsReadOnly="True" HeadersVisibility="All"
+                  MouseDoubleClick="dgObject_MouseDoubleClick" PreviewKeyDown="DataGrid_PreviewKeyDown"
+                  HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" RowStyle="{StaticResource ValidHighlightDataListRowStyle}"
+                  GotFocus="DataGrid_GotFocus" MouseUp ="DataGrid_MouseUp" PreviewMouseRightButtonUp ="dgObject_PreviewMouseRightButtonUp"
+                  PreviewMouseRightButtonDown="dgObject_PreviewMouseRightButtonDown" 
+                  KeyboardNavigation.TabNavigation="Once" >
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="{x:Static src:Properties.Resources.valid_col_head_text}" CellStyle="{StaticResource CenterDataListCellStyle}" Binding="{Binding Path=valid_flag, Converter={StaticResource FlagConverter}}" Width="Auto"
+                                    FontFamily="MS Gothic" />
+                <DataGridTextColumn Header="{x:Static src:Properties.Resources.update_date_col_head_text}" Binding="{Binding Path=update_date, Converter={StaticResource DateConverter}}" Width="Auto" FontFamily="MS Gothic" >
+                    <DataGridTextColumn.CellStyle>
+                        <Style TargetType="{x:Type DataGridCell}">
+                            <Setter Property="VerticalAlignment" Value="Stretch"/>
+                            <Setter Property="VerticalContentAlignment" Value="Center"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="{x:Type DataGridCell}">
+                                        <Border BorderBrush="{TemplateBinding BorderBrush}" VerticalAlignment="{TemplateBinding VerticalAlignment}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
+                                            <ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding  VerticalContentAlignment}"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Setter Property="KeyboardNavigation.IsTabStop" Value="False"></Setter>
+                        </Style>
+                    </DataGridTextColumn.CellStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="{x:Static src:Properties.Resources.public_col_head_text}" Binding="{Binding Path=public_flag, Converter={StaticResource FlagConverter}}" Width="Auto"  >
+                    <DataGridTextColumn.CellStyle>
+                        <Style TargetType="{x:Type DataGridCell}">
+                            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                            <Setter Property="VerticalAlignment" Value="Stretch"/>
+                            <Setter Property="VerticalContentAlignment" Value="Center"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="{x:Type DataGridCell}">
+                                        <Border BorderBrush="{TemplateBinding BorderBrush}" HorizontalAlignment="{TemplateBinding HorizontalAlignment}" VerticalAlignment="{TemplateBinding VerticalAlignment}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
+                                            <ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding  VerticalContentAlignment}"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Setter Property="KeyboardNavigation.IsTabStop" Value="False"></Setter>
+                        </Style>
+                    </DataGridTextColumn.CellStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="{x:Static src:Properties.Resources.user_name_col_head_text}" Binding="{Binding Path=user_name}" Width="Auto" >
+                    <DataGridTextColumn.CellStyle>
+                        <Style TargetType="{x:Type DataGridCell}">
+                            <Setter Property="VerticalAlignment" Value="Stretch"/>
+                            <Setter Property="VerticalContentAlignment" Value="Center"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="{x:Type DataGridCell}">
+                                        <Border BorderBrush="{TemplateBinding BorderBrush}" VerticalAlignment="{TemplateBinding VerticalAlignment}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
+                                            <ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding  VerticalContentAlignment}"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Setter Property="KeyboardNavigation.IsTabStop" Value="False"></Setter>
+                        </Style>
+                    </DataGridTextColumn.CellStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="{x:Static src:Properties.Resources.object_id_col_head_text}" Binding="{Binding Path=object_id}" Width="Auto" >
+                    <DataGridTextColumn.CellStyle>
+                        <Style TargetType="{x:Type DataGridCell}">
+                            <Setter Property="FontFamily" Value="MS Gothic"/>
+                            <Setter Property="VerticalAlignment" Value="Stretch"/>
+                            <Setter Property="VerticalContentAlignment" Value="Center"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="{x:Type DataGridCell}">
+                                        <Border BorderBrush="{TemplateBinding BorderBrush}" VerticalAlignment="{TemplateBinding VerticalAlignment}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
+                                            <ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding  VerticalContentAlignment}"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Setter Property="KeyboardNavigation.IsTabStop" Value="False"></Setter>
+                        </Style>
+                    </DataGridTextColumn.CellStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="{x:Static src:Properties.Resources.object_name_col_head_text}" Binding="{Binding Path=object_name}" Width="Auto" >
+                    <DataGridTextColumn.CellStyle>
+                        <Style TargetType="{x:Type DataGridCell}">
+                            <Setter Property="VerticalAlignment" Value="Stretch"/>
+                            <Setter Property="VerticalContentAlignment" Value="Center"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="{x:Type DataGridCell}">
+                                        <Border BorderBrush="{TemplateBinding BorderBrush}" VerticalAlignment="{TemplateBinding VerticalAlignment}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
+                                            <ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding  VerticalContentAlignment}"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Setter Property="KeyboardNavigation.IsTabStop" Value="False"></Setter>
+                        </Style>
+                    </DataGridTextColumn.CellStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="{x:Static src:Properties.Resources.memo_col_head_text}" Binding="{Binding Path=memo}" Width="Auto" >
+                    <DataGridTextColumn.CellStyle>
+                        <Style TargetType="{x:Type DataGridCell}">
+                            <Setter Property="VerticalAlignment" Value="Stretch"/>
+                            <Setter Property="VerticalContentAlignment" Value="Center"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="{x:Type DataGridCell}">
+                                        <Border BorderBrush="{TemplateBinding BorderBrush}" VerticalAlignment="{TemplateBinding VerticalAlignment}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
+                                            <ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding  VerticalContentAlignment}"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Setter Property="KeyboardNavigation.IsTabStop" Value="False"></Setter>
+                        </Style>
+                    </DataGridTextColumn.CellStyle>
+                </DataGridTextColumn>
+            </DataGrid.Columns>
+
+            <DataGrid.ContextMenu>
+                <ContextMenu Opened="ContextMenu_Open" Name="contextMenu">
+                    <MenuItem Header="{x:Static src:Properties.Resources.new_context_menu_text}"  Name="menuitemAdd" IsEnabled="False"></MenuItem>
+                    <MenuItem Header="{x:Static src:Properties.Resources.copy_new_context_menu_text}"  Name="menuitemCopyNew" Click="MenuitemCopyNew_Click"></MenuItem>
+                    <MenuItem Header="{x:Static src:Properties.Resources.update_context_menu_text}"  Name="menuitemEdit" Click="MenuitemEdit_Click"></MenuItem>
+                    <MenuItem Header="{x:Static src:Properties.Resources.new_version_context_menu_text}"  Name="menuitemCopyVer" Click="MenuitemCopyVer_Click"></MenuItem> 　　　　　
+                    <Separator></Separator>
+                    <MenuItem Header="{x:Static src:Properties.Resources.validity_context_menu_text}"  Name="menuitemValid" Click="MenuitemValid_Click"></MenuItem>
+                    <MenuItem Header="{x:Static src:Properties.Resources.invalidity_context_menu_text}"  Name="menuitemInValid" Click="MenuitemInValid_Click"></MenuItem>
+                    <Separator></Separator>
+                    <MenuItem Header="{x:Static src:Properties.Resources.del_menu_text}"  Name="menuitemDel" Click="MenuitemDel_Click"></MenuItem>
+                    <Separator></Separator>
+                    <MenuItem Header="{x:Static src:Properties.Resources.export_menu_text}"  Name="menuitemExport" Click="MenuitemExport_Click"></MenuItem>
+                </ContextMenu>
+            </DataGrid.ContextMenu>
+        </DataGrid>
+    </Grid>
+</src:BaseUserControl>

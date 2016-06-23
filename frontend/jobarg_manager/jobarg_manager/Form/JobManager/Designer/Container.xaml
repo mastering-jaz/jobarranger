@@ -1,0 +1,95 @@
+﻿<!--
+/*
+** Job Arranger for ZABBIX
+** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+**
+** This program is free software; you can redistribute it and/or modify
+** it under the terms of the GNU General Public License as published by
+** the Free Software Foundation; either version 2 of the License, or
+** (at your option) any later version.
+**
+** This program is distributed in the hope that it will be useful,
+** but WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+** GNU General Public License for more details.
+**
+** You should have received a copy of the GNU General Public License
+** along with this program; if not, write to the Free Software
+** Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+**/
+-->
+    <UserControl x:Class="jp.co.ftf.jobcontroller.JobController.Form.JobManager.Container"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"  
+             xmlns:src="clr-namespace:jp.co.ftf.jobcontroller.JobController" 
+             xmlns:design="clr-namespace:jp.co.ftf.jobcontroller.JobController.Form.JobEdit">
+    <Grid  x:Name="LayoutRoot"  Background="#FFEEECE1" ShowGridLines="False" Margin="0,0,5,0" >
+        <Grid.RowDefinitions >
+            <RowDefinition Height="25"/>
+            <RowDefinition Height="86"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions >
+        <Slider Grid.Row="0"  Grid.Column="0" x:Name="zoomSlider" Minimum="0.3" Maximum="1" Value="1"/>
+        <ScrollViewer Grid.Row="1" Grid.Column="0" HorizontalAlignment="Stretch" Name="svSampleContainer" VerticalAlignment="Stretch" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" >
+            <ScrollViewer.Content>
+                <Canvas Name="sampleContainer" Background="#FFEEECE1" HorizontalAlignment="Left" Width="860" VerticalAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Visible">
+                    <design:JobSample Canvas.ZIndex="100" Canvas.Top="8" Canvas.Left="5" x:Name="picJob" ></design:JobSample>
+                    <design:IfSample Canvas.ZIndex="100" Canvas.Top="8" Canvas.Left="80" x:Name="picIf" ></design:IfSample>
+                    <design:IfeSample Canvas.ZIndex="100" Canvas.Top="8" Canvas.Left="145" x:Name="picIfe" ></design:IfeSample>
+                    <design:MtsSample Canvas.ZIndex="100" Canvas.Top="8" Canvas.Left="180" x:Name="picParallelStart" ></design:MtsSample>
+                    <design:MteSample Canvas.ZIndex="100" Canvas.Top="8" Canvas.Left="210" x:Name="picParallelEnd" ></design:MteSample>
+                    <design:EnvSample Canvas.ZIndex="100" Canvas.Top="8" Canvas.Left="240" x:Name="picVar" ></design:EnvSample>
+                    <design:ExtJobSample Canvas.ZIndex="100" Canvas.Top="8" Canvas.Left="315" x:Name="picJobExtention" ></design:ExtJobSample>
+                    <design:StartSample Canvas.ZIndex="100" Canvas.Top="8" Canvas.Left="400" x:Name="picStart" ></design:StartSample>
+                    <design:EndSample Canvas.ZIndex="100" Canvas.Top="8" Canvas.Left="475" x:Name="picEnd" ></design:EndSample>
+                    <design:CalSample Canvas.ZIndex="100" Canvas.Top="8" Canvas.Left="548" x:Name="picCalculation" ></design:CalSample>
+                    <design:LoopSample Canvas.ZIndex="100" Canvas.Top="8" Canvas.Left="625" x:Name="picLoop" ></design:LoopSample>
+                    <design:TaskSample Canvas.ZIndex="100" Canvas.Top="8" Canvas.Left="655" x:Name="picTask" ></design:TaskSample>
+                    <design:InfSample Canvas.ZIndex="100" Canvas.Top="8" Canvas.Left="732" x:Name="picInfomation" ></design:InfSample>
+                    <design:FCopySample Canvas.ZIndex="100" Canvas.Top="38" Canvas.Left="5" x:Name="picCopy" ></design:FCopySample>
+                    <!--<design:FWaitSample Canvas.ZIndex="100" Canvas.Top="10" Canvas.Left="845" x:Name="picFWait" ></design:FWaitSample>-->
+                    <design:RebootSample Canvas.ZIndex="100" Canvas.Top="38" Canvas.Left="85" x:Name="picReboot" ></design:RebootSample>
+                </Canvas>
+            </ScrollViewer.Content>
+        </ScrollViewer>
+        <Border Margin="0" Grid.Row="2" Grid.Column="0"  VerticalAlignment="Stretch" HorizontalAlignment="Stretch" BorderThickness="1" BorderBrush="Black">
+        <ScrollViewer HorizontalAlignment="Stretch"  Name="svContainer" VerticalAlignment="Stretch" HorizontalScrollBarVisibility="Visible">
+            <ScrollViewer.Content>
+                    <Canvas Name="cnsDesignerContainer" VerticalAlignment="Stretch" 
+                                 MouseLeftButtonDown="Container_MouseButtonDown"
+                                 MouseRightButtonDown="Container_MouseButtonDown"
+                                 MouseLeftButtonUp="Container_MouseLeftButtonUp"  
+                                 MouseEnter="Container_MouseEnter"
+                                 MouseLeave="Container_MouseLeave"
+                                 AllowDrop="True" Canvas.ZIndex="100"
+                                 Width="100000" Height="100000"
+                                 ClipToBounds="True" Background="WhiteSmoke"
+                                 ContextMenuOpening="ContextMenu_Open">
+                        <Canvas.ContextMenu>
+                            <ContextMenu Name="contextMenu">
+                                <MenuItem Header="{x:Static src:Properties.Resources.hold_menu_text}"  Name="menuitemReserve" Click="MenuitemReserve_Click"></MenuItem>
+                                <MenuItem Header="{x:Static src:Properties.Resources.unhold_menu_text}"  Name="menuitemUnReserve" Click="MenuitemUnReserve_Click"></MenuItem>
+                                <Separator></Separator>
+                                <MenuItem Header="{x:Static src:Properties.Resources.skip_menu_text}"  Name="menuitemSkip" Click="MenuitemSkip_Click"></MenuItem>
+                                <MenuItem Header="{x:Static src:Properties.Resources.unskip_menu_text}"  Name="menuitemUnSkip" Click="MenuitemUnSkip_Click"></MenuItem>
+                                <Separator></Separator>
+                                <MenuItem Header="{x:Static src:Properties.Resources.force_stop_menu_text}"  Name="menuitemStop" Click="MenuitemStop_Click"></MenuItem>
+                                <MenuItem Header="{x:Static src:Properties.Resources.rerun_menu_text}"  Name="menuitemReStart" Click="MenuitemReStart_Click"></MenuItem>
+                                <Separator></Separator>
+                                <MenuItem Header="{x:Static src:Properties.Resources.variable_value_change_menu_text}"  Name="menuitemParameter" Click="MenuitemParameter_Click"></MenuItem>
+                                <MenuItem Header="{x:Static src:Properties.Resources.view_variable_value_menu_text}"  Name="menuitemView" Click="MenuitemView_Click"></MenuItem>
+                            </ContextMenu>
+                        </Canvas.ContextMenu>
+                        <Canvas.LayoutTransform>
+                            <ScaleTransform ScaleX="{Binding Path=Value, ElementName=zoomSlider}"
+                            ScaleY="{Binding Path=Value, ElementName=zoomSlider}"/>
+                        </Canvas.LayoutTransform>
+                    </Canvas>
+                </ScrollViewer.Content>
+        </ScrollViewer>
+        </Border>
+    </Grid>
+
+</UserControl>

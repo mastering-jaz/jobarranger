@@ -1,0 +1,88 @@
+﻿<!--
+/*
+** Job Arranger for ZABBIX
+** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+**
+** This program is free software; you can redistribute it and/or modify
+** it under the terms of the GNU General Public License as published by
+** the Free Software Foundation; either version 2 of the License, or
+** (at your option) any later version.
+**
+** This program is distributed in the hope that it will be useful,
+** but WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+** GNU General Public License for more details.
+**
+** You should have received a copy of the GNU General Public License
+** along with this program; if not, write to the Free Software
+** Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+**/
+-->
+    <src:BaseWindow x:Class="jp.co.ftf.jobcontroller.JobController.Form.CalendarEdit.CalendarInitWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:src="clr-namespace:jp.co.ftf.jobcontroller.JobController" 
+        xmlns:sys="clr-namespace:System;assembly=mscorlib" 
+        Title="{x:Static src:Properties.Resources.calendar_init_screen_name}" Height="487" Width="457"
+        ResizeMode="NoResize">
+    <Window.Resources>
+        <x:Array x:Key="Days" Type="sys:Int32">
+            <sys:Int32>1</sys:Int32>
+            <sys:Int32>2</sys:Int32>
+            <sys:Int32>3</sys:Int32>
+            <sys:Int32>4</sys:Int32>
+            <sys:Int32>5</sys:Int32>
+            <sys:Int32>6</sys:Int32>
+            <sys:Int32>7</sys:Int32>
+            <sys:Int32>8</sys:Int32>
+            <sys:Int32>9</sys:Int32>
+            <sys:Int32>10</sys:Int32>
+            <sys:Int32>11</sys:Int32>
+            <sys:Int32>12</sys:Int32>
+            <sys:Int32>13</sys:Int32>
+            <sys:Int32>14</sys:Int32>
+            <sys:Int32>15</sys:Int32>
+            <sys:Int32>16</sys:Int32>
+            <sys:Int32>17</sys:Int32>
+            <sys:Int32>18</sys:Int32>
+            <sys:Int32>19</sys:Int32>
+            <sys:Int32>20</sys:Int32>
+            <sys:Int32>21</sys:Int32>
+            <sys:Int32>22</sys:Int32>
+            <sys:Int32>23</sys:Int32>
+            <sys:Int32>24</sys:Int32>
+            <sys:Int32>25</sys:Int32>
+            <sys:Int32>26</sys:Int32>
+            <sys:Int32>27</sys:Int32>
+            <sys:Int32>28</sys:Int32>
+            <sys:Int32>29</sys:Int32>
+            <sys:Int32>30</sys:Int32>
+            <sys:Int32>31</sys:Int32>
+        </x:Array>
+    </Window.Resources>
+    <Grid Height="454">
+        <TextBlock Height="80" HorizontalAlignment="Left" Text="{x:Static src:Properties.Resources.calendar_init_screen_language}" Margin="26,12,0,0" Name="textBlock1" VerticalAlignment="Top" Width="379" FontSize="13">
+        </TextBlock>
+        <Label Margin="23,110,0,320" FontSize="12" Content="{x:Static src:Properties.Resources.day_week_checkbox_text}" HorizontalAlignment="Left" Width="109"/>
+        <!--<GroupBox Header="groupBox1" Height="152" HorizontalAlignment="Left" Name="groupBox1" VerticalAlignment="Top" Width="217" Margin="184,126,0,0">-->
+        <GroupBox Header="" Height="138" HorizontalAlignment="Left" Margin="176,98,0,0" Name="groupBox1" VerticalAlignment="Top" Width="124">
+            <StackPanel Height="114" Width="113" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                <CheckBox Content="{x:Static src:Properties.Resources.sun_day_checkbox_text}" Height="13" Name="checkBox_sun" Width="99"  Margin="0,0,0,0"/>
+                <CheckBox Content="{x:Static src:Properties.Resources.mon_day_checkbox_text}" Height="13" Margin="0,3,0,0" Name="checkBox_mon" Width="99" />
+                <CheckBox Content="{x:Static src:Properties.Resources.tue_day_checkbox_text}" Height="13" Margin="0,3,0,0" Name="checkBox_tue" Width="99" />
+                <CheckBox Content="{x:Static src:Properties.Resources.wed_day_checkbox_text}" Height="13" Margin="0,3,0,0" Name="checkBox_wed" Width="99" />
+                <CheckBox Content="{x:Static src:Properties.Resources.thu_day_checkbox_text}" Height="13" Margin="0,3,0,0" Name="checkBox_thu" Width="99" />
+                <CheckBox Content="{x:Static src:Properties.Resources.fri_day_checkbox_text}" Height="13" Margin="0,3,0,0" Name="checkBox_fri" Width="99" />
+                <CheckBox Content="{x:Static src:Properties.Resources.sat_day_checkbox_text}" Height="13" Margin="0,3,0,0" Name="checkBox_sat" Width="99" />
+            </StackPanel>
+        </GroupBox>
+        <CheckBox Content="{x:Static src:Properties.Resources.begin_month_checkbox_text}" FontSize="12" Margin="26,246,277,194" Name="checkBox_first" />
+        <CheckBox Content="{x:Static src:Properties.Resources.end_month_checkbox_text}" FontSize="12" Margin="26,265,309,0" Name="checkBox_last" Height="15" VerticalAlignment="Top" />
+        <Label Content="{x:Static src:Properties.Resources.every_month_checkbox_text}" FontSize="12" Margin="23,296,0,132" HorizontalAlignment="Left" Width="148" />
+        <ListBox Height="63" HorizontalAlignment="Left" Margin="177,296,0,0" Name="listBox1" VerticalAlignment="Top" Width="120" ItemsSource="{StaticResource Days}" SelectionMode="Multiple"/>
+        <CheckBox Content="{x:Static src:Properties.Resources.not_init_checkbox_text}" FontSize="12" HorizontalAlignment="Left" Margin="26,375,0,63" Name="checkBox_init" Width="186" IsChecked="True"/>
+        <Button Content="{x:Static src:Properties.Resources.regist_button_text}" Height="23" HorizontalAlignment="Left" Margin="249,415,0,0" Name="register" VerticalAlignment="Top" Width="75" Click="register_Click" IsDefault="True"/>
+        <Button Content="{x:Static src:Properties.Resources.cancel_button_text}" Height="23" HorizontalAlignment="Left" Margin="330,414,0,0" Name="cancel" VerticalAlignment="Top" Width="75" Click="cancel_Click" IsCancel="True"/>
+
+    </Grid>
+</src:BaseWindow>

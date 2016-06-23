@@ -1,0 +1,33 @@
+.TH JOBARG_GET 8 "15 March 2013"
+.if n .ad l
+.SH NAME
+jobarg_get \- Jobarranger Get utility.
+.SH SYNOPSIS
+.B jobarg_get [-hV] -z <hostname or IP> [-p <port>] -U <username> -P <password> -r <registrynumber>
+.SH DESCRIPTION
+.B jobarg_get
+is a command line utility for  getting status of jobnet from a remote Jobarranger server.
+
+.SS Options
+.IP "-z \fI<hostname or IP>\fR"
+Hostname or IP address of Jobarranger server.
+.IP "-p \fI<port>\fR"
+Specify port number of server trapper running on the server. Default is 10061.
+.IP "-U \fI<username>\fR"
+Specify user who has the authority to reference to the running jobnet.
+.IP "-P \fI<password>\fR"
+The user password.
+.IP "-r \fI<registrynumber>\fR"
+Specify registrynumeber of jobnet that was excute by jobarg_exec.
+.IP "-h\fR"
+Display this help and exit.
+.IP "-V\fR"
+Display version number.
+
+
+.SH "SEE ALSO"
+.BR jobarg_server (8),
+.BR jobarg_agentd (8),
+.BR jobarg_exec (8),
+.SH AUTHOR
+Takeshi Sako <sako@fitechforce.co.jp>

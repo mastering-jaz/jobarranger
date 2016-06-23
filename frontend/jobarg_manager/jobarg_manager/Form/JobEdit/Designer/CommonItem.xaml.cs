@@ -1,0 +1,1493 @@
+﻿/*
+** Job Arranger for ZABBIX
+** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+**
+** This program is free software; you can redistribute it and/or modify
+** it under the terms of the GNU General Public License as published by
+** the Free Software Foundation; either version 2 of the License, or
+** (at your option) any later version.
+**
+** This program is distributed in the hope that it will be useful,
+** but WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+** GNU General Public License for more details.
+**
+** You should have received a copy of the GNU General Public License
+** along with this program; if not, write to the Free Software
+** Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+**/
+using System;
+using System.Collections.Generic;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Data;
+using jp.co.ftf.jobcontroller.Common;
+//*******************************************************************
+//                                                                  *
+//                                                                  *
+//  Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.       *
+//                                                                  *
+//  * @author DHC 劉 偉 2012/10/15 新規作成<BR>                      *
+//                                                                  *
+//                                                                  *
+//*******************************************************************
+namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
+{
+/// <summary>マウス移動委託</summary>
+public delegate void MoveItemDelegate(CommonItem a, MouseEventArgs e);
+
+/// <summary>
+/// CommonItem.xaml の相互作用ロジッククラス
+/// </summary>
+public partial class CommonItem : UserControl, IRoom
+{
+
+    #region コンストラクタ
+    public CommonItem(IContainer container, JobData data, Consts.EditType editType)
+    {
+
+        InitializeComponent();
+
+        // コンテナのセット 
+        _container = container;
+
+        // 内容アイコンの初期化 
+        InitContentItem(data, editType, null);
+
+        // 内容のコンテナのセット  
+        _contentItem.Container = container; ;
+
+        // 各アイコン設定テーブルを登録 
+        if (Consts.EditType.Add == editType)
+            InsertIconData(data);
+            
+        this.Height = this.PicHeight;
+        this.Width = this.PicWidth;
+        this.ItemEditType = editType;
+        ResetInitColor();
+
+    }
+
+    public CommonItem(IContainer container, JobData data, Consts.EditType editType, SolidColorBrush color)
+    {
+
+        InitializeComponent();
+
+        // コンテナのセット 
+        _container = container;
+
+        // 内容アイコンの初期化 
+        InitContentItem(data, editType, color);
+
+        // 内容のコンテナのセット  
+        _contentItem.Container = container; ;
+
+        // 各アイコン設定テーブルを登録 
+        if (Consts.EditType.Add == editType)
+            InsertIconData(data);
+        this.ItemEditType = editType;
+        this.Height = this.PicHeight;
+        this.Width = this.PicWidth;
+
+    }
+
+
+    #endregion
+
+    #region フィールド
+
+    /// <summary>マウス追従フラグ</summary>
+    bool trackingMouseMove = false;
+
+    /// <summary>マウスの位置</summary>
+    Point mousePosition;
+
+    /// <summary>マウス移動フラグ</summary>
+    bool hadActualMove = false;
+
+    /// <summary>アイコン移動の委任</summary>
+    public event MoveItemDelegate ItemMove;
+
+
+    #endregion
+
+    #region プロパティ
+
+    /// <summary>タイプ</summary>
+    public ElementType ElementType{ get;set;}
+        
+    /// <summary>内容アイコン</summary>
+    private IElement _contentItem;
+    public IElement ContentItem
+    {
+        get
+        {
+            return _contentItem;
+        }
+        set
+        {
+            _contentItem = value;
+        }
+    }
+
+    /// <summary>アイコンの幅</summary>
+    double _picWidth;
+    public double PicWidth
+    {
+        get
+        {
+            _picWidth = this.ContentItem.PicWidth;
+            return _picWidth;
+        }
+    }
+
+    /// <summary>アイコンの高さ</summary>
+    double _picHeight;
+    public double PicHeight
+    {
+        get
+        {
+            _picHeight = this.ContentItem.PicHeight;
+            return _picHeight;
+        }
+    }
+
+    /// <summary>コンテナ</summary>
+    IContainer _container;
+    public IContainer Container
+    {
+        get
+        {
+            return _container;
+        }
+        set
+        {
+            _container = value;
+        }
+    }
+
+    /// <summary>当該コンポーネントの位置</summary>
+    public Point Position
+    {
+        get
+        {
+            Point position;
+
+            position = new Point();
+            position.Y = (double)this.GetValue(Canvas.TopProperty);
+            position.X = (double)this.GetValue(Canvas.LeftProperty);
+
+            return position;
+        }
+        set
+        {
+            this.SetValue(Canvas.TopProperty, value.Y);
+            this.SetValue(Canvas.LeftProperty, value.X);
+            Move(this, null);
+        }
+    }
+
+    /// <summary>中心点</summary>
+    public Point CenterPoint
+    {
+        get
+        {
+            return new Point((double)this.GetValue(Canvas.LeftProperty) + PicWidth / 2, (double)this.GetValue(Canvas.TopProperty) + PicHeight / 2);
+        }
+        set
+        {
+            this.SetValue(Canvas.LeftProperty, value.X - _picWidth / 2);
+            this.SetValue(Canvas.TopProperty, value.Y - _picHeight / 2);
+            Move(this, null);
+        }
+    }
+
+    /// <summary>選択フラグ</summary>
+    bool isSelectd = false;
+    public bool IsSelectd
+    {
+        get
+        {
+            return isSelectd;
+        }
+        set
+        {
+            isSelectd = value;
+                
+            if (isSelectd)
+            {
+                SetSelectedColor();
+
+                SetFocus();
+
+                if (!_container.CurrentSelectedControlCollection.Contains(this))
+                    _container.AddSelectedControl(this);
+            }
+            else
+            {
+                ResetInitColor();
+                SetUnFocus();
+            }
+        }
+
+    }
+
+    /// <summary>編集タイプ</summary>
+    public Consts.EditType ItemEditType { get; set; }
+
+    /// <summary>連接点：上</summary>
+    public Point TopConnectPosition
+    {
+        get
+        {
+            Point p = ContentItem.TopConnectPosition;
+
+            p.X += (double)this.GetValue(Canvas.LeftProperty);
+            p.Y += (double)this.GetValue(Canvas.TopProperty);
+            return p;
+        }
+    }
+
+    /// <summary>連接点：下</summary>
+    public Point BottomConnectPosition
+    {
+        get
+        {
+            Point p = ContentItem.BottomConnectPosition;
+                
+            p.X += (double)this.GetValue(Canvas.LeftProperty);
+            p.Y += (double)this.GetValue(Canvas.TopProperty);
+
+            return p;
+        }
+    }
+
+    /// <summary>連接点：左</summary>
+    public Point LeftConnectPosition
+    {
+        get
+        {
+            Point p = ContentItem.LeftConnectPosition;
+
+            p.X += (double)this.GetValue(Canvas.LeftProperty);
+            p.Y += (double)this.GetValue(Canvas.TopProperty);
+
+            return p;
+        }
+    }
+
+    /// <summary>連接点：右</summary>
+    public Point RightConnectPosition
+    {
+        get
+        {
+            Point p = ContentItem.RightConnectPosition;
+
+            p.X += (double)this.GetValue(Canvas.LeftProperty);
+            p.Y += (double)this.GetValue(Canvas.TopProperty);
+
+            return p;
+        }
+    }
+
+    public void RemoveAllEvent()
+    {
+        this.MouseMove -= new MouseEventHandler(UserControl_MouseMove);
+        this.MouseLeftButtonUp -= new MouseButtonEventHandler(UserControl_MouseLeftButtonUp);
+        this.MouseLeftButtonDown -= new MouseButtonEventHandler(UserControl_MouseLeftButtonDown);
+        this.MouseDoubleClick -= new MouseButtonEventHandler(UserControl_MouseDoubleClick);
+        this.MouseRightButtonDown -= new MouseButtonEventHandler(UserControl_MouseRightButtonDown);
+
+    }
+
+    public void RemoveEvent4Read()
+    {
+        this.MouseMove -= new MouseEventHandler(UserControl_MouseMove);
+        this.MouseLeftButtonUp -= new MouseButtonEventHandler(UserControl_MouseLeftButtonUp);
+        this.MouseLeftButtonDown -= new MouseButtonEventHandler(UserControl_MouseLeftButtonDown);
+        this.MouseRightButtonDown -= new MouseButtonEventHandler(UserControl_MouseRightButtonDown);
+    }
+
+    /// <summary>ジョブID</summary>
+    public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+    public string JobId
+    {
+        get
+        {
+            if (_contentItem != null)
+                return _contentItem.JobId;
+            else
+                return "";
+        }
+        set
+        {
+            if (_contentItem != null)
+                _contentItem.JobId = value;
+            // ジョブIDを変更した場合、アイコンの表示内容も変更される 
+            if (this.PropertyChanged != null)
+            {
+                this.PropertyChanged.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs("JobId"));
+            }
+        }
+    }
+
+    public string InnerJobId
+    {
+        get
+        {
+            if (_contentItem != null)
+                return _contentItem.InnerJobId;
+            else
+                return "";
+        }
+        set
+        {
+            if (_contentItem != null)
+                _contentItem.InnerJobId = value;
+        }
+    }
+
+    /// <summary>ジョブ名</summary>
+    public string JobName
+    {
+        get
+        {
+            if (_contentItem != null)
+                return _contentItem.JobName;
+            else
+                return "";
+        }
+        set
+        {
+            if (_contentItem != null)
+                _contentItem.JobName = value;
+            // ジョブ名を変更した場合、アイコンの表示内容も変更される 
+            if (this.PropertyChanged != null)
+            {
+                this.PropertyChanged.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs("JobName"));
+            }
+        }
+    }
+
+    public List<IFlow> BeginFlowList = new List<IFlow>();
+    public List<IFlow> EndFlowList = new List<IFlow>();
+
+    #endregion
+
+    #region イベント 
+
+    /// <summary>マウスを左クリック</summary>
+    /// <param name="sender">源</param>
+    /// <param name="e">マウスイベント</param>
+    private void UserControl_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        // 左クリック 
+        if (e.ClickCount == 1)
+        {
+            e.Handled = true;
+            hadActualMove = false;
+
+            if ((isSelectd == false) || (isSelectd == true && _container.ShiftKeyIsPress))
+            {
+                if (isSelectd == false && _container.ShiftKeyIsPress)
+                {
+                    _container.IsSelectedByShiftKey = true;
+                }
+                IsSelectd = !IsSelectd;
+                _container.SetWorkFlowElementSelected(this, IsSelectd);
+            }
+
+
+            FrameworkElement element = sender as FrameworkElement;
+            mousePosition = e.GetPosition(Window.GetWindow(this));
+                
+            if (null != element)
+            {
+                element.CaptureMouse();
+                element.Cursor = Cursors.Hand;
+                if (isSelectd == true)
+                    trackingMouseMove = true;
+            }
+            _container.CanvasClickFlg = false;
+        }
+        ((UserControl)_container).Focusable = true;
+        Keyboard.Focus((UserControl)_container);
+
+    }
+
+    /// <summary>マウスを左釈放</summary>
+    /// <param name="sender">源</param>
+    /// <param name="e">マウスイベント</param>
+    private void UserControl_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        if (e.ClickCount == 1)
+        {
+            if (hadActualMove)
+            {
+                Point p = e.GetPosition(_container.ContainerCanvas);
+
+                double x = (double)this.GetValue(Canvas.LeftProperty);
+                double y = (double)this.GetValue(Canvas.TopProperty);
+
+                _container.SetItemPosition(this.JobId, x, y);
+
+                // フローのTrue、Falseの位置をセット
+                foreach (IFlow flow in BeginFlowList)
+                    flow.setRuleNameControlPosition();
+                foreach (IFlow flow in EndFlowList)
+                    flow.setRuleNameControlPosition();
+
+                // 別の選択したアイコンのフローのTrue、Falseの位置をセット
+                _container.SetControlCollectionItemAndRuleNameControlPosition(this);
+            }
+            FrameworkElement element = sender as FrameworkElement;
+            trackingMouseMove = false;
+            element.ReleaseMouseCapture();
+
+            mousePosition.X = mousePosition.Y = 0;
+            element.Cursor = null;
+            _container.CanvasClickFlg = true;
+        }
+
+    }
+
+    /// <summary>マウスを左クリック</summary>
+    /// <param name="sender">源</param>
+    /// <param name="e">マウスイベント</param>
+    private void UserControl_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        //e.Handled = true;
+        hadActualMove = false;
+
+        if (isSelectd == false)
+        {
+            IsSelectd = !IsSelectd;
+            _container.SetWorkFlowElementSelected(this, IsSelectd);
+        }
+        ((UserControl)_container).Focusable = true;
+        Keyboard.Focus((UserControl)_container);
+    }
+
+    /// <summary>部品をダブルクリック</summary>
+    /// <param name="sender">源</param>
+    /// <param name="e">マウスイベント</param>
+    private void UserControl_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+    {
+        // 設定画面を表示する
+        ShowIconSetting();
+    }
+
+    /// <summary>部品をダブルクリック</summary>
+    /// <param name="sender">源</param>
+    /// <param name="e">マウスイベント</param>
+    private void UserControl_MouseDoubleClick4Read(object sender, MouseButtonEventArgs e)
+    {
+        // 設定画面を表示する
+        ShowIconSetting();
+    }
+
+    /// <summary>部品の移動処理</summary>
+    /// <param name="sender">源</param>
+    /// <param name="e">マウスイベント</param>
+    private void UserControl_MouseMove(object sender, MouseEventArgs e)
+    {
+        if (trackingMouseMove)
+        {
+            FrameworkElement element = sender as FrameworkElement;
+            element.Cursor = Cursors.Hand;
+
+            if (e.GetPosition(null) == mousePosition)
+                return;
+            hadActualMove = true;
+
+            double deltaV = (e.GetPosition(null).Y  - mousePosition.Y) /_container.ZoomValue;
+            double deltaH = (e.GetPosition(null).X - mousePosition.X) /_container.ZoomValue;
+
+            deltaH = this.ResizeMoveDalta(deltaH, deltaV)[0];
+            deltaV = this.ResizeMoveDalta(deltaH, deltaV)[1];
+
+            double newTop = deltaV + Position.Y;
+            double newLeft = deltaH + Position.X;
+
+            if(deltaH>0 || deltaH<0 || deltaV>0 || deltaV<0)
+            {
+                this.SetValue(Canvas.TopProperty, newTop);
+                this.SetValue(Canvas.LeftProperty, newLeft);
+
+                Move(this, e);
+                mousePosition = e.GetPosition(null);
+
+                // 別の選択したアイコンを移動 
+                _container.MoveControlCollectionByDisplacement(deltaH, deltaV, this);
+            }
+        }
+    }
+
+    #endregion
+
+    #region publicメッソド
+
+    /// <summary>移動処理</summary>
+    /// <param name="sender">源</param>
+    /// <param name="e">マウスイベント</param>
+    public void Move(CommonItem a, MouseEventArgs e)
+    {
+        if (ItemMove != null)
+            ItemMove(a, e);
+    }
+
+    /// <summary>選択色をセット</summary>
+    public void SetSelectedColor()
+    {
+        this.ContentItem.SetSelectedColor();
+    }
+
+    /// <summary>選択色をリセット</summary>
+    public void ResetInitColor()
+    {
+            this.ContentItem.ResetInitColor();
+    }
+
+    /// <summary>部品欄の色をセット</summary>
+    public void InitSampleColor()
+    {
+        this.ContentItem.InitSampleColor();
+    }
+
+    /// <summary>部品欄の色をセット</summary>
+    public void SetStatusColor(SolidColorBrush color)
+    {
+        this.ContentItem.SetStatusColor(color);
+    }
+
+    /// <summary>部品の位置をセット</summary>
+    /// <param name="x">x座標</param>
+    /// <param name="y">y座標</param>
+    public void SetPositionByDisplacement(double x, double y)
+    {
+        Point p = new Point();
+        p.X = (double)this.GetValue(Canvas.LeftProperty);
+        p.Y = (double)this.GetValue(Canvas.TopProperty);
+
+        this.SetValue(Canvas.TopProperty, p.Y + y);
+        this.SetValue(Canvas.LeftProperty, p.X + x);
+        Move(this, null);
+    }
+
+    /// <summary>アイコンを削除</summary>
+    public void Delete()
+    {
+        // 線からこのコンポーネントを削除(線を削除しない) 
+        if (this.BeginFlowList != null)
+        {
+            foreach (IFlow a in this.BeginFlowList)
+            {
+                _container.RemoveFlow(a);
+            }
+        }
+        if (this.EndFlowList != null)
+        {
+            foreach (IFlow a in this.EndFlowList)
+            {
+                _container.RemoveFlow(a);
+            }
+        }
+
+        // コンテナから当該部品を削除 
+        _container.RemoveItem(this);
+    }
+
+    /// <summary>最近いタイプを取得（上、下、左、右）</summary>
+    /// <param name="point">位置</param>
+    public ConnectType GetNearHotspot(Point point)
+    {
+        PointCollection points = new PointCollection();
+        points.Add(this.GetHotspot(ConnectType.LEFT));
+        points.Add(this.GetHotspot(ConnectType.TOP));
+        points.Add(this.GetHotspot(ConnectType.RIGHT));
+        points.Add(this.GetHotspot(ConnectType.BOTTOM));
+
+        ConnectType hotspotType = ConnectType.LEFT;
+        int idx = 0;
+        double minValue = Math.Abs(point.X - points[0].X) + Math.Abs(point.Y - points[0].Y);
+        for (int i = 1; i < points.Count; i++)
+        {
+            if (minValue > (Math.Abs(point.X - points[i].X) + Math.Abs(point.Y - points[i].Y)))
+            {
+                idx = i;
+                minValue = Math.Abs(point.X - points[i].X) + Math.Abs(point.Y - points[i].Y);
+            }
+        }
+        switch (idx)
+        {
+            case 0:
+                hotspotType = ConnectType.LEFT;
+                break;
+            case 1:
+                hotspotType = ConnectType.TOP;
+                break;
+            case 2:
+                hotspotType = ConnectType.RIGHT;
+                break;
+            case 3:
+                hotspotType = ConnectType.BOTTOM;
+                break;
+        }
+        return hotspotType;
+    }
+
+    /// <summary>連接点を取得</summary>
+    /// <param name="hotspotType">連接点のタイプ</param>
+    public Point GetHotspot(ConnectType hotspotType)
+    {
+        Point point = new Point(0, 0);
+        switch (hotspotType)
+        {
+            case ConnectType.LEFT:
+                point = LeftConnectPosition;
+                break;
+            case ConnectType.TOP:
+                point = TopConnectPosition;
+                break;
+            case ConnectType.RIGHT:
+                point = RightConnectPosition;
+                break;
+            case ConnectType.BOTTOM:
+                point = BottomConnectPosition;
+                break;
+        }
+        return point;
+    }
+
+    /// <summary>部品をフォーカス</summary>
+    public void SetFocus()
+    {
+        ContentItem.SetFocus();
+    }
+
+    /// <summary>部品のフォーカスをはずす</summary>
+    public void SetUnFocus()
+    {
+        ContentItem.SetUnFocus();
+    }
+
+    /// <summary>部品を選択</summary>
+    public void SetSelected()
+    {
+        ContentItem.SetSelected();
+    }
+
+    /// <summary>アイコン設定画面を表示</summary>
+    public void ShowIconSetting()
+    {
+        bool viewer = false;
+        #if VIEWER
+            viewer = true;
+        #endif
+        string jobId = this.JobId;
+        switch (ElementType)
+        {
+            // 0:開始、5:ジョブネット、6:並行処理開始、7：並行処理終了、8：ループの場合 
+            case ElementType.START:
+            //case ElementType.JOBNET:
+            case ElementType.LOOP:
+            case ElementType.MTS:
+            case ElementType.MTE:
+            //added by kim 2012/11/14
+            case ElementType.IFE:
+                OtherSetting otherSetting = new OtherSetting(this, jobId);
+                if (ItemEditType == Consts.EditType.READ || viewer)
+                    otherSetting.SetDisable();
+                otherSetting.ShowDialog();
+                break;
+            // 1:終了の場合 
+            case ElementType.END:
+                EndSetting endSetting = new EndSetting(this, jobId);
+                if (ItemEditType == Consts.EditType.READ || viewer)
+                    endSetting.SetDisable();
+                endSetting.ShowDialog();
+                break;
+            // 2:条件分岐の場合 
+            case ElementType.IF:
+                IfSetting ifSetting = new IfSetting(this, jobId);
+                if (ItemEditType == Consts.EditType.READ || viewer)
+                    ifSetting.SetDisable();
+                ifSetting.ShowDialog();
+                break;
+            // 3:ジョブコントローラ変数の場合 
+            case ElementType.ENV:
+                EnvSetting envSetting = new EnvSetting(this, jobId);
+                if (ItemEditType == Consts.EditType.READ || viewer)
+                    envSetting.SetDisable();
+                envSetting.ShowDialog();
+                break;
+            // 4:ジョブの場合 
+            case ElementType.JOB:
+                JobSetting jobSetting = new JobSetting(this, jobId, ItemEditType);
+                if (ItemEditType == Consts.EditType.READ || viewer)
+                    jobSetting.SetDisable();
+                jobSetting.ShowDialog();
+                break;
+            // 9：拡張ジョブの場合 
+            case ElementType.EXTJOB:
+                ExtJobSetting extJobSetting = new ExtJobSetting(this, jobId);
+                if (ItemEditType == Consts.EditType.READ || viewer)
+                    extJobSetting.SetDisable();
+                extJobSetting.ShowDialog();
+                break;
+            //  10：計算の場合 
+            case ElementType.CAL:
+                CalSetting calSetting = new CalSetting(this, jobId);
+                if (ItemEditType == Consts.EditType.READ || viewer)
+                    calSetting.SetDisable();
+                calSetting.ShowDialog();
+                break;
+            // 11：タスク場合 
+            case ElementType.TASK:
+                TaskSetting taskSetting = new TaskSetting(this, jobId);
+                if (ItemEditType == Consts.EditType.READ || viewer)
+                    taskSetting.SetDisable();
+                taskSetting.ShowDialog();
+                break;
+            // 12：情報取得場合 
+            case ElementType.INF:
+                InfSetting infSetting = new InfSetting(this, jobId);
+                if (ItemEditType == Consts.EditType.READ || viewer)
+                    infSetting.SetDisable();
+                infSetting.ShowDialog();
+                break;
+            // 12：情報取得場合 
+            case ElementType.JOBNET:
+                JobnetSetting jobnetSetting = new JobnetSetting(this, jobId);
+                if (ItemEditType == Consts.EditType.READ || viewer)
+                    jobnetSetting.SetDisable();
+                jobnetSetting.ShowDialog();
+                break;
+
+            // 14：ファイル転送場合 
+            case ElementType.FCOPY:
+                FCopySetting fcopy = new FCopySetting(this, jobId, ItemEditType);
+                if (ItemEditType == Consts.EditType.READ || viewer)
+                    fcopy.SetDisable();
+                fcopy.ShowDialog();
+                break;
+
+            // 15：ファイル待ち合わせ場合 
+            case ElementType.FWAIT:
+                FWaitSetting fwait = new FWaitSetting(this, jobId, ItemEditType);
+                if (ItemEditType == Consts.EditType.READ || viewer)
+                    fwait.SetDisable();
+                fwait.ShowDialog();
+                break;
+            // 16：リブートの場合 
+            case ElementType.REBOOT:
+                RebootSetting reboot = new RebootSetting(this, jobId, ItemEditType);
+                if (ItemEditType == Consts.EditType.READ || viewer)
+                    reboot.SetDisable();
+                reboot.ShowDialog();
+                break;
+            default:
+                break;
+        }
+    }
+
+
+    #region 関連の線の処理 
+
+    /// <summary>開始の線を追加</summary>
+    /// <param name="flow">連接線</param>
+    public void AddBeginFlow(IFlow flow)
+    {
+        if (!BeginFlowList.Contains(flow))
+        {
+            BeginFlowList.Add(flow);
+            //flow.BeginActivity = this;
+            Move(this, null);
+        }
+
+    }
+
+    /// <summary>開始の線を削除</summary>
+    /// <param name="flow">連接線</param>
+    public void RemoveBeginFlow(IFlow flow)
+    {
+        if (BeginFlowList.Contains(flow))
+        {
+            BeginFlowList.Remove(flow);
+            //flow.RemoveBeginActivity(this);
+
+        }
+    }
+
+    /// <summary>結束の線を追加</summary>
+    /// <param name="flow">連接線</param>
+    public void AddEndFlow(IFlow flow)
+    {
+        if (!EndFlowList.Contains(flow))
+        {
+            EndFlowList.Add(flow);
+            //r.EndActivity = this;
+            Move(this, null);
+
+        }
+
+    }
+
+    /// <summary>結束の線を削除</summary>
+    /// <param name="flow">連接線</param>
+    public void RemoveEndFlow(IFlow flow)
+    {
+        if (EndFlowList.Contains(flow))
+        {
+            EndFlowList.Remove(flow);
+        }
+    }
+
+    /// <summary>点のアイテムの中の判定</summary>
+    /// <param name="point">点</param>
+    public bool PointIsInside(Point point)
+    {
+        bool isInside = false;
+
+        if (Position.X < point.X && point.X < Position.X + PicWidth
+            && Position.Y < point.Y && point.Y < Position.Y + PicHeight)
+        {
+            isInside = true;
+        }
+        return isInside;
+    }
+
+    #endregion
+
+    #endregion
+
+    #region private メッソド
+
+    //************************************************************************
+    /// <summary>アイコンの初期化処理</summary>
+    /// <param name="data">データ</param>
+    /// <param name="editType">編集タイプ</param>
+    //************************************************************************
+    private bool InitContentItem(JobData data, Consts.EditType editType)
+    {
+        if (data == null)
+            return false;
+            
+        ElementType type = data.JobType;
+        this.ElementType = type;
+
+        // アイテムのインスタンス 
+        IElement item = null;
+
+        switch (type)
+        {
+            // 0:開始の場合 
+            case ElementType.START:
+                item = new Start();
+                break;
+            // 1:終了の場合 
+            case ElementType.END:
+                item = new End();
+                break;
+            // 2:条件分岐の場合 
+            case ElementType.IF:
+                item = new If();
+                break;
+            // 3:ジョブコントローラ変数の場合 
+            case ElementType.ENV:
+                item = new Env();
+                break;
+            // 4:ジョブの場合 
+            case ElementType.JOB:
+                item = new Job();
+                break;
+            // 5:ジョブネットの場合 
+            case ElementType.JOBNET:
+                item = new JobNet();
+                break;
+            // 6:並行処理開始の場合 
+            case ElementType.MTS:
+                item = new Mts();
+                break;
+            // 7：並行処理終了の場合 
+            case ElementType.MTE:
+                item = new Mte();
+                break;
+            // 8：ループの場合 
+            case ElementType.LOOP:
+                item = new Loop();
+                break;
+            // 9：拡張ジョブの場合 
+            case ElementType.EXTJOB:
+                item = new ExtJob();
+                break;
+            //  10：計算の場合 
+            case ElementType.CAL:
+                item = new Cal();
+                break;
+            // 11：タスク場合 
+            case ElementType.TASK:
+                item = new Task();
+                break;
+            // 12：情報取得場合 
+            case ElementType.INF:
+                item = new Inf();
+                break;
+            //added by kim 2012/11/14
+            // 13：条件分岐場合 
+            case ElementType.IFE:
+                item = new Ife();
+                break;
+            // 14：ファイル転送場合 
+            case ElementType.FCOPY:
+                item = new FCopy();
+                break;
+            // 15：ファイル待ち合わせ場合 
+            case ElementType.FWAIT:
+                item = new FWait();
+                break;
+            // 16：リブートの場合 
+            case ElementType.REBOOT:
+                item = new Reboot();
+                break;
+        }
+
+        string jobId = "";
+        if (Consts.EditType.Add == editType)
+        {
+            // ジョブデータをセット 
+            DataRow row = _container.JobControlTable.NewRow();
+            _container.JobControlTable.Rows.Add(row);
+                
+            jobId = CommonUtil.GetJobId(type);
+
+            // 既存の場合、繰り返して取得 
+            while(ElementType.START != type
+                && _container.JobItems.ContainsKey(jobId))
+            {
+                jobId = CommonUtil.GetJobId(type);
+            }
+            // ジョブネットID 
+            row["jobnet_id"] = _container.JobnetId;
+            // ジョブID 
+            row["job_id"] = jobId;
+            // 更新日 
+            row["update_date"] = _container.TmpUpdDate;
+            // ジョブタイプ 
+            row["job_type"] = type;
+            // ジョブネットの場合 
+            if (ElementType.JOBNET == type)
+                row["job_name"] = data.Data.ToString();
+        }
+
+        // コンクリート 
+        commonRoom.Children.Add((UIElement)item);
+
+        // 変数の初期化 
+        this.ContentItem = (IElement)item;
+        this.JobId = jobId;
+        // ジョブネットの場合、ジョブ名にリンク先ジョブネットIDをセット 
+        if (ElementType.JOBNET == type && Consts.EditType.Add == editType)
+            this.JobName = data.Data.ToString();
+        else 
+            this.JobName = "";
+
+        return true;
+    }
+
+    //************************************************************************
+    /// <summary>アイコンの初期化処理</summary>
+    /// <param name="data">データ</param>
+    /// <param name="editType">編集タイプ</param>
+    /// <param name="editType">アイコンカラー</param>
+    //************************************************************************
+    private bool InitContentItem(JobData data, Consts.EditType editType, SolidColorBrush color)
+    {
+        if (data == null)
+            return false;
+
+        ElementType type = data.JobType;
+        this.ElementType = type;
+
+        // アイテムのインスタンス 
+        IElement item = null;
+
+        switch (type)
+        {
+            // 0:開始の場合 
+            case ElementType.START:
+                item = new Start(color);
+                break;
+            // 1:終了の場合 
+            case ElementType.END:
+                item = new End(color);
+                break;
+            // 2:条件分岐の場合 
+            case ElementType.IF:
+                item = new If(color);
+                break;
+            // 3:ジョブコントローラ変数の場合 
+            case ElementType.ENV:
+                item = new Env(color);
+                break;
+            // 4:ジョブの場合 
+            case ElementType.JOB:
+                item = new Job(color);
+                break;
+            // 5:ジョブネットの場合 
+            case ElementType.JOBNET:
+                item = new JobNet(color);
+                break;
+            // 6:並行処理開始の場合 
+            case ElementType.MTS:
+                item = new Mts(color);
+                break;
+            // 7：並行処理終了の場合 
+            case ElementType.MTE:
+                item = new Mte(color);
+                break;
+            // 8：ループの場合 
+            case ElementType.LOOP:
+                item = new Loop(color);
+                break;
+            // 9：拡張ジョブの場合 
+            case ElementType.EXTJOB:
+                item = new ExtJob(color);
+                break;
+            //  10：計算の場合 
+            case ElementType.CAL:
+                item = new Cal(color);
+                break;
+            // 11：タスク場合 
+            case ElementType.TASK:
+                item = new Task(color);
+                break;
+            // 12：情報取得場合 
+            case ElementType.INF:
+                item = new Inf(color);
+                break;
+            // 13：分岐終了 
+            case ElementType.IFE:
+                item = new Ife(color);
+                break;
+            // 14：ファイル転送 
+            case ElementType.FCOPY:
+                item = new FCopy(color);
+                break;
+            // 15：ファイル待ち合わせ 
+            case ElementType.FWAIT:
+                item = new FWait(color);
+                break;
+            // 16：リブート 
+            case ElementType.REBOOT:
+                item = new Reboot(color);
+                break;
+        }
+
+        string jobId = "";
+        if (Consts.EditType.Add == editType)
+        {
+            // ジョブデータをセット 
+            DataRow row = _container.JobControlTable.NewRow();
+            _container.JobControlTable.Rows.Add(row);
+
+            jobId = CommonUtil.GetJobId(type);
+
+            // 既存の場合、繰り返して取得 
+            while (ElementType.START != type
+                && _container.JobItems.ContainsKey(jobId))
+            {
+                jobId = CommonUtil.GetJobId(type);
+            }
+            // ジョブネットID 
+            row["jobnet_id"] = _container.JobnetId;
+            // ジョブID 
+            row["job_id"] = jobId;
+            // 更新日 
+            row["update_date"] = _container.TmpUpdDate;
+            // ジョブタイプ 
+            row["job_type"] = type;
+            // ジョブネットの場合 
+            if (ElementType.JOBNET == type)
+                row["job_name"] = data.Data.ToString();
+        }
+
+        // コンクリート 
+        commonRoom.Children.Add((UIElement)item);
+
+        // 変数の初期化 
+        this.ContentItem = (IElement)item;
+        this.JobId = jobId;
+        // ジョブネットの場合、ジョブ名にリンク先ジョブネットIDをセット 
+        if (ElementType.JOBNET == type && Consts.EditType.Add == editType)
+            this.JobName = data.Data.ToString();
+        else
+            this.JobName = "";
+
+        return true;
+    }
+
+    //************************************************************************
+    /// <summary>各アイコン設定テーブルの登録処理</summary>
+    /// <param name="data">データ</param>
+    //************************************************************************
+    private bool InsertIconData(JobData data)
+    {
+        if (data == null)
+            return false;
+
+        ElementType type = data.JobType;
+        this.ElementType = type;
+
+        // 登録 
+        switch (type)
+        {
+            // 0:開始、6:並行処理開始、7：並行処理終了、8：ループの場合 
+            case ElementType.START:
+            case ElementType.LOOP:
+            case ElementType.MTS:
+            case ElementType.MTE:
+            //added by kim 2012/11/14
+            case ElementType.IFE:
+                break;
+            // 1:終了の場合 
+            case ElementType.END:
+                InsertIconEndTbl();
+                break;
+            // 2:条件分岐の場合 
+            case ElementType.IF:
+                InsertIconIfTbl();
+                break;
+            // 3:ジョブコントローラ変数の場合 
+            case ElementType.ENV:
+                //InsertIconValueTbl();
+                break;
+            // 4:ジョブの場合 
+            case ElementType.JOB:
+                InsertIconJobTbl();
+                break;
+            // 5:ジョブネット 
+            case ElementType.JOBNET:
+                InsertIconJobnetTbl(data.Data.ToString());
+                break;
+            // 9：拡張ジョブの場合 
+            case ElementType.EXTJOB:
+                InsertIconExtjobTbl();
+                break;
+            //  10：計算の場合 
+            case ElementType.CAL:
+                InsertIconCalcTbl();
+                break;
+            // 11：タスク場合 
+            case ElementType.TASK:
+                InsertIconTaskTbl();
+                break;
+            // 12：情報取得場合 
+            case ElementType.INF:
+                InsertIconInfoTbl();
+                break;
+            // 14：ファイル転送場合 
+            case ElementType.FCOPY:
+                InsertIconFcopyTbl();
+                break;
+            // 15：ファイル待ち合わせ場合 
+            case ElementType.FWAIT:
+                InsertIconFwaitTbl();
+                break;
+            // 16：リブートの場合 
+            case ElementType.REBOOT:
+                InsertIconRebootTbl();
+                break;
+        }
+
+        return true;
+    }
+
+    //************************************************************************
+    /// <summary>計算アイコン設定テーブルの登録処理</summary>
+    //************************************************************************
+    private void InsertIconCalcTbl()
+    {
+        string jobId = JobId;
+        DataRow row = _container.IconCalcTable.NewRow();
+        _container.IconCalcTable.Rows.Add(row);
+
+        row["jobnet_id"] = _container.JobnetId;
+        row["job_id"] = JobId;
+        row["update_date"] = _container.TmpUpdDate;
+        // 計算方法(0：整数計算) 
+        row["hand_flag"] = 0;
+        // 計算式 
+        row["formula"] = "";
+        // ジョブコントローラ変数名 
+        row["value_name"] = "";
+    }
+
+    //************************************************************************
+    /// <summary>終了アイコン設定テーブルの登録処理</summary>
+    //************************************************************************
+    private void InsertIconEndTbl()
+    {
+        string jobId = JobId;
+        DataRow row = _container.IconEndTable.NewRow();
+        _container.IconEndTable.Rows.Add(row);
+
+        row["jobnet_id"] = _container.JobnetId;
+        row["job_id"] = JobId;
+        row["update_date"] = _container.TmpUpdDate;
+        // ジョブネット停止フラグ(0：処理継続) 
+        row["jobnet_stop_flag"] = 0;
+        // 終了コード 
+        row["jobnet_stop_code"] = 0;
+    }
+
+    //************************************************************************
+    /// <summary>拡張ジョブアイコン設定テーブルの登録処理</summary>
+    //************************************************************************
+    private void InsertIconExtjobTbl()
+    {
+        string jobId = JobId;
+        DataRow row = _container.IconExtjobTable.NewRow();
+        _container.IconExtjobTable.Rows.Add(row);
+
+        row["jobnet_id"] = _container.JobnetId;
+        row["job_id"] = JobId;
+        row["update_date"] = _container.TmpUpdDate;
+        // コマンドID 
+        row["command_id"] = "";
+        // パラメータ値 
+        row["value"] = DBNull.Value;
+    }
+
+    //************************************************************************
+    /// <summary>条件分岐アイコン設定テーブルの登録処理</summary>
+    //************************************************************************
+    private void InsertIconIfTbl()
+    {
+        string jobId = JobId;
+        DataRow row = _container.IconIfTable.NewRow();
+        _container.IconIfTable.Rows.Add(row);
+
+        row["jobnet_id"] = _container.JobnetId;
+        row["job_id"] = JobId;
+        row["update_date"] = _container.TmpUpdDate;
+        // 処理方式(0：数値) 
+        row["hand_flag"] = 0;
+        row["value_name"] = "";
+        row["comparison_value"] = "";
+    }
+
+    //************************************************************************
+    /// <summary>情報取得アイコン設定テーブルの登録処理</summary>
+    //************************************************************************
+    private void InsertIconInfoTbl()
+    {
+        string jobId = JobId;
+        DataRow row = _container.IconInfoTable.NewRow();
+        _container.IconInfoTable.Rows.Add(row);
+
+        row["jobnet_id"] = _container.JobnetId;
+        row["job_id"] = JobId;
+        row["update_date"] = _container.TmpUpdDate;
+
+        // 情報種別(0：ジョブ状態) 
+        row["info_flag"] = 0;
+        // アイテムID 
+        row["item_id"] = DBNull.Value;
+        // トリガーID 
+        row["trigger_id"] = DBNull.Value;
+        // ホストグループ名 
+        row["host_group"] = DBNull.Value;
+        // ホスト名 
+        row["host_name"] = DBNull.Value;
+        // 取得先ジョブID 
+        row["get_job_id"] = DBNull.Value;
+    }
+
+    //************************************************************************
+    /// <summary>ジョブネットアイコン設定テーブルの登録処理</summary>
+    /// <param name="linkJobnetId">リンク先ジョブネットID</param>
+    //************************************************************************
+    private void InsertIconJobnetTbl(string linkJobnetId)
+    {
+        string jobId = JobId;
+        DataRow row = _container.IconJobnetTable.NewRow();
+        _container.IconJobnetTable.Rows.Add(row);
+
+        row["jobnet_id"] = _container.JobnetId;
+        row["job_id"] = JobId;
+        row["update_date"] = _container.TmpUpdDate;
+        // リンク先ジョブネットID 
+        row["link_jobnet_id"] = linkJobnetId;
+    }
+
+    //************************************************************************
+    /// <summary>ジョブアイコン設定テーブルの登録処理</summary>
+    //************************************************************************
+    private void InsertIconJobTbl()
+    {
+        string jobId = JobId;
+        DataRow row = _container.IconJobTable.NewRow();
+        _container.IconJobTable.Rows.Add(row);
+
+        row["jobnet_id"] = _container.JobnetId;
+        row["job_id"] = JobId;
+        row["update_date"] = _container.TmpUpdDate;
+        // ホストフラグ(0：ホスト名) 
+        row["host_flag"] = 0;
+        // 停止コマンドフラグ 
+        row["stop_flag"] = 0;
+        // コマンドタイプ 
+        row["command_type"] = 0;
+        // タイムアウト警告 
+        row["timeout"] = 0;
+        // ホスト名 
+        row["host_name"] = DBNull.Value;
+        // ジョブ停止コード 
+        row["stop_code"] = DBNull.Value;
+    }
+
+    //************************************************************************
+    /// <summary>タスクアイコン設定テーブルの登録処理</summary>
+    //************************************************************************
+    private void InsertIconTaskTbl()
+    {
+        string jobId = JobId;
+        DataRow row = _container.IconTaskTable.NewRow();
+        _container.IconTaskTable.Rows.Add(row);
+
+        row["jobnet_id"] = _container.JobnetId;
+        row["job_id"] = JobId;
+        row["update_date"] = _container.TmpUpdDate;
+        // 起動ジョブネットID 
+        row["submit_jobnet_id"] = "";
+    }
+
+    //************************************************************************
+    /// <summary>ファイル転送アイコン設定テーブルの登録処理</summary>
+    //************************************************************************
+    private void InsertIconFcopyTbl()
+    {
+        string jobId = JobId;
+        DataRow row = _container.IconFcopyTable.NewRow();
+        _container.IconFcopyTable.Rows.Add(row);
+
+        row["jobnet_id"] = _container.JobnetId;
+        row["job_id"] = JobId;
+        row["update_date"] = _container.TmpUpdDate;
+        // 転送元ホストフラグ(0：ホスト名) 
+        row["from_host_flag"] = 0;
+        // 転送先ホストフラグ(0：ホスト名) 
+        row["to_host_flag"] = 0;
+        // 転送元ホスト名 
+        row["from_host_name"] = DBNull.Value;
+        // 転送先ホスト名 
+        row["to_host_name"] = DBNull.Value;
+        // 転送元ディレクトリ
+        row["from_directory"] = DBNull.Value;
+        // 転送元ファイル名
+        row["from_file_name"] = DBNull.Value;
+        // 転送先ディレクトリ
+        row["to_directory"] = DBNull.Value;
+    }
+
+    //************************************************************************
+    /// <summary>ファイル待ち合わせアイコン設定テーブルの登録処理</summary>
+    //************************************************************************
+    private void InsertIconFwaitTbl()
+    {
+        string jobId = JobId;
+        DataRow row = _container.IconFwaitTable.NewRow();
+        _container.IconFwaitTable.Rows.Add(row);
+
+        row["jobnet_id"] = _container.JobnetId;
+        row["job_id"] = JobId;
+        row["update_date"] = _container.TmpUpdDate;
+        // ホストフラグ(0：ホスト名) 
+        row["host_flag"] = 0;
+        // ホスト名 
+        row["host_name"] = DBNull.Value;
+        // ファイル名 
+        row["file_name"] = DBNull.Value;
+    }
+
+    //************************************************************************
+    /// <summary>リブートアイコン設定テーブルの登録処理</summary>
+    //************************************************************************
+    private void InsertIconRebootTbl()
+    {
+        string jobId = JobId;
+        DataRow row = _container.IconRebootTable.NewRow();
+        _container.IconRebootTable.Rows.Add(row);
+
+        row["jobnet_id"] = _container.JobnetId;
+        row["job_id"] = JobId;
+        row["update_date"] = _container.TmpUpdDate;
+        // ホストフラグ(0：ホスト名) 
+        row["host_flag"] = 0;
+        // ホスト名 
+        row["host_name"] = DBNull.Value;
+        // リブートモードフラグ(0：強制) 
+        row["reboot_mode_flag"] = 0;
+        // 待合せ時間(初期値:0) 
+        row["reboot_wait_time"] = 0;
+
+    }
+    //************************************************************************
+    /// <summary>ジョブコントローラ変数アイコン設定テーブル の登録処理</summary>
+    //************************************************************************
+    //private void InsertIconValueTbl()
+    //{
+    //    string jobId = JobId;
+    //    DataRow row = _container.IconValueTable.NewRow();
+    //    _container.IconValueTable.Rows.Add(row);
+
+    //    row["jobnet_id"] = _container.JobnetId;
+    //    row["job_id"] = JobId;
+    //    row["update_date"] = _container.TmpUpdDate;
+    //}
+
+    private double[] ResizeMoveDalta(double deltaH, double deltaV)
+    {
+        CommonItem tmpItem = null;
+
+        double[] ResizeDelta = {deltaH,deltaV};
+
+        for (int i = 0; i < _container.CurrentSelectedControlCollection.Count; i++)
+        {
+            if (_container.CurrentSelectedControlCollection[i] is CommonItem)
+            {
+                tmpItem = _container.CurrentSelectedControlCollection[i] as CommonItem;
+                double newTop = ResizeDelta[1] + tmpItem.Position.Y;
+                double newLeft = ResizeDelta[0] + tmpItem.Position.X;
+
+                // コンテナの範囲を超える 
+                if (!_container.MouseIsInContainer
+                    //|| (_container.LeftXOfSelection - this.PicWidth / 2　< 1 && deltaH < 0)
+                    //|| (_container.TopYOfSelection - this.PicHeight / 2  < 1 && deltaV < 0)
+                    || (tmpItem.Position.X <= 0 && ResizeDelta[0] < 0)
+                    || (tmpItem.Position.Y <= 0 && ResizeDelta[1] < 0)
+                    || (tmpItem.Position.X + this.PicWidth >= _container.ContainerCanvas.Width && ResizeDelta[0] > 0)
+                    || (tmpItem.Position.Y + this.PicHeight >= _container.ContainerCanvas.Height && ResizeDelta[1] > 0)
+                    )
+                {
+                    return new double[]{0,0};
+                }
+                else
+                {
+                    // コンテナの範囲を越える 
+                    if (newTop < 0) ResizeDelta[1] = 0-tmpItem.Position.Y;
+                    if (newLeft < 0) ResizeDelta[0] = 0-tmpItem.Position.X;
+                }
+            }
+        }
+        return ResizeDelta;
+    }
+
+    #endregion
+
+}
+}
+

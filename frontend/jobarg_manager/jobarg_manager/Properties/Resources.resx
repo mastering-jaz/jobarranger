@@ -1,0 +1,1308 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="authority_label_text" xml:space="preserve">
+    <value>Authority:</value>
+  </data>
+  <data name="begin_month_checkbox_text" xml:space="preserve">
+    <value>Beginning-of-the-month</value>
+  </data>
+  <data name="boot_time_col_head_text" xml:space="preserve">
+    <value>Boot time</value>
+  </data>
+  <data name="boot_time_label_text" xml:space="preserve">
+    <value>Boot time:</value>
+  </data>
+  <data name="calendar_editing_screen_name" xml:space="preserve">
+    <value>Calendar editing screen</value>
+  </data>
+  <data name="calendar_id_label_text" xml:space="preserve">
+    <value>Calendar id:</value>
+  </data>
+  <data name="calendar_init_screen_language" xml:space="preserve">
+    <value>Initial setting of operating days is performed on a calendar.
+Please put a check into an item to make into operating days.
+
+In addition, when it checks "Not-initialize",
+registered operating days are held and it registers by addition.</value>
+  </data>
+  <data name="calendar_init_screen_name" xml:space="preserve">
+    <value>Calendar initial registration screen</value>
+  </data>
+  <data name="calendar_name_col_head_text" xml:space="preserve">
+    <value>Calendar name</value>
+  </data>
+  <data name="calendar_name_label_text" xml:space="preserve">
+    <value>Calendar name:</value>
+  </data>
+  <data name="calendar_node_text" xml:space="preserve">
+    <value>Calendar</value>
+  </data>
+  <data name="cancel_button_text" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="cancel_dialog_screen_name" xml:space="preserve">
+    <value>Delete Confirmation</value>
+  </data>
+  <data name="cancel_dialog_text" xml:space="preserve">
+    <value>I want to delete the data. Would you like?</value>
+  </data>
+  <data name="can_not_update_auth" xml:space="preserve">
+    <value>Can't update</value>
+  </data>
+  <data name="can_update_auth" xml:space="preserve">
+    <value>Can update</value>
+  </data>
+  <data name="new_version_context_menu_text" xml:space="preserve">
+    <value>Create new version(_V)</value>
+  </data>
+  <data name="day_week_checkbox_text" xml:space="preserve">
+    <value>Day-of-the-week</value>
+  </data>
+  <data name="del_button_text" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="del_menu_text" xml:space="preserve">
+    <value>Delete(_D)</value>
+  </data>
+  <data name="during_jobnet_situation_menu_text" xml:space="preserve">
+    <value>List of jobnets during the practice(_R)</value>
+  </data>
+  <data name="during_startup_jobnet_screen_language" xml:space="preserve">
+    <value>I start a job net. Are you all right?</value>
+  </data>
+  <data name="during_startup_jobnet_screen_name" xml:space="preserve">
+    <value>During startup jobnet</value>
+  </data>
+  <data name="edit_menu_text" xml:space="preserve">
+    <value>Edit(_E)</value>
+  </data>
+  <data name="ended_time_col_head_text" xml:space="preserve">
+    <value>End time</value>
+  </data>
+  <data name="end_month_checkbox_text" xml:space="preserve">
+    <value>End-of-the-month</value>
+  </data>
+  <data name="ERROR_BOOT_TIME_001" xml:space="preserve">
+    <value>Minute start-up time, please enter a number between 00-59.</value>
+  </data>
+  <data name="ERROR_CALENDAR_FILE_READ_001" xml:space="preserve">
+    <value>It is a format error in the date.</value>
+  </data>
+  <data name="ERROR_COMMON_001" xml:space="preserve">
+    <value>Please input {0}.</value>
+  </data>
+  <data name="ERROR_COMMON_002" xml:space="preserve">
+    <value>Please input {0} in the ASCII character.</value>
+  </data>
+  <data name="ERROR_COMMON_003" xml:space="preserve">
+    <value>Please input {0} within {1} bytes.</value>
+  </data>
+  <data name="ERROR_COMMON_004" xml:space="preserve">
+    <value>{0} inputted is already registered.</value>
+  </data>
+  <data name="ERROR_COMMON_005" xml:space="preserve">
+    <value>Please input {0} with a half-width alphanumeric character and a hyphen (-).</value>
+  </data>
+  <data name="ERROR_COMMON_006" xml:space="preserve">
+    <value>Please input {0} with a half-width alphanumeric character and a hyphen (-).</value>
+  </data>
+  <data name="ERROR_COMMON_007" xml:space="preserve">
+    <value>Please input {0} in a half-width number.</value>
+  </data>
+  <data name="ERROR_COMMON_008" xml:space="preserve">
+    <value>{0} is a hyphen (,), numeric characters, commas - Please enter ().</value>
+  </data>
+  <data name="ERROR_COMMON_009" xml:space="preserve">
+    <value>{0} is a comma (,) and the hyphen (-) before and after that, please enter a number.</value>
+  </data>
+  <data name="ERROR_COMMON_010" xml:space="preserve">
+    <value>Please input {0} by the half-width alphanumeric character, the hyphen (-), and a slash (/).</value>
+  </data>
+  <data name="ERROR_COMMON_011" xml:space="preserve">
+    <value>The specified file does not exist.</value>
+  </data>
+  <data name="ERROR_IMPORT_001" xml:space="preserve">
+    <value>An error occurred in reading the import file.</value>
+  </data>
+  <data name="ERROR_IMPORT_002" xml:space="preserve">
+    <value>User information does not exist</value>
+  </data>
+  <data name="ERROR_IMPORT_003" xml:space="preserve">
+    <value>You do not have permission.</value>
+  </data>
+  <data name="ERROR_JOBEDIT_001" xml:space="preserve">
+    <value>Please do not input START for a reserved word.</value>
+  </data>
+  <data name="ERROR_JOBEDIT_002" xml:space="preserve">
+    <value>Selected jobnet id was deleted by other users.</value>
+  </data>
+  <data name="ERROR_JOBEDIT_003" xml:space="preserve">
+    <value>Specified job id does not belong to a self-job network and the job network called from a self-job network.</value>
+  </data>
+  <data name="ERROR_JOBEDIT_004" xml:space="preserve">
+    <value>In an one job flow, a start icon can be registered only one.</value>
+  </data>
+  <data name="ERROR_JOBEDIT_005" xml:space="preserve">
+    <value>The flow of the icon {0} is inaccurate.
+Please correct IN flow or an OUT flow.</value>
+  </data>
+  <data name="ERROR_JOBEDIT_006" xml:space="preserve">
+    <value>Jobnet selected version is being edited by other users.
+At a later time, please try again.</value>
+  </data>
+  <data name="ERROR_LOGIN_001" xml:space="preserve">
+    <value>A user name or a password is inaccurate.</value>
+  </data>
+  <data name="ERROR_RUN_JOBNET_001" xml:space="preserve">
+    <value>Because there is no valid job net, I can not start.</value>
+  </data>
+  <data name="err_jobnet_situation_menu_text" xml:space="preserve">
+    <value>List of error jobnets(_T)</value>
+  </data>
+  <data name="err_message_alredy_exist_calendar" xml:space="preserve">
+    <value>The calendar of the same calendar id already exists.</value>
+  </data>
+  <data name="err_message_alredy_exist_jobnet" xml:space="preserve">
+    <value>The job net of the same job net id already exists.</value>
+  </data>
+  <data name="err_message_alredy_exist_schedule" xml:space="preserve">
+    <value>The schedule of the same schedule id already exists.</value>
+  </data>
+  <data name="err_message_boot_time" xml:space="preserve">
+    <value>boot time</value>
+  </data>
+  <data name="err_message_boot_time_hh" xml:space="preserve">
+    <value>boot time hour</value>
+  </data>
+  <data name="err_message_boot_time_mi" xml:space="preserve">
+    <value>boot time minite</value>
+  </data>
+  <data name="err_message_calendar_id" xml:space="preserve">
+    <value>calendar id</value>
+  </data>
+  <data name="err_message_calendar_init_day" xml:space="preserve">
+    <value>Please choose a day.</value>
+  </data>
+  <data name="err_message_calendar_init_every_month_day" xml:space="preserve">
+    <value>Please choose a designated day every month.</value>
+  </data>
+  <data name="err_message_calendar_name" xml:space="preserve">
+    <value>calendar name</value>
+  </data>
+  <data name="err_message_db_dbs" xml:space="preserve">
+    <value>Data source name</value>
+  </data>
+  <data name="err_message_db_pass" xml:space="preserve">
+    <value>DB password</value>
+  </data>
+  <data name="err_message_db_user" xml:space="preserve">
+    <value>DB user</value>
+  </data>
+  <data name="err_message_delete_relation" xml:space="preserve">
+    <value>I can not be deleted because it is used elsewhere.</value>
+  </data>
+  <data name="err_message_jobcon_name" xml:space="preserve">
+    <value>Jobcon name</value>
+  </data>
+  <data name="err_message_jobnet_id" xml:space="preserve">
+    <value>jobnet id</value>
+  </data>
+  <data name="err_message_jobnet_name" xml:space="preserve">
+    <value>jobnet name</value>
+  </data>
+  <data name="err_message_schedule_id" xml:space="preserve">
+    <value>schedule id</value>
+  </data>
+  <data name="err_message_schedule_name" xml:space="preserve">
+    <value>schedule name</value>
+  </data>
+  <data name="every_month_checkbox_text" xml:space="preserve">
+    <value>Every-month-specification</value>
+  </data>
+  <data name="exit_dialog_screen_name" xml:space="preserve">
+    <value>Exit confirmation</value>
+  </data>
+  <data name="exit_dialog_text" xml:space="preserve">
+    <value>I quit the job manager. Would you like?</value>
+  </data>
+  <data name="exit_menu_text" xml:space="preserve">
+    <value>Exit(_X)</value>
+  </data>
+  <data name="export_menu_text" xml:space="preserve">
+    <value>Export(_E)</value>
+  </data>
+  <data name="export_screen_language" xml:space="preserve">
+    <value>Please input the output place of an export file.</value>
+  </data>
+  <data name="export_screen_name" xml:space="preserve">
+    <value>Export screen</value>
+  </data>
+  <data name="file_menu_text" xml:space="preserve">
+    <value>File(_F)</value>
+  </data>
+  <data name="file_reading_button_text" xml:space="preserve">
+    <value>File reading</value>
+  </data>
+  <data name="format_label_text" xml:space="preserve">
+    <value>Format:</value>
+  </data>
+  <data name="fri_day_checkbox_text" xml:space="preserve">
+    <value>Fri</value>
+  </data>
+  <data name="help_menu_text" xml:space="preserve">
+    <value>Help(_H)</value>
+  </data>
+  <data name="hide_context_menu_text" xml:space="preserve">
+    <value>Hide(_H)</value>
+  </data>
+  <data name="immediate_run_menu_text" xml:space="preserve">
+    <value>Immediate run(_R)</value>
+  </data>
+  <data name="import_menu_text" xml:space="preserve">
+    <value>Import(_I)</value>
+  </data>
+  <data name="import_overwrite_duplicate_checkbox_text" xml:space="preserve">
+    <value>Overwrite is permitted:</value>
+  </data>
+  <data name="import_screen_language" xml:space="preserve">
+    <value>Please enter the export file to import.</value>
+  </data>
+  <data name="import_screen_name" xml:space="preserve">
+    <value>Import screen</value>
+  </data>
+  <data name="init_regist_button_text" xml:space="preserve">
+    <value>Initial registration</value>
+  </data>
+  <data name="invalidity_context_menu_text" xml:space="preserve">
+    <value>Invalidity(_I)</value>
+  </data>
+  <data name="jobnet_editing_screen_name" xml:space="preserve">
+    <value>Jobnet editing screen</value>
+  </data>
+  <data name="jobnet_id_col_head_text" xml:space="preserve">
+    <value>Jobnet id</value>
+  </data>
+  <data name="jobnet_id_label_text" xml:space="preserve">
+    <value>Jobnet id:</value>
+  </data>
+  <data name="jobnet_label_text" xml:space="preserve">
+    <value>Jobnet:</value>
+  </data>
+  <data name="jobnet_name_col_head_text" xml:space="preserve">
+    <value>Jobnet name</value>
+  </data>
+  <data name="jobnet_name_label_text" xml:space="preserve">
+    <value>Jobnet name:</value>
+  </data>
+  <data name="jobnet_node_text" xml:space="preserve">
+    <value>Jobnet</value>
+  </data>
+  <data name="jobnet_situation_menu_text" xml:space="preserve">
+    <value>List of operative situation jobnets(_O)</value>
+  </data>
+  <data name="job_control_tab_text" xml:space="preserve">
+    <value>Job execution management</value>
+  </data>
+  <data name="job_id_col_head_text" xml:space="preserve">
+    <value>Job id</value>
+  </data>
+  <data name="job_name_col_head_text" xml:space="preserve">
+    <value>Job name</value>
+  </data>
+  <data name="job_run_status_done" xml:space="preserve">
+    <value>Done</value>
+  </data>
+  <data name="job_run_status_running" xml:space="preserve">
+    <value>Running</value>
+  </data>
+  <data name="job_run_status_schedule" xml:space="preserve">
+    <value>Scheduled</value>
+  </data>
+  <data name="last_operation_day_label_text" xml:space="preserve">
+    <value>Last operation day:</value>
+  </data>
+  <data name="login_button_text" xml:space="preserve">
+    <value>Login</value>
+  </data>
+  <data name="login_failed" xml:space="preserve">
+    <value>A user name or a password is unjust.</value>
+  </data>
+  <data name="login_screen_db_group_label" xml:space="preserve">
+    <value>Information to connect to DB Job Controller</value>
+  </data>
+  <data name="login_screen_db_pass_label" xml:space="preserve">
+    <value>DB password:</value>
+  </data>
+  <data name="login_screen_db_source_label" xml:space="preserve">
+    <value>Datasource name:</value>
+  </data>
+  <data name="login_screen_db_user_label" xml:space="preserve">
+    <value>DB user:</value>
+  </data>
+  <data name="login_screen_jobcontrol_label" xml:space="preserve">
+    <value>Job control name:</value>
+  </data>
+  <data name="login_screen_language" xml:space="preserve">
+    <value>Welcome to a job manager.
+
+To log in to the job controller, press the login button the controller 
+to enter the job name, user name, and password.</value>
+  </data>
+  <data name="login_screen_name" xml:space="preserve">
+    <value>Login screen</value>
+  </data>
+  <data name="login_screen_passwd_label" xml:space="preserve">
+    <value>password:</value>
+  </data>
+  <data name="login_screen_user_label" xml:space="preserve">
+    <value>user:</value>
+  </data>
+  <data name="memo_col_head_text" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="memo_label_text" xml:space="preserve">
+    <value>Description:</value>
+  </data>
+  <data name="mon_day_checkbox_text" xml:space="preserve">
+    <value>Mon</value>
+  </data>
+  <data name="MSG_COMMON_001" xml:space="preserve">
+    <value>I finish the job manager. Are you all right?</value>
+  </data>
+  <data name="MSG_COMMON_002" xml:space="preserve">
+    <value>I register data editing. Are you all right?</value>
+  </data>
+  <data name="MSG_COMMON_004" xml:space="preserve">
+    <value>I delete the data. Are you all right?</value>
+  </data>
+  <data name="MSG_COMMON_005" xml:space="preserve">
+    <value>I start the job net. Wait for a while.</value>
+  </data>
+  <data name="MSG_COMMON_006" xml:space="preserve">
+    <value>There is no authority.</value>
+  </data>
+  <data name="MSG_COMMON_007" xml:space="preserve">
+    <value>Because related data exist, I cannot delete it.</value>
+  </data>
+  <data name="new_context_menu_text" xml:space="preserve">
+    <value>New(_N)</value>
+  </data>
+  <data name="new_menu_text" xml:space="preserve">
+    <value>New(_N)</value>
+  </data>
+  <data name="not_init_checkbox_text" xml:space="preserve">
+    <value>Not-initialize</value>
+  </data>
+  <data name="object_control_tab_text" xml:space="preserve">
+    <value>Object management</value>
+  </data>
+  <data name="object_id_col_head_text" xml:space="preserve">
+    <value>Object id</value>
+  </data>
+  <data name="object_list_screen_name" xml:space="preserve">
+    <value>List of objects screen</value>
+  </data>
+  <data name="object_name_col_head_text" xml:space="preserve">
+    <value>Object name</value>
+  </data>
+  <data name="operation_day_file_name_label_text" xml:space="preserve">
+    <value>Operation file name:</value>
+  </data>
+  <data name="operation_day_file_reading_screen_language" xml:space="preserve">
+    <value>Please input a file on the operation day that appointed an operation day.</value>
+  </data>
+  <data name="operation_day_file_reading_screen_name" xml:space="preserve">
+    <value>Operation day file reading screen</value>
+  </data>
+  <data name="operation_day_label_text" xml:space="preserve">
+    <value>Operation day:</value>
+  </data>
+  <data name="operation_information_err_jobnet_label" xml:space="preserve">
+    <value>Operation information error jobnet</value>
+  </data>
+  <data name="operation_information_jobnet_label" xml:space="preserve">
+    <value>Operation information jobnet</value>
+  </data>
+  <data name="operation_information_running_jobnet_label" xml:space="preserve">
+    <value>Job net operating information during execution</value>
+  </data>
+  <data name="private_calendar_node_text" xml:space="preserve">
+    <value>Private calendar</value>
+  </data>
+  <data name="private_jobnet_node_text" xml:space="preserve">
+    <value>Private jobnet</value>
+  </data>
+  <data name="private_schedule_node_text" xml:space="preserve">
+    <value>Private schedule</value>
+  </data>
+  <data name="PROCESS_001" xml:space="preserve">
+    <value>Registration process</value>
+  </data>
+  <data name="PROCESS_002" xml:space="preserve">
+    <value>Cancellation process</value>
+  </data>
+  <data name="PROCESS_003" xml:space="preserve">
+    <value>New addition process</value>
+  </data>
+  <data name="PROCESS_004" xml:space="preserve">
+    <value>Editing process</value>
+  </data>
+  <data name="PROCESS_005" xml:space="preserve">
+    <value>Copy version process</value>
+  </data>
+  <data name="PROCESS_006" xml:space="preserve">
+    <value>Deletion process</value>
+  </data>
+  <data name="PROCESS_007" xml:space="preserve">
+    <value>Valid process</value>
+  </data>
+  <data name="PROCESS_008" xml:space="preserve">
+    <value>Invalid process</value>
+  </data>
+  <data name="PROCESS_009" xml:space="preserve">
+    <value>Job net execution process</value>
+  </data>
+  <data name="PROCESS_010" xml:space="preserve">
+    <value>Login process</value>
+  </data>
+  <data name="PROCESS_011" xml:space="preserve">
+    <value>Close process</value>
+  </data>
+  <data name="PROCESS_012" xml:space="preserve">
+    <value>Export process</value>
+  </data>
+  <data name="PROCESS_013" xml:space="preserve">
+    <value>Import process</value>
+  </data>
+  <data name="PROCESS_014" xml:space="preserve">
+    <value>Job Details screen display process</value>
+  </data>
+  <data name="PROCESS_015" xml:space="preserve">
+    <value>Object list display process</value>
+  </data>
+  <data name="PROCESS_016" xml:space="preserve">
+    <value>Object Edit screen display process</value>
+  </data>
+  <data name="public_calendar_node_text" xml:space="preserve">
+    <value>Public calendar</value>
+  </data>
+  <data name="public_col_head_text" xml:space="preserve">
+    <value>Public</value>
+  </data>
+  <data name="public_jobnet_node_text" xml:space="preserve">
+    <value>Public jobnet</value>
+  </data>
+  <data name="public_label_text" xml:space="preserve">
+    <value>Public:</value>
+  </data>
+  <data name="public_schedule_node_text" xml:space="preserve">
+    <value>Public schedule</value>
+  </data>
+  <data name="reading_button_text" xml:space="preserve">
+    <value>Reading</value>
+  </data>
+  <data name="ref_export_file_text" xml:space="preserve">
+    <value>Please select the export file.</value>
+  </data>
+  <data name="ref_file_button_text" xml:space="preserve">
+    <value>Reference</value>
+  </data>
+  <data name="ref_import_file_text" xml:space="preserve">
+    <value>Please select the import file.</value>
+  </data>
+  <data name="regist_button_text" xml:space="preserve">
+    <value>Regist</value>
+  </data>
+  <data name="regist_dialog_screen_name" xml:space="preserve">
+    <value>Edit registration confirmation</value>
+  </data>
+  <data name="regist_dialog_text" xml:space="preserve">
+    <value>I want to register the data being edited. Would you like?</value>
+  </data>
+  <data name="reservation_run_menu_text" xml:space="preserve">
+    <value>Reservation run(_W)</value>
+  </data>
+  <data name="run_job_management_screen" xml:space="preserve">
+    <value>Run job management screen</value>
+  </data>
+  <data name="run_menu_text" xml:space="preserve">
+    <value>Run(_S)</value>
+  </data>
+  <data name="sat_day_checkbox_text" xml:space="preserve">
+    <value>Sat</value>
+  </data>
+  <data name="schedule_editing_screen_name" xml:space="preserve">
+    <value>Schedule editing screen</value>
+  </data>
+  <data name="schedule_id_label_text" xml:space="preserve">
+    <value>Schedule id:</value>
+  </data>
+  <data name="schedule_name_label_text" xml:space="preserve">
+    <value>Schedule name:</value>
+  </data>
+  <data name="schedule_node_text" xml:space="preserve">
+    <value>Schedule</value>
+  </data>
+  <data name="schedule_time_col_head_text" xml:space="preserve">
+    <value>Scheduled start time</value>
+  </data>
+  <data name="started_time_col_head_text" xml:space="preserve">
+    <value>Start time</value>
+  </data>
+  <data name="status_col_head_text" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="stop_context_menu_text" xml:space="preserve">
+    <value>Stop(_F)</value>
+  </data>
+  <data name="sun_day_checkbox_text" xml:space="preserve">
+    <value>Sun</value>
+  </data>
+  <data name="SYSERR_001" xml:space="preserve">
+    <value>A database execution error occurred. 
+Please contact a system administrator.</value>
+  </data>
+  <data name="SYSERR_002" xml:space="preserve">
+    <value>A file reading error occurred. Please contact a system administrator.</value>
+  </data>
+  <data name="SYSERR_003" xml:space="preserve">
+    <value>An error occurred other than anticipation. Please contact a system administrator.</value>
+  </data>
+  <data name="test_run_menu_text" xml:space="preserve">
+    <value>Test run(_T)</value>
+  </data>
+  <data name="thu_day_checkbox_text" xml:space="preserve">
+    <value>Thu</value>
+  </data>
+  <data name="Title_Msgbox_Delete" xml:space="preserve">
+    <value>Deletion confirmation</value>
+  </data>
+  <data name="Title_Msgbox_Edit" xml:space="preserve">
+    <value>Editing registration confirmation</value>
+  </data>
+  <data name="Title_Msgbox_End" xml:space="preserve">
+    <value>End confirmation</value>
+  </data>
+  <data name="Title_Msgbox_Error" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="Title_Msgbox_Head" xml:space="preserve">
+    <value>Version information</value>
+  </data>
+  <data name="Title_Msgbox_Jobnet_Start" xml:space="preserve">
+    <value>Confirmation of execution</value>
+  </data>
+  <data name="tue_day_checkbox_text" xml:space="preserve">
+    <value>Tue</value>
+  </data>
+  <data name="update_context_menu_text" xml:space="preserve">
+    <value>Update(_U)</value>
+  </data>
+  <data name="update_date_col_head_text" xml:space="preserve">
+    <value>Update date</value>
+  </data>
+  <data name="update_date_label_text" xml:space="preserve">
+    <value>Update date:</value>
+  </data>
+  <data name="user_name_label_text" xml:space="preserve">
+    <value>User name:</value>
+  </data>
+  <data name="validity_context_menu_text" xml:space="preserve">
+    <value>Validity(_A)</value>
+  </data>
+  <data name="valid_col_head_text" xml:space="preserve">
+    <value>Valid</value>
+  </data>
+  <data name="ver_dialog_screen_name" xml:space="preserve">
+    <value>Version</value>
+  </data>
+  <data name="ver_menu_text" xml:space="preserve">
+    <value>Version(_A)</value>
+  </data>
+  <data name="view_menu_text" xml:space="preserve">
+    <value>View(_V)</value>
+  </data>
+  <data name="wed_day_checkbox_text" xml:space="preserve">
+    <value>Wed</value>
+  </data>
+  <data name="WINDOW_NAME_100" xml:space="preserve">
+    <value>Login screen</value>
+  </data>
+  <data name="WINDOW_NAME_200" xml:space="preserve">
+    <value>Object list screen</value>
+  </data>
+  <data name="WINDOW_NAME_210" xml:space="preserve">
+    <value>Calendar edit screen</value>
+  </data>
+  <data name="WINDOW_NAME_211" xml:space="preserve">
+    <value>Operating-days file reading screen</value>
+  </data>
+  <data name="WINDOW_NAME_212" xml:space="preserve">
+    <value>Initial registration screen calendar</value>
+  </data>
+  <data name="WINDOW_NAME_220" xml:space="preserve">
+    <value>Schedule edit screen</value>
+  </data>
+  <data name="WINDOW_NAME_221" xml:space="preserve">
+    <value>Boot time registration screen</value>
+  </data>
+  <data name="WINDOW_NAME_222" xml:space="preserve">
+    <value>Job net registration screen</value>
+  </data>
+  <data name="WINDOW_NAME_230" xml:space="preserve">
+    <value>Job edit screen</value>
+  </data>
+  <data name="WINDOW_NAME_231" xml:space="preserve">
+    <value>Job icon setting screen</value>
+  </data>
+  <data name="WINDOW_NAME_232" xml:space="preserve">
+    <value>Conditional branch icon setting screen</value>
+  </data>
+  <data name="WINDOW_NAME_233" xml:space="preserve">
+    <value>Job controller variable icon setting screen</value>
+  </data>
+  <data name="WINDOW_NAME_234" xml:space="preserve">
+    <value>Extended job icon setting screen</value>
+  </data>
+  <data name="WINDOW_NAME_235" xml:space="preserve">
+    <value>End icon setting screen</value>
+  </data>
+  <data name="WINDOW_NAME_236" xml:space="preserve">
+    <value>Calculation icon setting screen</value>
+  </data>
+  <data name="WINDOW_NAME_237" xml:space="preserve">
+    <value>Task icon setting screen</value>
+  </data>
+  <data name="WINDOW_NAME_238" xml:space="preserve">
+    <value>Information acquisition icon setting screen</value>
+  </data>
+  <data name="WINDOW_NAME_239" xml:space="preserve">
+    <value>Other icon setting screens</value>
+  </data>
+  <data name="WINDOW_NAME_240" xml:space="preserve">
+    <value>Export screen</value>
+  </data>
+  <data name="WINDOW_NAME_250" xml:space="preserve">
+    <value>Import screen</value>
+  </data>
+  <data name="WINDOW_NAME_300" xml:space="preserve">
+    <value>Execution job management screen</value>
+  </data>
+  <data name="WINDOW_NAME_310" xml:space="preserve">
+    <value>Execution job detailed screen</value>
+  </data>
+  <data name="ERROR_COMMON_012" xml:space="preserve">
+    <value>Please enter {0} {1} digits.</value>
+  </data>
+  <data name="ERROR_CALENDAR_001" xml:space="preserve">
+    <value>By another user, calendar selected version has been removed.</value>
+  </data>
+  <data name="ERROR_CALENDAR_002" xml:space="preserve">
+    <value>Calendar selected version is being edited by other users.
+At a later time, please try again.</value>
+  </data>
+  <data name="ERROR_COMMON_013" xml:space="preserve">
+    <value>Please input {0} by the half-width alphanumeric character, the hyphen (-), and a underscore (_).</value>
+  </data>
+  <data name="ERROR_SCHEDULE_001" xml:space="preserve">
+    <value>By another user, schedule selected version has been removed.</value>
+  </data>
+  <data name="ERROR_SCHEDULE_002" xml:space="preserve">
+    <value>Schedule selected version is being edited by other users.
+At a later time, please try again.</value>
+  </data>
+  <data name="ERROR_JOBEDIT_009" xml:space="preserve">
+    <value>There is no registered job.</value>
+  </data>
+  <data name="ERROR_SCHEDULE_003" xml:space="preserve">
+    <value>There is no registered boot time.</value>
+  </data>
+  <data name="ERROR_SCHEDULE_004" xml:space="preserve">
+    <value>There is no registered jobnet.</value>
+  </data>
+  <data name="ERROR_IMPORT_004" xml:space="preserve">
+    <value>Data is already registered.</value>
+  </data>
+  <data name="ERROR_IMPORT_005" xml:space="preserve">
+    <value>It cannot import because of the compatibility error of data.</value>
+  </data>
+  <data name="ERROR_JOBEDIT_010" xml:space="preserve">
+    <value>Please set up the icon {0}.</value>
+  </data>
+  <data name="calc_label_text" xml:space="preserve">
+    <value>Calc</value>
+  </data>
+  <data name="extend_job_label_text" xml:space="preserve">
+    <value>Extended job:</value>
+  </data>
+  <data name="if_label_text" xml:space="preserve">
+    <value>IF</value>
+  </data>
+  <data name="info_label_text" xml:space="preserve">
+    <value>Info</value>
+  </data>
+  <data name="job_label_text" xml:space="preserve">
+    <value>Job</value>
+  </data>
+  <data name="task_label_text" xml:space="preserve">
+    <value>Task</value>
+  </data>
+  <data name="variable_label_text" xml:space="preserve">
+    <value>Variable</value>
+  </data>
+  <data name="add_button_text" xml:space="preserve">
+    <value>Add</value>
+  </data>
+  <data name="exec_label_text" xml:space="preserve">
+    <value>Exec</value>
+  </data>
+  <data name="host_label_text" xml:space="preserve">
+    <value>Host</value>
+  </data>
+  <data name="host_name_label_text" xml:space="preserve">
+    <value>Host name:</value>
+  </data>
+  <data name="jobcon_value_label_text" xml:space="preserve">
+    <value>Jobcontrol variable:</value>
+  </data>
+  <data name="job_id_label_text" xml:space="preserve">
+    <value>Job id:</value>
+  </data>
+  <data name="job_name_label_text" xml:space="preserve">
+    <value>Job name:</value>
+  </data>
+  <data name="job_value_label_text" xml:space="preserve">
+    <value>Job variable:</value>
+  </data>
+  <data name="stop_code_label_text" xml:space="preserve">
+    <value>Job stop code:</value>
+  </data>
+  <data name="stop_command_label_text" xml:space="preserve">
+    <value>Stop Command:</value>
+  </data>
+  <data name="timeout_label_text" xml:space="preserve">
+    <value>Timeout warning(minute):</value>
+  </data>
+  <data name="value_col_head_text" xml:space="preserve">
+    <value>Value</value>
+  </data>
+  <data name="value_label_text" xml:space="preserve">
+    <value>Value:</value>
+  </data>
+  <data name="value_name_col_head_text" xml:space="preserve">
+    <value>Value name</value>
+  </data>
+  <data name="value_name_label_text" xml:space="preserve">
+    <value>Value name:</value>
+  </data>
+  <data name="calc_icon_screen_name" xml:space="preserve">
+    <value>Clac icon setting</value>
+  </data>
+  <data name="calc_method_label_text" xml:space="preserve">
+    <value>Calc method</value>
+  </data>
+  <data name="character_string_text" xml:space="preserve">
+    <value>Character string</value>
+  </data>
+  <data name="compare_value_label_text" xml:space="preserve">
+    <value>Comparison value:</value>
+  </data>
+  <data name="end_code_label_text" xml:space="preserve">
+    <value>End code(JOB_EXIT_CD):</value>
+  </data>
+  <data name="end_icon_screen_name" xml:space="preserve">
+    <value>End icon setting</value>
+  </data>
+  <data name="env_icon_screen_name" xml:space="preserve">
+    <value>Jobcontrol variable icon setting</value>
+  </data>
+  <data name="err_message_compare_value" xml:space="preserve">
+    <value>compare value</value>
+  </data>
+  <data name="err_message_job_id" xml:space="preserve">
+    <value>job id</value>
+  </data>
+  <data name="err_message_job_name" xml:space="preserve">
+    <value>job name</value>
+  </data>
+  <data name="err_message_memo" xml:space="preserve">
+    <value>description</value>
+  </data>
+  <data name="err_message_value" xml:space="preserve">
+    <value>value</value>
+  </data>
+  <data name="err_message_value_name" xml:space="preserve">
+    <value>value name</value>
+  </data>
+  <data name="ext_job_icon_screen_name" xml:space="preserve">
+    <value>Extended job icon setting</value>
+  </data>
+  <data name="formula_label_text" xml:space="preserve">
+    <value>Formula:</value>
+  </data>
+  <data name="if_icon_screen_name" xml:space="preserve">
+    <value>IF icon setting</value>
+  </data>
+  <data name="information_classification_label_text" xml:space="preserve">
+    <value>Information classification:</value>
+  </data>
+  <data name="info_icon_screen_name" xml:space="preserve">
+    <value>Info icon setting</value>
+  </data>
+  <data name="integer_calc_label_text" xml:space="preserve">
+    <value>Integer calc</value>
+  </data>
+  <data name="jobnet_icon_screen_name" xml:space="preserve">
+    <value>Jobnet icon setting</value>
+  </data>
+  <data name="jobnet_stop_label_text" xml:space="preserve">
+    <value>Jobnet stop:</value>
+  </data>
+  <data name="job_icon_screen_name" xml:space="preserve">
+    <value>Job icon setting</value>
+  </data>
+  <data name="job_info_text" xml:space="preserve">
+    <value>Job info</value>
+  </data>
+  <data name="numerical_value_text" xml:space="preserve">
+    <value>Numerical value</value>
+  </data>
+  <data name="other_icon_screen_name" xml:space="preserve">
+    <value>Other icon setting</value>
+  </data>
+  <data name="parameter_label_text" xml:space="preserve">
+    <value>Parameter:</value>
+  </data>
+  <data name="process_method_label_text" xml:space="preserve">
+    <value>Processing method:</value>
+  </data>
+  <data name="task_icon_screen_name" xml:space="preserve">
+    <value>Task icon setting</value>
+  </data>
+  <data name="time_calc_label_text" xml:space="preserve">
+    <value>Time calc</value>
+  </data>
+  <data name="curve_flow_menu_text" xml:space="preserve">
+    <value>Curve flow(_C)</value>
+  </data>
+  <data name="del_flow_menu_text" xml:space="preserve">
+    <value>Delete flow(_O)</value>
+  </data>
+  <data name="err_message_exec" xml:space="preserve">
+    <value>exec command</value>
+  </data>
+  <data name="err_message_extend_job" xml:space="preserve">
+    <value>extended job</value>
+  </data>
+  <data name="err_message_formula" xml:space="preserve">
+    <value>formula</value>
+  </data>
+  <data name="err_message_host_name" xml:space="preserve">
+    <value>host name</value>
+  </data>
+  <data name="err_message_host_value_name" xml:space="preserve">
+    <value>host(value name)</value>
+  </data>
+  <data name="err_message_jobcontrol_value" xml:space="preserve">
+    <value>jobcontrol variable(value)</value>
+  </data>
+  <data name="err_message_jobcontrol_value_name" xml:space="preserve">
+    <value>jobcontrol variable(value name)</value>
+  </data>
+  <data name="err_message_jobcontrol_variable" xml:space="preserve">
+    <value>jobcontrol variable</value>
+  </data>
+  <data name="err_message_job_info" xml:space="preserve">
+    <value>job info(job id)</value>
+  </data>
+  <data name="err_message_job_value" xml:space="preserve">
+    <value>job variable(value)</value>
+  </data>
+  <data name="err_message_job_value_name" xml:space="preserve">
+    <value>job variable(value name)</value>
+  </data>
+  <data name="err_message_parameter" xml:space="preserve">
+    <value>parameter</value>
+  </data>
+  <data name="err_message_stop_code" xml:space="preserve">
+    <value>job stop code</value>
+  </data>
+  <data name="err_message_stop_command" xml:space="preserve">
+    <value>stop command</value>
+  </data>
+  <data name="err_message_timeout" xml:space="preserve">
+    <value>timeout warning</value>
+  </data>
+  <data name="false_setting_menu_text" xml:space="preserve">
+    <value>FALSE setting(_F)</value>
+  </data>
+  <data name="force_stop_menu_text" xml:space="preserve">
+    <value>Force stop(_F)</value>
+  </data>
+  <data name="hold_menu_text" xml:space="preserve">
+    <value>Hold(_W)</value>
+  </data>
+  <data name="job_status_text" xml:space="preserve">
+    <value>job status</value>
+  </data>
+  <data name="linear_flow_menu_text" xml:space="preserve">
+    <value>Linear flow(_L)</value>
+  </data>
+  <data name="rerun_menu_text" xml:space="preserve">
+    <value>Rerun(_A)</value>
+  </data>
+  <data name="setting_menu_text" xml:space="preserve">
+    <value>Setting(_S)</value>
+  </data>
+  <data name="skip_menu_text" xml:space="preserve">
+    <value>Skip(_S)</value>
+  </data>
+  <data name="true_setting_menu_text" xml:space="preserve">
+    <value>TRUE setting(_T)</value>
+  </data>
+  <data name="unhold_menu_text" xml:space="preserve">
+    <value>Un hold(_U)</value>
+  </data>
+  <data name="unskip_menu_text" xml:space="preserve">
+    <value>Un skip(_R)</value>
+  </data>
+  <data name="variable_value_change_menu_text" xml:space="preserve">
+    <value>Variable value change(_C)</value>
+  </data>
+  <data name="change_variable_value_screen_name" xml:space="preserve">
+    <value>Change variable value</value>
+  </data>
+  <data name="ERROR_JOBEDIT_011" xml:space="preserve">
+    <value>Please input job net id other than self.</value>
+  </data>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="arrow_left" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\arrow_left.gif;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="arrow_right" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\arrow_right.gif;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ERROR_JOBEDIT_012" xml:space="preserve">
+    <value>One Start icon,one or more End icons need to set up.</value>
+  </data>
+  <data name="extend_job_text" xml:space="preserve">
+    <value>Extended job</value>
+  </data>
+  <data name="SYSERR_004" xml:space="preserve">
+    <value>I failed to get the serial number. Please contact your system administrator.</value>
+  </data>
+  <data name="ERROR_LOGIN_002" xml:space="preserve">
+    <value>User is invalid.</value>
+  </data>
+  <data name="user_name_col_head_text" xml:space="preserve">
+    <value>User name</value>
+  </data>
+  <data name="ERROR_JOBNET_LOAD_001" xml:space="preserve">
+    <value>The job net of a job net icon and a task icon is invalid.</value>
+  </data>
+  <data name="load_err" xml:space="preserve">
+    <value>Load error</value>
+  </data>
+  <data name="ERROR_JOBEDIT_007" xml:space="preserve">
+    <value>Start and end points are the same.</value>
+  </data>
+  <data name="ERROR_JOBEDIT_008" xml:space="preserve">
+    <value>Please input {0} within {1}.</value>
+  </data>
+  <data name="after_variable_label_text" xml:space="preserve">
+    <value>After variable:</value>
+  </data>
+  <data name="before_variable_label_text" xml:space="preserve">
+    <value>Before variable:</value>
+  </data>
+  <data name="view_variable_value_menu_text" xml:space="preserve">
+    <value>View variable value(_V)</value>
+  </data>
+  <data name="view_variable_value_screen_name" xml:space="preserve">
+    <value>View variable value</value>
+  </data>
+  <data name="calc_icon_label_text" xml:space="preserve">
+    <value>CALC</value>
+  </data>
+  <data name="extend_job_icon_text" xml:space="preserve">
+    <value>EXTENSION</value>
+  </data>
+  <data name="info_icon_label_text" xml:space="preserve">
+    <value>INFO</value>
+  </data>
+  <data name="job_icon_label_text" xml:space="preserve">
+    <value>JOB</value>
+  </data>
+  <data name="task_icon_label_text" xml:space="preserve">
+    <value>TASK</value>
+  </data>
+  <data name="variable_icon_label_text" xml:space="preserve">
+    <value>VARIABLE</value>
+  </data>
+  <data name="close_button_text" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="ERROR_COMMON_014" xml:space="preserve">
+    <value>Please input the file name.</value>
+  </data>
+  <data name="file_copy_icon_label_text" xml:space="preserve">
+    <value>F-TRANSFER</value>
+  </data>
+  <data name="file_wait_icon_label_text" xml:space="preserve">
+    <value>F-WAIT</value>
+  </data>
+  <data name="copy_new_context_menu_text" xml:space="preserve">
+    <value>Copy new(_C)</value>
+  </data>
+  <data name="PROCESS_017" xml:space="preserve">
+    <value>Copy new process</value>
+  </data>
+  <data name="fcopy_icon_screen_name" xml:space="preserve">
+    <value>File transfer icon setting</value>
+  </data>
+  <data name="destination_directory_label_text" xml:space="preserve">
+    <value>Destination directory information</value>
+  </data>
+  <data name="destination_host_label_text" xml:space="preserve">
+    <value>Destination host</value>
+  </data>
+  <data name="directory_label_text" xml:space="preserve">
+    <value>Directory:</value>
+  </data>
+  <data name="file_name_label_text" xml:space="preserve">
+    <value>File name:</value>
+  </data>
+  <data name="fwait_icon_screen_name" xml:space="preserve">
+    <value>File wait icon setting</value>
+  </data>
+  <data name="source_file_label_text" xml:space="preserve">
+    <value>Source file information</value>
+  </data>
+  <data name="source_host_label_text" xml:space="preserve">
+    <value>Source host</value>
+  </data>
+  <data name="ERROR_BOOT_TIME_003" xml:space="preserve">
+    <value>The boot time is already registered.</value>
+  </data>
+  <data name="ERROR_BOOT_TIME_004" xml:space="preserve">
+    <value>Boot time is inputs required and please input it in HHMI (HH is 0-99 in one or two digit number, MI is 00-59 in two digit number) form.</value>
+  </data>
+  <data name="ERROR_COMMON_015" xml:space="preserve">
+    <value>Please input {0} by the half-width alphanumeric character, the underbar(_), and the first character except a numerical value.</value>
+  </data>
+  <data name="err_message_from_dir" xml:space="preserve">
+    <value>source directory</value>
+  </data>
+  <data name="err_message_from_file_name" xml:space="preserve">
+    <value>source file name</value>
+  </data>
+  <data name="err_message_from_host_name" xml:space="preserve">
+    <value>source host name</value>
+  </data>
+  <data name="err_message_from_host_value_name" xml:space="preserve">
+    <value>source host(value name)</value>
+  </data>
+  <data name="err_message_to_dir" xml:space="preserve">
+    <value>destination directory</value>
+  </data>
+  <data name="err_message_to_host_name" xml:space="preserve">
+    <value>destination host name</value>
+  </data>
+  <data name="err_message_to_host_value_name" xml:space="preserve">
+    <value>destination host(value name)</value>
+  </data>
+  <data name="ERROR_LOGIN_003" xml:space="preserve">
+    <value>The configuration file (jobarg_manager.conf) is not found.</value>
+  </data>
+  <data name="ERROR_LOGIN_004" xml:space="preserve">
+    <value>The contents of the configuration file (jobarg_manager.conf) are inaccurate.</value>
+  </data>
+  <data name="ERROR_LOGIN_005" xml:space="preserve">
+    <value>ODBC DSN is not found. 
+Please confirm a setup of ODBC.</value>
+  </data>
+  <data name="ERROR_LOGIN_006" xml:space="preserve">
+    <value>Connection with DB went wrong. 
+Please confirm ODBC and a database.</value>
+  </data>
+  <data name="err_message_file_name" xml:space="preserve">
+    <value>file names</value>
+  </data>
+  <data name="MSG_COMMON_008" xml:space="preserve">
+    <value>I cancel data editing. Are you all right?</value>
+  </data>
+  <data name="Title_Msgbox_Cancel" xml:space="preserve">
+    <value>Cancel confirmation</value>
+  </data>
+  <data name="MSG_COMMON_003" xml:space="preserve">
+    <value>                      Job Arranger for Zabbix
+                     Job Manager Version 1.3.0
+
+Copyright (C) 2012-2013 FitechForce, Inc. All Rights Reserved.</value>
+  </data>
+  <data name="PROCESS_018" xml:space="preserve">
+    <value>Hold process</value>
+  </data>
+  <data name="PROCESS_019" xml:space="preserve">
+    <value>Unhold process</value>
+  </data>
+  <data name="PROCESS_020" xml:space="preserve">
+    <value>Skip process</value>
+  </data>
+  <data name="PROCESS_021" xml:space="preserve">
+    <value>Unskip process</value>
+  </data>
+  <data name="PROCESS_022" xml:space="preserve">
+    <value>Stop process</value>
+  </data>
+  <data name="PROCESS_023" xml:space="preserve">
+    <value>Restart process</value>
+  </data>
+  <data name="reboot_icon_label_text" xml:space="preserve">
+    <value>REBOOT</value>
+  </data>
+  <data name="reboot_icon_screen_name" xml:space="preserve">
+    <value>Reboot icon setting</value>
+  </data>
+  <data name="force_reboot_label_text" xml:space="preserve">
+    <value>Force reboot</value>
+  </data>
+  <data name="reboot_mode_label_text" xml:space="preserve">
+    <value>Reboot mode</value>
+  </data>
+  <data name="waiting_reboot_label_text" xml:space="preserve">
+    <value>Job waiting after reboot</value>
+  </data>
+  <data name="wait_time_label_text" xml:space="preserve">
+    <value>Wait time(sec):</value>
+  </data>
+  <data name="err_message_wait_time" xml:space="preserve">
+    <value>Reboot wait time</value>
+  </data>
+  <data name="job_run_menu_text" xml:space="preserve">
+    <value>Job run（_J）</value>
+  </data>
+  <data name="run_job_jobnet_name_head" xml:space="preserve">
+    <value>Job icon single boot</value>
+  </data>
+  <data name="calendar_id_col_head_text" xml:space="preserve">
+    <value>Calendr id</value>
+  </data>
+</root>

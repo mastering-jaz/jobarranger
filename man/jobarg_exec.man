@@ -1,0 +1,34 @@
+.TH JOBARG_EXEC 8 "30 November 2012"
+.if n .ad l
+.SH NAME
+jobarg_exec \- Jobarranger Execution utility.
+.SH SYNOPSIS
+.B jobarg_exec [-h] -z <hostname or IP> [-p <port>] -U <username> -P <password> -j <jobnetid> [-t <YYYYMMDDHHMM>] [-E <environment-variable>,...]
+.SH DESCRIPTION
+.B jobarg_exec
+is a command line utility for executing jobnet to a remote Jobarranger server. 
+
+.SS Options
+.IP "-z \fI<hostname or IP>\fR"
+Hostname or IP address of Jobarranger server. 
+.IP "-p \fI<port>\fR"
+Specify port number of server trapper running on the server. Default is 10061.
+.IP "-U \fI<username>\fR"
+Specify user who has the authority to execute jobnet.
+.IP "-P \fI<password>\fR"
+The user password.
+.IP "-j \fI<jobnetid>\fR"
+Specify jobnet id as registered in Jobarranger front-end.
+.IP "-t \fI<YYYYMMDDHHMM>\fR"
+Specify start time of the jobnet.
+.IP "-E \fI<environment-variable>,...\fR"
+Specify environment variables which is set to the jobnet.
+.IP "-h\fR"
+Display this help and exit.
+
+
+.SH "SEE ALSO"
+.BR jobarg_server (8),
+.BR jobarg_agentd (8),
+.SH AUTHOR
+Yasuhiko Kato <kato@fitechforce.co.jp>

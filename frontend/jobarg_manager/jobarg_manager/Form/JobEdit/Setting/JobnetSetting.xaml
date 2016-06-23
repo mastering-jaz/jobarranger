@@ -1,0 +1,53 @@
+﻿<!--
+/*
+** Job Arranger for ZABBIX
+** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+**
+** This program is free software; you can redistribute it and/or modify
+** it under the terms of the GNU General Public License as published by
+** the Free Software Foundation; either version 2 of the License, or
+** (at your option) any later version.
+**
+** This program is distributed in the hope that it will be useful,
+** but WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+** GNU General Public License for more details.
+**
+** You should have received a copy of the GNU General Public License
+** along with this program; if not, write to the Free Software
+** Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+**/
+-->
+    <Window x:Class="jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobnetSetting"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:src="clr-namespace:jp.co.ftf.jobcontroller.JobController" 
+        WindowStartupLocation="CenterScreen" ResizeMode="NoResize"
+        Title="{x:Static src:Properties.Resources.jobnet_icon_screen_name}" Height="222" Width="390" FontFamily="MS Gothic" Closing="Window_Closed">
+    <Grid Background="#FFEEECE1" Name="GridSetting">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30" />
+            <RowDefinition Height="30" />
+            <RowDefinition Height="30" />
+            <RowDefinition Height="30" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Label Grid.Row="0" Content="{x:Static src:Properties.Resources.job_id_label_text}" Height="28" HorizontalAlignment="Left" Margin="12,3,0,0" 
+               VerticalAlignment="Top" VerticalContentAlignment="Center" />
+        <TextBox Name="txtJobId" Height="23" Width="267" Margin="95,6,0,0" HorizontalAlignment="Left" 
+                 VerticalAlignment="Top" VerticalContentAlignment="Center" MaxLength="32" />
+        <Label Grid.Row="1" Content="{x:Static src:Properties.Resources.job_name_label_text}" Height="28" HorizontalAlignment="Left" Margin="12,3,0,0" 
+               VerticalAlignment="Top" VerticalContentAlignment="Center" />
+        <TextBox Grid.Row="1" Name="txtJobName" Height="23" Width="267" Margin="95,6,0,0" HorizontalAlignment="Left" 
+                 VerticalAlignment="Top" VerticalContentAlignment="Center" MaxLength="64" />
+        <Button Grid.Row="4" Content="{x:Static src:Properties.Resources.regist_button_text}" Height="28" HorizontalAlignment="Left" Margin="201,27,0,0" 
+                Name="btnToroku" VerticalAlignment="Top" Width="75" Click="btnToroku_Click" IsDefault="True" />
+        <Button Grid.Row="4" Content="{x:Static src:Properties.Resources.cancel_button_text}" Height="28" HorizontalAlignment="Left" Margin="281,27,0,0" 
+                Name="btnCancel" VerticalAlignment="Top" Width="75" Click="btnCancel_Click" IsCancel="True"/>
+        <TextBlock Text="{x:Static src:Properties.Resources.jobnet_id_label_text}" Height="28" HorizontalAlignment="Left" Margin="13,9,0,0" VerticalAlignment="Top"  Grid.Row="2" />
+        <TextBlock Text="" Name="lblJobnetId" Height="28" HorizontalAlignment="Left" Margin="110,9,0,0" VerticalAlignment="Top"  Grid.Row="2" />
+        <TextBlock Text="{x:Static src:Properties.Resources.jobnet_name_label_text}" Height="28" HorizontalAlignment="Left" Margin="13,9,0,0" VerticalAlignment="Top"  Grid.Row="3" />
+        <TextBlock Text="" Name="lblJobnetName" Height="28" HorizontalAlignment="Left" Margin="110,9,0,0" VerticalAlignment="Top"  Grid.Row="3" />
+
+    </Grid>
+</Window>

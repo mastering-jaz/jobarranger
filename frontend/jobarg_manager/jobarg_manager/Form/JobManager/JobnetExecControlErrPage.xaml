@@ -1,0 +1,122 @@
+﻿<!--
+/*
+** Job Arranger for ZABBIX
+** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+**
+** This program is free software; you can redistribute it and/or modify
+** it under the terms of the GNU General Public License as published by
+** the Free Software Foundation; either version 2 of the License, or
+** (at your option) any later version.
+**
+** This program is distributed in the hope that it will be useful,
+** but WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+** GNU General Public License for more details.
+**
+** You should have received a copy of the GNU General Public License
+** along with this program; if not, write to the Free Software
+** Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+**/
+-->
+    <src:BaseUserControl x:Class="jp.co.ftf.jobcontroller.JobController.Form.JobManager.JobnetExecControlErrPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:src="clr-namespace:jp.co.ftf.jobcontroller.JobController"
+             xmlns:System="clr-namespace:System;assembly=mscorlib"              
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="15"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <TextBlock HorizontalAlignment="Left" Text="{x:Static src:Properties.Resources.operation_information_err_jobnet_label}" Width="Auto" Margin="5,0,0,0" Grid.Row="0" Background="Red" KeyboardNavigation.IsTabStop="False"/>
+            <ListView VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="0,0,0,0" Name="listView1" 
+                  ItemsSource="{Binding JobnetExecList}" Grid.Row="1" SelectionMode="Single" SelectionChanged="ListView_SelectionChanged" KeyboardNavigation.TabNavigation="Once">
+            <ListView.ItemContainerStyle>
+                <Style TargetType="{x:Type ListViewItem}">
+                    <Style.Resources>
+                        <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}" Color="{x:Static SystemColors.HighlightColor}"/>
+                        <SolidColorBrush x:Key="{x:Static SystemColors.ControlTextBrushKey}" Color="{x:Static SystemColors.HighlightTextColor}"/>
+                    </Style.Resources>
+
+                    <EventSetter Event="MouseDoubleClick" Handler="list_MouseDoubleClick" />
+                </Style>
+            </ListView.ItemContainerStyle>
+            <ListView.ContextMenu>
+                <ContextMenu Name="contextMenu" Opened="listView_ContextMenuOpening" >
+                    <MenuItem Name="hideContextMenu" Header="{x:Static src:Properties.Resources.hide_context_menu_text}" Command="{x:Static src:JobArrangerCommands.Hide}" 
+                        CommandTarget="{Binding Path=PlacementTarget,RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItems}" />
+                    <MenuItem Name="stopContextMenu" Header="{x:Static src:Properties.Resources.stop_context_menu_text}"  Command="{x:Static src:JobArrangerCommands.ErrStop}" 
+                        CommandTarget="{Binding Path=PlacementTarget,RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItems}" />
+                </ContextMenu>
+            </ListView.ContextMenu>
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Width="220">
+                        <GridViewColumnHeader Content="{x:Static src:Properties.Resources.jobnet_id_col_head_text}" />
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <TextBlock Text="{Binding jobnet_id}" TextAlignment="Center" FontFamily="MS PGothic"/>
+                                </Grid>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Width="85">
+                        <GridViewColumnHeader Content="{x:Static src:Properties.Resources.status_col_head_text}"/>
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <TextBlock Text="{Binding display_status}" TextAlignment="Center" Background="{Binding status_color}" />
+                                </Grid>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Width="440">
+                        <GridViewColumnHeader Content="{x:Static src:Properties.Resources.jobnet_name_col_head_text}"/>
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <TextBlock Text="{Binding jobnet_name}" TextAlignment="Center" />
+                                </Grid>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Width="120">
+                        <GridViewColumnHeader Content="{x:Static src:Properties.Resources.schedule_time_col_head_text}"/>
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <TextBlock Text="{Binding scheduled_time}" TextAlignment="Center" />
+                                </Grid>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Width="120">
+                        <GridViewColumnHeader Content="{x:Static src:Properties.Resources.started_time_col_head_text}"/>
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <TextBlock Text="{Binding start_time}" TextAlignment="Center" />
+                                </Grid>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Width="120" >
+                        <GridViewColumnHeader Content="{x:Static src:Properties.Resources.ended_time_col_head_text}"/>
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <TextBlock Text="{Binding end_time}" TextAlignment="Center" />
+                                </Grid>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                </GridView>
+            </ListView.View>
+        </ListView>
+    </Grid>
+</src:BaseUserControl>

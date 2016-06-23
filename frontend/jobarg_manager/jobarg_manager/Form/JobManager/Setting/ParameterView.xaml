@@ -1,0 +1,100 @@
+﻿<!--
+/*
+** Job Arranger for ZABBIX
+** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+**
+** This program is free software; you can redistribute it and/or modify
+** it under the terms of the GNU General Public License as published by
+** the Free Software Foundation; either version 2 of the License, or
+** (at your option) any later version.
+**
+** This program is distributed in the hope that it will be useful,
+** but WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+** GNU General Public License for more details.
+**
+** You should have received a copy of the GNU General Public License
+** along with this program; if not, write to the Free Software
+** Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+**/
+-->
+    <Window x:Class="jp.co.ftf.jobcontroller.JobController.Form.JobManager.ParameterView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
+        xmlns:src="clr-namespace:jp.co.ftf.jobcontroller.JobController" 
+        WindowStartupLocation="CenterScreen" ResizeMode="NoResize" FontFamily="MS Gothic"
+        Title="{x:Static src:Properties.Resources.view_variable_value_screen_name}"
+        Height="575" Width="390" >
+
+    <Grid Background="#FFEEECE1" Height="562">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30" />
+            <RowDefinition Height="30" />
+            <RowDefinition Height="25" />
+            <RowDefinition Height="190*" />
+            <RowDefinition Height="25" />
+            <RowDefinition Height="190*" />
+            <RowDefinition Height="70" />
+        </Grid.RowDefinitions>
+        <Label Grid.Row="0" Content="{x:Static src:Properties.Resources.job_id_label_text}" Height="28" HorizontalAlignment="Left" Margin="12,3,0,0" 
+               VerticalAlignment="Top" VerticalContentAlignment="Center" />
+        <Label Name="lblJobId" Height="23" Width="288" Margin="78,6,0,0" HorizontalAlignment="Left" 
+                 VerticalAlignment="Top" VerticalContentAlignment="Center"  />
+        <Label Grid.Row="1" Content="{x:Static src:Properties.Resources.job_name_label_text}" Height="28" HorizontalAlignment="Left" Margin="12,3,0,0" 
+               VerticalAlignment="Top" VerticalContentAlignment="Center" />
+        <Label Grid.Row="1" Name="lblJobName" Height="23" Width="288" Margin="78,6,0,0" HorizontalAlignment="Left" 
+                 VerticalAlignment="Top" VerticalContentAlignment="Center" />
+        <Label Grid.Row="2" Content="{x:Static src:Properties.Resources.before_variable_label_text}" Height="28" HorizontalAlignment="Left" Margin="12,3,0,0" 
+               VerticalAlignment="Top" VerticalContentAlignment="Center" />
+        <DataGrid Grid.Row="3" Name="dgVariableBefore" Height="180" Width="350" AutoGenerateColumns="False" 
+                  HorizontalAlignment="Left" Margin="14,2,0,0" VerticalAlignment="Stretch" Background="White" 
+                  GridLinesVisibility="None" CanUserAddRows="False" VerticalScrollBarVisibility="Visible"
+                  SelectionMode="Single" RowHeaderWidth="0" IsReadOnly="True"   
+                  HorizontalScrollBarVisibility="Auto"
+                  CanUserDeleteRows="False" 
+                  CellStyle="{StaticResource DisableDataGridCell}" KeyboardNavigation.TabNavigation="None">
+               <DataGrid.ColumnHeaderStyle>
+                <Style TargetType="DataGridColumnHeader">
+                    <Setter Property="Background" Value="White"/>
+                    <Setter Property="BorderThickness" Value="1,1,0,1"/>
+                    <Setter Property="BorderBrush" Value="Black"/>
+                    <Setter Property="FontWeight" Value="Bold"/>
+                    <Setter Property="Height" Value="18"/>
+                    <Setter Property="Padding" Value="4,0,0,0"/>
+                </Style>
+            </DataGrid.ColumnHeaderStyle>
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="{x:Static src:Properties.Resources.value_name_col_head_text}" Binding="{Binding Path=value_name}" Width="Auto" IsReadOnly="True"/>
+                <DataGridTextColumn Header="{x:Static src:Properties.Resources.value_col_head_text}" Binding="{Binding Path=value}" Width="Auto"  IsReadOnly="True"/>
+            </DataGrid.Columns>
+        </DataGrid>
+        <Label Grid.Row="4" Content="{x:Static src:Properties.Resources.after_variable_label_text}" Height="28" HorizontalAlignment="Left" Margin="12,3,0,0" 
+               VerticalAlignment="Top" VerticalContentAlignment="Center" />
+        <DataGrid Grid.Row="5" Name="dgVariableAfter" Height="180" Width="350" AutoGenerateColumns="False" 
+                  HorizontalAlignment="Left" Margin="14,2,0,0" VerticalAlignment="Top" Background="White" 
+                  GridLinesVisibility="None" RowHeight="18" CanUserAddRows="False" VerticalScrollBarVisibility="Visible"
+                  SelectionMode="Single" RowHeaderWidth="0" IsReadOnly="True"  
+                  HorizontalScrollBarVisibility="Auto"
+                  CanUserDeleteRows="False" 
+                  CellStyle="{StaticResource DisableDataGridCell}" KeyboardNavigation.TabNavigation="None">
+
+            <DataGrid.ColumnHeaderStyle>
+                <Style TargetType="DataGridColumnHeader">
+                    <Setter Property="Background" Value="White"/>
+                    <Setter Property="BorderThickness" Value="1,1,0,1"/>
+                    <Setter Property="BorderBrush" Value="Black"/>
+                    <Setter Property="FontWeight" Value="Bold"/>
+                    <Setter Property="Height" Value="18"/>
+                    <Setter Property="Padding" Value="4,0,0,0"/>
+                </Style>
+            </DataGrid.ColumnHeaderStyle>
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="{x:Static src:Properties.Resources.value_name_col_head_text}" Binding="{Binding Path=value_name}" Width="Auto" IsReadOnly="True"/>
+                <DataGridTextColumn Header="{x:Static src:Properties.Resources.value_col_head_text}" Binding="{Binding Path=value}" Width="Auto"  IsReadOnly="True"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <Button Grid.Row="6" Content="{x:Static src:Properties.Resources.close_button_text}" Height="28" HorizontalAlignment="Left" Margin="261,11,0,0" 
+                Name="btnClose" VerticalAlignment="Top" Width="75" Click="btnClose_Click" IsDefault="True" IsCancel="True"/>
+    </Grid>
+</Window>

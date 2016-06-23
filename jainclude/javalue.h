@@ -1,0 +1,73 @@
+/*
+** Job Arranger for ZABBIX
+** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+**
+** This program is free software; you can redistribute it and/or modify
+** it under the terms of the GNU General Public License as published by
+** the Free Software Foundation; either version 2 of the License, or
+** (at your option) any later version.
+**
+** This program is distributed in the hope that it will be useful,
+** but WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+** GNU General Public License for more details.
+**
+** You should have received a copy of the GNU General Public License
+** along with this program; if not, write to the Free Software
+** Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+**/
+
+/*
+** $Date:: 2013-07-09 17:41:31 +0900 #$
+** $Revision: 5129 $
+** $Author: ossinfra@FITECHLABS.CO.JP $
+**/
+
+#ifndef JOBARG_JAVALUE_H
+#define JOBARG_JAVALUE_H
+
+int ja_clean_value_before(const zbx_uint64_t inner_job_id);
+int ja_clean_value_after(const zbx_uint64_t inner_job_id);
+
+int ja_set_value_before(const zbx_uint64_t inner_job_id,
+                        const zbx_uint64_t inner_jobnet_id,
+                        const char *value_name, const char *before_value);
+int ja_set_value_after(const zbx_uint64_t inner_job_id,
+                       const zbx_uint64_t inner_jobnet_id,
+                       const char *value_name, const char *after_value);
+
+int ja_cpy_value(const zbx_uint64_t inner_job_id, const char *value_src,
+                 char *value_dest);
+
+int ja_get_value_before(const zbx_uint64_t inner_job_id,
+                        const char *value_name, char *before_value);
+int ja_get_value_after(const zbx_uint64_t inner_job_id,
+                       const char *value_name, char *after_value);
+
+int ja_remove_value_before(const zbx_uint64_t inner_job_id,
+                           const char *value_name);
+int ja_remove_value_after(const zbx_uint64_t inner_job_id,
+                          const char *value_name);
+
+int ja_value_before_after(const zbx_uint64_t inner_job_id);
+int ja_value_after_before(const zbx_uint64_t inner_job_id,
+                          const zbx_uint64_t next_inner_job_id);
+
+int ja_clean_value_jobnet_before(const zbx_uint64_t inner_jobnet_id);
+int ja_clean_value_jobnet_after(const zbx_uint64_t inner_jobnet_id);
+
+int ja_set_value_jobnet_before(const zbx_uint64_t inner_jobnet_id,
+                               const char *value_name,
+                               const char *before_value);
+int ja_get_value_jobnet_before(const zbx_uint64_t inner_jobnet_id,
+                               const char *value_name, char *before_value);
+
+int ja_value_before_jobnet_in(const zbx_uint64_t inner_job_id,
+                              const zbx_uint64_t inner_jobnet_id);
+int ja_value_before_jobnet_out(const zbx_uint64_t inner_jobnet_id,
+                               const zbx_uint64_t inner_job_id);
+
+int ja_get_jobnet_summary_start(const zbx_uint64_t inner_jobnet_id,
+                                char *start_time);
+
+#endif

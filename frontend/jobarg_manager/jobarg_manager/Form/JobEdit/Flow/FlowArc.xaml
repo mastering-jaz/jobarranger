@@ -1,0 +1,41 @@
+﻿<!--
+/*
+** Job Arranger for ZABBIX
+** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+**
+** This program is free software; you can redistribute it and/or modify
+** it under the terms of the GNU General Public License as published by
+** the Free Software Foundation; either version 2 of the License, or
+** (at your option) any later version.
+**
+** This program is distributed in the hope that it will be useful,
+** but WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+** GNU General Public License for more details.
+**
+** You should have received a copy of the GNU General Public License
+** along with this program; if not, write to the Free Software
+** Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+**/
+-->
+    <UserControl x:Class="jp.co.ftf.jobcontroller.JobController.Form.JobEdit.FlowArc"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:design="clr-namespace:jp.co.ftf.jobcontroller.JobController.Form.JobEdit">
+    <Grid x:Name="LayoutRoot">
+        <design:ArrowArc x:Name ="arrow" LineSweepDirection="Counterclockwise"
+                         LineThickness="2"  IsLargeArc="False"
+                         StartPoint="0,0" EndPoint="500,0"
+                         ArrowSize="4,8"  Radius="501"
+                         StrokeThickness="2.5" Background="Black" 
+                         MouseLeftButtonDown="Hotspot_MouseLeftButtonDown"
+                         MouseLeftButtonUp="Hotspot_MouseLeftButtonUp"/>
+        <Canvas  Name="cnRuleContainer"  Canvas.ZIndex="1000">
+            <TextBlock Visibility="Collapsed"  Canvas.ZIndex="100" Name="tbFlowName" Text="TRUE" Foreground="Black"
+                       Canvas.Left="23" Canvas.Top="5"
+                       Width="40" Height="14"></TextBlock>
+        </Canvas>
+    </Grid>
+</UserControl>
