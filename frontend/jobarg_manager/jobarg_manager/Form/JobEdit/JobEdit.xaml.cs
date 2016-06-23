@@ -128,6 +128,14 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
         /// <summary> 保留解除アイコン設定テーブル </summary>
         private IconReleaseDAO _iconReleaseDAO;
 
+        //added by YAMA 2014/02/06
+        /// <summary> Zabbix連携アイコン設定テーブル </summary>
+        private IconCooperationDAO _iconCooperationDAO;
+
+        //added by YAMA 2014/05/19
+        /// <summary> エージェントレスアイコン設定テーブル </summary>
+        private IconAgentlessDAO _iconAgentlessDAO;
+
         public Hashtable JobNoHash = new Hashtable();
 
         #endregion
@@ -563,6 +571,40 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             // プロパティをセット 
             container.ParantWindow = this;
 
+
+            //added by YAMA 2014/04/22
+            // 多重起動コンボボックスの設定
+
+            //DataTableオブジェクトを用意
+            DataTable CombData = new DataTable();
+
+            //DataTableに列を追加
+            CombData.Columns.Add("ID", typeof(string));
+            CombData.Columns.Add("ITEM", typeof(string));
+
+            DataRow CombDataRow = CombData.NewRow();
+
+            //各列に値をセット
+            CombDataRow["ID"] = "0";
+            CombDataRow["ITEM"] = Properties.Resources.multiple_start_type1;
+            CombData.Rows.Add(CombDataRow);
+
+            CombDataRow = CombData.NewRow();
+            CombDataRow["ID"] = "1";
+            CombDataRow["ITEM"] = Properties.Resources.multiple_start_type2;
+            CombData.Rows.Add(CombDataRow);
+
+            CombDataRow = CombData.NewRow();
+            CombDataRow["ID"] = "2";
+            CombDataRow["ITEM"] = Properties.Resources.multiple_start_type3;
+            CombData.Rows.Add(CombDataRow);
+
+            combMultipleStart.Items.Clear();
+            combMultipleStart.ItemsSource = CombData.DefaultView;
+            combMultipleStart.DisplayMemberPath = "ITEM";
+            combMultipleStart.SelectedValuePath = "ID";
+
+            combMultipleStart.SelectedValue = "0";
         }
 
         //*******************************************************************
@@ -737,6 +779,14 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
 
             /// 保留解除アイコン設定テーブル 
             _iconReleaseDAO = new IconReleaseDAO(dbAccess);
+
+            //added by YAMA 2014/02/06
+            /// Zabbix連携アイコン設定テーブル 
+            _iconCooperationDAO = new IconCooperationDAO(dbAccess);
+
+            //added by YAMA 2014/05/19
+            /// エージェントレスアイコン設定テーブル 
+            _iconAgentlessDAO = new IconAgentlessDAO(dbAccess);
         }
 
         //*******************************************************************
@@ -796,6 +846,13 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             container.IconRebootTable = _iconRebootDAO.GetEmptyTable();
             // 保留解除アイコン設定テーブル 
             container.IconReleaseTable = _iconReleaseDAO.GetEmptyTable();
+
+            //added by YAMA 2014/02/06
+            // Zabbix連携アイコン設定テーブル 
+            container.IconCooperationTable = _iconCooperationDAO.GetEmptyTable();
+            //added by YAMA 2014/05/19
+            /// エージェントレスアイコン設定テーブル 
+            container.IconAgentlessTable = _iconAgentlessDAO.GetEmptyTable();
 
             dbAccess.CloseSqlConnect();
         }
@@ -868,6 +925,13 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             // 保留解除アイコン設定テーブル 
             container.IconReleaseTable = _iconReleaseDAO.GetEntityByJobnet(jobnetId, updDate);
 
+            //added by YAMA 2014/02/06
+            // Zabbix連携アイコン設定テーブル 
+            container.IconCooperationTable = _iconCooperationDAO.GetEntityByJobnet(jobnetId, updDate);
+
+            //added by YAMA 2014/05/19
+            /// エージェントレスアイコン設定テーブル 
+            container.IconAgentlessTable = _iconAgentlessDAO.GetEntityByJobnet(jobnetId, updDate);
         }
 
         //*******************************************************************
@@ -968,6 +1032,18 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             // 保留解除アイコン設定テーブル 
             if (container.IconReleaseTable != null)
                 foreach (DataRow row in container.IconReleaseTable.Select())
+                    row.SetAdded();
+
+            //added by YAMA 2014/02/06
+            // Zabbix連携アイコン設定テーブル 
+            if (container.IconCooperationTable != null)
+                foreach (DataRow row in container.IconCooperationTable.Select())
+                    row.SetAdded();
+
+            //added by YAMA 2014/05/19
+            /// エージェントレスアイコン設定テーブル 
+            if (container.IconAgentlessTable != null)
+                foreach (DataRow row in container.IconAgentlessTable.Select())
                     row.SetAdded();
         }
 
@@ -1111,6 +1187,11 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             // 説明 
             rowsJobnet[0]["memo"] = tbComment.Text;
 
+            //added by YAMA 2014/04/22
+            // ジョブネットの多重起動の有無
+            rowsJobnet[0]["multiple_start_up"] = combMultipleStart.SelectedValue;
+
+
             // ジョブ管理テーブル 
             DataRow[] rowsJob = container.JobControlTable.Select();
             foreach (DataRow row in rowsJob)
@@ -1252,6 +1333,23 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                 row["update_date"] = updateDate;
             }
 
+            //added by YAMA 2014/02/06
+            // Zabbix連携アイコン設定テーブル 
+            DataRow[] rowsIconCooperation = container.IconCooperationTable.Select();
+            foreach (DataRow row in rowsIconCooperation)
+            {
+                row["jobnet_id"] = jobnetId;
+                row["update_date"] = updateDate;
+            }
+
+            //added by YAMA 2014/05/19
+            /// エージェントレスアイコン設定テーブル 
+            DataRow[] rowsIconAgentless = container.IconAgentlessTable.Select();
+            foreach (DataRow row in rowsIconAgentless)
+            {
+                row["jobnet_id"] = jobnetId;
+                row["update_date"] = updateDate;
+            }
         }
 
         //*******************************************************************
@@ -1281,6 +1379,11 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             rowsJobnet[0]["public_flag"] = publicFlg;
             // 有効フラグ(　0：無効（初期値）) 
             rowsJobnet[0]["valid_flag"] = 0;
+
+            //added by YAMA 2014/04/22
+            // ジョブネットの多重起動の有無
+            rowsJobnet[0]["multiple_start_up"] = combMultipleStart.SelectedValue;
+
 
             // 既存ジョブネットバージョンの公開フラグを更新 
             UpdatePublicFlg(publicFlg);
@@ -1407,6 +1510,22 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             {
                 row["update_date"] = updateDate;
             }
+
+            //added by YAMA 2014/02/06
+            // Zabbix連携アイコン設定テーブル 
+            DataRow[] rowsIconCooperation = container.IconCooperationTable.Select();
+            foreach (DataRow row in rowsIconCooperation)
+            {
+                row["update_date"] = updateDate;
+            }
+
+            //added by YAMA 2014/05/19
+            /// エージェントレスアイコン設定テーブル 
+            DataRow[] rowsIconAgentless = container.IconAgentlessTable.Select();
+            foreach (DataRow row in rowsIconAgentless)
+            {
+                row["update_date"] = updateDate;
+            }
         }
 
         //*******************************************************************
@@ -1436,6 +1555,8 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             btnRegist.IsEnabled = false;
             container.sampleContainer.IsEnabled = false;
             container.cnsDesignerContainer.ContextMenu.Visibility = System.Windows.Visibility.Hidden;
+            //added by YAMA 2014/04/22
+            combMultipleStart.IsEnabled = false;
 
         }
 
@@ -1446,12 +1567,50 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
         {
             DataRow row = container.JobnetControlTable.Select()[0];
 
+
+            //added by YAMA 2014/04/22
+            // 多重起動コンボボックスの設定
+
+            //DataTableオブジェクトを用意
+            DataTable CombData = new DataTable();
+
+            //DataTableに列を追加
+            CombData.Columns.Add("ID", typeof(string));
+            CombData.Columns.Add("ITEM", typeof(string));
+
+            DataRow CombDataRow = CombData.NewRow();
+
+            //各列に値をセット
+            CombDataRow["ID"] = "0";
+            CombDataRow["ITEM"] = Properties.Resources.multiple_start_type1;
+            CombData.Rows.Add(CombDataRow);
+
+            CombDataRow = CombData.NewRow();
+            CombDataRow["ID"] = "1";
+            CombDataRow["ITEM"] = Properties.Resources.multiple_start_type2;
+            CombData.Rows.Add(CombDataRow);
+
+            CombDataRow = CombData.NewRow();
+            CombDataRow["ID"] = "2";
+            CombDataRow["ITEM"] = Properties.Resources.multiple_start_type3;
+            CombData.Rows.Add(CombDataRow);
+
+            combMultipleStart.Items.Clear();
+            combMultipleStart.ItemsSource = CombData.DefaultView;
+            combMultipleStart.DisplayMemberPath = "ITEM";
+            combMultipleStart.SelectedValuePath = "ID";
+            
             //コピー新規の場合、採番したデフォルトＩＤをセット
             if (_editType == Consts.EditType.CopyNew)
             {
                 tbxJobNetId.Text = "JOBNET_" + DBUtil.GetNextId("100");
                 // ジョブネット名をセット 
                 tbJobnetName.Text = Convert.ToString(row["jobnet_name"]);
+
+                //added by YAMA 2014/04/22
+                // ジョブネットの多重起動の有無
+                combMultipleStart.SelectedValue = "0";
+
             }
             else
             {
@@ -1461,7 +1620,13 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                 tbxJobNetId.IsEnabled = false;
                 // ジョブネット名をセット 
                 tbJobnetName.Text = oldJobnetName = Convert.ToString(row["jobnet_name"]);
+
+                //added by YAMA 2014/04/22
+                // ジョブネットの多重起動の有無
+                combMultipleStart.SelectedValue = Convert.ToString(row["multiple_start_up"]);
+
             }
+
 
             // 公開チェックボックス 
             int openFlg = Convert.ToInt16(row["public_flag"]);
@@ -1498,6 +1663,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             {
                 lblUpdDate.Content = "";
             }
+
         }
 
 
@@ -1745,6 +1911,13 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             dbAccess.ExecuteNonQuery(container.IconRebootTable, _iconRebootDAO);
             // 保留解除アイコン設定テーブル 
             dbAccess.ExecuteNonQuery(container.IconReleaseTable, _iconReleaseDAO);
+
+            //added by YAMA 2014/02/06
+            // Zabbix連携アイコン設定テーブル 
+            dbAccess.ExecuteNonQuery(container.IconCooperationTable, _iconCooperationDAO);
+            //added by YAMA 2014/05/19
+            /// エージェントレスアイコン設定テーブル 
+            dbAccess.ExecuteNonQuery(container.IconAgentlessTable, _iconAgentlessDAO);
         }
 
         //*******************************************************************
@@ -1772,6 +1945,12 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             dataSet.Tables.Add(container.IconFwaitTable);
             dataSet.Tables.Add(container.IconRebootTable);
             dataSet.Tables.Add(container.IconReleaseTable);
+
+            //added by YAMA 2014/02/06
+            dataSet.Tables.Add(container.IconCooperationTable);
+            //added by YAMA 2014/05/19
+            /// エージェントレスアイコン設定テーブル 
+            dataSet.Tables.Add(container.IconAgentlessTable);
         }
 
         //*******************************************************************
@@ -1800,6 +1979,13 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             dataSet.Tables.Add(container.IconFwaitTable);
             dataSet.Tables.Add(container.IconRebootTable);
             dataSet.Tables.Add(container.IconReleaseTable);
+
+
+            //added by YAMA 2014/02/06
+            dataSet.Tables.Add(container.IconCooperationTable);
+            //added by YAMA 2014/05/19
+            /// エージェントレスアイコン設定テーブル 
+            dataSet.Tables.Add(container.IconAgentlessTable);
 
             // 目的：Rowstateをセット 
             dataSet.AcceptChanges();

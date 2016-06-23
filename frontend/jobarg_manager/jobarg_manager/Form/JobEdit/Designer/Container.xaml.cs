@@ -381,6 +381,14 @@ public partial class Container : UserControl,IContainer
     // <summary>保留解除アイコン設定テーブル</summary>
     public DataTable IconReleaseTable { get; set; }
 
+    //added by YAMA 2014/02/06
+    // <summary>Zabbix連携アイコン設定テーブル</summary>
+    public DataTable IconCooperationTable { get; set; }
+
+    //added by YAMA 2014/05/19
+    // <summary>エージェントレスアイコン設定テーブル</summary>
+    public DataTable IconAgentlessTable { get; set; }
+
     #endregion
 
     public double getLeftX()
@@ -865,6 +873,32 @@ public partial class Container : UserControl,IContainer
         DragDrop.DoDragDrop((ReleaseSample)sender, data, DragDropEffects.Copy);
     }
 
+    //added by YAMA 2014/02/04
+    //*******************************************************************
+    /// <summary>Zabbix連携をドラッグ</summary>
+    /// <param name="sender">源</param>
+    /// <param name="e">マウスイベント</param>
+    //*******************************************************************
+    public void CooperationSample_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        JobData data = new JobData();
+        data.JobType = ElementType.COOPERATION;
+        DragDrop.DoDragDrop((CooperationSample)sender, data, DragDropEffects.Copy);
+    }
+
+    //added by YAMA 2014/05/19
+    //*******************************************************************
+    /// <summary>エージェントレスをドラッグ</summary>
+    /// <param name="sender">源</param>
+    /// <param name="e">マウスイベント</param>
+    //*******************************************************************
+    public void AgentlessSample_MouseLeftButtonDow(object sender, MouseButtonEventArgs e)
+    {
+        JobData data = new JobData();
+        data.JobType = ElementType.AGENTLESS;
+        DragDrop.DoDragDrop((AgentlessSample)sender, data, DragDropEffects.Copy);
+    }
+    
     //************************************************************************
     /// <summary>ドラッグ部品を受け入れる</summary>
     /// <param name="sender">源</param>
@@ -1233,6 +1267,12 @@ public partial class Container : UserControl,IContainer
         hist.SetedJobIds = (Hashtable)SetedJobIds.Clone();
         hist.JobIdNos = (Hashtable)((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)ParantWindow).JobNoHash.Clone();
 
+        //added by YAMA 2014/02/06
+        hist.IconCooperationTable = IconCooperationTable.Copy();
+
+        //added by YAMA 2014/05/19
+        hist.IconAgentlessTable = IconAgentlessTable.Copy();
+        
         HistoryDataList.Add(hist);
 
         if (HistoryDataList.Count > MAX_UNDO)
@@ -1583,6 +1623,10 @@ public partial class Container : UserControl,IContainer
         string strNow = now.ToString("yyyyMMddHHmmss");
         int runType = (int)Consts.RunTypeEnum.Job;
         String jobnetName = ((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)ParantWindow).tbxJobNetId.Text;
+
+        //added by YAMA 2014/04/22
+        //String multiple_starts = ((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)ParantWindow).combMultipleStart.SelectedValue.ToString();
+
         String runJobnetName = jobnetName + "/" + JobId;
         int nameLen = runJobnetName.Length;
         if (nameLen > 64)
@@ -1614,29 +1658,39 @@ public partial class Container : UserControl,IContainer
             dbAccess.CloseSqlConnect();
             throw new DBException(Consts.SYSERR_004, null);
         }
+        //added by YAMA 2014/04/22  add -> multiple_start_up
         String insertRunJobnet = "insert into ja_run_jobnet_table "
                 + "(inner_jobnet_id, inner_jobnet_main_id, inner_job_id, update_date, run_type, "
-                + "main_flag, status, start_time, end_time, public_flag, jobnet_id, user_name, jobnet_name, memo, execution_user_name) "
-                + "VALUES (?,?,0,?,?,0,0,0,0,0,?,?,?,null,?)";
+                + "main_flag, status, start_time, end_time, public_flag, multiple_start_up, jobnet_id, user_name, jobnet_name, memo, execution_user_name) "
+                + "VALUES (?,?,0,?,?,0,0,0,0,0,?,?,?,?,null,?)";
         List<ComSqlParam> insertRunJobnetSqlParams = new List<ComSqlParam>();
         insertRunJobnetSqlParams.Add(new ComSqlParam(DbType.String, "@inner_jobnet_id", strInnerJobnetNextId));
         insertRunJobnetSqlParams.Add(new ComSqlParam(DbType.String, "@inner_jobnet_main_id", strInnerJobnetNextId));
         insertRunJobnetSqlParams.Add(new ComSqlParam(DbType.String, "@update_date", strNow));
         insertRunJobnetSqlParams.Add(new ComSqlParam(DbType.String, "@run_type", (int)runType));
+
+        //added by YAMA 2014/04/22  ジョブ起動の場合は、多重起動ありで実行する
+        insertRunJobnetSqlParams.Add(new ComSqlParam(DbType.String, "@multiple_start_up", "0"));
+
         insertRunJobnetSqlParams.Add(new ComSqlParam(DbType.String, "@jobnet_id", strJobnetNextId));
         insertRunJobnetSqlParams.Add(new ComSqlParam(DbType.String, "@user_name", LoginSetting.UserName));
         insertRunJobnetSqlParams.Add(new ComSqlParam(DbType.String, "@jobnet_name", runJobnetName));
         insertRunJobnetSqlParams.Add(new ComSqlParam(DbType.String, "@execution_user_name", LoginSetting.UserName));
         dbAccess.ExecuteNonQuery(insertRunJobnet, insertRunJobnetSqlParams);
 
+        //added by YAMA 2014/04/22  add -> multiple_start_up
         String insertRunJobnetSummary = "insert into ja_run_jobnet_summary_table "
                 + "(inner_jobnet_id, update_date, run_type, invo_flag,"
-                + "start_time, end_time, public_flag, jobnet_id, user_name, jobnet_name, memo) "
-                + "VALUES (?,?,?,1,0,0,0,?,?,?,null)";
+                + "start_time, end_time, public_flag, multiple_start_up, jobnet_id, user_name, jobnet_name, memo) "
+                + "VALUES (?,?,?,1,0,0,0,?,?,?,?,null)";
         List<ComSqlParam> insertRunJobnetSummarySqlParams = new List<ComSqlParam>();
         insertRunJobnetSummarySqlParams.Add(new ComSqlParam(DbType.String, "@inner_jobnet_id", strInnerJobnetNextId));
         insertRunJobnetSummarySqlParams.Add(new ComSqlParam(DbType.String, "@update_date", strNow));
         insertRunJobnetSummarySqlParams.Add(new ComSqlParam(DbType.String, "@run_type", (int)runType));
+
+        //added by YAMA 2014/04/22 ジョブ起動の場合は、多重起動ありで実行する
+        insertRunJobnetSummarySqlParams.Add(new ComSqlParam(DbType.String, "@multiple_start_up", "0"));
+
         insertRunJobnetSummarySqlParams.Add(new ComSqlParam(DbType.String, "@jobnet_id", strJobnetNextId));
         insertRunJobnetSummarySqlParams.Add(new ComSqlParam(DbType.String, "@user_name", LoginSetting.UserName));
         insertRunJobnetSummarySqlParams.Add(new ComSqlParam(DbType.String, "@jobnet_name", runJobnetName));
@@ -1813,6 +1867,12 @@ public partial class Container : UserControl,IContainer
         DataRow fwaitRow;
         DataRow rebootRow;
         DataRow releaseRow;
+
+        //added by YAMA 2014/02/06
+        DataRow cooperationRow;
+        //added by YAMA 2014/05/19
+        DataRow agentlessRow;
+
         Hashtable jobAllData;
 
         int iconCount = 0;
@@ -1980,6 +2040,20 @@ public partial class Container : UserControl,IContainer
                         releaseRow = IconReleaseTable.NewRow();
                         releaseRow.ItemArray = IconReleaseTable.Select(where)[0].ItemArray;
                         ((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)ParantWindow).ParantWindow.SaveItems.Add(jobControlRow, releaseRow);
+                        break;
+                    //added by YAMA 2014/02/06
+                    // 18：Zabbix連携の場合 
+                    case ElementType.COOPERATION:
+                        cooperationRow = IconCooperationTable.NewRow();
+                        cooperationRow.ItemArray = IconCooperationTable.Select(where)[0].ItemArray;
+                        ((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)ParantWindow).ParantWindow.SaveItems.Add(jobControlRow, cooperationRow);
+                        break;
+                    //added by YAMA 2014/05/19
+                    // 19：エージェントレスの場合 
+                    case ElementType.AGENTLESS:
+                        agentlessRow = IconAgentlessTable.NewRow();
+                        agentlessRow.ItemArray = IconAgentlessTable.Select(where)[0].ItemArray;
+                        ((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)ParantWindow).ParantWindow.SaveItems.Add(jobControlRow, agentlessRow);
                         break;
                 }
                 if (SetedJobIds.Contains(jobid))
@@ -2282,6 +2356,24 @@ public partial class Container : UserControl,IContainer
                         iconRow["jobnet_id"] = JobnetId;
                         IconReleaseTable.Rows.Add(iconRow);
                         break;
+                    //added by YAMA 2014/02/06
+                    // 18：Zabbix連携の場合 
+                    case ElementType.COOPERATION:
+                        iconRow = IconCooperationTable.NewRow();
+                        iconRow.ItemArray = ((DataRow)item.Value).ItemArray;
+                        iconRow["job_id"] = jobId;
+                        iconRow["jobnet_id"] = JobnetId;
+                        IconCooperationTable.Rows.Add(iconRow);
+                        break;
+                    //added by YAMA 2014/05/19
+                    // 19：エージェントレスの場合 
+                    case ElementType.AGENTLESS:
+                        iconRow = IconAgentlessTable.NewRow();
+                        iconRow.ItemArray = ((DataRow)item.Value).ItemArray;
+                        iconRow["job_id"] = jobId;
+                        iconRow["jobnet_id"] = JobnetId;
+                        IconAgentlessTable.Rows.Add(iconRow);
+                        break;
                 }
             }
             // フローを表示------------------
@@ -2410,6 +2502,12 @@ public partial class Container : UserControl,IContainer
         IconJobTable = hist.IconJobTable.Copy();
         IconRebootTable = hist.IconRebootTable.Copy();
         IconReleaseTable = hist.IconReleaseTable.Copy();
+
+        //added by YAMA 2014/02/06
+        IconCooperationTable = hist.IconCooperationTable.Copy();
+        //added by YAMA 2014/05/19
+        IconAgentlessTable = hist.IconAgentlessTable.Copy();
+
         IconTaskTable = hist.IconTaskTable.Copy();
         IconValueTable = hist.IconValueTable.Copy();
         JobCommandTable = hist.JobCommandTable.Copy();
@@ -3224,6 +3322,16 @@ public partial class Container : UserControl,IContainer
             // 17：保留解除場合 
             case ElementType.RELEASE:
                 rows = IconReleaseTable.Select(where);
+                break;
+            //added by YAMA 2014/02/06
+            // 18：Zabbix連携の場合 
+            case ElementType.COOPERATION:
+                rows = IconCooperationTable.Select(where);
+                break;
+            //added by YAMA 2014/05/19
+            // 19：エージェントレスの場合 
+            case ElementType.AGENTLESS:
+                rows = IconAgentlessTable.Select(where);
                 break;
         }
         // 削除 

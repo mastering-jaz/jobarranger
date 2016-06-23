@@ -18,9 +18,9 @@
 **/
 
 /*
-** $Date:: 2013-05-16 16:03:58 +0900 #$
-** $Revision: 4633 $
-** $Author: ossinfra@FITECHLABS.CO.JP $
+** $Date:: 2014-06-30 17:14:08 +0900 #$
+** $Revision: 6107 $
+** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
 #include "common.h"
@@ -29,10 +29,12 @@
 
 #include "jacommon.h"
 #include "jalog.h"
+#include "jajob.h"
 #include "jajobiconjob.h"
 #include "jajobiconextjob.h"
+#include "jajobiconless.h"
 #include "../jarun/jaruniconreboot.h"
-#include "jajob.h"
+#include "../jarun/jaruniconfwait.h"
 
 extern unsigned char process_type;
 extern int process_num;
@@ -63,14 +65,12 @@ static void process_jajob()
     const char *__function_name = "process_jajob";
 
     sec = zbx_time();
-    result =
-        DBselect
-        ("select inner_job_id, inner_jobnet_id, job_type, method_flag, timeout_flag, start_time"
-         " from ja_run_job_table where status = %d", JA_JOB_STATUS_RUN);
+
+    result = DBselect("select inner_job_id, inner_jobnet_id, job_type, method_flag, timeout_flag, start_time"
+                      " from ja_run_job_table where status = %d", JA_JOB_STATUS_RUN);
+
     sec = zbx_time() - sec;
-    zabbix_log(LOG_LEVEL_DEBUG,
-               "In %s() ja_run_job_table(status: RUN): " ZBX_FS_DBL
-               " sec.", __function_name, sec);
+    zabbix_log(LOG_LEVEL_DEBUG, "In %s() ja_run_job_table(status: RUN): " ZBX_FS_DBL " sec.", __function_name, sec);
 
     while (NULL != (row = DBfetch(result))) {
         ZBX_STR2UINT64(inner_job_id, row[0]);
@@ -79,16 +79,14 @@ static void process_jajob()
         method_flag = atoi(row[3]);
         timeout_flag = atoi(row[4]);
         start_time = row[5];
-        zabbix_log(LOG_LEVEL_DEBUG,
-                   "inner_job_id: " ZBX_FS_UI64
-                   ", method_flag: %d, job_type: %d",
+        zabbix_log(LOG_LEVEL_DEBUG, "inner_job_id: " ZBX_FS_UI64 ", method_flag: %d, job_type: %d",
                    inner_job_id, method_flag, job_type);
 
         ret = SUCCEED;
         DBbegin();
-        DBfree_result(DBselect
-                      ("select inner_job_id from ja_run_job_table where inner_job_id = "
-                       ZBX_FS_UI64 " for update", inner_job_id));
+        DBfree_result(DBselect("select inner_job_id from ja_run_job_table where inner_job_id = "
+                               ZBX_FS_UI64 " for update", inner_job_id));
+
         switch (job_type) {
         case JA_JOB_TYPE_JOB:
             if (method_flag == JA_JOB_METHOD_ABORT) {
@@ -98,19 +96,36 @@ static void process_jajob()
                 jajob_icon_job_timeout(inner_job_id, start_time);
             }
             break;
+
         case JA_JOB_TYPE_EXTJOB:
             if (method_flag == JA_JOB_METHOD_ABORT) {
-                jajob_icon_extjob_kill(inner_job_id);
+                ret = jajob_icon_extjob_kill(inner_job_id);
+            } else {
+                ret = jajob_icon_extjob(inner_job_id, inner_jobnet_id);
             }
-            ret =
-                jajob_icon_extjob(inner_job_id, inner_jobnet_id,
-                                  method_flag == JA_JOB_METHOD_ABORT);
             break;
+
+        case JA_JOB_TYPE_FWAIT:
+            if (method_flag == JA_JOB_METHOD_ABORT) {
+                jarun_icon_fwait(inner_job_id, JA_AGENT_METHOD_KILL);
+            }
+            break;
+
         case JA_JOB_TYPE_REBOOT:
             if (method_flag == JA_JOB_METHOD_ABORT) {
                 jarun_icon_reboot(inner_job_id, JA_AGENT_METHOD_KILL);
             }
             break;
+
+        case JA_JOB_TYPE_LESS:
+            if (method_flag == JA_JOB_METHOD_ABORT) {
+                jajob_icon_less_abort(inner_job_id, JA_SES_FORCE_STOP_ON);
+            }
+            if (timeout_flag == 0 && timeout_cnt == 0) {
+                jajob_icon_less_timeout(inner_job_id, start_time);
+            }
+            break;
+
         default:
             break;
         }
@@ -118,8 +133,7 @@ static void process_jajob()
         if (ret == SUCCEED) {
             DBcommit();
         } else {
-            ja_log("JAJOB300001", inner_jobnet_id, NULL, 0,
-                   __function_name, inner_job_id, job_type);
+            ja_log("JAJOB300001", inner_jobnet_id, NULL, 0, __function_name, inner_job_id, job_type);
             DBrollback();
         }
     }

@@ -20,6 +20,8 @@ libjarun_a_SOURCES = \
 	jaruniconfwait.c jaruniconfwait.h \
 	jaruniconreboot.c jaruniconreboot.h \
 	jaruniconrelease.c jaruniconrelease.h \
+	jaruniconzabbixlink.c jaruniconzabbixlink.h \
+	jaruniconless.c jaruniconless.h \
 	jarunagent.c jarunagent.h \
 	jarunnormal.c jarunnormal.h \
 	jarunskip.c jarunskip.h \

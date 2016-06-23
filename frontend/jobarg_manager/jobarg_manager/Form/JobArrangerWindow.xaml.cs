@@ -250,11 +250,14 @@ namespace jp.co.ftf.jobcontroller.JobController
         {
             if (e.Key == Key.Delete)
             {
+                #if VIEWER
+                #else
                 if (tabControl.SelectedIndex == 0 && _objList != null && JobNetGrid.Children.Contains(_objList))
                 {
                     DelFromMenuitemOrKey();
                 }
                 e.Handled = true;
+                #endif
             }
             if (e.Key == Key.F5)
             {
@@ -1050,6 +1053,8 @@ namespace jp.co.ftf.jobcontroller.JobController
 
             if (IsSelectedListItem())
             {
+                #if VIEWER
+                #else
                 if (_objList.ListObjectOwnType == Consts.ObjectOwnType.Owner || LoginSetting.Authority == Consts.AuthorityEnum.SUPER)
                 {
                     _objList.DelObject(_objList.ObjectId, _objList.ObjectType, _objList.GetSelectedRows());
@@ -1059,6 +1064,7 @@ namespace jp.co.ftf.jobcontroller.JobController
                 {
                     CommonDialog.ShowErrorDialog(Consts.MSG_COMMON_006);
                 }
+                #endif
             }
             else
             {

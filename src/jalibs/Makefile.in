@@ -40,8 +40,8 @@ ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ax_lib_mysql.m4 \
 	$(top_srcdir)/m4/ax_lib_postgresql.m4 \
 	$(top_srcdir)/m4/iconv.m4 $(top_srcdir)/m4/libjson.m4 \
-	$(top_srcdir)/m4/libsqlite3.m4 $(top_srcdir)/m4/resolv.m4 \
-	$(top_srcdir)/configure.in
+	$(top_srcdir)/m4/libsqlite3.m4 $(top_srcdir)/m4/libssh2.m4 \
+	$(top_srcdir)/m4/resolv.m4 $(top_srcdir)/configure.in
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
@@ -67,7 +67,8 @@ libjaserver_a_AR = $(AR) $(ARFLAGS)
 libjaserver_a_LIBADD =
 am__libjaserver_a_SOURCES_DIST = jalog.c jajoblog.c javalue.c \
 	jatimeout.c jastatus.c jaself.c jaindex.c jaflow.c jaenv.c \
-	jahost.c jauser.c jaconnect.c jaschedule.c jajobnet.c jadb.c
+	jahost.c jauser.c jaconnect.c jaschedule.c jajobnet.c jadb.c \
+	jazbxmsg.c jajobid.c
 @SERVER_TRUE@am_libjaserver_a_OBJECTS = libjaserver_a-jalog.$(OBJEXT) \
 @SERVER_TRUE@	libjaserver_a-jajoblog.$(OBJEXT) \
 @SERVER_TRUE@	libjaserver_a-javalue.$(OBJEXT) \
@@ -82,7 +83,9 @@ am__libjaserver_a_SOURCES_DIST = jalog.c jajoblog.c javalue.c \
 @SERVER_TRUE@	libjaserver_a-jaconnect.$(OBJEXT) \
 @SERVER_TRUE@	libjaserver_a-jaschedule.$(OBJEXT) \
 @SERVER_TRUE@	libjaserver_a-jajobnet.$(OBJEXT) \
-@SERVER_TRUE@	libjaserver_a-jadb.$(OBJEXT)
+@SERVER_TRUE@	libjaserver_a-jadb.$(OBJEXT) \
+@SERVER_TRUE@	libjaserver_a-jazbxmsg.$(OBJEXT) \
+@SERVER_TRUE@	libjaserver_a-jajobid.$(OBJEXT)
 libjaserver_a_OBJECTS = $(am_libjaserver_a_OBJECTS)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/include
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -168,6 +171,9 @@ SQLITE3_CPPFLAGS = @SQLITE3_CPPFLAGS@
 SQLITE3_LDFLAGS = @SQLITE3_LDFLAGS@
 SQLITE3_LIBS = @SQLITE3_LIBS@
 SQLITE3_VERSION = @SQLITE3_VERSION@
+SSH2_CFLAGS = @SSH2_CFLAGS@
+SSH2_LDFLAGS = @SSH2_LDFLAGS@
+SSH2_LIBS = @SSH2_LIBS@
 STRIP = @STRIP@
 VERSION = @VERSION@
 abs_builddir = @abs_builddir@
@@ -250,7 +256,9 @@ libjacommon_a_SOURCES = \
 @SERVER_TRUE@	jaconnect.c \
 @SERVER_TRUE@	jaschedule.c \
 @SERVER_TRUE@	jajobnet.c \
-@SERVER_TRUE@	jadb.c
+@SERVER_TRUE@	jadb.c \
+@SERVER_TRUE@	jazbxmsg.c \
+@SERVER_TRUE@	jajobid.c
 
 all: all-am
 
@@ -320,6 +328,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjaserver_a-jaflow.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjaserver_a-jahost.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjaserver_a-jaindex.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjaserver_a-jajobid.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjaserver_a-jajoblog.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjaserver_a-jajobnet.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjaserver_a-jalog.Po@am__quote@
@@ -329,6 +338,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjaserver_a-jatimeout.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjaserver_a-jauser.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjaserver_a-javalue.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjaserver_a-jazbxmsg.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -693,6 +703,34 @@ libjaserver_a-jadb.obj: jadb.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='jadb.c' object='libjaserver_a-jadb.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjaserver_a_CFLAGS) $(CFLAGS) -c -o libjaserver_a-jadb.obj `if test -f 'jadb.c'; then $(CYGPATH_W) 'jadb.c'; else $(CYGPATH_W) '$(srcdir)/jadb.c'; fi`
+
+libjaserver_a-jazbxmsg.o: jazbxmsg.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjaserver_a_CFLAGS) $(CFLAGS) -MT libjaserver_a-jazbxmsg.o -MD -MP -MF $(DEPDIR)/libjaserver_a-jazbxmsg.Tpo -c -o libjaserver_a-jazbxmsg.o `test -f 'jazbxmsg.c' || echo '$(srcdir)/'`jazbxmsg.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libjaserver_a-jazbxmsg.Tpo $(DEPDIR)/libjaserver_a-jazbxmsg.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='jazbxmsg.c' object='libjaserver_a-jazbxmsg.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjaserver_a_CFLAGS) $(CFLAGS) -c -o libjaserver_a-jazbxmsg.o `test -f 'jazbxmsg.c' || echo '$(srcdir)/'`jazbxmsg.c
+
+libjaserver_a-jazbxmsg.obj: jazbxmsg.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjaserver_a_CFLAGS) $(CFLAGS) -MT libjaserver_a-jazbxmsg.obj -MD -MP -MF $(DEPDIR)/libjaserver_a-jazbxmsg.Tpo -c -o libjaserver_a-jazbxmsg.obj `if test -f 'jazbxmsg.c'; then $(CYGPATH_W) 'jazbxmsg.c'; else $(CYGPATH_W) '$(srcdir)/jazbxmsg.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libjaserver_a-jazbxmsg.Tpo $(DEPDIR)/libjaserver_a-jazbxmsg.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='jazbxmsg.c' object='libjaserver_a-jazbxmsg.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjaserver_a_CFLAGS) $(CFLAGS) -c -o libjaserver_a-jazbxmsg.obj `if test -f 'jazbxmsg.c'; then $(CYGPATH_W) 'jazbxmsg.c'; else $(CYGPATH_W) '$(srcdir)/jazbxmsg.c'; fi`
+
+libjaserver_a-jajobid.o: jajobid.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjaserver_a_CFLAGS) $(CFLAGS) -MT libjaserver_a-jajobid.o -MD -MP -MF $(DEPDIR)/libjaserver_a-jajobid.Tpo -c -o libjaserver_a-jajobid.o `test -f 'jajobid.c' || echo '$(srcdir)/'`jajobid.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libjaserver_a-jajobid.Tpo $(DEPDIR)/libjaserver_a-jajobid.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='jajobid.c' object='libjaserver_a-jajobid.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjaserver_a_CFLAGS) $(CFLAGS) -c -o libjaserver_a-jajobid.o `test -f 'jajobid.c' || echo '$(srcdir)/'`jajobid.c
+
+libjaserver_a-jajobid.obj: jajobid.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjaserver_a_CFLAGS) $(CFLAGS) -MT libjaserver_a-jajobid.obj -MD -MP -MF $(DEPDIR)/libjaserver_a-jajobid.Tpo -c -o libjaserver_a-jajobid.obj `if test -f 'jajobid.c'; then $(CYGPATH_W) 'jajobid.c'; else $(CYGPATH_W) '$(srcdir)/jajobid.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libjaserver_a-jajobid.Tpo $(DEPDIR)/libjaserver_a-jajobid.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='jajobid.c' object='libjaserver_a-jajobid.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjaserver_a_CFLAGS) $(CFLAGS) -c -o libjaserver_a-jajobid.obj `if test -f 'jajobid.c'; then $(CYGPATH_W) 'jajobid.c'; else $(CYGPATH_W) '$(srcdir)/jajobid.c'; fi`
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \

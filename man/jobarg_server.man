@@ -1,4 +1,4 @@
-.TH JOBAEG_SERVER 8 "31 November 2012"
+.TH JOBAEG_SERVER 8 "17 March 2014"
 .SH NAME
 jobarg_server \- Job Arranger server daemon.
 .SH SYNOPSIS
@@ -24,6 +24,9 @@ Output version information and exit.
 Default location of Job Arranger server configuration file (if not modified during compile time).
 .SH "SEE ALSO"
 .BR jobarg_agentd (8),
-.BR jobarg_exec (8),
+.BR jobarg_exec (1),
+.BR jobarg_get (1),
+.BR jobarg_joblogput (1),
+.BR jobarg_release (1)
 .SH AUTHOR
 Komatus Yuji <komatsu@fitechforce.co.jp>

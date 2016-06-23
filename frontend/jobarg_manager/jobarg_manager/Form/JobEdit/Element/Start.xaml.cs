@@ -358,6 +358,14 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             picStart.Fill = color;
         }
 
+        //added by YAMA 2014/07/01
+        /// <summary>部品欄の文字色をセット</summary>
+        public void SetStatusCharacterColor(SolidColorBrush color)
+        {
+            // 何もしない
+            ;
+        }
+
         /// <summary>削除</summary>
         public void Delete()
         {

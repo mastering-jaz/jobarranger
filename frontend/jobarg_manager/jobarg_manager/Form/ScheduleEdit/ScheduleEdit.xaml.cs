@@ -273,6 +273,12 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.ScheduleEdit
             if ((_editType == Consts.EditType.Add || _editType == Consts.EditType.CopyNew) && !InputCheckForAdd())
                 return;
 
+
+            //added by YAMA 2014/06/30 参照モードでは登録不可とする
+            if (_editType == Consts.EditType.READ)
+                return;
+
+
             // 編集登録確認ダイアログの表示 
             if (MessageBoxResult.Yes == CommonDialog.ShowEditRegistDialog())
             {

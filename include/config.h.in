@@ -231,6 +231,9 @@
 /* Define to 1 if 'sockaddr_storage.ss_family' exists. */
 #undef HAVE_SOCKADDR_STORAGE_SS_FAMILY
 
+/* Define to 1 if you have the 'libssh2' library (-lssh2) */
+#undef HAVE_SSH2
+
 /* Define to 1 if you have the <stdarg.h> header file. */
 #undef HAVE_STDARG_H
 

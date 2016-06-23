@@ -19,7 +19,7 @@ dnl
 
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT(jobarranger, 1.4.2)
+AC_INIT(jobarranger, 2.0.1)
 AC_CONFIG_SRCDIR(src/jobarg_server/server.c)
 AM_INIT_AUTOMAKE([tar-pax])
 
@@ -990,6 +990,7 @@ if test "x$agent" = "xyes"; then
 fi
 
 have_db="no"
+have_ssh2="no"
 if test "x$server" = "xyes"; then
 
 	have_multirow_insert="no"
@@ -1048,6 +1049,7 @@ if test "x$server" = "xyes"; then
 	DB_CPPFLAGS="$MYSQL_CFLAGS $POSTGRESQL_CPPFLAGS"
 	DB_LDFLAGS="$MYSQL_LDFLAGS $POSTGRESQL_LDFLAGS"
 	DB_LIBS="$MYSQL_LIBS $POSTGRESQL_LIBS"
+
 	AC_SUBST(DB_CPPFLAGS)
 	AC_SUBST(DB_LDFLAGS)
 	AC_SUBST(DB_LIBS)
@@ -1055,6 +1057,19 @@ if test "x$server" = "xyes"; then
 	CFLAGS="${CFLAGS} ${DB_CPPFLAGS}"
 	SERVER_LDFLAGS="${SERVER_LDFLAGS} ${DB_LDFLAGS}"
 	SERVER_LIBS="${SERVER_LIBS} ${DB_LIBS}"
+
+	dnl Check for LIBSSH2 [by default - yes] at least of version 1.0.0.
+	LIBSSH2_CHECK_CONFIG()
+	if test "x$found_ssh2" != "xyes"; then
+		AC_MSG_ERROR([SSH2 library not found])
+	elif test "x$accept_ssh2_version" != "xyes"; then
+		AC_MSG_ERROR([SSH2 library version requirement not met (>= 1.0.0)])
+	else
+		have_ssh2="yes"
+	fi
+	CFLAGS="${CFLAGS} ${SSH2_CFLAGS}"
+	SERVER_LDFLAGS="${SERVER_LDFLAGS} ${SSH2_LDFLAGS}"
+	SERVER_LIBS="${SERVER_LIBS} ${SSH2_LIBS}"
 fi
 
 AM_CONDITIONAL(JABBER, test "xno" = "xyes")
@@ -1072,7 +1087,7 @@ LIBJSON_CHECK_CONFIG()
 if test "x$found_json" = "xyes"; then
     AC_MSG_RESULT([yes])
 else
-    AC_MSG_ERROR([json-c library not found])
+    AC_MSG_ERROR([JSON-C library not found])
 fi
 
 CFLAGS="$CFLAGS $ICONV_CFLAGS ${JSON_CPPFLAGS}"
@@ -1164,6 +1179,7 @@ AC_OUTPUT([
 	src/jobarg_release/Makefile
 	src/jobarg_joblogput/Makefile
 	src/jobarg_monitor/Makefile
+	src/jobarg_session/Makefile
 	src/jobarg_agent/Makefile
 	src/jobarg_server/Makefile
 	src/jobarg_server/jaloader/Makefile
@@ -1192,6 +1208,7 @@ if test "x$server" != "xno"; then
 
 echo "  Server details:
     With database:         ${have_db}
+    SSH:                   ${have_ssh2}
     Linker flags:          ${LDFLAGS} ${SERVER_LDFLAGS}
     Libraries:             ${LIBS} ${SERVER_LIBS}"
 

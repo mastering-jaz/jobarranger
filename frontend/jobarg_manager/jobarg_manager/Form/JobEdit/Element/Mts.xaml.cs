@@ -337,7 +337,13 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             picParStart.Fill = color;
         }
 
-        /// <summary>部品欄のアイコン選択状態をセット</summary>
+        //added by YAMA 2014/07/01
+        /// <summary>部品欄の文字色をセット</summary>
+        public void SetStatusCharacterColor(SolidColorBrush color)
+        {
+            // 何もしない
+            ;
+        }        /// <summary>部品欄のアイコン選択状態をセット</summary>
         public void SetSelected()
         {
             if (this._state != IElementState.Selected)

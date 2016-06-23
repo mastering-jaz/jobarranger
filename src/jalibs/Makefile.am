@@ -32,6 +32,7 @@ libjaserver_a_SOURCES = \
 	jaconnect.c \
 	jaschedule.c \
 	jajobnet.c \
-	jadb.c
+	jadb.c \
+	jazbxmsg.c \
+	jajobid.c
 endif
-

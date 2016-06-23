@@ -18,9 +18,9 @@
 **/
 
 /*
-** $Date:: 2013-07-18 18:02:46 +0900 #$
-** $Revision: 5205 $
-** $Author: ossinfra@FITECHLABS.CO.JP $
+** $Date:: 2014-04-03 15:45:56 +0900 #$
+** $Revision: 5920 $
+** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
 #include "common.h"
@@ -53,9 +53,7 @@ extern char *jobext[];
  * Comments:                                                                  *
  *                                                                            *
  ******************************************************************************/
-int jajob_icon_extjob(const zbx_uint64_t inner_job_id,
-                      const zbx_uint64_t inner_jobnet_id,
-                      const int kill_flag)
+int jajob_icon_extjob(const zbx_uint64_t inner_job_id, const zbx_uint64_t inner_jobnet_id)
 {
     int chk;
     char str_return_code[20], filepath[JA_MAX_STRING_LEN];
@@ -66,13 +64,12 @@ int jajob_icon_extjob(const zbx_uint64_t inner_job_id,
                "In %s() inner_job_id: " ZBX_FS_UI64, __function_name,
                inner_job_id);
 
-    zbx_snprintf(filepath, MAX_STRING_LEN,
-                 "%s%c%s-" ZBX_FS_UI64, CONFIG_TMPDIR, JA_DLM, progname,
-                 inner_job_id);
+    zbx_snprintf(filepath, MAX_STRING_LEN, "%s%c%s-" ZBX_FS_UI64, CONFIG_TMPDIR, JA_DLM, progname, inner_job_id);
 
     chk = ja_jobfile_chkend(filepath, 0);
-    if (chk == 0)
+    if (chk == 0) {
         return SUCCEED;
+    }
     if (chk == -1) {
         return ja_set_runerr(inner_job_id);
     }
@@ -81,24 +78,15 @@ int jajob_icon_extjob(const zbx_uint64_t inner_job_id,
     if (ja_jobfile_load(filepath, &job) == FAIL) {
         return ja_set_runerr(inner_job_id);
     }
+
     ja_jobfile_remove(filepath, jobext);
-    zbx_snprintf(str_return_code, sizeof(str_return_code), "%d",
-                 job.return_code);
+    zbx_snprintf(str_return_code, sizeof(str_return_code), "%d", job.return_code);
 
-    ja_set_value_after(inner_job_id, inner_jobnet_id, "JOB_EXIT_CD",
-                       str_return_code);
-    ja_set_value_after(inner_job_id, inner_jobnet_id, "STD_OUT",
-                       job.std_out);
-    ja_set_value_after(inner_job_id, inner_jobnet_id, "STD_ERR",
-                       job.std_err);
+    ja_set_value_after(inner_job_id, inner_jobnet_id, "JOB_EXIT_CD", str_return_code);
+    ja_set_value_after(inner_job_id, inner_jobnet_id, "STD_OUT", job.std_out);
+    ja_set_value_after(inner_job_id, inner_jobnet_id, "STD_ERR", job.std_err);
 
-    if (job.signal == 0 && kill_flag == 0) {
-        return ja_flow(inner_job_id, JA_FLOW_TYPE_NORMAL);
-    } else {
-        return ja_set_runerr(inner_job_id);
-    }
-
-    return SUCCEED;
+    return ja_flow(inner_job_id, JA_FLOW_TYPE_NORMAL);
 }
 
 /******************************************************************************
@@ -119,11 +107,14 @@ int jajob_icon_extjob_kill(const zbx_uint64_t inner_job_id)
     pid_t pid;
     DB_RESULT result;
     DB_ROW row;
+    char filepath[JA_MAX_STRING_LEN];
     const char *__function_name = "jajob_icon_extjob_kill";
 
     zabbix_log(LOG_LEVEL_DEBUG,
                "In %s() inner_job_id: " ZBX_FS_UI64, __function_name,
                inner_job_id);
+
+    zbx_snprintf(filepath, MAX_STRING_LEN, "%s%c%s-" ZBX_FS_UI64, CONFIG_TMPDIR, JA_DLM, progname, inner_job_id);
 
     pid = 0;
     result =
@@ -135,8 +126,12 @@ int jajob_icon_extjob_kill(const zbx_uint64_t inner_job_id)
     }
     DBfree_result(result);
 
-    if (pid <= 0)
+    if (pid <= 0) {
         return SUCCEED;
+    }
+
     ja_kill(pid);
-    return SUCCEED;
+    ja_jobfile_remove(filepath, jobext);
+
+    return ja_set_runerr(inner_job_id);
 }

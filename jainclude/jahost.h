@@ -18,8 +18,8 @@
 **/
 
 /*
-** $Date:: 2014-02-20 15:50:58 +0900 #$
-** $Revision: 5808 $
+** $Date:: 2014-07-16 11:34:41 +0900 #$
+** $Revision: 6308 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -33,8 +33,8 @@ extern int CONFIG_ZABBIX_VERSION;
 
 int ja_host_getname(const zbx_uint64_t inner_job_id, const int host_flag,
                     const char *host_name, char *host);
-zbx_uint64_t ja_host_getip(const char *host, char *host_ip, const zbx_uint64_t inner_job_id);
-int ja_host_getport(zbx_uint64_t hostid);
+zbx_uint64_t ja_host_getip(const char *host, char *host_ip, const zbx_uint64_t inner_job_id, int *port, int txn);
+int ja_host_getport(zbx_uint64_t hostid, int macro_flag);
 int ja_host_auth(zbx_sock_t * sock, const char *host, const zbx_uint64_t inner_job_id);
 
 int ja_host_lockinfo(const char *host);

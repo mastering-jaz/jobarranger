@@ -1,3 +1,29 @@
+Changes for 2.0.1 (Rev:6308) GA
+
+2014-07-16  Financial System Products Dept.
+
+	* Job Arranger : SSH接続ポートの規定値を22に固定、およびSSHポート指定にホストマクロ
+	「{$JOBARRANGER_SSH_PORT}」を追加。
+
+Changes for 2.0.0 (Rev:6093) GA
+
+2014-07-11  Financial System Products Dept.
+
+	* Job Arranger : エージェントレスアイコンを追加。
+	* Job Arranger : Zabbix連携アイコンを追加。
+	* Job Arranger : ジョブネットの多重起動抑止機能を追加。
+	* Job Arranger : スケジュールのカレンダー登録にサイクル起動を追加。
+	* Job Arranger : ジョブエージェント、ジョブサーバ、ジョブモニターのコンフィグファイル
+	にプロセス実行ユーザー（JaExecutionUser）を追加。
+	* Job Arranger : コンフィグファイルのテンポラリディレクトリ（TmpDir）の初期値を
+	「/var/tmp」に変更。
+	* Job Arranger : PDFによるマニュアルの公開を廃止。
+	* Job Arranger : CentOS 6 (32Bit)＋MySQL の環境で jobarranger-server-mysql-*.i386.rpm
+	パッケージのインストール時に依存性の欠如エラーが発生する不具合に対応。
+	* jajobiconextjob.c : 拡張ジョブアイコンが強制停止できない不具合に対応。
+	* jp.co.ftf.jobcontroller.JobController.Form.ScheduleEdit.ScheduleEdit.xaml.cs :
+	有効化されたスケジュールの起動時刻が変更できる不具合に対応。
+
 Changes for 1.4.2 (Rev:5870) GA
 
 2014-03-13  FitechForce Business Dept.

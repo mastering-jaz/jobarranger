@@ -43,6 +43,18 @@
                 Command="{x:Static src:JobArrangerCommands.RunningStop}"    
                 Executed="RunningStopCommandBinding_Executed"    
                 CanExecute="CommandBinding_CanExecute" />
+        <CommandBinding    
+                Command="{x:Static src:JobArrangerCommands.AllDelayed}"    
+                Executed="AllDelayedCommandBinding_Executed"    
+                CanExecute="CommandBinding_CanExecute" />
+        <CommandBinding    
+                Command="{x:Static src:JobArrangerCommands.ErrDelayed}"    
+                Executed="ErrDelayedCommandBinding_Executed"    
+                CanExecute="CommandBinding_CanExecute" />
+        <CommandBinding    
+                Command="{x:Static src:JobArrangerCommands.RunningDelayed}"    
+                Executed="RunningDelayedCommandBinding_Executed"    
+                CanExecute="CommandBinding_CanExecute" />
     </src:BaseUserControl.CommandBindings>
     <Grid Name="jobnetExecControlGrid">
 

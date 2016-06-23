@@ -78,6 +78,303 @@ namespace jp.co.ftf.jobcontroller.JobController.Properties {
             }
         }
         
+        /// <summary>
+        ///   Authentic： に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string agentless_authentic_label_text {
+            get {
+                return ResourceManager.GetString("agentless_authentic_label_text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Configuration に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string agentless_basicconfig_label_text {
+            get {
+                return ResourceManager.GetString("agentless_basicconfig_label_text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Char code: に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string agentless_charcode_label_text {
+            get {
+                return ResourceManager.GetString("agentless_charcode_label_text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   CR に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string agentless_comb_CR_text {
+            get {
+                return ResourceManager.GetString("agentless_comb_CR_text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   CRLF に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string agentless_comb_CRLF_text {
+            get {
+                return ResourceManager.GetString("agentless_comb_CRLF_text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   EUC-JP に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string agentless_comb_EUC_JP_text {
+            get {
+                return ResourceManager.GetString("agentless_comb_EUC_JP_text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Interact に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string agentless_comb_interactive_text {
+            get {
+                return ResourceManager.GetString("agentless_comb_interactive_text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   LF に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string agentless_comb_LF_text {
+            get {
+                return ResourceManager.GetString("agentless_comb_LF_text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Not interact に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string agentless_comb_noninteractive_text {
+            get {
+                return ResourceManager.GetString("agentless_comb_noninteractive_text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Password に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string agentless_comb_passwd_text {
+            get {
+                return ResourceManager.GetString("agentless_comb_passwd_text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Public key に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string agentless_comb_publickey_text {
+            get {
+                return ResourceManager.GetString("agentless_comb_publickey_text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   SHIFT_JIS に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string agentless_comb_SHIFT_JIS_text {
+            get {
+                return ResourceManager.GetString("agentless_comb_SHIFT_JIS_text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Unspecified に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string agentless_comb_unspecified_text {
+            get {
+                return ResourceManager.GetString("agentless_comb_unspecified_text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   UTF-8 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string agentless_comb_UTF8_text {
+            get {
+                return ResourceManager.GetString("agentless_comb_UTF8_text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Command に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string agentless_command_label_text {
+            get {
+                return ResourceManager.GetString("agentless_command_label_text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Connect に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string agentless_connection_label_text {
+            get {
+                return ResourceManager.GetString("agentless_connection_label_text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Continue に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string agentless_continue_label_text {
+            get {
+                return ResourceManager.GetString("agentless_continue_label_text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Disconnect に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string agentless_disconnect_label_text {
+            get {
+                return ResourceManager.GetString("agentless_disconnect_label_text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Mode: に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string agentless_executemode_label_text {
+            get {
+                return ResourceManager.GetString("agentless_executemode_label_text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Compulsory run: に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string agentless_force_label_text {
+            get {
+                return ResourceManager.GetString("agentless_force_label_text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   AGENTLESS に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string agentless_icon_label_text {
+            get {
+                return ResourceManager.GetString("agentless_icon_label_text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Agentless icon setting に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string agentless_icon_screen_name {
+            get {
+                return ResourceManager.GetString("agentless_icon_screen_name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Line feed code に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string agentless_linefeedcode_label_text {
+            get {
+                return ResourceManager.GetString("agentless_linefeedcode_label_text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   One-time に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string agentless_onetime_label_text {
+            get {
+                return ResourceManager.GetString("agentless_onetime_label_text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Passphrase: に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string agentless_passphrase_label_text {
+            get {
+                return ResourceManager.GetString("agentless_passphrase_label_text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Password: に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string agentless_passwd_label_text {
+            get {
+                return ResourceManager.GetString("agentless_passwd_label_text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Private key: に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string agentless_privatekey_label_text {
+            get {
+                return ResourceManager.GetString("agentless_privatekey_label_text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Prompt に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string agentless_prompt_label_text {
+            get {
+                return ResourceManager.GetString("agentless_prompt_label_text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Public key: に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string agentless_publickey_label_text {
+            get {
+                return ResourceManager.GetString("agentless_publickey_label_text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Session に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string agentless_session_label_text {
+            get {
+                return ResourceManager.GetString("agentless_session_label_text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Session id: に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string agentless_sessionid_label_text {
+            get {
+                return ResourceManager.GetString("agentless_sessionid_label_text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   SSH に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string agentless_ssh_label_text {
+            get {
+                return ResourceManager.GetString("agentless_ssh_label_text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Timeout (minute): に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string agentless_timeout_label_text {
+            get {
+                return ResourceManager.GetString("agentless_timeout_label_text", resourceCulture);
+            }
+        }
+        
         public static System.Drawing.Bitmap arrow_left {
             get {
                 object obj = ResourceManager.GetObject("arrow_left", resourceCulture);
@@ -340,6 +637,159 @@ namespace jp.co.ftf.jobcontroller.JobController.Properties {
         }
         
         /// <summary>
+        ///   ALL に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string cooperation_all_label_text {
+            get {
+                return ResourceManager.GetString("cooperation_all_label_text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Get data に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string cooperation_get_data {
+            get {
+                return ResourceManager.GetString("cooperation_get_data", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Get status に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string cooperation_get_stat {
+            get {
+                return ResourceManager.GetString("cooperation_get_stat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Host group に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string cooperation_hostgroup_label_text {
+            get {
+                return ResourceManager.GetString("cooperation_hostgroup_label_text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Host group: に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string cooperation_hostgroup_pdl_label_text {
+            get {
+                return ResourceManager.GetString("cooperation_hostgroup_pdl_label_text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Host name に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string cooperation_hostname_label_text {
+            get {
+                return ResourceManager.GetString("cooperation_hostname_label_text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Host name: に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string cooperation_hostname_pdl_label_text {
+            get {
+                return ResourceManager.GetString("cooperation_hostname_pdl_label_text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   ZABBIX cooperation に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string cooperation_icon_label_text {
+            get {
+                return ResourceManager.GetString("cooperation_icon_label_text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Zabbix cooperation icon Setting に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string cooperation_icon_screen_name {
+            get {
+                return ResourceManager.GetString("cooperation_icon_screen_name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Item name に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string cooperation_itemname_label_text {
+            get {
+                return ResourceManager.GetString("cooperation_itemname_label_text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Item name: に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string cooperation_itemname_pdl_label_text {
+            get {
+                return ResourceManager.GetString("cooperation_itemname_pdl_label_text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Disabled に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string cooperation_mode_disabled {
+            get {
+                return ResourceManager.GetString("cooperation_mode_disabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Enabled に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string cooperation_mode_enabled {
+            get {
+                return ResourceManager.GetString("cooperation_mode_enabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Cooperation mode に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string cooperation_mode_label_text {
+            get {
+                return ResourceManager.GetString("cooperation_mode_label_text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Object of the cooperation に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string cooperation_Object_label_text {
+            get {
+                return ResourceManager.GetString("cooperation_Object_label_text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Trigger name に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string cooperation_triggername_label_text {
+            get {
+                return ResourceManager.GetString("cooperation_triggername_label_text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Trigger name: に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string cooperation_triggername_pdl_label_text {
+            get {
+                return ResourceManager.GetString("cooperation_triggername_pdl_label_text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Copy new(_C) に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string copy_new_context_menu_text {
@@ -426,6 +876,15 @@ namespace jp.co.ftf.jobcontroller.JobController.Properties {
         public static string del_menu_text {
             get {
                 return ResourceManager.GetString("del_menu_text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Delayed start err start(_R) に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string delayedStart_context_menu_text {
+            get {
+                return ResourceManager.GetString("delayedStart_context_menu_text", resourceCulture);
             }
         }
         
@@ -601,11 +1060,74 @@ namespace jp.co.ftf.jobcontroller.JobController.Properties {
         }
         
         /// <summary>
+        ///   end time に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string err_message_boot_end_time {
+            get {
+                return ResourceManager.GetString("err_message_boot_end_time", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   end time hour に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string err_message_boot_end_time_hh {
+            get {
+                return ResourceManager.GetString("err_message_boot_end_time_hh", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   end time minite に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string err_message_boot_end_time_mi {
+            get {
+                return ResourceManager.GetString("err_message_boot_end_time_mi", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   start time に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string err_message_boot_start_time {
+            get {
+                return ResourceManager.GetString("err_message_boot_start_time", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   start time hour に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string err_message_boot_start_time_hh {
+            get {
+                return ResourceManager.GetString("err_message_boot_start_time_hh", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   start time minite に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string err_message_boot_start_time_mi {
+            get {
+                return ResourceManager.GetString("err_message_boot_start_time_mi", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   boot time に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string err_message_boot_time {
             get {
                 return ResourceManager.GetString("err_message_boot_time", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   CycleInterval(minute) に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string err_message_boot_time_CycleInterval {
+            get {
+                return ResourceManager.GetString("err_message_boot_time_CycleInterval", resourceCulture);
             }
         }
         
@@ -660,6 +1182,15 @@ namespace jp.co.ftf.jobcontroller.JobController.Properties {
         public static string err_message_calendar_name {
             get {
                 return ResourceManager.GetString("err_message_calendar_name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Char code に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string err_message_charcode {
+            get {
+                return ResourceManager.GetString("err_message_charcode", resourceCulture);
             }
         }
         
@@ -781,6 +1312,15 @@ namespace jp.co.ftf.jobcontroller.JobController.Properties {
         }
         
         /// <summary>
+        ///   host group name に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string err_message_host_gropu_name {
+            get {
+                return ResourceManager.GetString("err_message_host_gropu_name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   host name に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string err_message_host_name {
@@ -795,6 +1335,15 @@ namespace jp.co.ftf.jobcontroller.JobController.Properties {
         public static string err_message_host_value_name {
             get {
                 return ResourceManager.GetString("err_message_host_value_name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   item name に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string err_message_item_name {
+            get {
+                return ResourceManager.GetString("err_message_item_name", resourceCulture);
             }
         }
         
@@ -912,6 +1461,51 @@ namespace jp.co.ftf.jobcontroller.JobController.Properties {
         public static string err_message_parameter {
             get {
                 return ResourceManager.GetString("err_message_parameter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Passphrase に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string err_message_passphrase {
+            get {
+                return ResourceManager.GetString("err_message_passphrase", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Password に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string err_message_password {
+            get {
+                return ResourceManager.GetString("err_message_password", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Private key に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string err_message_privatekey {
+            get {
+                return ResourceManager.GetString("err_message_privatekey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Prompt に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string err_message_prompt {
+            get {
+                return ResourceManager.GetString("err_message_prompt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Public key に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string err_message_publickey {
+            get {
+                return ResourceManager.GetString("err_message_publickey", resourceCulture);
             }
         }
         
@@ -1069,6 +1663,15 @@ namespace jp.co.ftf.jobcontroller.JobController.Properties {
         }
         
         /// <summary>
+        ///   Session id に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string err_message_session_id {
+            get {
+                return ResourceManager.GetString("err_message_session_id", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   job stop code に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string err_message_stop_code {
@@ -1119,6 +1722,15 @@ namespace jp.co.ftf.jobcontroller.JobController.Properties {
         public static string err_message_to_host_value_name {
             get {
                 return ResourceManager.GetString("err_message_to_host_value_name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   trigger name に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string err_message_trigger_name {
+            get {
+                return ResourceManager.GetString("err_message_trigger_name", resourceCulture);
             }
         }
         
@@ -1182,6 +1794,24 @@ namespace jp.co.ftf.jobcontroller.JobController.Properties {
         public static string ERROR_BOOT_TIME_004 {
             get {
                 return ResourceManager.GetString("ERROR_BOOT_TIME_004", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Please Boot time is inputs start time &lt; end time. に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string ERROR_BOOT_TIME_005 {
+            get {
+                return ResourceManager.GetString("ERROR_BOOT_TIME_005", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Start time and the end time, please within 23 hours 59 minutes. に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string ERROR_BOOT_TIME_006 {
+            get {
+                return ResourceManager.GetString("ERROR_BOOT_TIME_006", resourceCulture);
             }
         }
         
@@ -1457,6 +2087,15 @@ namespace jp.co.ftf.jobcontroller.JobController.Properties {
         }
         
         /// <summary>
+        ///   Please input {0} with a half-width alphanumeric character and a colon (:). に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string ERROR_COMMON_027 {
+            get {
+                return ResourceManager.GetString("ERROR_COMMON_027", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Since data is in use, it cannot be operated.At a later time, please try again. に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string ERROR_DB_LOCK {
@@ -1639,6 +2278,24 @@ namespace jp.co.ftf.jobcontroller.JobController.Properties {
         }
         
         /// <summary>
+        ///   Because a starting job net existed, the job was reserved. に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string ERROR_JOBNET_LOAD_002 {
+            get {
+                return ResourceManager.GetString("ERROR_JOBNET_LOAD_002", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   The practice of the job net was canceled(skipped). に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string ERROR_JOBNET_LOAD_003 {
+            get {
+                return ResourceManager.GetString("ERROR_JOBNET_LOAD_003", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   A user name or a password is inaccurate. に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string ERROR_LOGIN_001 {
@@ -1737,6 +2394,33 @@ namespace jp.co.ftf.jobcontroller.JobController.Properties {
         public static string ERROR_SCHEDULE_004 {
             get {
                 return ResourceManager.GetString("ERROR_SCHEDULE_004", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   You cannot select &apos;data_get&apos;. に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string ERROR_ZABBIX_LINK_001 {
+            get {
+                return ResourceManager.GetString("ERROR_ZABBIX_LINK_001", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   You cannot select &apos;status_get&apos;. に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string ERROR_ZABBIX_LINK_002 {
+            get {
+                return ResourceManager.GetString("ERROR_ZABBIX_LINK_002", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Please choose a Cooperation mode again に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string ERROR_ZABBIX_LINK_003 {
+            get {
+                return ResourceManager.GetString("ERROR_ZABBIX_LINK_003", resourceCulture);
             }
         }
         
@@ -1939,7 +2623,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Properties {
         }
         
         /// <summary>
-        ///   compulsory run に類似しているローカライズされた文字列を検索します。
+        ///   Compulsory run に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string force_label_text {
             get {
@@ -2308,6 +2992,15 @@ namespace jp.co.ftf.jobcontroller.JobController.Properties {
         }
         
         /// <summary>
+        ///   Delayed start err に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string job_run_status_delay_err {
+            get {
+                return ResourceManager.GetString("job_run_status_delay_err", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Done に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string job_run_status_done {
@@ -2331,6 +3024,24 @@ namespace jp.co.ftf.jobcontroller.JobController.Properties {
         public static string job_run_status_schedule {
             get {
                 return ResourceManager.GetString("job_run_status_schedule", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Scheduled(Waiting) に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string job_run_status_scheduled_wait {
+            get {
+                return ResourceManager.GetString("job_run_status_scheduled_wait", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Skip に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string job_run_status_skip {
+            get {
+                return ResourceManager.GetString("job_run_status_skip", resourceCulture);
             }
         }
         
@@ -2443,7 +3154,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Properties {
         }
         
         /// <summary>
-        ///   Last operation day: に類似しているローカライズされた文字列を検索します。
+        ///   Last day: に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string last_operation_day_label_text {
             get {
@@ -2682,7 +3393,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Properties {
         /// <summary>
         ///   Job Arranger for Zabbix
         ///
-        ///Job Manager Version 1.4.2 (Rev:5870)
+        ///Job Manager Version 2.0.1 (Rev:6308)
         ///
         ///Copyright (C) 2012-2013 FitechForce, Inc. All Rights Reserved. 
         ///Copyright (C) 2013-2014 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved. に類似しているローカライズされた文字列を検索します。
@@ -2753,6 +3464,42 @@ namespace jp.co.ftf.jobcontroller.JobController.Properties {
         public static string mts_icon_screen_name {
             get {
                 return ResourceManager.GetString("mts_icon_screen_name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   multiple: に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string multiple_start_label_text {
+            get {
+                return ResourceManager.GetString("multiple_start_label_text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Yes に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string multiple_start_type1 {
+            get {
+                return ResourceManager.GetString("multiple_start_type1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Skip に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string multiple_start_type2 {
+            get {
+                return ResourceManager.GetString("multiple_start_type2", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Waiting に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string multiple_start_type3 {
+            get {
+                return ResourceManager.GetString("multiple_start_type3", resourceCulture);
             }
         }
         
@@ -3234,6 +3981,24 @@ namespace jp.co.ftf.jobcontroller.JobController.Properties {
         }
         
         /// <summary>
+        ///   cycle start: に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string rbCycleStart_label_text {
+            get {
+                return ResourceManager.GetString("rbCycleStart_label_text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   start time: に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string rbStartTime_label_text {
+            get {
+                return ResourceManager.GetString("rbStartTime_label_text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Reading に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string reading_button_text {
@@ -3621,6 +4386,15 @@ namespace jp.co.ftf.jobcontroller.JobController.Properties {
         }
         
         /// <summary>
+        ///    に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string String1 {
+            get {
+                return ResourceManager.GetString("String1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sun に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string sun_day_checkbox_text {
@@ -3699,6 +4473,15 @@ namespace jp.co.ftf.jobcontroller.JobController.Properties {
         public static string test_run_menu_text {
             get {
                 return ResourceManager.GetString("test_run_menu_text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   cycle interval: に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string textBox_CycleInterval_label_text {
+            get {
+                return ResourceManager.GetString("textBox_CycleInterval_label_text", resourceCulture);
             }
         }
         

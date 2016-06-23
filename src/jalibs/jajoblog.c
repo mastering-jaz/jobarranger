@@ -18,8 +18,8 @@
 **/
 
 /*
-** $Date:: 2014-02-06 17:52:18 +0900 #$
-** $Revision: 5779 $
+** $Date:: 2014-06-24 10:44:33 +0900 #$
+** $Revision: 6083 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -54,10 +54,12 @@ int	ja_joblog(char *message_id, zbx_uint64_t inner_jobnet_id, zbx_uint64_t inner
 	struct timeval	tv;
 	DB_RESULT	result;
 	DB_ROW		row;
-	int		job_type, sql_flag, rc, ms, cnt;
+	int		job_type, sql_flag, rc, ms, cnt, session_flag;
 	zbx_uint64_t	i_inner_jobnet_id;
 	char		*now_date;
+	const char	*__function_name = "ja_joblog";
 
+	zabbix_log(LOG_LEVEL_DEBUG, "In %s() message_id: %s", __function_name, message_id);
 
 	/* parameters check */
 	if (inner_jobnet_id == 0 && inner_job_id == 0)
@@ -122,13 +124,36 @@ int	ja_joblog(char *message_id, zbx_uint64_t inner_jobnet_id, zbx_uint64_t inner
 			job_type = atoi(row[0]);
 			DBfree_result(result);
 
-			if (job_type == JA_JOB_TYPE_JOB)
+			if (job_type == JA_JOB_TYPE_JOB || job_type == JA_JOB_TYPE_LESS)
 			{
 				sql_flag = 2;
 			}
 
+			if (job_type == JA_JOB_TYPE_LESS)
+			{
+				result = DBselect("select session_flag from ja_run_icon_agentless_table"
+						" where inner_job_id = " ZBX_FS_UI64,
+						inner_job_id);
+
+				if (NULL == (row = DBfetch(result)))
+				{
+					zbx_snprintf(msgwork, sizeof(msgwork), ZBX_FS_UI64, inner_job_id);
+					ja_log("JAJOBLOG200007", inner_jobnet_id, NULL, inner_job_id, "ja_run_icon_agentless_table", msgwork);
+					zbx_free(now_date);
+					DBfree_result(result);
+					return FAIL;
+				}
+				session_flag = atoi(row[0]);
+				DBfree_result(result);
+
+				if (session_flag == JA_SESSION_FLAG_CLOSE)
+				{
+					sql_flag = 1;
+				}
+			}
+
 			/* check abnormal termination of job icon */
-			if (job_type == JA_JOB_TYPE_JOB && strcmp(message_id, JC_JOB_ERR_END) == 0)
+			if (sql_flag == 2 && strcmp(message_id, JC_JOB_ERR_END) == 0)
 			{
 				result = DBselect("select count(*) from ja_run_value_after_table"
 						" where inner_job_id = " ZBX_FS_UI64
@@ -173,7 +198,7 @@ int	ja_joblog(char *message_id, zbx_uint64_t inner_jobnet_id, zbx_uint64_t inner
 			break;
 
 		case 2:
-			/* end of Job icon */
+			/* end of Job icon and agentless icon */
 			rc = DBexecute("insert into ja_run_log_table ("
 					" log_date, inner_jobnet_id, inner_jobnet_main_id, inner_job_id, update_date,"
 					" method_flag, jobnet_status, job_status, run_type, public_flag, jobnet_id, jobnet_name,"
@@ -192,6 +217,24 @@ int	ja_joblog(char *message_id, zbx_uint64_t inner_jobnet_id, zbx_uint64_t inner
 			break;
 
 		default:
+			/* duplication error jobnet message deletion */
+			if (strcmp(message_id, JC_JOBNET_ERR_END) == 0)
+			{
+				rc = DBexecute("delete from ja_run_log_table"
+						" where inner_jobnet_id = " ZBX_FS_UI64 " and message_id = '%s'",
+						i_inner_jobnet_id, message_id);
+
+				if (rc < ZBX_DB_OK)
+				{
+					zbx_snprintf(msgwork, sizeof(msgwork),
+						"message id[%s] inner jobnet id[" ZBX_FS_UI64 "] inner job id[" ZBX_FS_UI64 "]",
+						message_id, i_inner_jobnet_id, inner_job_id);
+					ja_log("JAJOBLOG200009", i_inner_jobnet_id, NULL, inner_job_id, "ja_run_log_table", msgwork);
+					zbx_free(now_date);
+					return FAIL;
+				}
+			}
+
 			/* jobnet message */
 			rc = DBexecute("insert into ja_run_log_table ("
 					" log_date, inner_jobnet_id, inner_jobnet_main_id, update_date,"

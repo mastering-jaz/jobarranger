@@ -18,8 +18,8 @@
 **/
 
 /*
-** $Date:: 2013-12-16 16:39:52 +0900 #$
-** $Revision: 5627 $
+** $Date:: 2014-06-26 11:15:45 +0900 #$
+** $Revision: 6086 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -101,7 +101,7 @@ int jarun_icon_fwait(const zbx_uint64_t inner_job_id, const int method)
 
     job.jobid = inner_job_id;
     job.method = method;
-    if (job.method == JA_AGENT_METHOD_NORMAL) {
+    if (job.method == JA_AGENT_METHOD_NORMAL || job.method == JA_AGENT_METHOD_TEST) {
         zbx_snprintf(job.type, sizeof(job.type), "%s", JA_PROTO_VALUE_EXTJOB);
         if (fwait_mode_flag == 0) {
             zbx_snprintf(job.script, sizeof(job.script), "jafwait");

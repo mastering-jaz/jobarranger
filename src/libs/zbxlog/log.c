@@ -124,6 +124,10 @@ int zabbix_open_log(int type, int level, const char *filename)
 		strscpy(log_filename, filename);
 		zbx_fclose(log_file);
 	}
+	else if (LOG_TYPE_FILELOG == type)
+	{
+		log_type = LOG_TYPE_FILELOG;
+	}
 
 	return SUCCEED;
 }
@@ -192,7 +196,7 @@ void zabbix_errlog(zbx_err_codes_t err, ...)
 void __zbx_zabbix_log(int level, const char *fmt, ...)
 {
 	FILE			*log_file = NULL;
-	char			message[MAX_BUFFER_LEN], filename_old[MAX_STRING_LEN];
+	char			message[MAX_BUFFER_LEN], filename_old[MAX_STRING_LEN], header[MAX_STRING_LEN];
 	long			milliseconds;
 	static zbx_uint64_t	old_size = 0;
 	va_list			args;
@@ -321,7 +325,7 @@ void __zbx_zabbix_log(int level, const char *fmt, ...)
 					fprintf(log_file,"[INFO] ");
 					break;
 			}
-/* end block */
+/* end block FTF */
 			va_start(args, fmt);
 			vfprintf(log_file, fmt, args);
 			va_end(args);
@@ -400,6 +404,51 @@ void __zbx_zabbix_log(int level, const char *fmt, ...)
 
 #endif	/* _WINDOWS */
 	}	/* LOG_TYPE_SYSLOG */
+
+/* Add log type "LOG_TYPE_FILELOG " 2014/05/14 FTF */
+	if (LOG_TYPE_FILELOG == log_type)
+	{
+#ifdef _WINDOWS
+		_ftime(&current_time);
+		tm = localtime(&current_time.time);
+		milliseconds = current_time.millitm;
+#else
+		gettimeofday(&current_time,NULL);
+		tm = localtime(&current_time.tv_sec);
+		milliseconds = current_time.tv_usec / 1000;
+#endif
+
+		zbx_snprintf(header, sizeof(header),
+			"%6li:%.4d%.2d%.2d:%.2d%.2d%.2d.%03ld ",
+			zbx_get_thread_id(),
+			tm->tm_year + 1900,
+			tm->tm_mon + 1,
+			tm->tm_mday,
+			tm->tm_hour,
+			tm->tm_min,
+			tm->tm_sec,
+			milliseconds
+			);
+
+		switch (level)
+		{
+			case LOG_LEVEL_CRIT:
+				ja_stdout("%s[CRIT] %s", header, message);
+				break;
+			case LOG_LEVEL_ERR:
+				ja_stdout("%s[ERROR] %s", header, message);
+				break;
+			case LOG_LEVEL_WARNING:
+				ja_stdout("%s[WARN] %s", header, message);
+				break;
+			case LOG_LEVEL_DEBUG:
+				ja_stdout("%s[DEBUG] %s", header, message);
+				break;
+			default:
+				ja_stdout("%s[INFO] %s", header, message);
+				break;
+		}
+	}	/* LOG_TYPE_FILELOG */
 	else	/* LOG_TYPE_UNDEFINED == log_type */
 	{
 		zbx_mutex_lock(&log_file_access);
@@ -425,6 +474,7 @@ void __zbx_zabbix_log(int level, const char *fmt, ...)
 
 		zbx_mutex_unlock(&log_file_access);
 	}
+/* end block FTF */
 }
 
 /******************************************************************************
@@ -500,3 +550,27 @@ char	*strerror_from_module(unsigned long error, LPCTSTR module)
 	return utf8_string;
 }
 #endif	/* _WINDOWS */
+
+/******************************************************************************
+ *                                                                            *
+ * Function: ja_stdout                                                        *
+ *                                                                            *
+ * Purpose: Print text to the stdout                                          *
+ *                                                                            *
+ * Parameters: fmt - format of message                                        *
+ *                                                                            *
+ * Return value:                                                              *
+ *                                                                            *
+ ******************************************************************************/
+void	ja_stdout(const char *fmt, ...)
+{
+	va_list	args;
+
+	va_start(args, fmt);
+
+	vfprintf(stdout, fmt, args);
+	fprintf(stdout, "\n");
+	fflush(stdout);
+
+	va_end(args);
+}

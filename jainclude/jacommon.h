@@ -18,8 +18,8 @@
 **/
 
 /*
-** $Date:: 2014-03-13 14:31:28 +0900 #$
-** $Revision: 5871 $
+** $Date:: 2014-07-16 14:51:04 +0900 #$
+** $Revision: 6333 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -31,12 +31,13 @@
 #include "jalog.h"
 #include "jaself.h"
 #include "jaindex.h"
+#include "jajobid.h"
 #endif
 
 /* version or revsion */
-#define JOBARG_VERSION          "1.4.2"
-#define JOBARG_REVISION         "5870"
-#define JOBARG_REVDATE		"2014-03-13"
+#define JOBARG_VERSION          "2.0.1"
+#define JOBARG_REVISION         "6308"
+#define JOBARG_REVDATE		"2014-07-16"
 
 /* treat unknown parameters as error */
 #define JA_CFG_STRICT			0
@@ -51,12 +52,21 @@
 /* data size */
 #define JA_MAX_STRING_LEN		1024
 #define JA_MAX_DATA_LEN			4096
+#define JA_JOBNET_ID_LEN		32 + 1
+#define JA_USER_NAME_LEN		100 + 1
+#define JA_VALUE_NAME_LEN		128 + 1
+#define JA_VALUE_LEN			4000 + 1
+#define JA_HOST_NAME_LEN		128 + 1
+#define JA_STOP_CODE_LEN		32 + 1
 #define JA_KIND_LEN			16
 #define JA_SERVERID_LEN			18
 
 /* extjob command */
 #define JA_CMD_TIME			"jacmdtime"
 
+/* transaction instruction */
+#define	JA_TXN_OFF			0
+#define	JA_TXN_ON			1
 
 /* ja_run_jobnet_table */
 /* run type */
@@ -157,7 +167,51 @@
 #define	JA_FLOW_TYPE_TRUE		1
 #define	JA_FLOW_TYPE_FALSE		2
 
-/*job agent info*/
+
+/* ja_run_icon_agentless_table */
+/* session flag */
+#define JA_SESSION_FLAG_ONETIME		0
+#define JA_SESSION_FLAG_CONNECT		1
+#define JA_SESSION_FLAG_CONTINUE	2
+#define JA_SESSION_FLAG_CLOSE		3
+
+/* auth method */
+#define JA_SES_AUTH_PASSWORD		0
+#define JA_SES_AUTH_PUBLICKEY		1
+
+/* run mode */
+#define JA_RUN_MODE_INTERACTIVE		0
+#define JA_RUN_MODE_NON_INTERACTIVE	1
+
+/* line feed code */
+#define JA_LINE_FEED_CODE_LF		0
+#define JA_LINE_FEED_CODE_CR		1
+#define JA_LINE_FEED_CODE_CRLF		2
+
+
+/* ja_session_table */
+/* operation flag */
+#define JA_SES_OPERATION_FLAG_ONETIME	0
+#define JA_SES_OPERATION_FLAG_CONNECT	1
+#define JA_SES_OPERATION_FLAG_CONTINUE	2
+#define JA_SES_OPERATION_FLAG_CLOSE	3
+
+/* session status */
+#define JA_SES_STATUS_BEGIN		0
+#define JA_SES_STATUS_END		1
+
+/* force stop */
+#define JA_SES_FORCE_STOP_OFF		0
+#define JA_SES_FORCE_STOP_ON		1
+#define JA_SES_FORCE_STOP_KILL		2
+
+
+/* ssh info */
+#define JA_SSH_PORT			"{$JOBARRANGER_SSH_PORT}"
+#define JA_SSH_CONNECT_PORT		22
+
+
+/* job agent info */
 #define JA_AGENT_PORT			"{$JOBARRANGER_AGENT_PORT}"
 
 

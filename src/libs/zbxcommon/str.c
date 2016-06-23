@@ -2946,6 +2946,47 @@ char	*convert_to_utf8(char *in, size_t in_size, const char *encoding)
 }
 #endif	/* HAVE_ICONV */
 
+#if defined(HAVE_ICONV)
+char	*convert_from_utf8(char *in, size_t in_size, const char *encoding)
+{
+	iconv_t		cd;
+	size_t		in_size_left, out_size_left, sz, out_alloc = 0;
+	const char	from_code[] = "UTF-8";
+	char		*out = NULL, *p;
+
+	out_alloc = in_size + 1;
+	p = out = zbx_malloc(out, out_alloc);
+
+	if (*encoding == '\0' || (iconv_t)-1 == (cd = iconv_open(encoding, from_code)))
+	{
+		memcpy(out, in, in_size);
+		out[in_size] = '\0';
+		return out;
+	}
+
+	in_size_left = in_size;
+	out_size_left = out_alloc - 1;
+
+	while ((size_t)(-1) == iconv(cd, &in, &in_size_left, &p, &out_size_left))
+	{
+		if (E2BIG != errno)
+			break;
+
+		sz = (size_t)(p - out);
+		out_alloc += in_size;
+		out_size_left += in_size;
+		p = out = zbx_realloc(out, out_alloc);
+		p += sz;
+	}
+
+	*p = '\0';
+
+	iconv_close(cd);
+
+	return out;
+}
+#endif	/* HAVE_ICONV */
+
 size_t	zbx_strlen_utf8(const char *text)
 {
 	size_t	n = 0;
@@ -3160,6 +3201,25 @@ void	dos2unix(char *str)
 		if ('\r' == str[0] && '\n' == str[1])	/* CR+LF (Windows) */
 			str++;
 		*o++ = *str++;
+	}
+	*o = '\0';
+}
+
+void	dos2cr(char *str)
+{
+	char	*o = str;
+
+	while ('\0' != *str)
+	{
+		if ('\r' == str[0] && '\n' == str[1])	/* CR+LF (Windows) */
+		{
+			*o++ = *str;
+			str = str + 2;
+		}
+		else
+		{
+			*o++ = *str++;
+		}
 	}
 	*o = '\0';
 }

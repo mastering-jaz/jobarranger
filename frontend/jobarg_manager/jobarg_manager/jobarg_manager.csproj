@@ -152,6 +152,17 @@
     <Compile Include="Form\JobArrangerWindow.xaml.cs">
       <DependentUpon>JobArrangerWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Form\JobEdit\Designer\CommonItem.xaml.cs">
+      <DependentUpon>CommonItem.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Form\JobEdit\Designer\Container.xaml.cs">
+      <DependentUpon>Container.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Form\JobEdit\Element\Cooperation.xaml.cs">
+      <DependentUpon>Cooperation.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Form\JobEdit\Element\FCopy.xaml.cs">
       <DependentUpon>FCopy.xaml</DependentUpon>
     </Compile>
@@ -167,8 +178,14 @@
     <Compile Include="Form\JobEdit\Element\Release.xaml.cs">
       <DependentUpon>Release.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Form\JobEdit\Element\Agentless.xaml.cs">
+      <DependentUpon>Agentless.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Form\JobEdit\HistoryData.cs" />
     <Compile Include="Form\JobEdit\IconViewData.cs" />
+    <Compile Include="Form\JobEdit\Sample\CooperationSample.xaml.cs">
+      <DependentUpon>CooperationSample.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Form\JobEdit\Sample\FCopySample.xaml.cs">
       <DependentUpon>FCopySample.xaml</DependentUpon>
     </Compile>
@@ -183,6 +200,16 @@
     </Compile>
     <Compile Include="Form\JobEdit\Sample\ReleaseSample.xaml.cs">
       <DependentUpon>ReleaseSample.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Form\JobEdit\Sample\AgentlessSample.xaml.cs">
+      <DependentUpon>AgentlessSample.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Form\JobEdit\Setting\AgentlessSetting.xaml.cs">
+      <DependentUpon>AgentlessSetting.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Form\JobEdit\Setting\CooperationtSetting.xaml.cs">
+      <DependentUpon>CooperationtSetting.xaml</DependentUpon>
     </Compile>
     <Compile Include="Form\JobEdit\Setting\FCopySetting.xaml.cs">
       <DependentUpon>FCopySetting.xaml</DependentUpon>
@@ -222,6 +249,7 @@
     </Compile>
     <Compile Include="Form\JobManager\JobnetExecDetail.xaml.cs">
       <DependentUpon>JobnetExecDetail.xaml</DependentUpon>
+      <SubType>Code</SubType>
     </Compile>
     <Compile Include="Form\JobManager\Setting\ParameterSetting.xaml.cs">
       <DependentUpon>ParameterSetting.xaml</DependentUpon>
@@ -241,13 +269,18 @@
     <Compile Include="Form\NumericTextBoxBehavior.cs" />
     <Compile Include="Form\ScheduleEdit\Designer\CalendarContainer.xaml.cs">
       <DependentUpon>CalendarContainer.xaml</DependentUpon>
+      <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Form\ScheduleEdit\Designer\JobnetContainer.xaml.cs" />
+    <Compile Include="Form\ScheduleEdit\Designer\JobnetContainer.xaml.cs">
+      <DependentUpon>JobnetContainer.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Form\ScheduleEdit\ScheduleCalendarRegistWindow.xaml.cs">
       <DependentUpon>ScheduleCalendarRegistWindow.xaml</DependentUpon>
+      <SubType>Code</SubType>
     </Compile>
     <Compile Include="Form\ScheduleEdit\ScheduleJobnetRegistWindow.xaml.cs">
       <DependentUpon>ScheduleJobnetRegistWindow.xaml</DependentUpon>
+      <SubType>Code</SubType>
     </Compile>
     <Compile Include="Form\TextBlockService.cs" />
     <Compile Include="Form\WindowBehavior.cs" />
@@ -270,9 +303,6 @@
     <Compile Include="Form\FlagConverter.cs" />
     <Compile Include="Form\JobEdit\Common\IFlow.cs" />
     <Compile Include="Form\JobEdit\Common\JobData.cs" />
-    <Compile Include="Form\JobEdit\Designer\CommonItem.xaml.cs">
-      <DependentUpon>CommonItem.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Form\JobEdit\Flow\ArrowArc.cs" />
     <Compile Include="Form\JobEdit\Flow\Extension\ExtentDirectionEnum.cs" />
     <Compile Include="Form\JobEdit\Flow\Extension\MathExtension.cs" />
@@ -351,9 +381,6 @@
     <Compile Include="Form\JobEdit\Common\IContainer.cs" />
     <Compile Include="Form\JobEdit\Common\IElement.cs" />
     <Compile Include="Form\JobEdit\Common\IRoom.cs" />
-    <Compile Include="Form\JobEdit\Designer\Container.xaml.cs">
-      <DependentUpon>Container.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Form\JobEdit\Element\Cal.xaml.cs">
       <DependentUpon>Cal.xaml</DependentUpon>
     </Compile>
@@ -486,6 +513,18 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Form\JobEdit\Designer\CommonItem.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Form\JobEdit\Designer\Container.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Form\JobEdit\Element\Cooperation.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Form\JobEdit\Element\FCopy.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -506,6 +545,14 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Form\JobEdit\Element\Agentless.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Form\JobEdit\Sample\CooperationSample.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Form\JobEdit\Sample\FCopySample.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -523,6 +570,18 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Form\JobEdit\Sample\ReleaseSample.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Form\JobEdit\Sample\AgentlessSample.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Form\JobEdit\Setting\AgentlessSetting.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Form\JobEdit\Setting\CooperationtSetting.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -571,10 +630,6 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Form\JobManager\JobnetExecControlRunningPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Form\JobEdit\Designer\CommonItem.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -667,8 +722,8 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Form\JobManager\JobnetExecDetail.xaml">
-      <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Form\JobManager\Setting\ParameterSetting.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -693,10 +748,6 @@
     <Page Include="Form\LoginWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Form\JobEdit\Designer\Container.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
     </Page>
     <Page Include="Form\JobEdit\Element\Cal.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -763,16 +814,16 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Form\ScheduleEdit\Designer\CalendarContainer.xaml">
-      <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Form\ScheduleEdit\Designer\JobnetContainer.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Form\ScheduleEdit\ScheduleCalendarRegistWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Form\ScheduleEdit\ScheduleEdit.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -783,8 +834,8 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Form\ScheduleEdit\ScheduleJobnetRegistWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Themes\Generic.xaml">
       <Generator>MSBuild:Compile</Generator>

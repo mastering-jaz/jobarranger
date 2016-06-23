@@ -18,8 +18,8 @@
 **/
 
 /*
-** $Date:: 2014-02-26 10:24:08 +0900 #$
-** $Revision: 5821 $
+** $Date:: 2014-05-01 16:37:08 +0900 #$
+** $Revision: 5945 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -287,7 +287,7 @@ int jajobnet_run(const zbx_uint64_t inner_jobnet_id,
     renew_timeout_flag = timeout_flag;
     if (start_icons != 1) {
         ja_log("JAJOBNETRUN200003", inner_jobnet_id, NULL, 0,
-               __function_name, inner_jobnet_id);
+               __function_name, start_icons, inner_jobnet_id);
         goto error;
     }
 

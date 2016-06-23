@@ -7,4 +7,5 @@ libjajob_a_CFLAGS = -I@top_srcdir@/jainclude/
 libjajob_a_SOURCES = \
 	jajobiconextjob.c jajobiconextjob.h \
 	jajobiconjob.c jajobiconjob.h \
+	jajobiconless.c jajobiconless.h \
 	jajob.c jajob.h

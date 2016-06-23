@@ -98,6 +98,20 @@ namespace jp.co.ftf.jobcontroller.JobController
         public static readonly RoutedUICommand RunningStop = new RoutedUICommand(
                 Properties.Resources.stop_context_menu_text, "RunningStop", typeof(JobArrangerCommands));
 
+        //added by YAMA 2014/04/25
+        public static readonly RoutedUICommand AllDelayed = new RoutedUICommand(
+                Properties.Resources.stop_context_menu_text, "AllDelayed", typeof(JobArrangerCommands));
+
+        //added by YAMA 2014/04/25
+        public static readonly RoutedUICommand ErrDelayed = new RoutedUICommand(
+                Properties.Resources.stop_context_menu_text, "ErrDelayed", typeof(JobArrangerCommands));
+
+        //added by YAMA 2014/04/25
+        public static readonly RoutedUICommand RunningDelayed = new RoutedUICommand(
+                Properties.Resources.stop_context_menu_text, "RunningDelayed", typeof(JobArrangerCommands));
+
+
+
         public JobArrangerCommands(JobArrangerWindow window)
         {
             this.window = window;

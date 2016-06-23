@@ -343,6 +343,37 @@ namespace jp.co.ftf.jobcontroller.Common
         /// <summary> ERROR_JOBNET_LOAD_001 </summary>
         public static readonly String ERROR_JOBNET_LOAD_001 = "ERROR_JOBNET_LOAD_001";
 
+        //added by YAMA 2014/04/11
+        /// <summary> ERROR_COMMON_027 </summary>
+        public static readonly String ERROR_COMMON_027 = "ERROR_COMMON_027";
+
+        //added by YAMA 2014/04/11
+        /// <summary> ERROR_BOOT_TIME_005 </summary>
+        public static readonly String ERROR_BOOT_TIME_005 = "ERROR_BOOT_TIME_005";
+
+        //added by YAMA 2014/02/21
+        /// <summary> ERROR_ZABBIX_LINK_001 </summary>
+        public static readonly String ERROR_ZABBIX_LINK_001 = "ERROR_ZABBIX_LINK_001";
+
+        //added by YAMA 2014/02/21
+        /// <summary> ERROR_ZABBIX_LINK_002 </summary>
+        public static readonly String ERROR_ZABBIX_LINK_002 = "ERROR_ZABBIX_LINK_002";
+
+        //added by YAMA 2014/03/20
+        /// <summary> ERROR_ZABBIX_LINK_003 </summary>
+        public static readonly String ERROR_ZABBIX_LINK_003 = "ERROR_ZABBIX_LINK_003";
+
+        //added by YAMA 2014/06/23
+        /// <summary> ERROR_BOOT_TIME_006 </summary>
+        public static readonly String ERROR_BOOT_TIME_006 = "ERROR_BOOT_TIME_006";
+
+        //added by YAMA 2014/07/09
+        /// <summary> ERROR_JOBNET_LOAD_002 </summary>
+        public static readonly String ERROR_JOBNET_LOAD_002 = "ERROR_JOBNET_LOAD_002";
+
+        //added by YAMA 2014/07/09
+        /// <summary> ERROR_JOBNET_LOAD_003 </summary>
+        public static readonly String ERROR_JOBNET_LOAD_003 = "ERROR_JOBNET_LOAD_003";
 
         #endregion
 

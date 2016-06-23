@@ -18,9 +18,9 @@
 **/
 
 /*
-** $Date:: 2014-03-05 16:44:24 +0900 #$
-** $Revision: 5862 $
-** $Author: nagata@FITECHLABS.CO.JP $
+** $Date:: 2014-06-17 18:49:59 +0900 #$
+** $Revision: 6065 $
+** $Author: kazuyoshi.yamagiwa@FITECHLABS.CO.JP $
 **/
 
 #include "common.h"
@@ -73,16 +73,15 @@ static char *JOBARG_DETERRENCE = "0";
 const char *progname = NULL;
 const char title_message[] = "Job Arranger Jobnet execution";
 const char usage_message[] =
-    "[-hV] -z <hostname or IP> [-p <port>] -U <username> -P <password> -j <jobnetid> [-t <YYYYMMDDHHMM>] [-E <environment-variables>,...] [-D]";
+    "[-hV] -z <server> [-p <port>] -U <user-name> -P <password> -j <jobnet-id> [-t <YYYYMMDDHHMM>] [-E <environment-variables>,...] [-D]";
 
 const char *help_message[] = {
     "Options:",
     "  -z --jobarranger-server <server>                         Hostname or IP address of Job Arranger server",
-    " [-p --port <server port>]                                 Specify port number of server trapper running on the server. Default is "
-        JOBARG_DEFAULT_SERVER_PORT_STR,
-    "  -U --user-name <user-name>                               Specify user name",
-    "  -P --password <password>                                 Specify password",
-    "  -j --jobnet-id <jobnetid>                                Specify jobnetid",
+    " [-p --port <port>]                                        Specify port number of server trapper running on the server. Default is " JOBARG_DEFAULT_SERVER_PORT_STR,
+    "  -U --user-name <user-name>                               Specify user with authority to operate the jobnet",
+    "  -P --password <password>                                 Specify user password",
+    "  -j --jobnet-id <jobnet-id>                               Specify jobnet id",
     " [-t --start-time <YYYYMMDDHHSS>]                          Specify start time",
     " [-E --environment-variable <environment-variable>,...]    Specify environment variables",
     " [-D --deterrence]                                         Specify the double registration deterrence of time start-up with -t option",
@@ -421,6 +420,10 @@ int main(int argc, char **argv)
     char *copy = NULL;
     char *env = NULL;
 
+#if defined(_WINDOWS)
+	LPSTR acp_string = NULL;
+#endif
+
     progname = get_program_name(argv[0]);
 
     parse_commandline(argc, argv);
@@ -532,14 +535,30 @@ int main(int argc, char **argv)
 #endif                          /* NOT _WINDOWS */
 
     if (SUCCEED != zbx_tcp_connect(&sock, JOBARG_SOURCE_IP, JOBARG_SERVER, JOBARG_SERVER_PORT, GET_SENDER_TIMEOUT)) {
-        zabbix_log(LOG_LEVEL_ERR, "Job arranger server connect error: [%s : %u] %s", JOBARG_SERVER, JOBARG_SERVER_PORT, zbx_tcp_strerror());
+
+#if defined(_WINDOWS)
+		acp_string = ja_utf8_to_acp((LPSTR)zbx_tcp_strerror());
+		zabbix_log(LOG_LEVEL_ERR, "Job arranger server connect error: [%s : %u] %s", JOBARG_SERVER, JOBARG_SERVER_PORT, acp_string);
+		zbx_free(acp_string);
+#else
+		zabbix_log(LOG_LEVEL_ERR, "Job arranger server connect error: [%s : %u] %s", JOBARG_SERVER, JOBARG_SERVER_PORT, zbx_tcp_strerror());
+#endif                          /* _WINDOWS */
+
         zbx_json_free(&json);
         ret = FAIL;
         goto exit;
     }
  
     if (SUCCEED != zbx_tcp_send(&sock, json.buffer)) {
+
+#if defined(_WINDOWS)
+		acp_string = ja_utf8_to_acp((LPSTR)zbx_tcp_strerror());
+        zabbix_log(LOG_LEVEL_ERR, "Job arranger message send error: %s", acp_string);
+		zbx_free(acp_string);
+#else
         zabbix_log(LOG_LEVEL_ERR, "Job arranger message send error: %s", zbx_tcp_strerror());
+#endif                          /* _WINDOWS */
+
         zbx_json_free(&json);
         zbx_tcp_close(&sock);
         ret = FAIL;
@@ -547,7 +566,15 @@ int main(int argc, char **argv)
     }
  
     if (SUCCEED != zbx_tcp_recv(&sock, &answer)) {
+
+#if defined(_WINDOWS)
+		acp_string = ja_utf8_to_acp((LPSTR)zbx_tcp_strerror());
+        zabbix_log(LOG_LEVEL_ERR, "Job arranger message receive error: %s", acp_string);
+		zbx_free(acp_string);
+#else
         zabbix_log(LOG_LEVEL_ERR, "Job arranger message receive error: %s", zbx_tcp_strerror());
+#endif                          /* _WINDOWS */
+
         zbx_json_free(&json);
         zbx_tcp_close(&sock);
         ret = FAIL;

@@ -56,7 +56,11 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
         private JobnetExecControlAllPage allPage;
         private JobnetExecControlErrPage errPage;
         private JobnetExecControlRunningPage runningPage;
-        private int jobnetLoadSpan = 0;
+
+        //added by YAMA 2014/07/07
+        //private int jobnetLoadSpan = 0;
+        private int jobnetViewSpan = 0;
+
         private DispatcherTimer dispatcherTimer;
         
         #endregion
@@ -71,7 +75,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
             errPage.JobnetExecList = new ObservableCollection<JobnetExecInfo>();
             runningPage = new JobnetExecControlRunningPage(this);
             runningPage.JobnetExecList = new ObservableCollection<JobnetExecInfo>();
-            
+
             dispatcherTimer = new DispatcherTimer(DispatcherPriority.Normal);
             dispatcherTimer.Tick += new EventHandler(refresh);
             dispatcherTimer.Start();
@@ -79,7 +83,10 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
             _db.CreateSqlConnect();
             runJobnetSummaryDAO = new RunJobnetSummaryDAO(_db);
             hideJobnetInnerIdList = new List<decimal>();
-            jobnetLoadSpan = Convert.ToInt32(DBUtil.GetParameterVelue("JOBNET_LOAD_SPAN"));
+
+            //added by YAMA 2014/07/07
+            //jobnetLoadSpan = Convert.ToInt32(DBUtil.GetParameterVelue("JOBNET_LOAD_SPAN"));
+            jobnetViewSpan = Convert.ToInt32(DBUtil.GetParameterVelue("JOBNET_VIEW_SPAN"));
             _parent = parent;
             SetInit();
 
@@ -277,6 +284,66 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
             JobnetExecInfo jobnetExecInfo = (JobnetExecInfo)errPage.hideContextMenu.Tag;
             hideJobnetInnerIdList.Add(jobnetExecInfo.inner_jobnet_id);
         }
+
+        //added by YAMA 2014/04/25
+        private void AllDelayedCommandBinding_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            JobnetExecInfo jobnetExecInfo = (JobnetExecInfo)allPage.stopContextMenu.Tag;
+
+            // 展開状況が「遅延起動」
+            if ((LoadStausType)jobnetExecInfo.load_status == LoadStausType.Delay)
+            {
+                // 実行ジョブネット管理テーブルのステータスを「未実行」に更新
+                DBUtil.SetJaRunJobnetTableStatus(jobnetExecInfo.inner_jobnet_id);
+
+                // 実行ジョブネットサマリ管理テーブルのステータスを「実行準備」、ジョブ状況を「通常」、展開状況を「正常」に更新
+                DBUtil.SetJaRunJobnetSummaryTableStatus(jobnetExecInfo.inner_jobnet_id);
+
+                // 実行ジョブ管理テーブルのステータスを「未実行」に更新
+                DBUtil.SetJaRunJobTableStatus(jobnetExecInfo.inner_jobnet_id);
+            }
+        }
+
+        //added by YAMA 2014/04/25
+        private void ErrDelayedCommandBinding_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            JobnetExecInfo jobnetExecInfo = (JobnetExecInfo)errPage.stopContextMenu.Tag;
+
+            // 展開状況が「遅延起動」
+            if ((LoadStausType)jobnetExecInfo.load_status == LoadStausType.Delay)
+            {
+                // 実行ジョブネット管理テーブルのステータスを「未実行」に更新
+                DBUtil.SetJaRunJobnetTableStatus(jobnetExecInfo.inner_jobnet_id);
+
+                // 実行ジョブネットサマリ管理テーブルのステータスを「実行準備」、ジョブ状況を「通常」、展開状況を「正常」に更新
+                DBUtil.SetJaRunJobnetSummaryTableStatus(jobnetExecInfo.inner_jobnet_id);
+
+                // 実行ジョブ管理テーブルのステータスを「未実行」に更新
+                DBUtil.SetJaRunJobTableStatus(jobnetExecInfo.inner_jobnet_id);
+            }
+        }
+
+        //added by YAMA 2014/04/25
+        private void RunningDelayedCommandBinding_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            JobnetExecInfo jobnetExecInfo = (JobnetExecInfo)runningPage.stopContextMenu.Tag;
+
+            // 展開状況が「遅延起動」
+            if ((LoadStausType)jobnetExecInfo.load_status == LoadStausType.Delay)
+            {
+                // 実行ジョブネット管理テーブルのステータスを「未実行」に更新
+                DBUtil.SetJaRunJobnetTableStatus(jobnetExecInfo.inner_jobnet_id);
+
+                // 実行ジョブネットサマリ管理テーブルのステータスを「実行準備」、ジョブ状況を「通常」、展開状況を「正常」に更新
+                DBUtil.SetJaRunJobnetSummaryTableStatus(jobnetExecInfo.inner_jobnet_id);
+
+                // 実行ジョブ管理テーブルのステータスを「未実行」に更新
+                DBUtil.SetJaRunJobTableStatus(jobnetExecInfo.inner_jobnet_id);
+            }
+        }
+
+
+
         #endregion
 
         #region publicメソッド
@@ -386,8 +453,14 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
             allPage.JobnetExecList.Clear();
             DataTable dt;
             DateTime now = DateTime.Now;
-            DateTime before = now.AddMinutes(-1 * jobnetLoadSpan);
-            DateTime after = now.AddMinutes(jobnetLoadSpan);
+
+
+            //added by YAMA 2014/07/07
+            //DateTime before = now.AddMinutes(-1 * jobnetLoadSpan);
+            //DateTime after = now.AddMinutes(jobnetLoadSpan);
+            DateTime before = now.AddMinutes(-1 * jobnetViewSpan);
+            DateTime after = now.AddMinutes(jobnetViewSpan);
+
             decimal fromTime = ConvertUtil.ConverDate2IntYYYYMMDDHHMI(before);
             decimal toTime = ConvertUtil.ConverDate2IntYYYYMMDDHHMI(after);
 
@@ -486,8 +559,19 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
             JobnetExecInfo jobnetExecInfo = new JobnetExecInfo();
             jobnetExecInfo.jobnet_id = row["jobnet_id"].ToString();
             jobnetExecInfo.status = (int)row["status"];
+
+            //added by YAMA 2014/04/25
+            jobnetExecInfo.load_status = (int)row["load_status"];
+
             jobnetExecInfo.display_status = getRunJobStatusStr((int)row["status"], (int)row["load_status"]);
-            jobnetExecInfo.status_color = getRunJobStatusColor((int)row["status"], (int)row["job_status"]);
+
+            //added by YAMA 2014/04/25
+            //jobnetExecInfo.status_color = getRunJobStatusColor((int)row["status"], (int)row["job_status"]);
+            jobnetExecInfo.status_color = getRunJobStatusOfColor((int)row["status"], (int)row["job_status"], (int)row["load_status"]);
+
+            //added by YAMA 2014/07/01
+            jobnetExecInfo.Foreground_color = getRunJobStatusOfChrColor((int)row["status"], (int)row["job_status"], (int)row["load_status"]);
+
             jobnetExecInfo.jobnet_name = row["jobnet_name"].ToString();
 
             if (Convert.ToDecimal(row["scheduled_time"]) > 0)
@@ -500,7 +584,14 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
             }
             if (Convert.ToDecimal(row["start_time"]) > 0)
             {
-                jobnetExecInfo.start_time = ConvertUtil.ConverIntYYYYMMDDHHMISS2Date(Convert.ToDecimal(row["start_time"])).ToString("yyyy/MM/dd HH:mm:ss");
+                //added by YAMA 2014/04/25
+                if ((LoadStausType)jobnetExecInfo.load_status != LoadStausType.Skip)
+                {
+                    jobnetExecInfo.start_time = ConvertUtil.ConverIntYYYYMMDDHHMISS2Date(Convert.ToDecimal(row["start_time"])).ToString("yyyy/MM/dd HH:mm:ss");
+                }
+                else
+                {
+                }
             }
             else
             {
@@ -508,7 +599,14 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
             }
             if (Convert.ToDecimal(row["end_time"]) > 0)
             {
-                jobnetExecInfo.end_time = ConvertUtil.ConverIntYYYYMMDDHHMISS2Date(Convert.ToDecimal(row["end_time"])).ToString("yyyy/MM/dd HH:mm:ss");
+                //added by YAMA 2014/04/25
+                if ((LoadStausType)jobnetExecInfo.load_status != LoadStausType.Skip)
+                {
+                    jobnetExecInfo.end_time = ConvertUtil.ConverIntYYYYMMDDHHMISS2Date(Convert.ToDecimal(row["end_time"])).ToString("yyyy/MM/dd HH:mm:ss");
+                }
+                else
+                {
+                }
             }
             else
             {
@@ -581,7 +679,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
         }
 
         /// <summary>各リストの画面Gridの行番号を取得</summary>
-        private String getRunJobStatusStr(int status, int load_status)
+        private String getRunJobStatusStr_(int status, int load_status)
         {
             String str;
             switch (status)
@@ -605,6 +703,60 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
             }
             return str;
         }
+
+        //added by YAMA 2014/04/25
+        private String getRunJobStatusStr(int status, int load_status)
+        {
+            String str;
+            
+            switch (status)
+            {
+                case 0:
+                    str = Properties.Resources.job_run_status_schedule;
+                    if (load_status == 2)
+                        str = Properties.Resources.job_run_status_scheduled_wait;
+                    break;
+                case 1:
+                    str = Properties.Resources.job_run_status_schedule;
+                    break;
+                case 2:
+                case 4:
+                    //str = Properties.Resources.job_run_status_running;
+                    if (load_status == 2)
+                    {
+                        // 「『ｽﾃｰﾀｽ(status) = 実行中(2)』and『展開状況(load_status) = 遅延起動(2)』」の場合、『遅延起動エラー』を設定
+                        str = Properties.Resources.job_run_status_delay_err;
+                    }
+                    else
+                    {
+                        str = Properties.Resources.job_run_status_running;
+                    }
+
+                    break;
+                case 3:
+                    str = Properties.Resources.job_run_status_done;
+                    if (load_status == 3)
+                        str = Properties.Resources.job_run_status_skip;
+                    break;
+                case 5:
+                    str = Properties.Resources.job_run_status_done;
+                    if (load_status == 1)
+                    {
+                        str = Properties.Resources.load_err;
+                    }
+                    //added by YAMA 2014/04/25
+                    //else if (load_status == 2)
+                    //{
+                    //    str = Properties.Resources.job_run_status_delay_err;
+                    //}
+                    break;
+                default:
+                    str = Properties.Resources.job_run_status_schedule;
+                    break;
+            }
+            return str;
+        }
+
 
         /// <summary>各リストの画面Gridの行番号を取得</summary>
         /// <param name="status">実行ジョブネットステータス</param>
@@ -654,6 +806,120 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
             }
             return color;
         }
+
+
+
+        //added by YAMA 2014/04/25  (実行スキップのグレイ色対応)
+        /// <summary>ステータスに対応する色を設定</summary>
+        /// <param name="status">実行ジョブネットステータス</param>
+        /// <param name="job_status">実行ジョブネットジョブ状況</param>
+        /// <param name="load_status">実行ジョブネット展開状況</param>
+        private SolidColorBrush getRunJobStatusOfColor(int status, int job_status, int load_status)
+        {
+            SolidColorBrush color = new SolidColorBrush(Colors.Aquamarine);
+            switch (status)
+            {
+                case 0:
+                    break;
+                case 1:
+                    break;
+                case 2:
+                case 6:
+                    switch (job_status)
+                    {
+                        case 0:
+                            color = new SolidColorBrush(Colors.Yellow);
+                            break;
+                        case 1:
+                            color = new SolidColorBrush(Colors.Orange);
+                            break;
+                        case 2:
+                            color = new SolidColorBrush(Colors.Red);
+                            break;
+                    }
+                    break;
+                case 3:
+                    switch (job_status)
+                    {
+                        case 0:
+                            if ((LoadStausType)load_status != LoadStausType.Skip)
+                            {
+                                color = new SolidColorBrush(Colors.Lime);
+                            }
+                            else
+                            {
+                                color = new SolidColorBrush(Colors.Gray);
+                            }
+                            break;
+                        case 1:
+                            color = new SolidColorBrush(Colors.Orange);
+                            break;
+                        case 2:
+                            color = new SolidColorBrush(Colors.Red);
+                            break;
+                    }
+                    break;
+                case 4:
+                case 5:
+                    color = new SolidColorBrush(Colors.Red);
+                    break;
+            }
+            return color;
+        }
+
+
+        //added by YAMA 2014/07/01  (実行スキップ時の文字色対応)
+        /// <summary>ステータスに対応する文字色を設定</summary>
+        /// <param name="status">実行ジョブネットステータス</param>
+        /// <param name="job_status">実行ジョブネットジョブ状況</param>
+        /// <param name="load_status">実行ジョブネット展開状況</param>
+        private String getRunJobStatusOfChrColor(int status, int job_status, int load_status)
+        {
+            String color = "Black";
+            switch (status)
+            {
+                case 0:                 // 0：未実行（初期値）
+                    break;
+                case 1:                 // 1：実行準備
+                    break;
+                case 2:                 // 2：実行中
+                case 6:
+                    switch (job_status)
+                    {
+                        case 0:             // 0：通常（初期値）
+                            break;
+                        case 1:             // 1：タイムアウト
+                            break;
+                        case 2:             // 2：エラー
+                            break;
+                    }
+                    break;
+                case 3:                 // 3：正常終了
+                    switch (job_status)
+                    {
+                        case 0:             // 0：通常（初期値）
+                            if ((LoadStausType)load_status != LoadStausType.Skip)
+                            {
+                                ;
+                            }
+                            else
+                            {
+                                color = "White";
+                            }
+                            break;
+                        case 1:             // 1：タイムアウト
+                            break;
+                        case 2:             // 2：エラー
+                            break;
+                    }
+                    break;
+                case 4:
+                case 5:                 // 5：異常終了
+                    break;
+            }
+            return color;
+        }
+
 
         #endregion
 

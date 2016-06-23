@@ -18,8 +18,8 @@
 **/
 
 /*
-** $Date:: 2014-01-06 10:51:40 +0900 #$
-** $Revision: 5710 $
+** $Date:: 2014-04-03 15:46:12 +0900 #$
+** $Revision: 5921 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -255,20 +255,22 @@ int ja_kill(JA_PID job_pid)
     if (job_pid == 0)
         return SUCCEED;
 
-    // check job_pid
+    /* check job_pid */
     if (kill(job_pid, 0) != 0) {
-        zabbix_log(LOG_LEVEL_ERR, "In %s() job_pid: %d isn't existed",
+        zabbix_log(LOG_LEVEL_WARNING, "In %s() job_pid: %d isn't existed",
                    __function_name, job_pid);
         return FAIL;
     }
-    // open /proc 
+
+    /* open /proc */
     procdir = opendir("/proc");
     if (procdir == NULL) {
         zabbix_log(LOG_LEVEL_ERR, "In %s() Can not opendir /proc [%s]",
                    __function_name, strerror(errno));
         return FAIL;
     }
-    // load alll pid and ppid to job_pid_t list
+
+    /* load alll pid and ppid to job_pid_t list */
     cnt = 0;
     size = 0;
     jpt = NULL;
@@ -295,7 +297,7 @@ int ja_kill(JA_PID job_pid)
     }
     closedir(procdir);
 
-    // can not match job_pid
+    /* can not match job_pid */
     if (cnt == 0)
         return SUCCEED;
 

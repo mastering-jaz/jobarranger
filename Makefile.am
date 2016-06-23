@@ -13,11 +13,11 @@ EXTRA_DIST = \
 	jaconf \
 	jainclude \
 	include \
-	doc \
 	misc \
 	build \
 	bin \
-	m4
+	m4 \
+	3rd_party_licenses
 
 dist-hook:
 	@jobarg_revision=`LANG=C; svn info|grep "Last Changed Rev"|awk '{print $$4;}'`; \

@@ -51,6 +51,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DAO\BaseDAO.cs" />
+    <Compile Include="DAO\IconCooperationDAO.cs" />
     <Compile Include="DAO\IconFcopyDAO.cs" />
     <Compile Include="DAO\IconFwaitDAO.cs" />
     <Compile Include="DAO\IconRebootDAO.cs" />
@@ -68,6 +69,7 @@
     <Compile Include="DAO\JobCommandDAO.cs" />
     <Compile Include="DAO\RunFlowDAO.cs" />
     <Compile Include="DAO\RunIconCaclDAO.cs" />
+    <Compile Include="DAO\RunIconCooperationDAO.cs" />
     <Compile Include="DAO\RunIconEndDAO.cs" />
     <Compile Include="DAO\RunIconExtJobDAO.cs" />
     <Compile Include="DAO\RunIconFcopyDAO.cs" />
@@ -82,6 +84,9 @@
     <Compile Include="DAO\RunIconValueDAO.cs" />
     <Compile Include="DAO\RunJobCommandDAO.cs" />
     <Compile Include="DAO\RunJobDAO.cs" />
+    <Compile Include="DAO\RunJobnetSummaryDAO.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="DAO\RunLogDAO.cs" />
     <Compile Include="DAO\RunValueBeforeDAO.cs" />
     <Compile Include="DAO\RunValueJobDAO.cs" />
@@ -99,8 +104,9 @@
     <Compile Include="DAO\ScheduleDetailDAO.cs" />
     <Compile Include="DAO\ScheduleJobnetDAO.cs" />
     <Compile Include="DAO\UsersDAO.cs" />
-    <Compile Include="DAO\RunJobnetSummaryDAO.cs" />
     <Compile Include="DAO\RunJobnetDAO.cs" />
+    <Compile Include="DAO\IconAgentlessDAO.cs" />
+    <Compile Include="DAO\RunIconAgentlessDAO.cs" />
     <Compile Include="DB\ComSqlParam.cs" />
     <Compile Include="DB\DBConnect.cs" />
     <Compile Include="DB\DBUtil.cs" />

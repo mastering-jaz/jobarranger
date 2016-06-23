@@ -52,22 +52,23 @@ namespace jp.co.ftf.jobcontroller.DAO
         private string _selectSqlByPk = "select * from ja_run_jobnet_summary_table " +
                                         "where inner_jobnet_id = ? ";
 
+        //added by YAMA 2014/07/09
         private String _select_run_jobnet_super = "select JR.* from "
-                                                + "ja_run_jobnet_summary_table AS JR "
-                                                + "where ((JR.scheduled_time between ? and ?) OR (JR.start_time between ? and ?)) order by JR.scheduled_time,JR.start_time,JR.inner_jobnet_id";
+                                        + "ja_run_jobnet_summary_table AS JR "
+                                        + "where ((JR.scheduled_time between ? and ?) OR (JR.start_time between ? and ?) OR ((JR.scheduled_time = 0) and (JR.start_time between ? and ?)) OR ((JR.scheduled_time = 0) and (JR.start_time = 0) and (multiple_start_up = 2))) order by JR.scheduled_time,JR.start_time,JR.inner_jobnet_id";
 
 
+        //added by YAMA 2014/07/09
         private String _select_run_jobnet = "select JRAll.* from ((select JR.* from "
                                                 + "ja_run_jobnet_summary_table AS JR "
-                                                + "where ((JR.scheduled_time between ? and ?) OR (JR.start_time between ? and ?)) and JR.public_flag=1) "
+                                                + "where ((JR.scheduled_time between ? and ?) OR (JR.start_time between ? and ?) OR ((JR.scheduled_time = 0) and (JR.start_time between ? and ?)) OR ((JR.scheduled_time = 0) and (JR.start_time = 0) and (multiple_start_up = 2))) and JR.public_flag=1) "
                                                 + "union "
                                                 + "(select JR.* from "
                                                 + "ja_run_jobnet_summary_table AS JR, users AS U, users_groups AS UG1, users_groups AS UG2 "
-                                                + "where ((JR.scheduled_time between ? and ?) OR (JR.start_time between ? and ?))  and "
+                                                + "where ((JR.scheduled_time between ? and ?) OR (JR.start_time between ? and ?) OR ((JR.scheduled_time = 0) and (JR.start_time between ? and ?)) OR ((JR.scheduled_time = 0) and (JR.start_time = 0) and (multiple_start_up = 2)))  and "
                                                 + "JR.public_flag=0 and JR.user_name=U.alias and U.userid=UG1.userid and UG2.userid=? and UG1.usrgrpid=UG2.usrgrpid)) "
                                                 + "as JRAll "
                                                 + "order by JRAll.scheduled_time,JRAll.start_time,JRAll.inner_jobnet_id";
-
 
         //特権ユーザー以外の実行ジョブエラーリスト取得SQL文
         private String _select_run_jobnet_err = "select JRAll.* from ((select JR.* "
@@ -205,6 +206,10 @@ namespace jp.co.ftf.jobcontroller.DAO
             sqlParams.Add(new ComSqlParam(DbType.UInt64, "@start_time", startFromTime));
             sqlParams.Add(new ComSqlParam(DbType.UInt64, "@start_time", startEndTime));
 
+            //added by YAMA 2014/07/07
+            sqlParams.Add(new ComSqlParam(DbType.UInt64, "@start_time", startFromTime));
+            sqlParams.Add(new ComSqlParam(DbType.UInt64, "@start_time", startEndTime));
+
             DataTable dt = _db.ExecuteQuery(_select_run_jobnet_super, sqlParams, TableName);
 
             return dt;
@@ -226,10 +231,20 @@ namespace jp.co.ftf.jobcontroller.DAO
             sqlParams.Add(new ComSqlParam(DbType.UInt64, "@scheduled_time", endTime));
             sqlParams.Add(new ComSqlParam(DbType.UInt64, "@start_time", startFromTime));
             sqlParams.Add(new ComSqlParam(DbType.UInt64, "@start_time", startEndTime));
+
+            //added by YAMA 2014/07/07
+            sqlParams.Add(new ComSqlParam(DbType.UInt64, "@start_time", startFromTime));
+            sqlParams.Add(new ComSqlParam(DbType.UInt64, "@start_time", startEndTime));
+
             sqlParams.Add(new ComSqlParam(DbType.UInt64, "@scheduled_time", fromTime));
             sqlParams.Add(new ComSqlParam(DbType.UInt64, "@scheduled_time", endTime));
             sqlParams.Add(new ComSqlParam(DbType.UInt64, "@start_time", startFromTime));
             sqlParams.Add(new ComSqlParam(DbType.UInt64, "@start_time", startEndTime));
+
+            //added by YAMA 2014/07/07
+            sqlParams.Add(new ComSqlParam(DbType.UInt64, "@start_time", startFromTime));
+            sqlParams.Add(new ComSqlParam(DbType.UInt64, "@start_time", startEndTime));
+
             sqlParams.Add(new ComSqlParam(DbType.UInt64, "@userid", userid));
 
             DataTable dt = _db.ExecuteQuery(_select_run_jobnet, sqlParams, TableName);

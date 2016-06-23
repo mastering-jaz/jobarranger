@@ -983,6 +983,9 @@ void	zbx_strupper(char *str);
 #if defined(_WINDOWS) || defined(HAVE_ICONV)
 char	*convert_to_utf8(char *in, size_t in_size, const char *encoding);
 #endif	/* HAVE_ICONV */
+#if defined(HAVE_ICONV)
+char	*convert_from_utf8(char *in, size_t in_size, const char *encoding);
+#endif	/* HAVE_ICONV */
 size_t	zbx_strlen_utf8(const char *text);
 size_t	zbx_strlen_utf8_n(const char *text, size_t utf8_maxlen);
 
@@ -991,6 +994,7 @@ char	*zbx_replace_utf8(const char *text);
 void	zbx_replace_invalid_utf8(char *text);
 
 void	dos2unix(char *str);
+void	dos2cr(char *str);
 int	str2uint64(const char *str, const char *suffixes, zbx_uint64_t *value);
 double	str2double(const char *str);
 

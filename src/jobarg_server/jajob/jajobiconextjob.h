@@ -18,17 +18,15 @@
 **/
 
 /*
-** $Date:: 2013-04-08 14:37:11 +0900 #$
-** $Revision: 4355 $
-** $Author: ossinfra@FITECHLABS.CO.JP $
+** $Date:: 2014-04-03 15:45:56 +0900 #$
+** $Revision: 5920 $
+** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
 #ifndef JOBARG_JAJOBICONEXTJOB_H
 #define JOBARG_JAJOBICONEXTJOB_H
 
-int jajob_icon_extjob(const zbx_uint64_t inner_job_id,
-                      const zbx_uint64_t inner_jobnet_id,
-                      const int kill_flag);
+int jajob_icon_extjob(const zbx_uint64_t inner_job_id, const zbx_uint64_t inner_jobnet_id);
 int jajob_icon_extjob_kill(const zbx_uint64_t inner_job_id);
 
 #endif

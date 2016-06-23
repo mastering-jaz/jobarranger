@@ -18,8 +18,8 @@
 **/
 
 /*
-** $Date:: 2014-02-24 17:40:05 +0900 #$
-** $Revision: 5818 $
+** $Date:: 2014-06-30 16:42:08 +0900 #$
+** $Revision: 6100 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -33,6 +33,7 @@
 #include "../jarun/jaruniconjob.h"
 #include "../jarun/jaruniconfwait.h"
 #include "../jajob/jajobiconextjob.h"
+#include "../jajob/jajobiconless.h"
 
 /******************************************************************************
  *                                                                            *
@@ -98,6 +99,13 @@ int jajobnet_kill(const zbx_uint64_t inner_jobnet_id)
     if (db_ret < ZBX_DB_OK)
         return FAIL;
 
+    db_ret =
+        DBexecute
+        ("delete from ja_session_table where inner_jobnet_main_id = " ZBX_FS_UI64,
+         inner_jobnet_id);
+    if (db_ret < ZBX_DB_OK)
+        return FAIL;
+
     sec = zbx_time();
     result =
         DBselect
@@ -130,6 +138,8 @@ int jajobnet_kill(const zbx_uint64_t inner_jobnet_id)
                 jajob_icon_extjob_kill(inner_job_id);
             } else if (job_type == JA_JOB_TYPE_FWAIT) {
                 jarun_icon_fwait(inner_job_id, JA_AGENT_METHOD_KILL);
+            } else if (job_type == JA_JOB_TYPE_LESS) {
+                jajob_icon_less_abort(inner_job_id, JA_SES_FORCE_STOP_KILL);
             }
             break;
         default:

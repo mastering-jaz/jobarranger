@@ -18,8 +18,8 @@
 **/
 
 /*
-** $Date:: 2013-08-05 13:45:29 +0900 #$
-** $Revision: 5232 $
+** $Date:: 2014-04-25 14:25:43 +0900 #$
+** $Revision: 5924 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -373,8 +373,14 @@ int ja_number_match(const char *string, const char *pattern)
     const char *__function_name = "ja_number_match";
 
     zabbix_log(LOG_LEVEL_DEBUG, "In %s()", __function_name);
-    if (string == NULL || pattern == NULL)
+
+    if (string == NULL || pattern == NULL) {
         return 0;
+    }
+
+    if (strlen(string) == 0 || strlen(pattern) == 0) {
+        return 0;
+    }
 
     zabbix_log(LOG_LEVEL_DEBUG, "In %s() string: %s, pattern: %s",
                __function_name, string, pattern);

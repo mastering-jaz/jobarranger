@@ -194,7 +194,12 @@ int	daemon_start(int allow_root)
 	pid_t			pid;
 	struct passwd		*pwd;
 	struct sigaction	phan;
-	char			user[7] = "zabbix";
+	char			user[1024] = "zabbix";
+
+	if (NULL != CONFIG_JA_EXECUTION_USER)
+	{
+		zbx_strlcpy(user, CONFIG_JA_EXECUTION_USER, sizeof(user));
+	}
 
 	if (0 == allow_root && (0 == getuid() || 0 == getgid()))	/* running as root? */
 	{

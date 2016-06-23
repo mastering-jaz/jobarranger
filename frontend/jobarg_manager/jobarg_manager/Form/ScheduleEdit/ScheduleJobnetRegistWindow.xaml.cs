@@ -116,6 +116,14 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.ScheduleEdit
         /// <summary> 保留解除アイコン設定テーブル </summary>
         private IconReleaseDAO _iconReleaseDAO;
 
+        //added by YAMA 2014/02/06
+        /// <summary> Zabbix連携アイコン設定テーブル </summary>
+        private IconCooperationDAO _iconCooperationDAO;
+
+        //added by YAMA 2014/05/19
+        /// <summary> 実行エージェントレスアイコン設定テーブル </summary>
+        private IconAgentlessDAO _iconAgentlessDAO;
+
         #endregion
 
         #region コンストラクタ
@@ -435,6 +443,14 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.ScheduleEdit
 
             /// リブート保留解除アイコン設定テーブル 
             _iconReleaseDAO = new IconReleaseDAO(dbAccess);
+
+            //added by YAMA 2014/02/06
+            /// Zabbix連携アイコン設定テーブル 
+            _iconCooperationDAO = new IconCooperationDAO(dbAccess);
+
+            //added by YAMA 2014/2014/05/19
+            /// 実行エージェントレスアイコン設定テーブル
+            _iconAgentlessDAO = new IconAgentlessDAO(dbAccess);
         }
 
         //*******************************************************************
@@ -487,6 +503,14 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.ScheduleEdit
             container.IconRebootTable = _iconRebootDAO.GetEmptyTable();
             // 保留解除アイコン設定テーブル 
             container.IconReleaseTable = _iconReleaseDAO.GetEmptyTable();
+
+            //added by YAMA 2014/02/06
+            // Zabbix連携アイコン設定テーブル 
+            container.IconCooperationTable = _iconCooperationDAO.GetEmptyTable();
+
+            //added by YAMA 2014/2014/05/19
+            /// 実行エージェントレスアイコン設定テーブル
+            container.IconAgentlessTable = _iconAgentlessDAO.GetEmptyTable();
 
             dbAccess.CloseSqlConnect();
         }
@@ -557,6 +581,13 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.ScheduleEdit
             // 保留解除アイコン設定テーブル  
             container.IconReleaseTable = _iconReleaseDAO.GetEntityByJobnet(jobnetId, updDate);
 
+            //added by YAMA 2014/02/06
+            // Zabbix連携アイコン設定テーブル  
+            container.IconCooperationTable = _iconCooperationDAO.GetEntityByJobnet(jobnetId, updDate);
+
+            //added by YAMA 2014/2014/05/19
+            /// 実行エージェントレスアイコン設定テーブル
+            container.IconAgentlessTable = _iconAgentlessDAO.GetEntityByJobnet(jobnetId, updDate);
         }
 
         //*******************************************************************
@@ -584,6 +615,23 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.ScheduleEdit
             lblUpdDate.Text = (ConvertUtil.ConverIntYYYYMMDDHHMISS2Date(Convert.ToInt64(row["update_date"]))).ToString("yyyy/MM/dd HH:mm:ss");
             //ユーザー名
             lblUserName.Text = Convert.ToString(row["user_name"]);
+
+
+            //added by YAMA 2014/04/22
+            // ジョブネットの多重起動の有無
+            switch (Convert.ToInt32(row["multiple_start_up"]))
+            {
+                case 0:
+                    lblmultiple_start.Text = Properties.Resources.multiple_start_type1;
+                    break;
+                case 1:
+                    lblmultiple_start.Text = Properties.Resources.multiple_start_type2;
+                    break;
+                case 2:
+                    lblmultiple_start.Text = Properties.Resources.multiple_start_type3;
+                    break;
+            }
+
         }
 
         /// <summary>ジョブネットを展開</summary>

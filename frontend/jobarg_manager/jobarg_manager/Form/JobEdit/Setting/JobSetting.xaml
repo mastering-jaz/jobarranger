@@ -71,12 +71,16 @@
         <GroupBox Header="{x:Static src:Properties.Resources.exec_label_text}" Height="115" HorizontalAlignment="Left" Margin="7,16,0,0" Name="gbExcute" 
                   VerticalAlignment="Top" Width="390" Grid.Row="4" Grid.RowSpan="2">
             <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="20*" />
+                    <ColumnDefinition Width="358*" />
+                </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
-                <TextBox Grid.Row="0" Height="92" Width="374" HorizontalAlignment="Left" Name="txtCmd" TextWrapping="Wrap"
-                         Margin="0,4,0,0" VerticalAlignment="Top" VerticalScrollBarVisibility="Auto" MaxLength="4000" AcceptsReturn="True"/>
+                <TextBox Height="92" Width="374" HorizontalAlignment="Left" Name="txtCmd" TextWrapping="Wrap"
+                         Margin="0,4,0,0" VerticalAlignment="Top" VerticalScrollBarVisibility="Auto" MaxLength="4000" AcceptsReturn="True" Grid.ColumnSpan="2" />
             </Grid>
         </GroupBox>
         <Label Grid.Row="5" Content="{x:Static src:Properties.Resources.job_value_label_text}" Height="23" HorizontalAlignment="Left" Margin="9,11,0,0" 

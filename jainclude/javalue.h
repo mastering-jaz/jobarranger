@@ -18,56 +18,48 @@
 **/
 
 /*
-** $Date:: 2013-07-09 17:41:31 +0900 #$
-** $Revision: 5129 $
-** $Author: ossinfra@FITECHLABS.CO.JP $
+** $Date:: 2014-05-16 10:51:28 +0900 #$
+** $Revision: 5966 $
+** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
 #ifndef JOBARG_JAVALUE_H
 #define JOBARG_JAVALUE_H
 
+typedef struct {
+    int  len1;
+    int  len2;
+    char name[JA_VALUE_NAME_LEN];
+    char *value;
+} ja_variable;
+
 int ja_clean_value_before(const zbx_uint64_t inner_job_id);
 int ja_clean_value_after(const zbx_uint64_t inner_job_id);
 
-int ja_set_value_before(const zbx_uint64_t inner_job_id,
-                        const zbx_uint64_t inner_jobnet_id,
-                        const char *value_name, const char *before_value);
-int ja_set_value_after(const zbx_uint64_t inner_job_id,
-                       const zbx_uint64_t inner_jobnet_id,
-                       const char *value_name, const char *after_value);
+int ja_set_value_before(const zbx_uint64_t inner_job_id, const zbx_uint64_t inner_jobnet_id, const char *value_name, const char *before_value);
+int ja_set_value_after(const zbx_uint64_t inner_job_id, const zbx_uint64_t inner_jobnet_id, const char *value_name, const char *after_value);
 
-int ja_cpy_value(const zbx_uint64_t inner_job_id, const char *value_src,
-                 char *value_dest);
+int ja_cpy_value(const zbx_uint64_t inner_job_id, const char *value_src, char *value_dest);
 
-int ja_get_value_before(const zbx_uint64_t inner_job_id,
-                        const char *value_name, char *before_value);
-int ja_get_value_after(const zbx_uint64_t inner_job_id,
-                       const char *value_name, char *after_value);
+int ja_get_value_before(const zbx_uint64_t inner_job_id, const char *value_name, char *before_value);
+int ja_get_value_after(const zbx_uint64_t inner_job_id, const char *value_name, char *after_value);
 
-int ja_remove_value_before(const zbx_uint64_t inner_job_id,
-                           const char *value_name);
-int ja_remove_value_after(const zbx_uint64_t inner_job_id,
-                          const char *value_name);
+int ja_remove_value_before(const zbx_uint64_t inner_job_id, const char *value_name);
+int ja_remove_value_after(const zbx_uint64_t inner_job_id, const char *value_name);
 
 int ja_value_before_after(const zbx_uint64_t inner_job_id);
-int ja_value_after_before(const zbx_uint64_t inner_job_id,
-                          const zbx_uint64_t next_inner_job_id);
+int ja_value_after_before(const zbx_uint64_t inner_job_id, const zbx_uint64_t next_inner_job_id);
 
 int ja_clean_value_jobnet_before(const zbx_uint64_t inner_jobnet_id);
 int ja_clean_value_jobnet_after(const zbx_uint64_t inner_jobnet_id);
 
-int ja_set_value_jobnet_before(const zbx_uint64_t inner_jobnet_id,
-                               const char *value_name,
-                               const char *before_value);
-int ja_get_value_jobnet_before(const zbx_uint64_t inner_jobnet_id,
-                               const char *value_name, char *before_value);
+int ja_set_value_jobnet_before(const zbx_uint64_t inner_jobnet_id, const char *value_name, const char *before_value);
+int ja_get_value_jobnet_before(const zbx_uint64_t inner_jobnet_id, const char *value_name, char *before_value);
 
-int ja_value_before_jobnet_in(const zbx_uint64_t inner_job_id,
-                              const zbx_uint64_t inner_jobnet_id);
-int ja_value_before_jobnet_out(const zbx_uint64_t inner_jobnet_id,
-                               const zbx_uint64_t inner_job_id);
+int ja_value_before_jobnet_in(const zbx_uint64_t inner_job_id, const zbx_uint64_t inner_jobnet_id);
+int ja_value_before_jobnet_out(const zbx_uint64_t inner_jobnet_id, const zbx_uint64_t inner_job_id);
 
-int ja_get_jobnet_summary_start(const zbx_uint64_t inner_jobnet_id,
-                                char *start_time);
+int ja_get_jobnet_summary_start(const zbx_uint64_t inner_jobnet_id, char *start_time);
 
+int ja_replace_variable(const zbx_uint64_t inner_job_id, char *value_src, char *value_dest, int dest_len);
 #endif

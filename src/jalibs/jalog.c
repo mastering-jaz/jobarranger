@@ -18,8 +18,8 @@
 **/
 
 /*
-** $Date:: 2014-02-20 16:52:27 +0900 #$
-** $Revision: 5809 $
+** $Date:: 2014-06-17 15:23:46 +0900 #$
+** $Revision: 6053 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -77,7 +77,9 @@ int	ja_log(char *message_id, zbx_uint64_t inner_jobnet_id, char *jobnet_id, zbx_
 	char		cmd[AP_MESSAGE_BUF_SIZE];
 	char		host_name[JA_DATA_BUFFER_LEN] = "";
 	char		s_job_id[JA_DATA_BUFFER_LEN] = "none";
+	const char	*__function_name = "ja_log";
 
+	zabbix_log(LOG_LEVEL_DEBUG, "In %s() message_id: %s", __function_name, message_id);
 
 	w_inner_jobnet_id = inner_jobnet_id;
 
@@ -309,6 +311,13 @@ int	ja_log(char *message_id, zbx_uint64_t inner_jobnet_id, char *jobnet_id, zbx_
 						" from ja_run_icon_reboot_table"
 						" where inner_job_id = " ZBX_FS_UI64, inner_job_id);
 				break;
+
+			case JA_JOB_TYPE_LESS:
+				get_host_flag = 1;
+				result = DBselect("select host_flag, host_name"
+						" from ja_run_icon_agentless_table"
+						" where inner_job_id = " ZBX_FS_UI64, inner_job_id);
+				break;
 		}
 
 		/* host name acquisition target icon */
@@ -316,24 +325,27 @@ int	ja_log(char *message_id, zbx_uint64_t inner_jobnet_id, char *jobnet_id, zbx_
 		{
 			if (NULL != (row = DBfetch(result)))
 			{
-				host_flag = atoi(row[0]);
-				if (host_flag == USE_HOSTNAME)
+				if (SUCCEED != DBis_null(row[1]))
 				{
-					zbx_strlcpy(host_name, row[1], sizeof(host_name));
-				}
-				else
-				{
-					/* get the host name from the job controller variable */
-					result2 = DBselect("select before_value"
-							" from ja_run_value_before_table"
-							" where inner_job_id = " ZBX_FS_UI64 " and value_name = '%s'",
-							inner_job_id, row[1]);
-
-					if (NULL != (row2 = DBfetch(result2)))
+					host_flag = atoi(row[0]);
+					if (host_flag == USE_HOSTNAME)
 					{
-						zbx_strlcpy(host_name, row2[0], sizeof(host_name));
+						zbx_strlcpy(host_name, row[1], sizeof(host_name));
 					}
-					DBfree_result(result2);
+					else
+					{
+						/* get the host name from the job controller variable */
+						result2 = DBselect("select before_value"
+								" from ja_run_value_before_table"
+								" where inner_job_id = " ZBX_FS_UI64 " and value_name = '%s'",
+								inner_job_id, row[1]);
+
+						if (NULL != (row2 = DBfetch(result2)))
+						{
+							zbx_strlcpy(host_name, row2[0], sizeof(host_name));
+						}
+						DBfree_result(result2);
+					}
 				}
 			}
 			DBfree_result(result);

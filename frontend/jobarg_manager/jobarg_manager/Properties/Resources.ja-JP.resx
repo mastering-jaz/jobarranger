@@ -483,7 +483,7 @@
   <data name="MSG_COMMON_003" xml:space="preserve">
     <value>Job Arranger for Zabbix
 
-Job Manager Version 1.4.2 (Rev:5870)
+Job Manager Version 2.0.1 (Rev:6308)
 
 Copyright (C) 2012-2013 FitechForce, Inc. All Rights Reserved. 
 Copyright (C) 2013-2014 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.</value>
@@ -1515,5 +1515,263 @@ Copyright (C) 2013-2014 Daiwa Institute of Research Business Innovation Ltd. All
   </data>
   <data name="force_label_text" xml:space="preserve">
     <value>強制実行</value>
+  </data>
+  <data name="rbCycleStart_label_text" xml:space="preserve">
+    <value>サイクル起動：</value>
+  </data>
+  <data name="rbStartTime_label_text" xml:space="preserve">
+    <value>起動時刻：</value>
+  </data>
+  <data name="textBox_CycleInterval_label_text" xml:space="preserve">
+    <value>分間隔</value>
+  </data>
+  <data name="ERROR_COMMON_027" xml:space="preserve">
+    <value>{0}は半角数字、コロン（:）で入力してください。</value>
+  </data>
+  <data name="err_message_boot_end_time_hh" xml:space="preserve">
+    <value>終了時刻の時間</value>
+  </data>
+  <data name="err_message_boot_start_time_hh" xml:space="preserve">
+    <value>開始時刻の時間</value>
+  </data>
+  <data name="ERROR_BOOT_TIME_005" xml:space="preserve">
+    <value>起動時間は、開始時間＜終了時間で入力してください。</value>
+  </data>
+  <data name="err_message_boot_end_time" xml:space="preserve">
+    <value>終了時刻</value>
+  </data>
+  <data name="err_message_boot_end_time_mi" xml:space="preserve">
+    <value>終了時刻の分</value>
+  </data>
+  <data name="err_message_boot_start_time" xml:space="preserve">
+    <value>開始時刻</value>
+  </data>
+  <data name="err_message_boot_start_time_mi" xml:space="preserve">
+    <value>開始時刻の分</value>
+  </data>
+  <data name="err_message_boot_time_CycleInterval" xml:space="preserve">
+    <value>間隔時間（分）</value>
+  </data>
+  <data name="multiple_start_label_text" xml:space="preserve">
+    <value>多重起動：</value>
+  </data>
+  <data name="job_run_status_delay_err" xml:space="preserve">
+    <value>遅延起動エラー</value>
+  </data>
+  <data name="job_run_status_scheduled_wait" xml:space="preserve">
+    <value>予定（完了待ち）</value>
+  </data>
+  <data name="job_run_status_skip" xml:space="preserve">
+    <value>実行スキップ</value>
+  </data>
+  <data name="multiple_start_type1" xml:space="preserve">
+    <value>あり</value>
+  </data>
+  <data name="multiple_start_type2" xml:space="preserve">
+    <value>スキップ</value>
+  </data>
+  <data name="multiple_start_type3" xml:space="preserve">
+    <value>待ち合せ</value>
+  </data>
+  <data name="delayedStart_context_menu_text" xml:space="preserve">
+    <value>遅延起動エラー再実行（_R）</value>
+  </data>
+  <data name="cooperation_get_data" xml:space="preserve">
+    <value>最新データ取得</value>
+  </data>
+  <data name="cooperation_get_stat" xml:space="preserve">
+    <value>状態取得</value>
+  </data>
+  <data name="cooperation_hostgroup_label_text" xml:space="preserve">
+    <value>ホストグループ</value>
+  </data>
+  <data name="cooperation_hostgroup_pdl_label_text" xml:space="preserve">
+    <value>ホストグループ名：</value>
+  </data>
+  <data name="cooperation_hostname_label_text" xml:space="preserve">
+    <value>ホスト</value>
+  </data>
+  <data name="cooperation_hostname_pdl_label_text" xml:space="preserve">
+    <value>ホスト名：</value>
+  </data>
+  <data name="cooperation_icon_label_text" xml:space="preserve">
+    <value>Zabbix連携</value>
+  </data>
+  <data name="cooperation_icon_screen_name" xml:space="preserve">
+    <value>Zabbix連携アイコンの設定</value>
+  </data>
+  <data name="cooperation_itemname_label_text" xml:space="preserve">
+    <value>アイテム</value>
+  </data>
+  <data name="cooperation_itemname_pdl_label_text" xml:space="preserve">
+    <value>アイテム名：</value>
+  </data>
+  <data name="cooperation_mode_disabled" xml:space="preserve">
+    <value>無効化</value>
+  </data>
+  <data name="cooperation_mode_enabled" xml:space="preserve">
+    <value>有効化</value>
+  </data>
+  <data name="cooperation_mode_label_text" xml:space="preserve">
+    <value>連携動作</value>
+  </data>
+  <data name="cooperation_Object_label_text" xml:space="preserve">
+    <value>連携対象</value>
+  </data>
+  <data name="cooperation_triggername_label_text" xml:space="preserve">
+    <value>トリガー</value>
+  </data>
+  <data name="cooperation_triggername_pdl_label_text" xml:space="preserve">
+    <value>トリガー名：</value>
+  </data>
+  <data name="ERROR_ZABBIX_LINK_001" xml:space="preserve">
+    <value>連携動作として、「最新データ取得」は選択できません。</value>
+  </data>
+  <data name="ERROR_ZABBIX_LINK_002" xml:space="preserve">
+    <value>連携動作として、「状態取得」は選択できません。</value>
+  </data>
+  <data name="ERROR_ZABBIX_LINK_003" xml:space="preserve">
+    <value>連携動作を選択し直してください。</value>
+  </data>
+  <data name="err_message_host_gropu_name" xml:space="preserve">
+    <value>ホストグループ名</value>
+  </data>
+  <data name="err_message_item_name" xml:space="preserve">
+    <value>アイテム名</value>
+  </data>
+  <data name="err_message_trigger_name" xml:space="preserve">
+    <value>トリガー名</value>
+  </data>
+  <data name="agentless_icon_label_text" xml:space="preserve">
+    <value>ｴｰｼﾞｪﾝﾄﾚｽ</value>
+  </data>
+  <data name="agentless_authentic_label_text" xml:space="preserve">
+    <value>認証方式：</value>
+  </data>
+  <data name="agentless_basicconfig_label_text" xml:space="preserve">
+    <value>基本設定</value>
+  </data>
+  <data name="agentless_command_label_text" xml:space="preserve">
+    <value>コマンド</value>
+  </data>
+  <data name="agentless_connection_label_text" xml:space="preserve">
+    <value>接続</value>
+  </data>
+  <data name="agentless_continue_label_text" xml:space="preserve">
+    <value>継続</value>
+  </data>
+  <data name="agentless_disconnect_label_text" xml:space="preserve">
+    <value>切断</value>
+  </data>
+  <data name="agentless_executemode_label_text" xml:space="preserve">
+    <value>実行モード：</value>
+  </data>
+  <data name="agentless_force_label_text" xml:space="preserve">
+    <value>強制実行：</value>
+  </data>
+  <data name="agentless_icon_screen_name" xml:space="preserve">
+    <value>エージェントレスアイコンの設定</value>
+  </data>
+  <data name="agentless_onetime_label_text" xml:space="preserve">
+    <value>ワンタイム</value>
+  </data>
+  <data name="agentless_passphrase_label_text" xml:space="preserve">
+    <value>パスフレーズ：</value>
+  </data>
+  <data name="agentless_privatekey_label_text" xml:space="preserve">
+    <value>秘密鍵：</value>
+  </data>
+  <data name="agentless_publickey_label_text" xml:space="preserve">
+    <value>公開鍵：</value>
+  </data>
+  <data name="agentless_sessionid_label_text" xml:space="preserve">
+    <value>セッションID：</value>
+  </data>
+  <data name="agentless_session_label_text" xml:space="preserve">
+    <value>セッション</value>
+  </data>
+  <data name="agentless_ssh_label_text" xml:space="preserve">
+    <value>SSH</value>
+  </data>
+  <data name="agentless_comb_passwd_text" xml:space="preserve">
+    <value>パスワード</value>
+  </data>
+  <data name="agentless_comb_publickey_text" xml:space="preserve">
+    <value>公開鍵</value>
+  </data>
+  <data name="agentless_charcode_label_text" xml:space="preserve">
+    <value>文字コード：</value>
+  </data>
+  <data name="agentless_comb_CRLF_text" xml:space="preserve">
+    <value>CRLF</value>
+  </data>
+  <data name="agentless_comb_CR_text" xml:space="preserve">
+    <value>CR</value>
+  </data>
+  <data name="agentless_comb_EUC_JP_text" xml:space="preserve">
+    <value>EUC-JP</value>
+  </data>
+  <data name="agentless_comb_interactive_text" xml:space="preserve">
+    <value>対話モード</value>
+  </data>
+  <data name="agentless_comb_LF_text" xml:space="preserve">
+    <value>LF</value>
+  </data>
+  <data name="agentless_comb_noninteractive_text" xml:space="preserve">
+    <value>非対話モード</value>
+  </data>
+  <data name="agentless_comb_SHIFT_JIS_text" xml:space="preserve">
+    <value>SHIFT_JIS</value>
+  </data>
+  <data name="agentless_comb_unspecified_text" xml:space="preserve">
+    <value>指定なし</value>
+  </data>
+  <data name="agentless_comb_UTF8_text" xml:space="preserve">
+    <value>UTF-8</value>
+  </data>
+  <data name="agentless_linefeedcode_label_text" xml:space="preserve">
+    <value>改行コード：</value>
+  </data>
+  <data name="agentless_passwd_label_text" xml:space="preserve">
+    <value>パスワード：</value>
+  </data>
+  <data name="agentless_prompt_label_text" xml:space="preserve">
+    <value>プロンプト文字列</value>
+  </data>
+  <data name="agentless_timeout_label_text" xml:space="preserve">
+    <value>タイムアウト警告(分)：</value>
+  </data>
+  <data name="err_message_session_id" xml:space="preserve">
+    <value>セッションＩＤ</value>
+  </data>
+  <data name="err_message_passphrase" xml:space="preserve">
+    <value>パスフレーズ</value>
+  </data>
+  <data name="err_message_password" xml:space="preserve">
+    <value>パスワード</value>
+  </data>
+  <data name="err_message_privatekey" xml:space="preserve">
+    <value>秘密鍵</value>
+  </data>
+  <data name="err_message_prompt" xml:space="preserve">
+    <value>プロンプト文字列</value>
+  </data>
+  <data name="err_message_publickey" xml:space="preserve">
+    <value>公開鍵</value>
+  </data>
+  <data name="cooperation_all_label_text" xml:space="preserve">
+    <value>全て</value>
+  </data>
+  <data name="err_message_charcode" xml:space="preserve">
+    <value>文字コード</value>
+  </data>
+  <data name="ERROR_BOOT_TIME_006" xml:space="preserve">
+    <value>開始時刻と終了時刻の時間幅は23時間59分以内にして下さい。</value>
+  </data>
+  <data name="ERROR_JOBNET_LOAD_002" xml:space="preserve">
+    <value>起動中のジョブネットが存在するため、実行が保留されました。</value>
+  </data>
+  <data name="ERROR_JOBNET_LOAD_003" xml:space="preserve">
+    <value>ジョブネットの実行がキャンセル（スキップ）されました。</value>
   </data>
 </root>

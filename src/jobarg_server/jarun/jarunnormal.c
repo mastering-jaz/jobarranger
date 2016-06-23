@@ -18,8 +18,8 @@
 **/
 
 /*
-** $Date:: 2013-12-06 15:18:05 +0900 #$
-** $Revision: 5530 $
+** $Date:: 2014-04-25 14:25:43 +0900 #$
+** $Revision: 5924 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -46,6 +46,8 @@
 #include "jaruniconfwait.h"
 #include "jaruniconreboot.h"
 #include "jaruniconrelease.h"
+#include "jaruniconless.h"
+#include "jaruniconzabbixlink.h"
 #include "jarunnormal.h"
 
 /******************************************************************************
@@ -139,6 +141,12 @@ int jarun_normal(zbx_uint64_t inner_job_id, int job_type, int test_flag)
         break;
     case JA_JOB_TYPE_REL:
         ret = jarun_icon_release(inner_job_id, test_flag);
+        break;
+    case JA_JOB_TYPE_LESS:
+        ret = jarun_icon_less(inner_job_id, test_flag);
+        break;
+    case JA_JOB_TYPE_LINK:
+        ret = jarun_icon_zabbixlink(inner_job_id, test_flag);
         break;
     default:
         ja_log("JARUNNORMAL200001", 0, NULL, inner_job_id, __function_name,

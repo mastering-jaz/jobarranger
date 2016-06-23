@@ -245,6 +245,30 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.ScheduleEdit
         }
 
         #endregion
+
+        //added by YAMA 2014/04/10
+        private void rbStartTime_Checked(object sender, RoutedEventArgs e)
+        {
+            //rbStartTime.IsEnabled = true;
+            textBox_StartTime.IsEnabled = true;
+
+            textBox_CyclePeriodFrom.IsEnabled = false;
+            textBox_CyclePeriodTo.IsEnabled = false;
+            textBox_CycleInterval.IsEnabled = false;
+        }
+
+        //added by YAMA 2014/04/10
+        private void rbCycleStart_Checked(object sender, RoutedEventArgs e)
+        {
+            //rbCycleStart.IsEnabled = true;
+            textBox_StartTime.IsEnabled = false;
+
+            textBox_CyclePeriodFrom.IsEnabled = true;
+            textBox_CyclePeriodTo.IsEnabled = true;
+            textBox_CycleInterval.IsEnabled = true;
+
+        }
+
     }
 
 }

@@ -18,9 +18,9 @@
 **/
 
 /*
-** $Date:: 2014-03-05 16:36:46 +0900 #$
-** $Revision: 5861 $
-** $Author: nagata@FITECHLABS.CO.JP $
+** $Date:: 2014-06-17 18:49:59 +0900 #$
+** $Revision: 6065 $
+** $Author: kazuyoshi.yamagiwa@FITECHLABS.CO.JP $
 **/
 
 #include "common.h"
@@ -32,6 +32,10 @@
 #include "zbxjson.h"
 
 #include "jacommon.h"
+
+#if defined(_WINDOWS)
+#include "jastr.h"
+#endif                          /* _WINDOWS */
 
 #define JOBARG_DEFAULT_SERVER_PORT_STR  "10061"
 
@@ -67,16 +71,15 @@ static int JOBARG_VARIABLE_FORMAT = 0;
 const char *progname = NULL;
 const char title_message[] = "Job Arranger Jobnet status get";
 const char usage_message[] =
-    "[-hV] -z <hostname or IP> [-p <port>] -U <username> -P <password> -r <registry number> [-e]";
+    "[-hV] -z <server> [-p <port>] -U <user-name> -P <password> -r <registry-number> [-e]";
 
 const char *help_message[] = {
     "Options:",
     "  -z --jobarranger-server <server>          Hostname or IP address of Job Arranger server",
-    " [-p --port <server port>]                  Specify port number of server trapper running on the server. Default is "
-        JOBARG_DEFAULT_SERVER_PORT_STR,
-    "  -U --user-name <user-name>                Specify user name",
-    "  -P --password <password>                  Specify password",
-    "  -r --registry-number <registry-number>    Specify registry number",
+    " [-p --port <port>]                         Specify port number of server trapper running on the server. Default is " JOBARG_DEFAULT_SERVER_PORT_STR,
+    "  -U --user-name <user-name>                Specify user who has permission to reference the jobnet",
+    "  -P --password <password>                  Specify user password",
+    "  -r --registry-number <registry-number>    Specify the jobnet registration number to be referenced",
     " [-e --variable-format]                     Specify output in the environment variable format (with bash format)",
     "",
     "Other options:",
@@ -214,7 +217,11 @@ static int check_response(char *response)
                             zbx_json_value_by_name(&jp_row,
                                                    JA_PROTO_TAG_JOBNETNAME,
                                                    value, sizeof(value))) {
+#if defined(_WINDOWS)
+                            jobnetname = ja_utf8_to_acp((LPSTR)value);
+#else
                             jobnetname = strdup(value);
+#endif                          /* _WINDOWS */
                         } else {
                             zabbix_log(LOG_LEVEL_INFORMATION,
                                        "Succeeded, but could not get Status");
@@ -360,7 +367,12 @@ static int check_response(char *response)
                             zbx_json_value_by_name(&jp_row,
                                                    JA_PROTO_TAG_LASTSTDOUT,
                                                    value, sizeof(value))) {
+#if defined(_WINDOWS)
+                            laststdout = ja_utf8_to_acp((LPSTR)value);
+#else
                             laststdout = strdup(value);
+#endif                          /* _WINDOWS */
+
                         } else {
                             zabbix_log(LOG_LEVEL_INFORMATION,
                                        "Succeeded, but could not get Status");
@@ -370,7 +382,12 @@ static int check_response(char *response)
                             zbx_json_value_by_name(&jp_row,
                                                    JA_PROTO_TAG_LASTSTDERR,
                                                    value, sizeof(value))) {
+#if defined(_WINDOWS)
+                            laststderr = ja_utf8_to_acp((LPSTR)value);
+#else
                             laststderr = strdup(value);
+#endif                          /* _WINDOWS */
+
                         } else {
                             zabbix_log(LOG_LEVEL_INFORMATION,
                                        "Succeeded, but could not get Status");
@@ -510,6 +527,10 @@ int main(int argc, char **argv)
     zbx_sock_t sock;
     char *answer = NULL;
 
+#if defined(_WINDOWS)
+	LPSTR acp_string = NULL;
+#endif
+
     progname = get_program_name(argv[0]);
 
     parse_commandline(argc, argv);
@@ -561,14 +582,30 @@ int main(int argc, char **argv)
 #endif                          /* NOT _WINDOWS */
 
     if (SUCCEED != zbx_tcp_connect(&sock, JOBARG_SOURCE_IP, JOBARG_SERVER, JOBARG_SERVER_PORT, GET_SENDER_TIMEOUT)) {
+
+#if defined(_WINDOWS)
+		acp_string = ja_utf8_to_acp((LPSTR)zbx_tcp_strerror());
+        zabbix_log(LOG_LEVEL_ERR, "Job arranger server connect error: [%s : %u] %s", JOBARG_SERVER, JOBARG_SERVER_PORT, acp_string);
+		zbx_free(acp_string);
+#else
         zabbix_log(LOG_LEVEL_ERR, "Job arranger server connect error: [%s : %u] %s", JOBARG_SERVER, JOBARG_SERVER_PORT, zbx_tcp_strerror());
+#endif                          /* _WINDOWS */
+
         zbx_json_free(&json);
         ret = FAIL;
         goto exit;
     }
 
     if (SUCCEED != zbx_tcp_send(&sock, json.buffer)) {
+
+#if defined(_WINDOWS)
+		acp_string = ja_utf8_to_acp((LPSTR)zbx_tcp_strerror());
+        zabbix_log(LOG_LEVEL_ERR, "Job arranger message send error: %s", acp_string);
+		zbx_free(acp_string);
+#else
         zabbix_log(LOG_LEVEL_ERR, "Job arranger message send error: %s", zbx_tcp_strerror());
+#endif                          /* _WINDOWS */
+
         zbx_json_free(&json);
         zbx_tcp_close(&sock);
         ret = FAIL;
@@ -576,7 +613,15 @@ int main(int argc, char **argv)
     }
 
     if (SUCCEED != zbx_tcp_recv(&sock, &answer)) {
+
+#if defined(_WINDOWS)
+		acp_string = ja_utf8_to_acp((LPSTR)zbx_tcp_strerror());
+        zabbix_log(LOG_LEVEL_ERR, "Job arranger message receive error: %s", acp_string);
+		zbx_free(acp_string);
+#else
         zabbix_log(LOG_LEVEL_ERR, "Job arranger message receive error: %s", zbx_tcp_strerror());
+#endif                          /* _WINDOWS */
+
         zbx_json_free(&json);
         zbx_tcp_close(&sock);
         ret = FAIL;

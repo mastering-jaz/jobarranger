@@ -18,8 +18,8 @@
 **/
 
 /*
-** $Date:: 2014-02-20 15:50:58 +0900 #$
-** $Revision: 5808 $
+** $Date:: 2014-07-16 11:34:41 +0900 #$
+** $Revision: 6308 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -64,18 +64,22 @@ int ja_host_getname(const zbx_uint64_t inner_job_id, const int host_flag,
 
 /******************************************************************************
  *                                                                            *
- * Function:                                                                  *
+ * Function: ja_host_getip                                                    *
  *                                                                            *
- * Purpose:                                                                   *
+ * Purpose: get the ip address and port of the host                           *
  *                                                                            *
- * Parameters:                                                                *
+ * Parameters: host         (in)  - host name                                 *
+ *             host_ip      (out) - ip address                                *
+ *             inner_job_id (in)  - inner job id                              *
+ *             port         (out) - port                                      *
+ *             txn          (in)  - transaction instruction                   *
  *                                                                            *
- * Return value:                                                              *
+ * Return value: return the host id. failure is zero                          *
  *                                                                            *
- * Comments:                                                                  *
+ * Comments: value is not set when host_ip or port is NULL                    *
  *                                                                            *
  ******************************************************************************/
-zbx_uint64_t ja_host_getip(const char *host, char *host_ip, const zbx_uint64_t inner_job_id)
+zbx_uint64_t ja_host_getip(const char *host, char *host_ip, const zbx_uint64_t inner_job_id, int *port, int txn)
 {
     DB_RESULT result;
     DB_RESULT result2;
@@ -93,22 +97,26 @@ zbx_uint64_t ja_host_getip(const char *host, char *host_ip, const zbx_uint64_t i
     switch (CONFIG_ZABBIX_VERSION) {
     case 1:
         // for zabbix 1.8
-        result = DBselect("select hostid, useip, dns, ip, status from hosts where host = '%s'",
+        result = DBselect("select hostid, useip, dns, ip, status, port from hosts where host = '%s'",
                           host_esc);
         break;
     case 2:
-        // for zabbix 2.0
-        result = DBselect(" select i.hostid, i.useip, i.dns, i.ip, h.status from hosts h, interface i"
-                          " where h.hostid = i.hostid and i.main = 1 and host = '%s'",
+    case 3:
+        // for zabbix 2.0 or 2.2
+        result = DBselect(" select i.hostid, i.useip, i.dns, i.ip, h.status, i.port from hosts h, interface i"
+                          " where h.hostid = i.hostid and i.main = 1 and h.host = '%s'",
                           host_esc);
         break;
     default:
         ja_log("JAHOST200001", 0, NULL, inner_job_id, __function_name, CONFIG_ZABBIX_VERSION);
-        break;
+        goto error;
     }
 
     if (result == NULL) {
-        DBrollback();
+        if (txn == JA_TXN_ON) {
+            DBrollback();
+        }
+        ja_log("JAHOST200007", 0, NULL, inner_job_id, __function_name, CONFIG_ZABBIX_VERSION);
         goto error;
     }
 
@@ -145,6 +153,12 @@ zbx_uint64_t ja_host_getip(const char *host, char *host_ip, const zbx_uint64_t i
             zbx_snprintf(host_ip, strlen(row[3]) + 1, "%s", row[3]);
         }
     }
+
+    /* get port */
+    if (port != NULL) {
+        *port = atoi(row[5]);
+    }
+
     DBfree_result(result);
     result = NULL;
 
@@ -157,33 +171,47 @@ zbx_uint64_t ja_host_getip(const char *host, char *host_ip, const zbx_uint64_t i
 
 /******************************************************************************
  *                                                                            *
- * Function:                                                                  *
+ * Function: ja_host_getport                                                  *
  *                                                                            *
- * Purpose:                                                                   *
+ * Purpose: get the port that is specified in the host macro                  *
  *                                                                            *
- * Parameters:                                                                *
+ * Parameters: hostid     (in)  - host id                                     *
+ *             macro_flag (in)  - macro flag                                  *
+ *                                0: job agent listen port                    *
+ *                                1: ssh connect port                         *
  *                                                                            *
- * Return value:                                                              *
+ *                                                                            *
+ * Return value: return the port number                                       *
  *                                                                            *
  * Comments:                                                                  *
  *                                                                            *
  ******************************************************************************/
-int ja_host_getport(zbx_uint64_t hostid)
+int ja_host_getport(zbx_uint64_t hostid, int macro_flag)
 {
-    int port;
     DB_RESULT result;
     DB_ROW row;
+    int port;
+    char *macro_name;
     const char *__function_name = "ja_host_getport";
 
-    zabbix_log(LOG_LEVEL_DEBUG, "In %s() hostid: " ZBX_FS_UI64,
-               __function_name, hostid);
-    port = CONFIG_AGENT_LISTEN_PORT;
-    result =
-        DBselect("select value from hostmacro where hostid = " ZBX_FS_UI64
-                 " and macro = '%s'", hostid, JA_AGENT_PORT);
+    zabbix_log(LOG_LEVEL_DEBUG, "In %s() hostid: " ZBX_FS_UI64, __function_name, hostid);
+
+    if (macro_flag == 0) {
+        port = CONFIG_AGENT_LISTEN_PORT;
+        macro_name = JA_AGENT_PORT;
+    }
+    else {
+        port = JA_SSH_CONNECT_PORT;
+        macro_name = JA_SSH_PORT;
+    }
+
+    result =  DBselect("select value from hostmacro where hostid = " ZBX_FS_UI64
+                       " and macro = '%s'", hostid, macro_name);
+
     row = DBfetch(result);
-    if (row != NULL)
+    if (row != NULL) {
         port = atoi(row[0]);
+    }
     DBfree_result(result);
 
     return port;
@@ -209,7 +237,7 @@ int ja_host_auth(zbx_sock_t * sock, const char *host, const zbx_uint64_t inner_j
 
     zabbix_log(LOG_LEVEL_DEBUG, "In %s() host: %s", __function_name, host);
 
-    if (ja_host_getip(host, host_ip, inner_job_id) == 0) {
+    if (ja_host_getip(host, host_ip, inner_job_id, NULL, JA_TXN_ON) == 0) {
         return FAIL;
     }
 
@@ -279,7 +307,7 @@ int ja_host_lock(const char *host, const zbx_uint64_t inner_job_id)
 
     zabbix_log(LOG_LEVEL_DEBUG, "In %s() host: %s", __function_name, host);
 
-    if (ja_host_getip(host, NULL, inner_job_id) == 0)
+    if (ja_host_getip(host, NULL, inner_job_id, NULL, JA_TXN_ON) == 0)
         return FAIL;
 
     DBfree_result(DBselect

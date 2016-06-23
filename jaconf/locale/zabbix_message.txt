@@ -1,0 +1,16 @@
+
+# Job Arranger zabbix message  - 2014/03/14 -
+
+# Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+
+# Format: Message id, Language code, Message body
+
+# Comments: Language code conforms to the language code of Zabbix.
+
+TRG0001,en_gb,Trigger status became "Disabled".
+TRG0001,en_us,Trigger status became "Disabled".
+TRG0001,ja_jp,トリガーのステータスを"無効"に設定しました。
+
+TRG0002,en_gb,Host status became "Not monitored"
+TRG0002,en_us,Host status became "Not monitored"
+TRG0002,ja_jp,ホストのステータスが"無効"になりました。

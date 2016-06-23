@@ -825,6 +825,12 @@ namespace jp.co.ftf.jobcontroller.JobController
                     case ElementType.REBOOT:
                     // 保留解除アイコン 
                     case ElementType.RELEASE:
+                    //added by YAMA 2014/02/06
+                    // Zabbix連携アイコン 
+                    case ElementType.COOPERATION:
+                    //added by YAMA 2014/05/19
+                    /// 実行エージェントレスアイコン設定テーブル
+                    case ElementType.AGENTLESS:
                         {
                             // INフローの本数≠1、またはOUTフローの本数≠1の場合 
                             if (inFlowNum != 1 || outFlowNum != 1)

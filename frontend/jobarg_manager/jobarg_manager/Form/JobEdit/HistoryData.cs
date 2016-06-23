@@ -100,6 +100,14 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
         // <summary>保留解除アイコン設定テーブル</summary>
         public DataTable IconReleaseTable { get; set; }
 
+        //added by YAMA 2014/02/06
+        // <summary>Zabbix連携アイコン設定テーブル</summary>
+        public DataTable IconCooperationTable { get; set; }
+
+        //added by YAMA 2014/05/19
+        // <summary>エージェントレスアイコン設定テーブル</summary>
+        public DataTable IconAgentlessTable { get; set; }
+        
         public Hashtable SetedJobIds { get; set; }
 
         public Hashtable JobIdNos { get; set; }

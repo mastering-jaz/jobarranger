@@ -33,6 +33,9 @@ using System.Collections.ObjectModel;
 using jp.co.ftf.jobcontroller.DAO;
 using jp.co.ftf.jobcontroller.Common;
 
+//added by YAMA 2014/04/25
+using jp.co.ftf.jobcontroller.JobController.Form.JobEdit;
+
 namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
 {
     /// <summary>
@@ -134,21 +137,38 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
         private void listView_ContextMenuOpening(object sender, RoutedEventArgs e)
         {
             hideContextMenu.IsEnabled = false;
+
+            //added by YAMA 2014/04/25
+            DelayedContextMenu.IsEnabled = false;
+
             // 何らかのアイテムを選択した状態のとき
             if (listView1.SelectedItems.Count > 0)
             {
                 stopContextMenu.IsEnabled = true;
                 JobnetExecInfo jobnetExecInfo = (JobnetExecInfo)listView1.SelectedItems[0];
                 stopContextMenu.Tag = jobnetExecInfo;
+
+                //added by YAMA 2014/04/25
+                // 展開状況が「遅延起動」
+                if ((LoadStausType)jobnetExecInfo.load_status == LoadStausType.Delay)
+                {
+                    DelayedContextMenu.IsEnabled = true;
+                    DelayedContextMenu.Tag = jobnetExecInfo;
+                }
+
             }
             else
             {
                 stopContextMenu.IsEnabled = false;
+                //added by YAMA 2014/04/25
+                DelayedContextMenu.IsEnabled = false;
+
             }
             #if VIEWER
                 this.contextMenu.Visibility = System.Windows.Visibility.Hidden;
             #endif
         }
+
         //*******************************************************************
         /// <summary>リスト行データをダブルクリック</summary>
         /// <param name="sender">源</param>

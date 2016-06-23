@@ -33,7 +33,7 @@
         </Grid.RowDefinitions >
 
         <TextBlock HorizontalAlignment="Left" Margin="5,10,0,0" Text="{x:Static src:Properties.Resources.operation_day_label_text}" Width="Auto" Grid.Row="0"/>
-        <Button Name="btnLeft" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="87,6,0,0" Width="20" Height="20" Click="left_arrow_click" BorderBrush="Transparent" BorderThickness="0" Background="Transparent" 
+        <Button Name="btnLeft" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="55,8,0,0" Width="20" Height="20" Click="left_arrow_click" BorderBrush="Transparent" BorderThickness="0" Background="Transparent" 
  Foreground="White">
             <Button.Template>
                 <ControlTemplate TargetType="Button">
@@ -42,8 +42,8 @@
             </Button.Template>
             <Image Source="../../../Resources/arrow_left.gif" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
         </Button>
-        <TextBox HorizontalAlignment="Left" Margin="119,6,0,0" Name="textBox_year" VerticalAlignment="Top" Text="" Width="Auto" IsReadOnly="True" Grid.Row="0"/>
-        <Button Name="btnRight" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="164,6,0,0" Width="20" Height="20" Click="right_arrow_click" Grid.Row="0" BorderBrush="Transparent" BorderThickness="0" Background="Transparent" 
+        <TextBox HorizontalAlignment="Left" Margin="86,7,0,0" Name="textBox_year" VerticalAlignment="Top" Text="" Width="Auto" IsReadOnly="True" />
+        <Button Name="btnRight" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="130,8,0,0" Width="20" Height="20" Click="right_arrow_click" Grid.Row="0" BorderBrush="Transparent" BorderThickness="0" Background="Transparent" 
  Foreground="White">
             <Button.Template>
                 <ControlTemplate TargetType="Button">
@@ -52,13 +52,7 @@
             </Button.Template>
             <Image Source="../../../Resources/arrow_right.gif" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
         </Button>
-        <TextBlock HorizontalAlignment="Left" Margin="214,10,0,0" Text="{x:Static src:Properties.Resources.boot_time_label_text}" Width="Auto" Grid.Row="0"/>
-        <TextBox HorizontalAlignment="Left" Margin="273,7,0,0" Name="textBox_bootTimeHH" VerticalAlignment="Top" HorizontalContentAlignment="Center" 
-                 VerticalContentAlignment="Center" Text="" Width="50" Grid.Row="0" MaxLength="2"/>
-        <TextBlock HorizontalAlignment="Left" Margin="329,8,0,0" Text=":" Width="10" Grid.Row="0" FontWeight="ExtraBlack"/>
-        <TextBox HorizontalAlignment="Left" Margin="337,7,0,0" Name="textBox_bootTimeMI" VerticalAlignment="Top" HorizontalContentAlignment="Center" 
-                 VerticalContentAlignment="Center" Text="" Width="50"  Grid.Row="0" MaxLength="2"/>
-        <TextBlock HorizontalAlignment="Left" Margin="560,10,0,0" Text="{x:Static src:Properties.Resources.last_operation_day_label_text}" Width="Auto" Grid.Row="0"/>
+        <TextBlock HorizontalAlignment="Left" Margin="591,11,0,3" Text="{x:Static src:Properties.Resources.last_operation_day_label_text}" VerticalAlignment="Center" Width="Auto" />
         <TextBlock HorizontalAlignment="Left" Margin="670,10,0,0" Name="last_operation_day_value" Text="" Width="Auto" Grid.Row="0"/>
         <Border Margin="2" Grid.Row="1" Grid.Column="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" BorderThickness="1" BorderBrush="Black">
         <ScrollViewer HorizontalAlignment="Stretch"  Name="svContainer" VerticalAlignment="Stretch" HorizontalScrollBarVisibility="Visible">
@@ -67,5 +61,15 @@
             </ScrollViewer.Content>
         </ScrollViewer>
         </Border>
+        <Grid Height="28" HorizontalAlignment="Left" Margin="152,2,0,0" Name="grid1" VerticalAlignment="Top" Width="439">
+            <RadioButton Content="{x:Static src:Properties.Resources.rbStartTime_label_text}" Height="17" HorizontalAlignment="Left" Margin="4,7,0,0" Name="rbStartTime" VerticalAlignment="Center" Width="70" Checked="rbStartTime_Checked" />
+            <TextBox HorizontalAlignment="Left" Margin="75,5,0,0" Name="textBox_StartTime" VerticalAlignment="Top" Text="" Width="45" MaxLength="5" />
+            <RadioButton Content="{x:Static src:Properties.Resources.rbCycleStart_label_text}" Height="16" HorizontalAlignment="Right" Margin="0,7,218,0" Name="rbCycleStart" VerticalAlignment="Center" Checked="rbCycleStart_Checked" />
+            <TextBox HorizontalAlignment="Left" Margin="221,5,0,0" Name="textBox_CyclePeriodFrom" VerticalAlignment="Top" Text="" Width="45" MaxLength="5" />
+            <TextBox HorizontalAlignment="Left" Margin="284,5,0,0" Name="textBox_CyclePeriodTo" VerticalAlignment="Top" Text="" Width="45" MaxLength="5" />
+            <Label Content="～" Height="23" HorizontalAlignment="Left" Margin="263,0,0,0" Name="label1" VerticalAlignment="Center" Width="21" />
+            <TextBox HorizontalAlignment="Right" Margin="0,5,76,0" Name="textBox_CycleInterval" VerticalAlignment="Top" Text="" Width="30" MaxLength="3" />
+            <Label Content="{x:Static src:Properties.Resources.textBox_CycleInterval_label_text}" Height="23" HorizontalAlignment="Left" Margin="359,2,0,2" Name="label2" VerticalAlignment="Center" Width="59" />
+        </Grid>
     </Grid>
 </UserControl>

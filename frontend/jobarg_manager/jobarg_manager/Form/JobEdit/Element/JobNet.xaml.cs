@@ -58,6 +58,17 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             picJobnet.Fill = color;
             this.DataContext = new IconViewData();
         }
+
+        //added by YAMA 2014/07/01
+        public JobNet(SolidColorBrush color, SolidColorBrush characterColor)
+        {
+            InitializeComponent();
+            picJobnet.Fill = color;
+            tbJobId.Foreground = characterColor;		// 文字の色 設定
+            tbJobName.Foreground = characterColor;		// 文字の色 設定
+            this.DataContext = new IconViewData();
+        }
+
         #endregion
 
         #region プロパティ
@@ -379,9 +390,21 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                     break;
                 case RunJobMethodType.SKIP:
                     color = SystemConst.ColorConst.SkipColor;
+
+                    //added by YAMA 2014/07/01
+                    // スキップ設定時は白文字を設定
+                    tbJobId.Foreground = SystemConst.ColorConst.WhiteColor;
+                    tbJobName.Foreground = SystemConst.ColorConst.WhiteColor;
+
                     break;
                 default:
                     color = SystemConst.ColorConst.JobColor;
+
+                    //added by YAMA 2014/07/01
+                    // スキップ設定以外は黒文字を設定
+                    tbJobId.Foreground = SystemConst.ColorConst.BlackColor;
+                    tbJobName.Foreground = SystemConst.ColorConst.BlackColor;
+
                     break;
             }
             picJobnet.Fill = color;
@@ -391,6 +414,14 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
         public void InitSampleColor()
         {
             picJobnet.Fill = SystemConst.ColorConst.SampleColor;
+        }
+
+        //added by YAMA 2014/07/01
+        /// <summary>部品欄の文字色をセット</summary>
+        public void SetStatusCharacterColor(SolidColorBrush color)
+        {
+            tbJobId.Foreground = color;
+            tbJobName.Foreground = color;
         }
 
         /// <summary>実行状態によりアイコン色をセット</summary>

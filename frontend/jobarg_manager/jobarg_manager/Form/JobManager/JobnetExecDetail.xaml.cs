@@ -117,6 +117,14 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
         /// <summary> 実行保留解除アイコン設定テーブル </summary>
         private RunIconReleaseDAO _runIconReleaseDAO;
 
+        //added by YAMA 2014/02/06
+        /// <summary> 実行Zabbix連携アイコン設定テーブル </summary>
+        private RunIconCooperationDAO _runIconCooperationDAO;
+
+        //added by YAMA 2014/05/19
+        /// <summary> 実行エージェントレスアイコン設定テーブル </summary>
+        private RunIconAgentlessDAO _runIconAgentlessDAO;
+
         /// <summary>実行ジョブネットサマリ管理テーブル</summary>
         public DataTable RunJobnetSummaryTable { get; set; }
 
@@ -409,6 +417,14 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
 
             /// 実行リブートアイコン設定テーブル 
             _runIconReleaseDAO = new RunIconReleaseDAO(_dbAccess);
+
+            //added by YAMA 2014/02/06
+            /// 実行Zabbix連携アイコン設定テーブル 
+            _runIconCooperationDAO = new RunIconCooperationDAO(_dbAccess);
+
+            //added by YAMA 2014/05/19
+            /// 実行エージェントレスアイコン設定テーブル
+            _runIconAgentlessDAO = new RunIconAgentlessDAO(_dbAccess);
         }
 
 
@@ -479,6 +495,13 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
             // 実行保留解除アイコン設定テーブル 
             container.IconReleaseTable = _runIconReleaseDAO.GetEntityByJobnet(innerJobnetId);
 
+            //added by YAMA 2014/02/06
+            // 実行Zabbix連携アイコン設定テーブル 
+            container.IconCooperationTable = _runIconCooperationDAO.GetEntityByJobnet(innerJobnetId);
+
+            //added by YAMA 2014/05/19
+            /// 実行エージェントレスアイコン設定テーブル
+            container.IconAgentlessTable = _runIconAgentlessDAO.GetEntityByJobnet(innerJobnetId);
         }
 
         //*******************************************************************
@@ -497,7 +520,12 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
                 // 実行ジョブタイプ 
                 jobData.JobType = (ElementType)row["job_type"];
                 SolidColorBrush iconColor = getIconColor(row);
-                CommonItem room = new CommonItem(container, jobData, Consts.EditType.READ, iconColor);
+
+                //added by YAMA 2014/07/01
+                //CommonItem room = new CommonItem(container, jobData, Consts.EditType.READ, iconColor);
+                SolidColorBrush characterColor = getCharacterColor(row);
+                CommonItem room = new CommonItem(container, jobData, Consts.EditType.READ, iconColor, characterColor);
+
                 // 実行ジョブID 
                 room.JobId = Convert.ToString(row["job_id"]);
                 // 実行内部ジョブID 
@@ -574,7 +602,12 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
                 SolidColorBrush iconColor = getIconColor(row);
                 CommonItem room = (CommonItem)container.JobItems[Convert.ToString(row["inner_job_id"])];
                 room.SetStatusColor(iconColor);
-           }
+
+                //added by YAMA 2014/07/01
+                SolidColorBrush characterColor = getCharacterColor(row);
+                room.SetStatusCharacterColor(characterColor);
+
+            }
 
         }
 
@@ -628,7 +661,23 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
             lblUpdDate.Text = (ConvertUtil.ConverIntYYYYMMDDHHMISS2Date(Convert.ToInt64(row["update_date"]))).ToString("yyyy/MM/dd HH:mm:ss");
             //ユーザー名
             lblUserName.Text = Convert.ToString(row["user_name"]);
-        }
+
+            //added by YAMA 2014/04/22
+            // ジョブネットの多重起動の有無
+            switch (Convert.ToInt32(row["multiple_start_up"]))
+            {
+                case 0:
+                    lblmultiple_start.Text = Properties.Resources.multiple_start_type1;
+                    break;
+                case 1:
+                    lblmultiple_start.Text = Properties.Resources.multiple_start_type2;
+                    break;
+                case 2:
+                    lblmultiple_start.Text = Properties.Resources.multiple_start_type3;
+                    break;
+            }
+
+        }            
 
         //*******************************************************************
         /// <summary>アイコン色取得</summary>
@@ -676,6 +725,52 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
                     if (timeout_flag.Equals(RunJobTimeoutType.TIMEOUT)) color = new SolidColorBrush(Colors.Orange);
                     break;
 
+            }
+            return color;
+        }
+
+
+        //added by YAMA 2014/07/01
+        //*******************************************************************
+        /// <summary>文字色取得</summary>
+        //*******************************************************************
+        private SolidColorBrush getCharacterColor(DataRow row)
+        {
+            int status = (Int32)row["status"];
+            RunJobMethodType method_flag = (RunJobMethodType)row["method_flag"];
+            RunJobTimeoutType timeout_flag = (RunJobTimeoutType)row["timeout_flag"];
+            SolidColorBrush color = new SolidColorBrush(Colors.Aquamarine);
+
+            color = new SolidColorBrush(Colors.Black);
+
+            switch ((RunJobStatusType)row["status"])
+            {
+                case RunJobStatusType.None:
+                    if (method_flag.Equals(RunJobMethodType.SKIP))
+                    {
+                        color = new SolidColorBrush(Colors.White);
+                    }
+                    break;
+                case RunJobStatusType.Prepare:
+                    if (method_flag.Equals(RunJobMethodType.SKIP))
+                    {
+                        color = new SolidColorBrush(Colors.White);
+                    }
+                    break;
+                case RunJobStatusType.During:
+                    break;
+                case RunJobStatusType.Normal:
+                    if (method_flag.Equals(RunJobMethodType.SKIP))
+                    {
+                        color = new SolidColorBrush(Colors.White);
+                    }
+                    break;
+                case RunJobStatusType.RunErr:
+                    break;
+                case RunJobStatusType.Abnormal:
+                    break;
+                case RunJobStatusType.ForceStop:
+                    break;
             }
             return color;
         }

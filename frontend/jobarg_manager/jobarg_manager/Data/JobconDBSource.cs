@@ -36,6 +36,9 @@ namespace jp.co.ftf.jobcontroller.JobController
         private bool _healthCheckFlag;
         private int _healthCheckInterval;
 
+        //added by YAMA 2014/03/03
+        private int _jazabbixVersion;
+
         public string JobconName
         {
             get { return _jobconName; }
@@ -80,8 +83,17 @@ namespace jp.co.ftf.jobcontroller.JobController
             set { _healthCheckInterval = value; }
         }
 
+        //added by YAMA 2014/03/03
+        public int JaZabbixVersion
+        {
+            get { return _jazabbixVersion; }
+            set { _jazabbixVersion = value; }
+        }
+
         public JobconDBSource(String jobconName, String dbUser, String dbPass, String dbs, Consts.DBTYPE dbType,
-                                bool healthCheckFlag, int healthCheckInterval)
+                                bool healthCheckFlag, int healthCheckInterval, int jazabbixVersion)
+//        public JobconDBSource(String jobconName, String dbUser, String dbPass, String dbs, Consts.DBTYPE dbType,
+//                                bool healthCheckFlag, int healthCheckInterval)
         {
             _jobconName = jobconName;
             _dbUser = dbUser;
@@ -90,6 +102,10 @@ namespace jp.co.ftf.jobcontroller.JobController
             _dbType = dbType;
             _healthCheckFlag = healthCheckFlag;
             _healthCheckInterval = healthCheckInterval;
+
+            //added by YAMA 2014/03/03
+            _jazabbixVersion = jazabbixVersion;
+
             _connnectStr = "DSN=" + dbs + ";UID=" + dbUser + ";PWD=" + dbPass + "; Connect Timeout=300"; ;
         }
         public override string ToString()
@@ -119,7 +135,20 @@ namespace jp.co.ftf.jobcontroller.JobController
             if (healthCheckFlag && healthCheckInterval == 0)
                 healthCheckInterval = 5;
 
-            return new JobconDBSource(jobconName, dbUser, dbPass, dbs, dbType, healthCheckFlag, healthCheckInterval);
+            //added by YAMA 2014/03/03
+            int jazabbixVersion = 0;
+            try
+            {
+                jazabbixVersion = Convert.ToInt16(dr["JaZabbixVersion"]);
+            }
+            catch (Exception ex)
+            {
+                jazabbixVersion = 2;
+            }
+
+            //added by YAMA 2014/03/03
+            return new JobconDBSource(jobconName, dbUser, dbPass, dbs, dbType, healthCheckFlag, healthCheckInterval, jazabbixVersion);
+//            return new JobconDBSource(jobconName, dbUser, dbPass, dbs, dbType, healthCheckFlag, healthCheckInterval);
         }
 
     }

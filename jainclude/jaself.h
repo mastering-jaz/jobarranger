@@ -18,9 +18,9 @@
 **/
 
 /*
-** $Date:: 2012-11-26 13:25:18 +0900 #$
-** $Revision: 2727 $
-** $Author: ossinfra@FITECHLABS.CO.JP $
+** $Date:: 2014-05-01 16:37:08 +0900 #$
+** $Revision: 5945 $
+** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
 #ifndef JOBARG_JASELF_H
@@ -44,6 +44,7 @@
 int	ja_get_process_type_forks(unsigned char process_type);
 const char	*ja_get_process_type_string(unsigned char process_type);
 void	ja_init_selfmon_collector();
+void	ja_free_selfmon_collector();
 void	ja_update_selfmon_counter(unsigned char state);
 void	ja_collect_selfmon_stats();
 void	ja_sleep_loop(int sleeptime);

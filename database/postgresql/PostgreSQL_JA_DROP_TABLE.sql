@@ -1,5 +1,5 @@
 
--- Job Arranger drop table SQL for PostgreSQL  - 2014/02/05 -
+-- Job Arranger drop table SQL for PostgreSQL  - 2014/03/25 -
 
 -- Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
 
@@ -12,6 +12,7 @@ DROP TABLE ja_schedule_jobnet_table CASCADE;
 DROP TABLE ja_jobnet_control_table CASCADE;
 DROP TABLE ja_job_control_table CASCADE;
 DROP TABLE ja_flow_control_table CASCADE;
+DROP TABLE ja_icon_agentless_table CASCADE;
 DROP TABLE ja_icon_calc_table CASCADE;
 DROP TABLE ja_icon_end_table CASCADE;
 DROP TABLE ja_icon_extjob_table CASCADE;
@@ -28,12 +29,14 @@ DROP TABLE ja_icon_reboot_table CASCADE;
 DROP TABLE ja_icon_release_table CASCADE;
 DROP TABLE ja_icon_task_table CASCADE;
 DROP TABLE ja_icon_value_table CASCADE;
+DROP TABLE ja_icon_zabbix_link_table CASCADE;
 DROP TABLE ja_define_value_jobcon_table CASCADE;
 DROP TABLE ja_define_extjob_table CASCADE;
 DROP TABLE ja_run_jobnet_summary_table CASCADE;
 DROP TABLE ja_run_jobnet_table CASCADE;
 DROP TABLE ja_run_job_table CASCADE;
 DROP TABLE ja_run_flow_table CASCADE;
+DROP TABLE ja_run_icon_agentless_table CASCADE;
 DROP TABLE ja_run_icon_calc_table CASCADE;
 DROP TABLE ja_run_icon_end_table CASCADE;
 DROP TABLE ja_run_icon_extjob_table CASCADE;
@@ -50,10 +53,12 @@ DROP TABLE ja_run_icon_reboot_table CASCADE;
 DROP TABLE ja_run_icon_release_table CASCADE;
 DROP TABLE ja_run_icon_task_table CASCADE;
 DROP TABLE ja_run_icon_value_table CASCADE;
+DROP TABLE ja_run_icon_zabbix_link_table CASCADE;
 DROP TABLE ja_run_value_before_table CASCADE;
 DROP TABLE ja_run_value_after_table CASCADE;
 DROP TABLE ja_value_before_jobnet_table CASCADE;
 DROP TABLE ja_value_after_jobnet_table CASCADE;
+DROP TABLE ja_session_table CASCADE;
 DROP TABLE ja_run_log_table CASCADE;
 DROP TABLE ja_define_run_log_message_table CASCADE;
 DROP TABLE ja_index_table CASCADE;

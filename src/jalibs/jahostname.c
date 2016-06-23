@@ -18,9 +18,9 @@
 **/
 
 /*
-** $Date:: 2013-05-14 09:55:36 +0900 #$
-** $Revision: 4619 $
-** $Author: ossinfra@FITECHLABS.CO.JP $
+** $Date:: 2014-05-12 10:24:25 +0900 #$
+** $Revision: 5954 $
+** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
 #include "common.h"
@@ -45,26 +45,29 @@ int ja_hostname(char *hostname)
 #ifdef _WINDOWS
     DWORD dwSize = 256;
     TCHAR computerName[256];
-    if (0 == GetComputerName(computerName, &dwSize))
-        return FAIL;
 
-    zbx_snprintf(hostname, JA_MAX_STRING_LEN, "%s",
-                 zbx_unicode_to_utf8(computerName));
+    if (0 == GetComputerName(computerName, &dwSize)) {
+        return FAIL;
+    }
+    zbx_snprintf(hostname, JA_MAX_STRING_LEN, "%s", zbx_unicode_to_utf8(computerName));
+
     return SUCCEED;
 #else
     FILE *fp;
     char value[JA_MAX_STRING_LEN];
 
-    zbx_snprintf(value, JA_MAX_STRING_LEN, "");
-    if ((fp = popen("hostname", "r")) == NULL)
+    memset(value, '\0', sizeof(value));
+    if ((fp = popen("hostname", "r")) == NULL) {
         return FAIL;
+    }
 
-    if (fread(value, sizeof(char), JA_MAX_STRING_LEN, fp) == 0) {
+    if (fread(value, sizeof(char), (JA_MAX_STRING_LEN - 1), fp) == 0) {
         pclose(fp);
         return FAIL;
     }
     zbx_rtrim(value, " \n");
     pclose(fp);
+
     zbx_snprintf(hostname, JA_MAX_STRING_LEN, "%s", value);
     return SUCCEED;
 #endif

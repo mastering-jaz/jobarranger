@@ -40,8 +40,8 @@ ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ax_lib_mysql.m4 \
 	$(top_srcdir)/m4/ax_lib_postgresql.m4 \
 	$(top_srcdir)/m4/iconv.m4 $(top_srcdir)/m4/libjson.m4 \
-	$(top_srcdir)/m4/libsqlite3.m4 $(top_srcdir)/m4/resolv.m4 \
-	$(top_srcdir)/configure.in
+	$(top_srcdir)/m4/libsqlite3.m4 $(top_srcdir)/m4/libssh2.m4 \
+	$(top_srcdir)/m4/resolv.m4 $(top_srcdir)/configure.in
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
@@ -54,7 +54,8 @@ ARFLAGS = cru
 libjajob_a_AR = $(AR) $(ARFLAGS)
 libjajob_a_LIBADD =
 am_libjajob_a_OBJECTS = libjajob_a-jajobiconextjob.$(OBJEXT) \
-	libjajob_a-jajobiconjob.$(OBJEXT) libjajob_a-jajob.$(OBJEXT)
+	libjajob_a-jajobiconjob.$(OBJEXT) \
+	libjajob_a-jajobiconless.$(OBJEXT) libjajob_a-jajob.$(OBJEXT)
 libjajob_a_OBJECTS = $(am_libjajob_a_OBJECTS)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/include
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -139,6 +140,9 @@ SQLITE3_CPPFLAGS = @SQLITE3_CPPFLAGS@
 SQLITE3_LDFLAGS = @SQLITE3_LDFLAGS@
 SQLITE3_LIBS = @SQLITE3_LIBS@
 SQLITE3_VERSION = @SQLITE3_VERSION@
+SSH2_CFLAGS = @SSH2_CFLAGS@
+SSH2_LDFLAGS = @SSH2_LDFLAGS@
+SSH2_LIBS = @SSH2_LIBS@
 STRIP = @STRIP@
 VERSION = @VERSION@
 abs_builddir = @abs_builddir@
@@ -196,6 +200,7 @@ libjajob_a_CFLAGS = -I@top_srcdir@/jainclude/
 libjajob_a_SOURCES = \
 	jajobiconextjob.c jajobiconextjob.h \
 	jajobiconjob.c jajobiconjob.h \
+	jajobiconless.c jajobiconless.h \
 	jajob.c jajob.h
 
 all: all-am
@@ -249,6 +254,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjajob_a-jajob.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjajob_a-jajobiconextjob.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjajob_a-jajobiconjob.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjajob_a-jajobiconless.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -291,6 +297,20 @@ libjajob_a-jajobiconjob.obj: jajobiconjob.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='jajobiconjob.c' object='libjajob_a-jajobiconjob.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjajob_a_CFLAGS) $(CFLAGS) -c -o libjajob_a-jajobiconjob.obj `if test -f 'jajobiconjob.c'; then $(CYGPATH_W) 'jajobiconjob.c'; else $(CYGPATH_W) '$(srcdir)/jajobiconjob.c'; fi`
+
+libjajob_a-jajobiconless.o: jajobiconless.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjajob_a_CFLAGS) $(CFLAGS) -MT libjajob_a-jajobiconless.o -MD -MP -MF $(DEPDIR)/libjajob_a-jajobiconless.Tpo -c -o libjajob_a-jajobiconless.o `test -f 'jajobiconless.c' || echo '$(srcdir)/'`jajobiconless.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libjajob_a-jajobiconless.Tpo $(DEPDIR)/libjajob_a-jajobiconless.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='jajobiconless.c' object='libjajob_a-jajobiconless.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjajob_a_CFLAGS) $(CFLAGS) -c -o libjajob_a-jajobiconless.o `test -f 'jajobiconless.c' || echo '$(srcdir)/'`jajobiconless.c
+
+libjajob_a-jajobiconless.obj: jajobiconless.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjajob_a_CFLAGS) $(CFLAGS) -MT libjajob_a-jajobiconless.obj -MD -MP -MF $(DEPDIR)/libjajob_a-jajobiconless.Tpo -c -o libjajob_a-jajobiconless.obj `if test -f 'jajobiconless.c'; then $(CYGPATH_W) 'jajobiconless.c'; else $(CYGPATH_W) '$(srcdir)/jajobiconless.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libjajob_a-jajobiconless.Tpo $(DEPDIR)/libjajob_a-jajobiconless.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='jajobiconless.c' object='libjajob_a-jajobiconless.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjajob_a_CFLAGS) $(CFLAGS) -c -o libjajob_a-jajobiconless.obj `if test -f 'jajobiconless.c'; then $(CYGPATH_W) 'jajobiconless.c'; else $(CYGPATH_W) '$(srcdir)/jajobiconless.c'; fi`
 
 libjajob_a-jajob.o: jajob.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjajob_a_CFLAGS) $(CFLAGS) -MT libjajob_a-jajob.o -MD -MP -MF $(DEPDIR)/libjajob_a-jajob.Tpo -c -o libjajob_a-jajob.o `test -f 'jajob.c' || echo '$(srcdir)/'`jajob.c

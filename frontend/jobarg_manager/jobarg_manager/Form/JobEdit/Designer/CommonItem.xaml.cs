@@ -94,6 +94,29 @@ public partial class CommonItem : UserControl, IRoom
 
     }
 
+    //added by YAMA 2014/07/01
+    public CommonItem(IContainer container, JobData data, Consts.EditType editType, SolidColorBrush color, SolidColorBrush characterColor)
+    {
+
+        InitializeComponent();
+
+        // コンテナのセット 
+        _container = container;
+
+        // 内容アイコンの初期化 
+        InitContentItem(data, editType, color, characterColor);
+
+        // 内容のコンテナのセット  
+        _contentItem.Container = container; ;
+
+        // 各アイコン設定テーブルを登録 
+        if (Consts.EditType.Add == editType)
+            InsertIconData(data);
+        this.ItemEditType = editType;
+        this.Height = this.PicHeight;
+        this.Width = this.PicWidth;
+
+    }
 
     #endregion
 
@@ -577,6 +600,13 @@ public partial class CommonItem : UserControl, IRoom
         this.ContentItem.SetStatusColor(color);
     }
 
+    //added by YAMA 2014/07/01
+    /// <summary>部品欄の文字色をセット</summary>
+    public void SetStatusCharacterColor(SolidColorBrush color)
+    {
+        this.ContentItem.SetStatusCharacterColor(color);
+    }
+
     /// <summary>部品の位置をセット</summary>
     /// <param name="x">x座標</param>
     /// <param name="y">y座標</param>
@@ -853,6 +883,22 @@ public partial class CommonItem : UserControl, IRoom
                     release.SetDisable();
                 release.ShowDialog();
                 break;
+            //added by YAMA 2014/02/04
+            // 18：Zabbix連携の場合 
+            case ElementType.COOPERATION:
+                CooperationSetting cooperation = new CooperationSetting(this, jobId, ItemEditType);
+                if (ItemEditType == Consts.EditType.READ || viewer)
+                    cooperation.SetDisable();
+                cooperation.ShowDialog();
+                break;
+            //added by YAMA 2014/05/19
+            // 19：エージェントレスの場合 
+            case ElementType.AGENTLESS:
+                AgentlessSetting agentless = new AgentlessSetting(this, jobId, ItemEditType);
+                if (ItemEditType == Consts.EditType.READ || viewer)
+                    agentless.SetDisable();
+                agentless.ShowDialog();
+                break;
             default:
                 break;
         }
@@ -1034,6 +1080,16 @@ public partial class CommonItem : UserControl, IRoom
             case ElementType.RELEASE:
                 item = new Release();
                 break;
+            //added by YAMA 2014/02/04
+            // 18：Zabbix連携
+            case ElementType.COOPERATION:
+                item = new Cooperation();
+                break;
+            //added by YAMA 2014/05/19
+            // 19：エージェントレス
+            case ElementType.AGENTLESS:
+                item = new Agentless();
+                break;
         }
 
         string jobId = "";
@@ -1175,6 +1231,16 @@ public partial class CommonItem : UserControl, IRoom
             // 17：保留解除
             case ElementType.RELEASE:
                 item = new Release(methodType);
+                break;
+            //added by YAMA 2014/02/04
+            // 18：Zabbix連携
+            case ElementType.COOPERATION:
+                item = new Cooperation(methodType);
+                break;
+            //added by YAMA 2014/05/19
+            // 19：エージェントレス
+            case ElementType.AGENTLESS:
+                item = new Agentless(methodType);
                 break;
         }
 
@@ -1320,6 +1386,168 @@ public partial class CommonItem : UserControl, IRoom
             case ElementType.RELEASE:
                 item = new Release(color);
                 break;
+            //added by YAMA 2014/02/04
+            // 18：Zabbix連携
+            case ElementType.COOPERATION:
+                item = new Cooperation(color);
+                break;
+            //added by YAMA 2014/05/19
+            // 19：エージェントレス
+            case ElementType.AGENTLESS:
+                item = new Agentless(color);
+                break;
+        }
+
+        string jobId = "";
+        if (Consts.EditType.Add == editType)
+        {
+            // ジョブデータをセット 
+            DataRow row = _container.JobControlTable.NewRow();
+            _container.JobControlTable.Rows.Add(row);
+
+            jobId = CommonUtil.GetJobId(((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)_container.ParantWindow).JobNoHash, type);
+            if (ElementType.JOBNET == type)
+                jobId = data.Data.ToString();
+
+            // 既存の場合、繰り返して取得 
+            int count = 0;
+            while (ElementType.START != type
+                && _container.JobItems.ContainsKey(jobId))
+            {
+                count++;
+                jobId = CommonUtil.GetJobId(((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)_container.ParantWindow).JobNoHash, type);
+                if (ElementType.JOBNET == type)
+                    jobId = data.Data.ToString() + "-" + count;
+            }
+            // ジョブネットID 
+            row["jobnet_id"] = _container.JobnetId;
+            // ジョブID 
+            row["job_id"] = jobId;
+            // 更新日 
+            row["update_date"] = _container.TmpUpdDate;
+            // ジョブタイプ 
+            row["job_type"] = type;
+            // ジョブネットの場合 
+            if (ElementType.JOBNET == type)
+                row["job_name"] = data.Data.ToString();
+        }
+
+        // コンクリート 
+        commonRoom.Children.Add((UIElement)item);
+
+        // 変数の初期化 
+        this.ContentItem = (IElement)item;
+        this.JobId = jobId;
+        // ジョブネットの場合、ジョブ名にリンク先ジョブネットIDをセット 
+        if (ElementType.JOBNET == type && Consts.EditType.Add == editType)
+            this.JobName = data.Data.ToString();
+        else
+            this.JobName = "";
+
+        return true;
+    }
+
+    //added by YAMA 2014/07/01
+    //************************************************************************
+    /// <summary>アイコンの初期化処理</summary>
+    /// <param name="data">データ</param>
+    /// <param name="editType">編集タイプ</param>
+    /// <param name="color">アイコンカラー</param>
+    /// <param name="characterColor">文字色</param>
+    //************************************************************************
+    private bool InitContentItem(JobData data, Consts.EditType editType, SolidColorBrush color, SolidColorBrush characterColor)
+    {
+        if (data == null)
+            return false;
+
+        ElementType type = data.JobType;
+        this.ElementType = type;
+
+        // アイテムのインスタンス 
+        IElement item = null;
+
+        switch (type)
+        {
+            // 0:開始の場合 
+            case ElementType.START:
+                item = new Start(color);
+                break;
+            // 1:終了の場合 
+            case ElementType.END:
+                item = new End(color);
+                break;
+            // 2:条件分岐の場合 
+            case ElementType.IF:
+                item = new If(color);
+                break;
+            // 3:ジョブコントローラ変数の場合 
+            case ElementType.ENV:
+                item = new Env(color, characterColor);
+                break;
+            // 4:ジョブの場合 
+            case ElementType.JOB:
+                item = new Job(color, characterColor);
+                break;
+            // 5:ジョブネットの場合 
+            case ElementType.JOBNET:
+                item = new JobNet(color, characterColor);
+                break;
+            // 6:並行処理開始の場合 
+            case ElementType.MTS:
+                item = new Mts(color);
+                break;
+            // 7：並行処理終了の場合 
+            case ElementType.MTE:
+                item = new Mte(color);
+                break;
+            // 8：ループの場合 
+            case ElementType.LOOP:
+                item = new Loop(color);
+                break;
+            // 9：拡張ジョブの場合 
+            case ElementType.EXTJOB:
+                item = new ExtJob(color, characterColor);
+                break;
+            //  10：計算の場合 
+            case ElementType.CAL:
+                item = new Cal(color, characterColor);
+                break;
+            // 11：タスク場合 
+            case ElementType.TASK:
+                item = new Task(color, characterColor);
+                break;
+            // 12：情報取得場合 
+            case ElementType.INF:
+                item = new Inf(color, characterColor);
+                break;
+            // 13：分岐終了 
+            case ElementType.IFE:
+                item = new Ife(color);
+                break;
+            // 14：ファイル転送 
+            case ElementType.FCOPY:
+                item = new FCopy(color, characterColor);
+                break;
+            // 15：ファイル待ち合わせ 
+            case ElementType.FWAIT:
+                item = new FWait(color, characterColor);
+                break;
+            // 16：リブート 
+            case ElementType.REBOOT:
+                item = new Reboot(color, characterColor);
+                break;
+            // 17：保留解除
+            case ElementType.RELEASE:
+                item = new Release(color, characterColor);
+                break;
+            // 18：Zabbix連携
+            case ElementType.COOPERATION:
+                item = new Cooperation(color, characterColor);
+                break;
+            // 19：エージェントレス
+            case ElementType.AGENTLESS:
+                item = new Agentless(color, characterColor);
+                break;
         }
 
         string jobId = "";
@@ -1445,6 +1673,17 @@ public partial class CommonItem : UserControl, IRoom
             // 17：保留解除の場合 
             case ElementType.RELEASE:
                 InsertIconReleaseTbl();
+                break;
+
+            //added by YAMA 2014/02/06
+            // 18：Zabbix連携の場合 
+            case ElementType.COOPERATION:
+                InsertIconCooperationTbl();
+                break;
+            //added by YAMA 2014/05/19
+            // 19：エージェントレスの場合 
+            case ElementType.AGENTLESS:
+                InsertIconAgentlessTbl();
                 break;
         }
 
@@ -1705,6 +1944,63 @@ public partial class CommonItem : UserControl, IRoom
 
 
     }
+
+    //added by YAMA 2014/02/06
+    //************************************************************************
+    /// <summary>Zabbix連携アイコン設定テーブルの登録処理</summary>
+    //************************************************************************
+    private void InsertIconCooperationTbl()
+    {
+        string jobId = JobId;
+        DataRow row = _container.IconCooperationTable.NewRow();
+        _container.IconCooperationTable.Rows.Add(row);
+
+        row["jobnet_id"] = _container.JobnetId;
+        row["job_id"] = JobId;
+        row["update_date"] = _container.TmpUpdDate;
+        row["link_target"] = 0;
+        row["link_operation"] = 0;
+        row["groupid"] = DBNull.Value;
+        row["hostid"] = DBNull.Value;
+        row["itemid"] = DBNull.Value;
+        row["triggerid"] = DBNull.Value;
+
+    }
+
+    //added by YAMA 2014/05/19
+    //************************************************************************
+    /// <summary>エージェントレスアイコン設定テーブルの登録処理</summary>
+    //************************************************************************
+    private void InsertIconAgentlessTbl()
+    {
+        string jobId = JobId;
+        DataRow row = _container.IconAgentlessTable.NewRow();
+        _container.IconAgentlessTable.Rows.Add(row);
+
+        row["jobnet_id"] = _container.JobnetId;
+        row["job_id"] = JobId;
+        row["update_date"] = _container.TmpUpdDate;
+        row["host_flag"] = 0;
+        row["connection_method"] = 0;
+        row["session_flag"] = 0;
+        row["auth_method"] = 0;
+        row["run_mode"] = 0;
+        row["line_feed_code"] = 0;
+        row["timeout"] = 0;
+        row["session_id"] = DBNull.Value;
+        row["login_user"] = DBNull.Value;
+        row["login_password"] = DBNull.Value;
+        row["public_key"] = DBNull.Value;
+        row["private_key"] = DBNull.Value;
+        row["passphrase"] = DBNull.Value;
+        row["host_name"] = DBNull.Value;
+        row["stop_code"] = DBNull.Value;
+        row["terminal_type"] = DBNull.Value;
+        row["character_code"] = DBNull.Value;
+        row["prompt_string"] = DBNull.Value;
+        row["command"] = DBNull.Value;
+    }
+
 
     private double[] ResizeMoveDalta(double deltaH, double deltaV)
     {

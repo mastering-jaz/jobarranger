@@ -18,8 +18,8 @@
 **/
 
 /*
-** $Date:: 2013-12-18 16:41:02 +0900 #$
-** $Revision: 5657 $
+** $Date:: 2014-04-25 14:25:43 +0900 #$
+** $Revision: 5924 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -30,6 +30,7 @@
 #define	JA_RUN_ID_JOBNET_EX		3
 #define	JA_RUN_ID_JOB			20
 #define	JA_RUN_ID_FLOW			30
+#define	JA_RUN_ID_SESSION		40
 
 zbx_uint64_t	get_next_id(int count_id, zbx_uint64_t inner_jobnet_id, char *jobnet_id, zbx_uint64_t inner_job_id);
 

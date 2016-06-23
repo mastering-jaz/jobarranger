@@ -18,8 +18,8 @@
 **/
 
 /*
-** $Date:: 2014-03-06 16:18:01 +0900 #$
-** $Revision: 5866 $
+** $Date:: 2014-03-18 09:52:42 +0900 #$
+** $Revision: 5909 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -265,7 +265,7 @@ char *ja_user_lang(zbx_uint64_t userid)
         lang = strdup("en_gb");
     } else {
         lang = strdup(row[0]);
-         for (p = lang; *p != '\0'; p++) {
+        for (p = lang; *p != '\0'; p++) {
             *p = tolower(*p);
         }
     }

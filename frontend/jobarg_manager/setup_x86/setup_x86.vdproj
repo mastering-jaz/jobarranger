@@ -39,7 +39,7 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_6957718DA456EF206418A55859B9B54C"
+        "MsmKey" = "8:_60EB40F1E74C9CF217C11E071DC594EB"
         "OwnerKey" = "8:_390ADA82E66D405D94648740580E9DA2"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -51,13 +51,7 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_90DABB89B6104A78831455DBC5A4F55D"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_AB924849F0F70AF4D20056194316A585"
+        "MsmKey" = "8:_9BA8EEB248E2D9CD36CB337218B423FA"
         "OwnerKey" = "8:_390ADA82E66D405D94648740580E9DA2"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -69,8 +63,8 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_B7A9E5912CE24036B31AF18E01AEBCE8"
-        "OwnerKey" = "8:_UNDEFINED"
+        "MsmKey" = "8:_CE23958A376E97497FC8A2DA6A133DA1"
+        "OwnerKey" = "8:_390ADA82E66D405D94648740580E9DA2"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -81,26 +75,20 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_D2657F860BCF5122F831686B8DEA9626"
-        "OwnerKey" = "8:_390ADA82E66D405D94648740580E9DA2"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_D2657F860BCF5122F831686B8DEA9626"
-        "OwnerKey" = "8:_D46CFD5D7DB7494BACDE9B246A319727"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_D2C0D61F105249C3BC035A74AA90BDFD"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_D46CFD5D7DB7494BACDE9B246A319727"
+        "MsmKey" = "8:_D302C4476F55CB3D81986A4FA5D14EA6"
         "OwnerKey" = "8:_390ADA82E66D405D94648740580E9DA2"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_D302C4476F55CB3D81986A4FA5D14EA6"
+        "OwnerKey" = "8:_CE23958A376E97497FC8A2DA6A133DA1"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -124,25 +112,25 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_6957718DA456EF206418A55859B9B54C"
+        "OwnerKey" = "8:_9BA8EEB248E2D9CD36CB337218B423FA"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_AB924849F0F70AF4D20056194316A585"
+        "OwnerKey" = "8:_60EB40F1E74C9CF217C11E071DC594EB"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_D46CFD5D7DB7494BACDE9B246A319727"
+        "OwnerKey" = "8:_CE23958A376E97497FC8A2DA6A133DA1"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_D2657F860BCF5122F831686B8DEA9626"
+        "OwnerKey" = "8:_D302C4476F55CB3D81986A4FA5D14EA6"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -431,20 +419,20 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_6957718DA456EF206418A55859B9B54C"
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_60EB40F1E74C9CF217C11E071DC594EB"
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:MonthCalendarControl, Version=1.0.5066.31403, Culture=neutral, processorArchitecture=MSIL"
+            "AssemblyAsmDisplayName" = "8:log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
-                    "_6957718DA456EF206418A55859B9B54C"
+                    "_60EB40F1E74C9CF217C11E071DC594EB"
                     {
-                    "Name" = "8:MonthCalendarControl.DLL"
+                    "Name" = "8:log4net.DLL"
                     "Attributes" = "3:512"
                     }
                 }
-            "SourcePath" = "8:MonthCalendarControl.DLL"
+            "SourcePath" = "8:log4net.DLL"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_72718675066546058EF87E9C54C7EB6D"
@@ -482,40 +470,20 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_90DABB89B6104A78831455DBC5A4F55D"
-            {
-            "SourcePath" = "8:..\\..\\..\\doc\\Job_Arranger_インストールガイド.pdf"
-            "TargetName" = "8:Job_Arranger_インストールガイド.pdf"
-            "Tag" = "8:"
-            "Folder" = "8:_0176D7E7D69A40148643F4DCD22F6576"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_AB924849F0F70AF4D20056194316A585"
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_9BA8EEB248E2D9CD36CB337218B423FA"
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL"
+            "AssemblyAsmDisplayName" = "8:MonthCalendarControl, Version=1.0.5297.24117, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
-                    "_AB924849F0F70AF4D20056194316A585"
+                    "_9BA8EEB248E2D9CD36CB337218B423FA"
                     {
-                    "Name" = "8:log4net.DLL"
+                    "Name" = "8:MonthCalendarControl.DLL"
                     "Attributes" = "3:512"
                     }
                 }
-            "SourcePath" = "8:log4net.DLL"
+            "SourcePath" = "8:MonthCalendarControl.DLL"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_72718675066546058EF87E9C54C7EB6D"
@@ -553,40 +521,20 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_B7A9E5912CE24036B31AF18E01AEBCE8"
-            {
-            "SourcePath" = "8:..\\..\\..\\doc\\Job_Arranger_操作マニュアル.pdf"
-            "TargetName" = "8:Job_Arranger_操作マニュアル.pdf"
-            "Tag" = "8:"
-            "Folder" = "8:_0176D7E7D69A40148643F4DCD22F6576"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_D2657F860BCF5122F831686B8DEA9626"
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_CE23958A376E97497FC8A2DA6A133DA1"
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:common, Version=1.2.0.0, Culture=neutral, processorArchitecture=MSIL"
+            "AssemblyAsmDisplayName" = "8:dao, Version=1.2.0.0, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
-                    "_D2657F860BCF5122F831686B8DEA9626"
+                    "_CE23958A376E97497FC8A2DA6A133DA1"
                     {
-                    "Name" = "8:common.DLL"
+                    "Name" = "8:dao.DLL"
                     "Attributes" = "3:512"
                     }
                 }
-            "SourcePath" = "8:common.DLL"
+            "SourcePath" = "8:dao.DLL"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_72718675066546058EF87E9C54C7EB6D"
@@ -624,20 +572,20 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_D46CFD5D7DB7494BACDE9B246A319727"
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_D302C4476F55CB3D81986A4FA5D14EA6"
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:dao, Version=1.2.0.0, Culture=neutral, processorArchitecture=MSIL"
+            "AssemblyAsmDisplayName" = "8:common, Version=1.2.0.0, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
-                    "_D46CFD5D7DB7494BACDE9B246A319727"
+                    "_D302C4476F55CB3D81986A4FA5D14EA6"
                     {
-                    "Name" = "8:dao.DLL"
+                    "Name" = "8:common.DLL"
                     "Attributes" = "3:512"
                     }
                 }
-            "SourcePath" = "8:dao.DLL"
+            "SourcePath" = "8:common.DLL"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_72718675066546058EF87E9C54C7EB6D"
@@ -955,34 +903,6 @@
             "Folder" = "8:_F081377A9F64426484A8055A8C1B1287"
             "WorkingFolder" = "8:_72718675066546058EF87E9C54C7EB6D"
             "Icon" = "8:_D2C0D61F105249C3BC035A74AA90BDFD"
-            "Feature" = "8:"
-            }
-            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_A1CD18F91D7C4F72B5D16033124D52F6"
-            {
-            "Name" = "8:Job_Arranger_操作マニュアル"
-            "Arguments" = "8:"
-            "Description" = "8:"
-            "ShowCmd" = "3:1"
-            "IconIndex" = "3:0"
-            "Transitive" = "11:FALSE"
-            "Target" = "8:_B7A9E5912CE24036B31AF18E01AEBCE8"
-            "Folder" = "8:_D3577EC881604134BB428FEA7226FB36"
-            "WorkingFolder" = "8:_0176D7E7D69A40148643F4DCD22F6576"
-            "Icon" = "8:"
-            "Feature" = "8:"
-            }
-            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_A53001AE41144E14883C5CB621A7AF24"
-            {
-            "Name" = "8:Job_Arranger_インストールガイド"
-            "Arguments" = "8:"
-            "Description" = "8:"
-            "ShowCmd" = "3:1"
-            "IconIndex" = "3:0"
-            "Transitive" = "11:FALSE"
-            "Target" = "8:_90DABB89B6104A78831455DBC5A4F55D"
-            "Folder" = "8:_D3577EC881604134BB428FEA7226FB36"
-            "WorkingFolder" = "8:_0176D7E7D69A40148643F4DCD22F6576"
-            "Icon" = "8:"
             "Feature" = "8:"
             }
             "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_AE09BEE1EC5B4B6DAC0361C71DDF8457"
@@ -1540,7 +1460,7 @@
         {
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_D0DF5E140F3D4BF4995CDFFB48F5ADE9"
             {
-            "SourcePath" = "8:..\\Installer\\obj\\Release\\Installer.dll"
+            "SourcePath" = "8:..\\Installer\\obj\\Debug\\Installer.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_F84408CA886F43E89F132C973A70AD2F"

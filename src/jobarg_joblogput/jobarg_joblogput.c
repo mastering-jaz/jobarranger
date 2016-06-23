@@ -72,22 +72,22 @@ char *CONFIG_TARGETUSER = NULL;
 char *CONFIG_MID = NULL;
 
 const char *progname = NULL;
-const char title_message[] = "Job Arranger Job log outut";
+const char title_message[] = "Job Arranger Job log output";
 const char usage_message[] =
-    "[-hV] -z <hostname or IP> [-p <port>] -U <username> -P <password> [-s <YYYYMMDD>|<YYYYMMDDHHMM>] [-e <YYYYMMDD>|<YYYYMMDDHHMM>] [-n <jobnet-id>] [-j <job-id>] [-u <target-user>] [-r <registry number>]";
+    "[-hV] -z <server> [-p <port>] -U <user-name> -P <password> [-s <YYYYMMDD>|<YYYYMMDDHHMM>] [-e <YYYYMMDD>|<YYYYMMDDHHMM>] [-n <jobnet-id>] [-j <job-id>] [-u <target-user>] [-r <registry-number>]";
 
 const char *help_message[] = {
     "Options:",
     "  -z --jobarranger-server <server>                Hostname or IP address of Job Arranger server",
-    " [-p --port <server port>]                        Specify port number of server trapper running on the server. Default is 10061",
-    "  -U --user-name <user-name>                      Specify user name",
-    "  -P --password <password>                        Specify password",
+    " [-p --port <port>]                               Specify port number of server trapper running on the server. Default is 10061",
+    "  -U --user-name <user-name>                      Specify user who has permission to reference the jobnet",
+    "  -P --password <password>                        Specify user password",
     " [-s --from-time <YYYYMMDD> or <YYYYMMDDHHMM>]    Specify search start time",
     " [-e --to-time <YYYYMMDD> or <YYYYMMDDHHMM>]      Specify search end time",
-    " [-n --jobnet-id <jobnet-id>]                     Specify the jobnet-id to be refine search",
-    " [-j --job-id <job-id>]                           Specify the job-id to be refine search",
-    " [-u --target-user <target-user>]                 Specify the target-user to be refine search",
-    " [-r --registry-number <registry-number>]         Specify the registry number to be refine search",
+    " [-n --jobnet-id <jobnet-id>]                     Specify the jobnet id to be refine search",
+    " [-j --job-id <job-id>]                           Specify the job id to be refine search",
+    " [-u --target-user <target-user>]                 Specify the target user to be refine search",
+    " [-r --registry-number <registry-number>]         Specify the jobnet registry number to be refine search",
     "",
     "Other options:",
     "  -h --help                                       Give this help",
@@ -292,14 +292,24 @@ static int ja_check_response(char *data)
                              JA_PROTO_TAG_MESSAGE);
             goto error;
         }
-        zabbix_log(LOG_LEVEL_ERR, "response message: %s",
+#if defined(_WINDOWS)
+    	zabbix_log(LOG_LEVEL_ERR, "response message: %s",
+                   ja_utf8_to_acp( (char *) json_object_get_string(jp) ));
+#else
+		zabbix_log(LOG_LEVEL_ERR, "response message: %s",
                    (char *) json_object_get_string(jp));
-    } else {
+#endif
+	} else {
         jp_joblog = json_object_object_get(jp_data, "joblog");
         for (i = 0; i < json_object_array_length(jp_joblog); i++) {
             jp = json_object_array_get_idx(jp_joblog, i);
-            printf("%s\n", (char *) json_object_get_string(jp));
-        }
+
+#if defined(_WINDOWS)
+			printf("%s\n", ja_utf8_to_acp( (char *) json_object_get_string(jp) ));
+#else
+			printf("%s\n", (char *) json_object_get_string(jp));
+#endif
+		}
         ret = SUCCEED;
     }
   error:
@@ -335,6 +345,10 @@ int main(int argc, char **argv)
     json_object *jp;
     zbx_sock_t sock;
     char *data;
+
+#if defined(_WINDOWS)
+	LPSTR acp_string = NULL;
+#endif
 
     ret = FAIL;
     progname = get_program_name(argv[0]);
@@ -394,22 +408,37 @@ int main(int argc, char **argv)
         zbx_tcp_connect(&sock, NULL, CONFIG_SERVER, CONFIG_SERVER_PORT,
                         GET_SENDER_TIMEOUT);
     if (ret == FAIL) {
-        zabbix_log(LOG_LEVEL_ERR, "connect error: %s", zbx_tcp_strerror());
-        goto exit;
+#if defined(_WINDOWS)
+		acp_string = ja_utf8_to_acp((LPSTR)zbx_tcp_strerror());
+        zabbix_log(LOG_LEVEL_ERR, "connect error: %s", acp_string);
+		zbx_free(acp_string);
+#else
+		zabbix_log(LOG_LEVEL_ERR, "connect error: %s", zbx_tcp_strerror());
+#endif
+		goto exit;
     }
 
     ret = ja_tcp_send(&sock, 0, obj.request);
     if (ret == FAIL) {
-        zabbix_log(LOG_LEVEL_ERR, "send data error: %s",
+#if defined(_WINDOWS)
+        zabbix_log(LOG_LEVEL_ERR, "send data error: %s", 
+                   ja_utf8_to_acp( json_object_to_json_string(obj.request) ));
+#else
+		zabbix_log(LOG_LEVEL_ERR, "send data error: %s",
                    json_object_to_json_string(obj.request));
-        zbx_tcp_close(&sock);
+#endif
+		zbx_tcp_close(&sock);
         goto exit;
     }
 
     ret = zbx_tcp_recv(&sock, &data);
     if (ret == FAIL) {
+#if defined(_WINDOWS)
+        zabbix_log(LOG_LEVEL_ERR, "recive data error: %s", ja_utf8_to_acp( data ));
+#else
         zabbix_log(LOG_LEVEL_ERR, "recive data error: %s", data);
-        zbx_tcp_close(&sock);
+#endif
+		zbx_tcp_close(&sock);
         goto exit;
     }
     ret = ja_check_response(data);

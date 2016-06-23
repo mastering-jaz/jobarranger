@@ -48,6 +48,30 @@ namespace jp.co.ftf.jobcontroller.DAO
                                                     "ja_schedule_jobnet_table" 
                                                   };
         //エクスポートジョブネットオブジェクト関連テーブル一覧最初が管理テーブル
+        //private static String[] EXPORT_JOBNET_TABLES = { "ja_jobnet_control_table",
+        //                                          "ja_job_control_table",
+        //                                          "ja_flow_control_table",
+        //                                          "ja_icon_calc_table",
+        //                                          "ja_icon_end_table",
+        //                                          "ja_icon_extjob_table",
+        //                                          "ja_icon_if_table",
+        //                                          "ja_icon_info_table",
+        //                                          "ja_icon_jobnet_table",
+        //                                          "ja_icon_job_table",
+        //                                          "ja_job_command_table",
+        //                                          "ja_value_job_table",
+        //                                          "ja_value_jobcon_table",
+        //                                          "ja_icon_task_table",
+        //                                          "ja_icon_value_table",
+        //                                          "ja_icon_fcopy_table",
+        //                                          "ja_icon_fwait_table",
+        //                                          "ja_icon_reboot_table",
+        //                                          "ja_icon_release_table"
+        //                                        };
+
+        //added by YAMA 2014/05/19 [ja_icon_agentless_table]
+        //added by YAMA 2014/02/05 [ja_icon_zabbix_link_table]
+        //エクスポートジョブネットオブジェクト関連テーブル一覧最初が管理テーブル
         private static String[] EXPORT_JOBNET_TABLES = { "ja_jobnet_control_table",
                                                   "ja_job_control_table",
                                                   "ja_flow_control_table",
@@ -66,7 +90,9 @@ namespace jp.co.ftf.jobcontroller.DAO
                                                   "ja_icon_fcopy_table",
                                                   "ja_icon_fwait_table",
                                                   "ja_icon_reboot_table",
-                                                  "ja_icon_release_table"
+                                                  "ja_icon_release_table",
+                                                  "ja_icon_zabbix_link_table",
+                                                  "ja_icon_agentless_table"
                                                 };
         //インポート時、重複チェック用情報
         private static Hashtable KEY_FOR_DOUBLE_CHECK = new Hashtable();
@@ -136,10 +162,12 @@ namespace jp.co.ftf.jobcontroller.DAO
         public static String InsertRunJobnet(DataRow jobnetRow, Consts.RunTypeEnum runType)
         {
             String innerJobnetId = DBUtil.GetNextId("2");
+
+            //added by YAMA 2014/04/22 add-> multiple_start_up 
             String sql = "insert into ja_run_jobnet_table "
                             + "(inner_jobnet_id, inner_jobnet_main_id, inner_job_id, update_date, run_type, "
-                            + "main_flag, status, start_time, end_time, public_flag, jobnet_id, user_name, jobnet_name, memo, execution_user_name) "
-                            + "VALUES (?,?,0,?,?,0,0,0,0,?,?,?,?,?,?)";
+                            + "main_flag, status, start_time, end_time, public_flag, multiple_start_up, jobnet_id, user_name, jobnet_name, memo, execution_user_name) "
+                            + "VALUES (?,?,0,?,?,0,0,0,0,?,?,?,?,?,?,?)";
             DBConnect db = new DBConnect(LoginSetting.ConnectStr);
 
             List<ComSqlParam> insertRunJobnetSqlParams = new List<ComSqlParam>();
@@ -148,6 +176,10 @@ namespace jp.co.ftf.jobcontroller.DAO
             insertRunJobnetSqlParams.Add(new ComSqlParam(DbType.String, "@update_date", jobnetRow["update_date"]));
             insertRunJobnetSqlParams.Add(new ComSqlParam(DbType.String, "@run_type", (int)runType));
             insertRunJobnetSqlParams.Add(new ComSqlParam(DbType.String, "@public_flag", jobnetRow["public_flag"]));
+
+            //added by YAMA 2014/04/22
+            insertRunJobnetSqlParams.Add(new ComSqlParam(DbType.String, "@multiple_start_up", jobnetRow["multiple_start_up"]));
+
             insertRunJobnetSqlParams.Add(new ComSqlParam(DbType.String, "@jobnet_id", jobnetRow["jobnet_id"]));
             insertRunJobnetSqlParams.Add(new ComSqlParam(DbType.String, "@user_name", jobnetRow["user_name"]));
             insertRunJobnetSqlParams.Add(new ComSqlParam(DbType.String, "@jobnet_name", jobnetRow["jobnet_name"]));
@@ -193,17 +225,68 @@ namespace jp.co.ftf.jobcontroller.DAO
             if (dt.Rows.Count == 1)
             {
                 strParameterVelue = dt.Rows[0]["value"].ToString();
+                //added by YAMA 2014/04/25 マイナス値の場合、初期値を設定する
+                int retVal = Convert.ToInt32(strParameterVelue);
+                if (retVal < 0)
+                {
+                    strParameterVelue = GetParamDefaultData(parameterName);
+                }
 
                 db.CloseSqlConnect();
             }
             else
             {
-                strParameterVelue = "60";
+                //added by YAMA 2014/04/25 該当データなしの場合、初期値を設定する
+                //strParameterVelue = "60";
+                strParameterVelue = GetParamDefaultData(parameterName);
                 db.CloseSqlConnect();
             }
 
             return strParameterVelue;
         }
+
+        //added by YAMA 2014/04/25
+        private static string GetParamDefaultData(string parameterName)
+        {
+            string defaultValue = "";
+
+            switch (parameterName)
+            {
+                case "JOBNET_VIEW_SPAN":
+                    defaultValue = "60";
+                    break;
+                case "JOBNET_LOAD_SPAN":
+                    defaultValue = "60";
+                    break;
+                case "JOBNET_KEEP_SPAN":
+                    defaultValue = "60";
+                    break;
+                case "JOBLOG_KEEP_SPAN":
+                    defaultValue = "129600";
+                    break;
+                case "JOBNET_DUMMY_START_X":
+                    defaultValue = "117";
+                    break;
+                case "JOBNET_DUMMY_START_Y":
+                    defaultValue = "39";
+                    break;
+                case "JOBNET_DUMMY_JOB_X":
+                    defaultValue = "117";
+                    break;
+                case "JOBNET_DUMMY_JOB_Y":
+                    defaultValue = "93";
+                    break;
+                case "JOBNET_DUMMY_END_X":
+                    defaultValue = "117";
+                    break;
+                case "JOBNET_DUMMY_END_Y":
+                    defaultValue = "146";
+                    break;
+            }
+            return defaultValue;
+        }
+
+
 
         /// <summary>ユーザーが属するグループ取得ary>
         /// <param name="alias">別名</param>
@@ -374,8 +457,10 @@ namespace jp.co.ftf.jobcontroller.DAO
             int jobnetLoadSpan = Convert.ToInt32(DBUtil.GetParameterVelue("JOBNET_LOAD_SPAN"));
             DateTime now = DateTime.Now;
             decimal startTime = ConvertUtil.ConverDate2IntYYYYMMDDHHMISS(now);
-            decimal endTime = ConvertUtil.ConverDate2IntYYYYMMDDHHMISS(now.AddMinutes(2 * jobnetLoadSpan));
-            String _stop_enexecuted_jobnet = "update ja_run_jobnet_summary_table set status=5, start_time=" + startTime + " ,end_time="+endTime+" where inner_jobnet_id=? and status=0";
+            //added by YAMA 2014/07/01
+            //decimal endTime = ConvertUtil.ConverDate2IntYYYYMMDDHHMISS(now.AddMinutes(2 * jobnetLoadSpan));
+            decimal endTime = startTime;
+            String _stop_enexecuted_jobnet = "update ja_run_jobnet_summary_table set status=5, start_time=" + startTime + " ,end_time=" + endTime + " where inner_jobnet_id=? and status=0";
 
             List<ComSqlParam> sqlParams = new List<ComSqlParam>();
 
@@ -387,6 +472,59 @@ namespace jp.co.ftf.jobcontroller.DAO
             db.TransactionCommit();
             db.CloseSqlConnect();
         }
+
+
+        //added by YAMA 2014/04/25
+        public static void SetJaRunJobnetTableStatus(object innerJobnetId)
+        {
+            String _stop_err_jobnet = "update ja_run_jobnet_table set status = 0 where inner_jobnet_id = ? ";
+
+            List<ComSqlParam> sqlParams = new List<ComSqlParam>();
+
+            sqlParams.Add(new ComSqlParam(DbType.UInt64, "@inner_jobnet_id", innerJobnetId));
+            DBConnect db = new DBConnect(LoginSetting.ConnectStr);
+            db.CreateSqlConnect();
+            db.BeginTransaction();
+            db.ExecuteNonQuery(_stop_err_jobnet, sqlParams);
+            db.TransactionCommit();
+            db.CloseSqlConnect();
+        }
+
+        //added by YAMA 2014/04/25
+        public static void SetJaRunJobnetSummaryTableStatus(object innerJobnetId)
+        {
+            String _stop_err_jobnet = "update ja_run_jobnet_summary_table set status = 1, job_status = 0, load_status = 0 where inner_jobnet_id = ? ";
+            // String _stop_err_jobnet = "update ja_run_jobnet_summary_table set status = 0, job_status = 0, load_status = 0 where inner_jobnet_id = ? ";
+
+            List<ComSqlParam> sqlParams = new List<ComSqlParam>();
+
+            sqlParams.Add(new ComSqlParam(DbType.UInt64, "@inner_jobnet_id", innerJobnetId));
+            DBConnect db = new DBConnect(LoginSetting.ConnectStr);
+            db.CreateSqlConnect();
+            db.BeginTransaction();
+            db.ExecuteNonQuery(_stop_err_jobnet, sqlParams);
+            db.TransactionCommit();
+            db.CloseSqlConnect();
+        }
+
+        //added by YAMA 2014/04/25
+        public static void SetJaRunJobTableStatus(object innerJobnetId)
+        {
+            String _stop_err_jobnet = "update ja_run_job_table set status = 0 where inner_jobnet_id = ? and job_type = 0 ";
+
+            List<ComSqlParam> sqlParams = new List<ComSqlParam>();
+
+            sqlParams.Add(new ComSqlParam(DbType.UInt64, "@inner_jobnet_id", innerJobnetId));
+            DBConnect db = new DBConnect(LoginSetting.ConnectStr);
+            db.CreateSqlConnect();
+            db.BeginTransaction();
+            db.ExecuteNonQuery(_stop_err_jobnet, sqlParams);
+            db.TransactionCommit();
+            db.CloseSqlConnect();
+        }
+
+
+
 
         /// <summary>オブジェクトを無効にする<summary>
         /// <param name="objectId">オブジェクトＩＤ</param>

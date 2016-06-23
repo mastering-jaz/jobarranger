@@ -264,13 +264,16 @@ namespace jp.co.ftf.jobcontroller.JobController
 
                 LoginSetting.DBType = ((JobconDBSource)comboBox_jobarg.SelectedItem).DBType;
 
-
                 //added by YAMA 2014/02/26
                 string wkLang = (String)row0["lang"];
                 LoginSetting.Lang = wkLang.ToLower();
 
                 LoginSetting.HealthCheckFlag = ((JobconDBSource)comboBox_jobarg.SelectedItem).HealthCheckFlag;
                 LoginSetting.HealthCheckInterval = ((JobconDBSource)comboBox_jobarg.SelectedItem).HealthCheckInterval;
+
+                //added by YAMA 2014/03/03
+                LoginSetting.JaZabbixVersion = ((JobconDBSource)comboBox_jobarg.SelectedItem).JaZabbixVersion;
+
                 return true;
             }
             return false;

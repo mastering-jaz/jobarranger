@@ -18,8 +18,8 @@
 **/
 
 /*
-** $Date:: 2013-08-15 15:11:24 +0900 #$
-** $Revision: 5241 $
+** $Date:: 2014-04-28 17:18:10 +0900 #$
+** $Revision: 5941 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -71,45 +71,46 @@ int threads_num = 0;
 ZBX_THREAD_HANDLE *threads = NULL;
 unsigned char daemon_type = ZBX_DAEMON_TYPE_AGENT;
 
-int CONFIG_LOG_LEVEL = LOG_LEVEL_WARNING;
-char *CONFIG_DBHOST = NULL;
-char *CONFIG_DBNAME = NULL;
-char *CONFIG_DBSCHEMA = NULL;
-char *CONFIG_DBUSER = NULL;
-char *CONFIG_DBPASSWORD = NULL;
-char *CONFIG_DBSOCKET = NULL;
-int CONFIG_DBPORT = 0;
-int CONFIG_LOAD_SHIFT_TIME = 0;
-int CONFIG_RUN_SHIFT_TIME = 0;
-int CONFIG_JAMONITOR_INTERVAL = 60;
-char *CONFIG_SENDER_SCRIPT = NULL;
-int CONFIG_SPAN_TIME = 0;
+int  CONFIG_LOG_LEVEL              = LOG_LEVEL_WARNING;
+char *CONFIG_DBHOST                = NULL;
+char *CONFIG_DBNAME                = NULL;
+char *CONFIG_DBSCHEMA              = NULL;
+char *CONFIG_DBUSER                = NULL;
+char *CONFIG_DBPASSWORD            = NULL;
+char *CONFIG_DBSOCKET              = NULL;
+int  CONFIG_DBPORT                 = 0;
+int  CONFIG_LOAD_SHIFT_TIME        = 0;
+int  CONFIG_RUN_SHIFT_TIME         = 0;
+int  CONFIG_JAMONITOR_INTERVAL     = 60;
+char *CONFIG_SENDER_SCRIPT         = NULL;
+int  CONFIG_SPAN_TIME              = 0;
+char *CONFIG_JA_EXECUTION_USER     = NULL;
 
 /* for Zabbix */
-char *CONFIG_SOURCE_IP = NULL;
-int CONFIG_NODEID = 0;
-int CONFIG_MASTER_NODEID = 0;
-int CONFIG_NODE_NOHISTORY = 0;
-int CONFIG_TEXT_CACHE_SIZE = 0;
-int CONFIG_HISTORY_CACHE_SIZE = 0;
-int CONFIG_TRENDS_CACHE_SIZE = 0;
-int CONFIG_CONF_CACHE_SIZE = 0;
-int CONFIG_POLLER_FORKS = 0;
-int CONFIG_JAVAPOLLER_FORKS = 0;
-int CONFIG_HISTSYNCER_FORKS = 0;
-int CONFIG_IPMIPOLLER_FORKS = 0;
-int CONFIG_PINGER_FORKS = 0;
-int CONFIG_HISTSYNCER_FREQUENCY = 0;
-int CONFIG_UNREACHABLE_DELAY = 0;
-int CONFIG_UNREACHABLE_PERIOD = 0;
-int CONFIG_UNAVAILABLE_DELAY = 0;
-int CONFIG_UNSAFE_USER_PARAMETERS = 0;
-int CONFIG_ENABLE_REMOTE_COMMANDS = 0;
-int CONFIG_LOG_REMOTE_COMMANDS = 0;
-int CONFIG_SERVER_STARTUP_TIME = 0;
-int CONFIG_LOG_SLOW_QUERIES = 0;
-int CONFIG_PROXYCONFIG_FREQUENCY = 0;
-int CONFIG_PROXYDATA_FREQUENCY = 0;
+char *CONFIG_SOURCE_IP             = NULL;
+int  CONFIG_NODEID                 = 0;
+int  CONFIG_MASTER_NODEID          = 0;
+int  CONFIG_NODE_NOHISTORY         = 0;
+int  CONFIG_TEXT_CACHE_SIZE        = 0;
+int  CONFIG_HISTORY_CACHE_SIZE     = 0;
+int  CONFIG_TRENDS_CACHE_SIZE      = 0;
+int  CONFIG_CONF_CACHE_SIZE        = 0;
+int  CONFIG_POLLER_FORKS           = 0;
+int  CONFIG_JAVAPOLLER_FORKS       = 0;
+int  CONFIG_HISTSYNCER_FORKS       = 0;
+int  CONFIG_IPMIPOLLER_FORKS       = 0;
+int  CONFIG_PINGER_FORKS           = 0;
+int  CONFIG_HISTSYNCER_FREQUENCY   = 0;
+int  CONFIG_UNREACHABLE_DELAY      = 0;
+int  CONFIG_UNREACHABLE_PERIOD     = 0;
+int  CONFIG_UNAVAILABLE_DELAY      = 0;
+int  CONFIG_UNSAFE_USER_PARAMETERS = 0;
+int  CONFIG_ENABLE_REMOTE_COMMANDS = 0;
+int  CONFIG_LOG_REMOTE_COMMANDS    = 0;
+int  CONFIG_SERVER_STARTUP_TIME    = 0;
+int  CONFIG_LOG_SLOW_QUERIES       = 0;
+int  CONFIG_PROXYCONFIG_FREQUENCY  = 0;
+int  CONFIG_PROXYDATA_FREQUENCY    = 0;
 
 /******************************************************************************
  *                                                                            *
@@ -213,27 +214,23 @@ static void parse_commandline(int argc, char **argv)
 static void ja_load_config(const char *config_file)
 {
     struct cfg_line cfg[] = {
-        /* PARAMETER, VAR, TYPE, MANDATORY, MIN, MAX */
-        {"DBHost", &CONFIG_DBHOST, TYPE_STRING, PARM_OPT, 0, 0},
-        {"DBName", &CONFIG_DBNAME, TYPE_STRING, PARM_MAND, 0, 0},
-        {"DBSchema", &CONFIG_DBSCHEMA, TYPE_STRING, PARM_OPT, 0, 0},
-        {"DBUser", &CONFIG_DBUSER, TYPE_STRING, PARM_OPT, 0, 0},
-        {"DBPassword", &CONFIG_DBPASSWORD, TYPE_STRING, PARM_OPT, 0, 0},
-        {"DBSocket", &CONFIG_DBSOCKET, TYPE_STRING, PARM_OPT, 0, 0},
-        {"DBPort", &CONFIG_DBPORT, TYPE_INT, PARM_OPT, 1024, 65535},
-        {"DebugLevel", &CONFIG_LOG_LEVEL, TYPE_INT, PARM_OPT, 0, 4},
-        {"LogFileSize", &CONFIG_LOG_FILE_SIZE, TYPE_INT, PARM_OPT, 0,
-         1024},
-        {"JaLogFile", &CONFIG_LOG_FILE, TYPE_STRING, PARM_OPT, 0, 0},
-        {"JaPidFile", &CONFIG_PID_FILE, TYPE_STRING, PARM_OPT, 0, 0},
-        {"JaLoadShiftTime", &CONFIG_LOAD_SHIFT_TIME, TYPE_INT, PARM_OPT, 0,
-         1440},
-        {"JaRunShiftTime", &CONFIG_RUN_SHIFT_TIME, TYPE_INT, PARM_OPT, 0,
-         1440},
-        {"JaMonitorInterval", &CONFIG_JAMONITOR_INTERVAL, TYPE_INT,
-         PARM_OPT, 1, 60},
-        {"JaSenderScript", &CONFIG_SENDER_SCRIPT, TYPE_STRING, PARM_OPT,
-         0, 0},
+        /* PARAMETER,         VAR,                        TYPE,        MANDATORY, MIN,  MAX */
+        {"DBHost",            &CONFIG_DBHOST,             TYPE_STRING, PARM_OPT,  0,    0},
+        {"DBName",            &CONFIG_DBNAME,             TYPE_STRING, PARM_MAND, 0,    0},
+        {"DBSchema",          &CONFIG_DBSCHEMA,           TYPE_STRING, PARM_OPT,  0,    0},
+        {"DBUser",            &CONFIG_DBUSER,             TYPE_STRING, PARM_MAND, 0,    0},
+        {"DBPassword",        &CONFIG_DBPASSWORD,         TYPE_STRING, PARM_OPT,  0,    0},
+        {"DBSocket",          &CONFIG_DBSOCKET,           TYPE_STRING, PARM_OPT,  0,    0},
+        {"DBPort",            &CONFIG_DBPORT,             TYPE_INT,    PARM_OPT,  1024, 65535},
+        {"DebugLevel",        &CONFIG_LOG_LEVEL,          TYPE_INT,    PARM_OPT,  0,    4},
+        {"LogFileSize",       &CONFIG_LOG_FILE_SIZE,      TYPE_INT,    PARM_OPT,  0,    1024},
+        {"JaLogFile",         &CONFIG_LOG_FILE,           TYPE_STRING, PARM_OPT,  0,    0},
+        {"JaPidFile",         &CONFIG_PID_FILE,           TYPE_STRING, PARM_OPT,  0,    0},
+        {"JaLoadShiftTime",   &CONFIG_LOAD_SHIFT_TIME,    TYPE_INT,    PARM_OPT,  0,    1440},
+        {"JaRunShiftTime",    &CONFIG_RUN_SHIFT_TIME,     TYPE_INT,    PARM_OPT,  0,    1440},
+        {"JaMonitorInterval", &CONFIG_JAMONITOR_INTERVAL, TYPE_INT,    PARM_OPT,  1,    60},
+        {"JaSenderScript",    &CONFIG_SENDER_SCRIPT,      TYPE_STRING, PARM_OPT,  0,    0},
+        {"JaExecutionUser",   &CONFIG_JA_EXECUTION_USER,  TYPE_STRING, PARM_OPT,  0,    0},
         {NULL}
     };
 

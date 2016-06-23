@@ -18,8 +18,8 @@
 **/
 
 /*
-** $Date:: 2014-01-28 16:00:35 +0900 #$
-** $Revision: 5755 $
+** $Date:: 2014-05-16 11:07:27 +0900 #$
+** $Revision: 5967 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -110,6 +110,8 @@ char	*CONFIG_JA_LOG_MESSAGE_FILE	= NULL;
 int	CONFIG_FCOPY_TIMEOUT		= 180;
 int	CONFIG_ZABBIX_VERSION		= 1;
 int	CONFIG_JALAUNCH_INTERVAL	= 1;
+char	*CONFIG_JA_ZBX_MESSAGE_FILE	= NULL;
+char	*CONFIG_JA_EXECUTION_USER	= NULL;
 
 /* for Zabbix */
 int	CONFIG_ALERTER_FORKS		= 1;
@@ -267,7 +269,7 @@ static void zbx_load_config()
 		{"DBHost",		&CONFIG_DBHOST,			TYPE_STRING,		PARM_OPT,	0,	0},
 		{"DBName",		&CONFIG_DBNAME,			TYPE_STRING,		PARM_MAND,	0,	0},
 		{"DBSchema",		&CONFIG_DBSCHEMA,		TYPE_STRING,		PARM_OPT,	0,	0},
-		{"DBUser",		&CONFIG_DBUSER,			TYPE_STRING,		PARM_OPT,	0,	0},
+		{"DBUser",		&CONFIG_DBUSER,			TYPE_STRING,		PARM_MAND,	0,	0},
 		{"DBPassword",		&CONFIG_DBPASSWORD,		TYPE_STRING,		PARM_OPT,	0,	0},
 		{"DBSocket",		&CONFIG_DBSOCKET,		TYPE_STRING,		PARM_OPT,	0,	0},
 		{"DBPort",		&CONFIG_DBPORT,			TYPE_INT,		PARM_OPT,	1024,	65535},
@@ -293,8 +295,10 @@ static void zbx_load_config()
 		{"JaErrorCmdPath",	&CONFIG_ERROR_CMD_PATH,		TYPE_STRING,		PARM_MAND,	0,	0},
 		{"JaLogMessageFile",	&CONFIG_JA_LOG_MESSAGE_FILE,	TYPE_STRING,		PARM_MAND,	0,	0},
 		{"JaFcopyTimeout",	&CONFIG_FCOPY_TIMEOUT,		TYPE_INT,		PARM_OPT,	1,	3600},
-		{"JaZabbixVersion",	&CONFIG_ZABBIX_VERSION,		TYPE_INT,		PARM_OPT,	1,	2},
+		{"JaZabbixVersion",	&CONFIG_ZABBIX_VERSION,		TYPE_INT,		PARM_OPT,	1,	3},
 		{"JaLaunchInterval",	&CONFIG_JALAUNCH_INTERVAL,	TYPE_INT,		PARM_OPT,	1,	9999999},
+		{"JaZabbixMessageFile",	&CONFIG_JA_ZBX_MESSAGE_FILE,	TYPE_STRING,		PARM_MAND,	0,	0},
+		{"JaExecutionUser",	&CONFIG_JA_EXECUTION_USER,	TYPE_STRING,		PARM_OPT,	0,	0},
 		{NULL}
 	};
 
@@ -483,6 +487,7 @@ int MAIN_ZABBIX_ENTRY()
  ******************************************************************************/
 void zbx_on_exit()
 {
+	int	rc;
 	zabbix_log(LOG_LEVEL_DEBUG, "zbx_on_exit() called");
 
 	if (SUCCEED == DBtxn_ongoing())
@@ -507,8 +512,17 @@ void zbx_on_exit()
 		zbx_free(threads);
 	}
 
-	free_selfmon_collector();
-	zbx_sleep(2);
+	zbx_sleep(2);	/* wait for all child processes to exit */
+
+	ja_free_selfmon_collector();
+
+	/* kill the external command */
+	rc = system("pkill -SIGTERM jobarg_session");
+	rc = system("pkill -SIGTERM jobarg_command");
+	rc = system("pkill -SIGTERM jacmdsleep");
+	rc = system("pkill -SIGTERM jacmdtime");
+	rc = system("pkill -SIGTERM jacmdweek");
+
 	ja_log("JASERVER000002", 0, NULL, 0, JOBARG_VERSION, JOBARG_REVISION);
 	zabbix_close_log();
 	exit(SUCCEED);

@@ -18,9 +18,9 @@
 **/
 
 /*
-** $Date:: 2013-07-10 15:16:37 +0900 #$
-** $Revision: 5154 $
-** $Author: ossinfra@FITECHLABS.CO.JP $
+** $Date:: 2014-05-07 14:17:04 +0900 #$
+** $Revision: 5948 $
+** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
 #include <json/json.h>
@@ -482,7 +482,7 @@ int ja_tar_extract(const int fd, char *dir, const int overwrite,
 #endif
     if (tar_extract_all(tar, destdir) == -1) {
         zbx_snprintf(job->message, sizeof(job->message),
-                     "can not extarct tar to dir: %s (%s)", dir,
+                     "can not extract tar to dir: %s (%s)", dir,
                      strerror(errno));
         while (th_read(tar) == 0) {
             if (TH_ISREG(tar) && tar_skip_regfile(tar))

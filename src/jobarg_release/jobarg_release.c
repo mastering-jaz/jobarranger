@@ -66,19 +66,19 @@ char *CONFIG_STARTTIME = NULL;
 char *CONFIG_MID = NULL;
 
 const char *progname = NULL;
-const char title_message[] = "Job Arranger Job wait release";
+const char title_message[] = "Job Arranger Job hold release";
 const char usage_message[] =
-    "[-hV] -z <hostname or IP> [-p <port>] -U <username> -P <password> -j <jobid> [-t <YYYYMMDD>|<YYYYMMDDHHMM>] [-r <registry number>]";
+    "[-hV] -z <server> [-p <port>] -U <user-name> -P <password> -j <jobnet-id/job-id> [-t <YYYYMMDD>|<YYYYMMDDHHMM>] [-r <registry-number>]";
 
 const char *help_message[] = {
     "Options:",
     "  -z --jobarranger-server <server>                 Hostname or IP address of Job Arranger server",
-    " [-p --port <server port>]                         Specify port number of server trapper running on the server. Default is 10061",
-    "  -U --user-name <user-name>                       Specify user name",
-    "  -P --password <password>                         Specify password",
-    "  -j --job-id <jobid>                              Specify jobid",
+    " [-p --port <port>]                                Specify port number of server trapper running on the server. Default is 10061",
+    "  -U --user-name <user-name>                       Specify user with authority to operate the jobnet",
+    "  -P --password <password>                         Specify user password",
+    "  -j --job-id <jobnet-id/job-id>                   Specify target job id. Format is \"jobnet-id/job-id/job-id/...\" in the sub jobnet.",
     " [-t --start-time <YYYYMMDD> or <YYYYMMDDHHMM>]    Specify jobnet start time",
-    " [-r --registry-number <registry-number>]          Specify registry number",
+    " [-r --registry-number <registry-number>]          Specify the jobnet registration number that contains the hold release job",
     "",
     "Other options:",
     "  -h --help                                        Give this help",
@@ -317,7 +317,11 @@ int main(int argc, char **argv)
     zbx_sock_t sock;
     char *data;
 
-    ret = FAIL;
+#if defined(_WINDOWS)
+	LPSTR acp_string = NULL;
+#endif
+
+	ret = FAIL;
     progname = get_program_name(argv[0]);
     parse_commandline(argc, argv);
 
@@ -366,22 +370,40 @@ int main(int argc, char **argv)
         zbx_tcp_connect(&sock, NULL, CONFIG_SERVER, CONFIG_SERVER_PORT,
                         GET_SENDER_TIMEOUT);
     if (ret == FAIL) {
+
+#if defined(_WINDOWS)
+		acp_string = ja_utf8_to_acp((LPSTR)zbx_tcp_strerror());
+        zabbix_log(LOG_LEVEL_ERR, "connect error: %s", acp_string);
+		zbx_free(acp_string);
+#else
         zabbix_log(LOG_LEVEL_ERR, "connect error: %s", zbx_tcp_strerror());
-        goto exit;
+#endif
+
+		goto exit;
     }
 
     ret = ja_tcp_send(&sock, 0, obj.request);
     if (ret == FAIL) {
-        zabbix_log(LOG_LEVEL_ERR, "send data error: %s",
+
+#if defined(_WINDOWS)
+        zabbix_log(LOG_LEVEL_ERR, "send data error: %s", 
+                   ja_utf8_to_acp( json_object_to_json_string(obj.request) ));
+#else
+    	zabbix_log(LOG_LEVEL_ERR, "send data error: %s",
                    json_object_to_json_string(obj.request));
-        zbx_tcp_close(&sock);
+#endif
+		zbx_tcp_close(&sock);
         goto exit;
     }
 
     ret = zbx_tcp_recv(&sock, &data);
     if (ret == FAIL) {
-        zabbix_log(LOG_LEVEL_ERR, "recive data error: %s", data);
-        zbx_tcp_close(&sock);
+#if defined(_WINDOWS)
+        zabbix_log(LOG_LEVEL_ERR, "recive data error: %s", ja_utf8_to_acp( data ));
+#else
+    	zabbix_log(LOG_LEVEL_ERR, "recive data error: %s", data);
+#endif
+		zbx_tcp_close(&sock);
         goto exit;
     }
     ret = ja_check_response(data);

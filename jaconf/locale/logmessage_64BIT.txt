@@ -1,5 +1,5 @@
 
-# Job Arranger application log message  - 2014/03/04 -
+# Job Arranger application log message  - 2014/04/25 -
 
 # Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
 
@@ -253,13 +253,22 @@ JAGETAGENT200008,2,1,JaZabbixVersion range error: JaZabbixVersion [%d]
 
 JASTATUS200001,2,1,In %s() can not update jobnet status by inner_job_id: %lu
 
+JAVALUE200001,2,1,In %s() detected a NULL pointer to the parameter. inner_job_id: %lu
+JAVALUE200002,2,1,In %s() the length of the string area of the parameter is incorrect. length: %d, inner_job_id: %lu
+JAVALUE200003,2,1,In %s() failed to get the Job Controller variable value. inner_job_id: %lu
+JAVALUE200004,2,1,In %s() reads the Job Controller variable was over. inner_job_id: %lu
+JAVALUE200005,2,1,In %s() string of Job Controller variable after substitution has overflowed. variable_name: %s, inner_job_id: %lu
+JAVALUE200006,2,1,In %s() Job Controller variable can not be found. variable_name: %s, inner_job_id: %lu
+JAVALUE200007,2,1,In %s() overflow occurs in the replacement of Job Controller variable. inner_job_id: %lu
+JAVALUE200008,2,1,In %s() invalid Job Controller variable name. variable_name: %s, inner_job_id: %lu
+JAVALUE200009,2,1,In %s() length of the Job Controller variable is over %d. length: %d, variable_name: %s, inner_job_id: %lu
 JAVALUE300001,3,0,In %s() can not insert inner_job_id: %lu, inner_jobnet_id: %lu
 JAVALUE300002,3,0,In %s() can not get start_time from ja_run_jobnet_summary_table. inner_jobinet_id: %lu
 JAVALUE300003,3,0,In %s() can not insert the data. inner_job_id: %lu
 JAVALUE300004,3,0,In %s() can not set inner_jobnet_id: %lu, value_name: %s, before_value: %s
 JAVALUE300005,3,0,In %s() can not set inner_jobnet_id: %lu, inner_job_id: %lu
 
-JACONNECT300001,3,0,In %s() can not connect the host [%s] host_ip:[%s] port:[%d] source_ip:[%s] timeout:[%d]
+JACONNECT300001,2,1,In %s() can not connect the host. %s host_ip:[%s] port:[%d] source_ip:[%s] timeout:[%d]
 
 JAHOST200001,2,1,In %s() can not support zabbix version. please check the configuration file. JaZabbixVersion=[%d]
 JAHOST200002,2,1,In %s() can not find host: [%s] inner_job_id [%lu]
@@ -267,3 +276,87 @@ JAHOST200003,2,1,In %s() host is disabled: [%s] inner_job_id [%lu] job_id [%s]
 JAHOST200004,2,1,In %s() can not get the force flag and job id: inner_job_id [%lu]
 JAHOST200005,2,1,In %s() can not lock host: [%s] inner_job_id [%lu]
 JAHOST200006,2,1,In %s() TCP connection authentication failure: host [%s] IP or DNS names [%s] inner_job_id [%lu]
+JAHOST200007,2,1,In %s() version of zabbix is different. please check the configuration file. JaZabbixVersion=[%d]
+
+JARUNICONZABBIXLINK200001,2,1,JaZabbixVersion range error: JaZabbixVersion [%d]
+JARUNICONZABBIXLINK200002,2,1,In %s() Cannot get item status. inner_job_id: %lu, item_id: %s
+JARUNICONZABBIXLINK200003,2,1,In %s() Cannot set item status. inner_job_id: %lu, item_id: %s
+JARUNICONZABBIXLINK200004,2,1,In %s() Cannot get item data. inner_job_id: %lu, item_id: %s
+JARUNICONZABBIXLINK200005,2,1,In %s() Cannot get item data from history. inner_job_id: %lu, item_id: %s
+JARUNICONZABBIXLINK200006,2,1,In %s() Cannot get trigger status. inner_job_id: %lu, trigger_id: %s
+JARUNICONZABBIXLINK200007,2,1,In %s() Cannot update nextid. inner_job_id: %lu, table_name: %s, field_name: %s
+JARUNICONZABBIXLINK200008,2,1,In %s() Cannot get nextid. inner_job_id: %lu, table_name: %s, field_name: %s
+JARUNICONZABBIXLINK200009,2,1,In %s() Cannot update servicealarmid. inner_job_id: %lu, service_id: %s
+JARUNICONZABBIXLINK200010,2,1,In %s() Cannot insert service_alarms. inner_job_id: %lu, service_id: %s
+JARUNICONZABBIXLINK200011,2,1,In %s() Failure search_service_alarms. inner_job_id: %lu, service_id: %s
+JARUNICONZABBIXLINK200012,2,1,In %s() Cannot set service status. inner_job_id: %lu, service_id: %s
+JARUNICONZABBIXLINK200013,2,1,In %s() algorithm range error from services. inner_job_id: %lu, algorithm: %d, service_id: %s
+JARUNICONZABBIXLINK200014,2,1,In %s() Cannot update eventid. inner_job_id: %lu, trigger_id: %s
+JARUNICONZABBIXLINK200015,2,1,In %s() Cannot insert events. inner_job_id: %lu, trigger_id: %s
+JARUNICONZABBIXLINK200016,2,1,In %s() Cannot set service status. inner_job_id: %lu, trigger_id: %s
+JARUNICONZABBIXLINK200017,2,1,In %s() Failure search_service_links. inner_job_id: %lu, service_id: %s
+JARUNICONZABBIXLINK200018,2,1,In %s() Cannot set trigger status. inner_job_id: %lu, trigger_id: %s
+JARUNICONZABBIXLINK200019,2,1,In %s() Cannot get trigger value. inner_job_id: %lu, trigger_id: %s
+JARUNICONZABBIXLINK200020,2,1,In %s() Cannot set trigger value. inner_job_id: %lu, trigger_id: %s
+JARUNICONZABBIXLINK200021,2,1,In %s() Cannot set trigger value_flags. inner_job_id: %lu, trigger_id: %s
+JARUNICONZABBIXLINK200022,2,1,In %s() Cannot get host status. inner_job_id: %lu, host_id: %s
+JARUNICONZABBIXLINK200023,2,1,In %s() Cannot set host status. inner_job_id: %lu, host_id: %s
+JARUNICONZABBIXLINK200024,2,1,In %s() Cannot get message. inner_job_id: %lu, message_id: %s
+JARUNICONZABBIXLINK200025,2,1,In %s() Cannot set trigger value_flags. inner_job_id: %lu, host_id: %s
+JARUNICONZABBIXLINK200026,2,1,In %s() Cannot insert events. inner_job_id: %lu, host_id: %s
+JARUNICONZABBIXLINK200027,2,1,In %s() Cannot allocate memory. inner_job_id: %lu, id: %s
+JARUNICONZABBIXLINK200028,2,1,In %s() Cannot set host status. inner_job_id: %lu, group_id: %s
+JARUNICONZABBIXLINK200029,2,1,In %s() link_operation range error from ja_run_icon_zabbix_link_table. inner_job_id: %lu, link_operation: %d
+JARUNICONZABBIXLINK200030,2,1,In %s() link_target range error from ja_run_icon_zabbix_link_table. inner_job_id: %lu, link_target: %d
+JARUNICONZABBIXLINK200031,2,1,In %s() Cannot find from ja_run_icon_zabbix_link_table. inner_job_id: %lu
+JARUNICONZABBIXLINK200032,2,1,In %s() Cannot get lang. inner_job_id: %lu
+
+JATRGMSG200001,2,1,failed to open the zabbix message file: [%s]
+JATRGMSG200002,2,1,could not find an zabbix message: id[%s] lang[%s]
+JATRGMSG200003,2,1,line data in the zabbix message file is invalid: line(%d) id[%s] file[%s]
+
+JARUNICONLESS200001,2,1,In %s() agentless icon information is not found. inner_job_id: %lu
+JARUNICONLESS200002,2,1,In %s() jobnet information is not found. inner_jobnet_id: %lu
+JARUNICONLESS200003,2,1,In %s() failed to run the session management process. [%s]
+JARUNICONLESS200004,2,1,In %s() session id is already in use. inner_jobnet_main_id: %lu session_id: %s job_id: %s
+JARUNICONLESS200005,2,1,In %s() session is not established. inner_jobnet_main_id: %lu session_id: %s job_id: %s
+JARUNICONLESS200006,2,1,In %s() failed to update the session information. inner_jobnet_main_id: %lu session_id: %s inner_job_id: %lu
+JARUNICONLESS200007,2,1,In %s() detected an invalid session flag. inner_jobnet_main_id: %lu session_id: %s inner_job_id: %lu session_flag %d
+JARUNICONLESS200008,2,1,In %s() failed to read the session information. session_id: %s inner_jobnet_main_id: %lu
+JARUNICONLESS200009,2,1,In %s() failed to insert the session information. session_id: %s inner_jobnet_main_id: %lu
+JARUNICONLESS200010,2,1,In %s() same session parallel execution error. inner_jobnet_main_id: %lu session_id: %s job_id: %s
+
+JAJOBICONLESS200001,2,1,In %s() agentless icon information is not found. inner_job_id: %lu
+JAJOBICONLESS200002,2,1,In %s() jobnet information is not found. inner_jobnet_id: %lu
+JAJOBICONLESS200003,2,1,In %s() failed to update the session information. inner_jobnet_main_id: %lu session_id: %s inner_job_id: %lu
+JAJOBICONLESS200004,2,1,In %s() failed to update the job information. inner_job_id: %lu
+JAJOBICONLESS300001,3,0,In %s() timeout occurrence. inner_job_id: %lu, timeout: %s, start_time: %s, jobnet_id: %s, job_id: %s, user_name: %s
+
+JASESSION000001,0,0,Starting Job Arranger Session. session_id: %s inner_jobnet_main_id: %s test_flag: %d
+JASESSION000002,0,0,Job Arranger Session stopped. session_id: %s inner_jobnet_main_id: %s
+JASESSION200001,2,1,In %s() failed to update the session information. inner_jobnet_main_id: %s session_id: %s
+JASESSION200002,2,1,In %s() detected an invalid operation flag. inner_jobnet_main_id: %s session_id: %s inner_job_id: %lu operation_flag: %d
+JASESSION200003,2,1,In %s() failed to delete the session information. inner_jobnet_main_id: %s session_id: %s
+JASESSION200004,2,1,In %s() agentless icon information is not found. inner_job_id: %lu
+JASESSION200005,2,1,In %s() host name can not be found. host_name: %s host_flag: %d inner_job_id: %lu
+JASESSION200006,2,1,In %s() cannot initialize SSH session. inner_jobnet_main_id: %s session_id: %s host_name: %s inner_job_id: %lu
+JASESSION200007,2,1,In %s() cannot establish SSH session. [(%d) %s] inner_jobnet_main_id: %s session_id: %s host_name: %s inner_job_id: %lu
+JASESSION200008,2,1,In %s() failed to get list of user authentication. [(%d) %s] inner_jobnet_main_id: %s session_id: %s host_name: %s inner_job_id: %lu
+JASESSION200009,2,1,In %s() unsupported authentication method. supported methods: %s inner_jobnet_main_id: %s session_id: %s host_name: %s inner_job_id: %lu
+JASESSION200010,2,1,In %s() password authentication failed. [(%d) %s] inner_jobnet_main_id: %s session_id: %s host_name: %s inner_job_id: %lu
+JASESSION200011,2,1,In %s() keyboard-interactive authentication failed. [(%d) %s] inner_jobnet_main_id: %s session_id: %s host_name: %s inner_job_id: %lu
+JASESSION200012,2,1,In %s() cannot access public key file. file: %s inner_jobnet_main_id: %s session_id: %s inner_job_id: %lu
+JASESSION200013,2,1,In %s() cannot access private key file. file: %s inner_jobnet_main_id: %s session_id: %s inner_job_id: %lu
+JASESSION200014,2,1,In %s() public key authentication failed. [(%d) %s] public_key: %s private_key: %s inner_jobnet_main_id: %s session_id: %s host_name: %s inner_job_id: %lu
+JASESSION200015,2,1,In %s() detect incorrect user authentication method. inner_jobnet_main_id: %s session_id: %s inner_job_id: %lu auth_method: %d
+JASESSION200016,2,1,In %s() cannot establish generic session channel. [(%d) %s] inner_jobnet_main_id: %s session_id: %s host_name: %s inner_job_id: %lu
+JASESSION200017,2,1,In %s() Job Controller variable is not found. variable_name: %s inner_jobnet_main_id: %s session_id: inner_job_id: %lu
+JASESSION200018,2,1,In %s() failed to send commands to the SSH server. return_value: %d inner_jobnet_main_id: %s session_id: %s host_name: %s inner_job_id: %lu
+JASESSION200019,2,1,In %s() cannot read data from SSH server. [(%d) %s] inner_jobnet_main_id: %s session_id: %s host_name: %s inner_job_id: %lu
+JASESSION200020,2,1,In %s() failed requesting pty. return_value: %d inner_jobnet_main_id: %s session_id: %s host_name: %s inner_job_id: %lu
+JASESSION200021,2,1,In %s() unable to request shell on allocated pty. return_value: %d inner_jobnet_main_id: %s session_id: %s host_name: %s inner_job_id: %lu
+JASESSION200022,2,1,In %s() failed to send commands to the SSH server. return_value: %d inner_jobnet_main_id: %s session_id: %s host_name: %s inner_job_id: %lu
+JASESSION300001,3,0,In %s() cannot close generic session channel. [(%d) %s] inner_jobnet_main_id: %s session_id: %s
+JASESSION300002,3,0,In %s() kill the session management process. inner_jobnet_main_id: %s session_id: %s
+JASESSION300003,3,0,In %s() interrupt the session processing. inner_jobnet_main_id: %s session_id: %s
+JASESSION300004,3,0,The job return code '%s' is range of the stop code '%s' inner_job_id: %lu

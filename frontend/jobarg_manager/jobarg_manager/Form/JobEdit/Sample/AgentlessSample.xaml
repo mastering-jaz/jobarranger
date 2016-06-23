@@ -1,0 +1,43 @@
+﻿<!--
+/*
+** Job Arranger for ZABBIX
+** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+**
+** This program is free software; you can redistribute it and/or modify
+** it under the terms of the GNU General Public License as published by
+** the Free Software Foundation; either version 2 of the License, or
+** (at your option) any later version.
+**
+** This program is distributed in the hope that it will be useful,
+** but WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+** GNU General Public License for more details.
+**
+** You should have received a copy of the GNU General Public License
+** along with this program; if not, write to the Free Software
+** Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+**/
+-->
+<UserControl x:Class="jp.co.ftf.jobcontroller.JobController.Form.JobEdit.AgentlessSample"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:src="clr-namespace:jp.co.ftf.jobcontroller.JobController" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             FontSize="11" FontFamily="Meiryo">
+    <Canvas x:Name="LayoutRoot" Background="Transparent" >
+
+        <Rectangle Name="picAgentless" Height="25" Width="70" RadiusX="8" RadiusY="8" Stroke="Black"
+                   Canvas.Top="0" Canvas.Left="0" Fill="White">
+        </Rectangle>
+        <Ellipse Canvas.Top="15" Canvas.Left="54" Height="14" Width="14" Fill="White" StrokeThickness="1" Stroke="Black" />
+        <Label FontSize="9" FontWeight="Bold" Content="L" Canvas.Top="11" Canvas.Left="54" Foreground="Black"/>
+
+        <TextBlock   Canvas.ZIndex="101" Name="tbJobName" Foreground="Black" Text="{x:Static src:Properties.Resources.agentless_icon_label_text}"    
+                     VerticalAlignment="Center" HorizontalAlignment="Center" TextWrapping="Wrap"  MaxWidth="90"
+                     Height="15" Width="90"  Canvas.Left="-10" Canvas.Top="5"
+                     FontWeight="Normal" TextAlignment="Center" >
+        </TextBlock>
+
+    </Canvas>
+</UserControl>

@@ -18,15 +18,16 @@
 **/
 
 /*
-** $Date:: 2013-07-12 15:12:54 +0900 #$
-** $Revision: 5180 $
-** $Author: ossinfra@FITECHLABS.CO.JP $
+** $Date:: 2014-04-28 17:37:12 +0900 #$
+** $Revision: 5942 $
+** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
 #include "common.h"
 #include "log.h"
 #include "db.h"
 
+#include "jacommon.h"
 #include "jastr.h"
 #include "javalue.h"
 #include "jalog.h"

@@ -302,6 +302,14 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
         // <summary>保留解除アイコン設定テーブル</summary>
         public DataTable IconReleaseTable { get; set; }
 
+        //added by YAMA 2014/02/06
+        // <summary>Zabbix連携アイコン設定テーブル</summary>
+        public DataTable IconCooperationTable { get; set; }
+
+        //added by YAMA 2014/05/19
+        // <summary>エージェントレスアイコン設定テーブル</summary>
+        public DataTable IconAgentlessTable { get; set; }
+
         #endregion
 
         public double getLeftX()
@@ -1051,7 +1059,11 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
         private bool IsStopEnable(IElement item, DataRow existJob)
         {
             // ジョブアイコン以外の場合利用不可 
-            if (!(item is Job || item is ExtJob || item is Reboot))
+            //    if (!(item is Job || item is ExtJob || item is Reboot))
+            //added by YAMA 2014/05/30 エージェントレスアイコンも追加
+            //    if (!(item is Job || item is ExtJob || item is Reboot || item is Agentless))
+            //added by YAMA 2014/06/26 ファイル待合わせアイコンも追加
+            if (!(item is Job || item is ExtJob || item is Reboot || item is Agentless || item is FWait))
                 return false;
 
             //ステータスが実行中以外の場合利用不可 
@@ -1060,13 +1072,19 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
             return true;
         }
 
+
         //*******************************************************************
         /// <>再実行可能判定</>
         //*******************************************************************
         private bool IsReStartEnable(IElement item, DataRow existJob)
         {
             // ジョブ、拡張ジョブ、ファイル伝送アイコン以外の場合利用不可 
-            if (!(item is Job || item is ExtJob || item is FCopy || item is Reboot || item is Release))
+            //    if (!(item is Job || item is ExtJob || item is FCopy || item is Reboot || item is Release))
+            //added by YAMA 2014/05/30 エージェントレスアイコンも追加
+            //    if (!(item is Job || item is ExtJob || item is FCopy || item is Reboot || item is Release || item is Agentless))
+            //added by YAMA 2014/06/26 ファイル待合わせアイコンも追加
+            if (!(item is Job || item is ExtJob || item is FCopy || item is Reboot || item is Release || item is Agentless || item is FWait))
+
                 return false;
 
             //ステータスが実行エラー以外の場合利用不可 
@@ -1081,7 +1099,9 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
         private bool IsParameterEnable(IElement item, DataRow existJob)
         {
             // ジョブ、条件、終了、ジョブコントローラ変数アイコン以外の場合利用不可 
-            if (!(item is End || item is Job || item is If || item is Env))
+            //    if (!(item is End || item is Job || item is If || item is Env))
+            //added by YAMA 2014/05/30 エージェントレスアイコンも追加
+            if (!(item is End || item is Job || item is If || item is Env || item is Agentless))
                 return false;
 
             //ステータスが未実行＋処理フラグが保留かステータスが実行エラー以外の場合利用不可 
@@ -1422,6 +1442,18 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
                 // 17:保留解除の場合 
                 case ElementType.RELEASE:
                     rows = IconReleaseTable.Select(where);
+                    break;
+
+                //added by YAMA 2014/02/06
+                // 18:Zabbix連携の場合 
+                case ElementType.COOPERATION:
+                    rows = IconCooperationTable.Select(where);
+                    break;
+
+                //added by YAMA 2014/05/19
+                // 19:エージェントレスの場合 
+                case ElementType.AGENTLESS:
+                    rows = IconAgentlessTable.Select(where);
                     break;
             }
             // 削除 

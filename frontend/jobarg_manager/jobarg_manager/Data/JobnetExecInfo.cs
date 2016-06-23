@@ -39,5 +39,11 @@ namespace jp.co.ftf.jobcontroller.JobController
         public String scheduled_time { get; set; }
         public String start_time { get; set; }
         public String end_time { get; set; }
+
+        //added by YAMA 2014/04/25
+        public int load_status { get; set; }
+
+        //added by YAMA 2014/07/01
+        public String Foreground_color { get; set; }    
     }
 }

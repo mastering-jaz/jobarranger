@@ -18,8 +18,8 @@
 **/
 
 /*
-** $Date:: 2014-02-20 15:50:58 +0900 #$
-** $Rev: 5808 $
+** $Date:: 2014-05-21 14:08:02 +0900 #$
+** $Rev: 5985 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -130,10 +130,6 @@ static int	get_load_span()
 		if (span < 1)
 		{
 			span = 1;
-		}
-		if (span > 1439)
-		{
-			span = 1439;
 		}
 	}
 	DBfree_result(result);
@@ -728,7 +724,7 @@ static int	load_icon_jobnet(zbx_uint64_t inner_jobnet_id, zbx_uint64_t inner_job
 	zabbix_log(LOG_LEVEL_DEBUG, "In %s(" ZBX_FS_UI64 " " ZBX_FS_UI64 " %s %s %s)",
 		__function_name, inner_jobnet_id, inner_job_id, jobnet_id, job_id, update_date);
 
-	link_inner_jobnet_id = get_next_id(JA_RUN_ID_JOBNET_LD, inner_jobnet_id, jobnet_id, 0);
+	link_inner_jobnet_id = get_next_id(JA_RUN_ID_JOBNET_LD, 0, jobnet_id, 0);
 	if (link_inner_jobnet_id == 0)
 	{
 		return FAIL;
@@ -1136,22 +1132,60 @@ static int	load_icon_rel(zbx_uint64_t inner_jobnet_id, zbx_uint64_t inner_job_id
 static int	load_icon_less(zbx_uint64_t inner_jobnet_id, zbx_uint64_t inner_job_id,
 				char *jobnet_id, char *job_id, char *update_date)
 {
-	int		rc;
+	DB_RESULT	result;
+	DB_ROW		row;
+	int		session_flag, rc;
+	zbx_uint64_t	session_id_num;
+	char		session_id[65];
 	const char	*__function_name = "load_icon_less";
 
 	zabbix_log(LOG_LEVEL_DEBUG, "In %s(" ZBX_FS_UI64 " " ZBX_FS_UI64 " %s %s %s)",
 		__function_name, inner_jobnet_id, inner_job_id, jobnet_id, job_id, update_date);
 
-	rc = DBexecute("insert into ja_run_icon_agentless_table ("
-			" inner_job_id, inner_jobnet_id, host_flag, connection_method, session_flag,"
-			" auth_method, run_mode, timeout, session_id, login_user, login_password,"
-			" public_key, private_key, passphrase, host_name, stop_code, command)"
-			" select '" ZBX_FS_UI64 "','" ZBX_FS_UI64 "', host_flag, connection_method, session_flag,"
-			" auth_method, run_mode, timeout, session_id, login_user, login_password,"
-			" public_key, private_key, passphrase, host_name, stop_code, command"
+	/* expand the information icon */
+	result = DBselect("select session_flag, session_id"
 			" from ja_icon_agentless_table"
 			" where jobnet_id = '%s' and job_id = '%s' and update_date = %s",
-			inner_job_id, inner_jobnet_id, jobnet_id, job_id, update_date);
+			jobnet_id, job_id, update_date);
+
+	while (NULL == (row = DBfetch(result)))
+	{
+		zbx_snprintf(msgwork, sizeof(msgwork), "%s %s %s", jobnet_id, job_id, update_date);
+		ja_log("JALOADER200001", inner_jobnet_id, NULL, 0, "ja_icon_agentless_table", msgwork);
+		DBfree_result(result);
+		return FAIL;
+	}
+
+	session_flag = atoi(row[0]);
+
+	/* one-time session ? */
+	if (session_flag == 0)
+	{
+		session_id_num = get_next_id(JA_RUN_ID_SESSION, 0, jobnet_id, 0);
+		if (session_id_num == 0)
+		{
+			DBfree_result(result);
+			return FAIL;
+		}
+		zbx_snprintf(session_id, sizeof(session_id), "@SESSION-" ZBX_FS_UI64, session_id_num);
+	}
+	else
+	{
+		zbx_strlcpy(session_id, row[1], sizeof(session_id));
+	}
+
+	DBfree_result(result);
+
+	rc = DBexecute("insert into ja_run_icon_agentless_table ("
+			" inner_job_id, inner_jobnet_id, host_flag, connection_method, session_flag,"
+			" auth_method, run_mode, line_feed_code, timeout, session_id, login_user, login_password,"
+			" public_key, private_key, passphrase, host_name, stop_code, terminal_type, character_code, prompt_string, command)"
+			" select '" ZBX_FS_UI64 "','" ZBX_FS_UI64 "', host_flag, connection_method, session_flag,"
+			" auth_method, run_mode, line_feed_code, timeout, '%s', login_user, login_password,"
+			" public_key, private_key, passphrase, host_name, stop_code, terminal_type, character_code, prompt_string, command"
+			" from ja_icon_agentless_table"
+			" where jobnet_id = '%s' and job_id = '%s' and update_date = %s",
+			inner_job_id, inner_jobnet_id, session_id, jobnet_id, job_id, update_date);
 
 	if (rc <= ZBX_DB_OK)
 	{
@@ -1160,10 +1194,7 @@ static int	load_icon_less(zbx_uint64_t inner_jobnet_id, zbx_uint64_t inner_job_i
 		return FAIL;
 	}
 
-	/* expand the job variable */
-	rc = load_value(inner_jobnet_id, inner_job_id, jobnet_id, job_id, update_date);
-
-	return rc;
+	return SUCCEED;
 }
 
 /******************************************************************************
@@ -1256,7 +1287,7 @@ static int	load_job_definition(zbx_uint64_t inner_jobnet_main_id, zbx_uint64_t i
 	{
 		job_type = atoi(row[3]);
 
-		inner_job_id = get_next_id(JA_RUN_ID_JOB, inner_jobnet_main_id, jobnet_id, 0);
+		inner_job_id = get_next_id(JA_RUN_ID_JOB, 0, jobnet_id, 0);
 		if (inner_job_id == 0)
 		{
 			DBfree_result(result);
@@ -1266,7 +1297,7 @@ static int	load_job_definition(zbx_uint64_t inner_jobnet_main_id, zbx_uint64_t i
 		inner_job_id_fs_link = 0;
 		if (job_type == JA_JOB_TYPE_JOB)
 		{
-			inner_job_id_fs_link = get_next_id(JA_RUN_ID_JOB, inner_jobnet_main_id, jobnet_id, 0);
+			inner_job_id_fs_link = get_next_id(JA_RUN_ID_JOB, 0, jobnet_id, 0);
 			if (inner_job_id_fs_link == 0)
 			{
 				DBfree_result(result);
@@ -1412,7 +1443,7 @@ static int	load_job_definition(zbx_uint64_t inner_jobnet_main_id, zbx_uint64_t i
 
 	while (NULL != (row = DBfetch(result)))
 	{
-		inner_flow_id = get_next_id(JA_RUN_ID_FLOW, inner_jobnet_main_id, jobnet_id, 0);
+		inner_flow_id = get_next_id(JA_RUN_ID_FLOW, 0, jobnet_id, 0);
 		if (inner_flow_id == 0)
 		{
 			DBfree_result(result);
@@ -1872,7 +1903,7 @@ static int	get_calendar_detail(char *schedule_id, char *update_date,
 	zbx_strlcpy(jc_update_date, row[0], sizeof(jc_update_date));
 	DBfree_result(result);
 
-	/* edit the start and end dates of the search range */
+	/* edit the start and end dates of the search range (YYYYMMDD <- YYYYMMDDHHMM) */
 	zbx_strlcpy(start_ope_date, start_date, sizeof(start_ope_date));
 	make_end_operating_date(end_ope_date, end_date, boot_time);
 

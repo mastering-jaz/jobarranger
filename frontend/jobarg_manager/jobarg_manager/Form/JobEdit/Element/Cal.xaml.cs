@@ -59,6 +59,17 @@ public partial class Cal : UserControl,IElement
         picCalc.Fill = color;
         this.DataContext = new IconViewData();
     }
+
+    //added by YAMA 2014/07/01
+    public Cal(SolidColorBrush color, SolidColorBrush characterColor)
+    {
+        InitializeComponent();
+        picCalc.Fill = color;
+        tbJobId.Foreground = characterColor;		// 文字の色 設定
+        tbJobName.Foreground = characterColor;		// 文字の色 設定
+        this.DataContext = new IconViewData();
+    }
+
     #endregion
 
     #region プロパティ
@@ -378,9 +389,21 @@ public partial class Cal : UserControl,IElement
                 break;
             case RunJobMethodType.SKIP:
                 color = SystemConst.ColorConst.SkipColor;
+
+                //added by YAMA 2014/07/01
+                // スキップ設定時は白文字を設定
+                tbJobId.Foreground = SystemConst.ColorConst.WhiteColor;
+                tbJobName.Foreground = SystemConst.ColorConst.WhiteColor;
+
                 break;
             default:
                 color = SystemConst.ColorConst.JobColor;
+
+                //added by YAMA 2014/07/01
+                // スキップ設定以外は黒文字を設定
+                tbJobId.Foreground = SystemConst.ColorConst.BlackColor;
+                tbJobName.Foreground = SystemConst.ColorConst.BlackColor;
+
                 break;
         }
 
@@ -397,6 +420,14 @@ public partial class Cal : UserControl,IElement
     public void SetStatusColor(SolidColorBrush color)
     {
         picCalc.Fill = color;
+    }
+
+    //added by YAMA 2014/07/01
+    /// <summary>部品欄の文字色をセット</summary>
+    public void SetStatusCharacterColor(SolidColorBrush color)
+    {
+        tbJobId.Foreground = color;
+        tbJobName.Foreground = color;
     }
 
     /// <summary>部品欄のアイコン選択状態をセット</summary>

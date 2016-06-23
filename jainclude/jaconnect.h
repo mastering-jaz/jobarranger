@@ -18,8 +18,8 @@
 **/
 
 /*
-** $Date:: 2014-02-20 15:50:58 +0900 #$
-** $Revision: 5808 $
+** $Date:: 2014-07-03 17:48:58 +0900 #$
+** $Revision: 6211 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -31,5 +31,6 @@ extern char *CONFIG_SOURCE_IP;
 extern int CONFIG_TIMEOUT;
 
 int ja_connect(zbx_sock_t * s, const char *host, const zbx_uint64_t inner_job_id);
+int ja_connect_to_port(zbx_sock_t * s, const char *host, const zbx_uint64_t inner_job_id, int txn);
 
 #endif

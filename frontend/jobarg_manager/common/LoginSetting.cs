@@ -122,6 +122,8 @@ namespace jp.co.ftf.jobcontroller.Common
 
         public static int HealthCheckInterval { get; set; }
 
+        //added by YAMA 2014/03/03
+        public static int JaZabbixVersion { get; set; }
 
     }
 

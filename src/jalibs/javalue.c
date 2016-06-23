@@ -18,8 +18,8 @@
 **/
 
 /*
-** $Date:: 2014-02-04 13:21:01 +0900 #$
-** $Revision: 5771 $
+** $Date:: 2014-05-23 17:29:44 +0900 #$
+** $Revision: 6010 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -862,4 +862,246 @@ int ja_get_jobnet_summary_start(const zbx_uint64_t inner_jobnet_id,
                inner_jobnet_id);
     }
     return ret;
+}
+
+/******************************************************************************
+ *                                                                            *
+ * Function: ja_variable_free                                                 *
+ *                                                                            *
+ * Purpose: free the memory of the job controller variable acquisition area   *
+ *                                                                            *
+ * Parameters: count       (in) - number of variables                         *
+ *             ja_variable (in) - job controller variable storage area        *
+ *                                                                            *
+ * Return value:                                                              *
+ *                                                                            *
+ * Comments:                                                                  *
+ *                                                                            *
+ ******************************************************************************/
+static void ja_variable_free(const int count, ja_variable *val)
+{
+    int         idx;
+    const char  *__function_name = "ja_variable_free";
+
+    zabbix_log(LOG_LEVEL_DEBUG, "In %s() count: %d", __function_name, count);
+
+    idx = 0;
+    while (idx < count) {
+        zbx_free(val[idx].value);
+        idx = idx + 1;
+    }
+
+    zbx_free(val);
+}
+
+/******************************************************************************
+ *                                                                            *
+ * Function: ja_replace_variable                                              *
+ *                                                                            *
+ * Purpose: replaced with the value the job controller variables included in  *
+ *          the string                                                        *
+ *                                                                            *
+ * Parameters: inner_job_id (in)  - inner job id                              *
+ *             value_src    (in)  - string before replacement                 *
+ *             value_dest   (out) - string area after replacement             *
+ *             dest_len     (in)  - length of the string area after           *
+ *                                  replacement                               *
+ *                                                                            *
+ * Return value: SUCCEED - normal end                                         *
+ *               FAIL    - an error occurred                                  *
+ *                                                                            *
+ * Comments: when using "$" as a character it is specified as "$$"            *
+ *           examples of variable specification.                              *
+ *           $AAA, ${AAA}, $AAA$BBB, AAA${AAA}BBB                             *
+ *                                                                            *
+ ******************************************************************************/
+int ja_replace_variable(const zbx_uint64_t inner_job_id, char *value_src, char *value_dest, int dest_len)
+{
+    DB_RESULT   result;
+    DB_ROW      row;
+    ja_variable *val = NULL;
+    char        *ss, *dd, *vv;
+    int         count, idx, len, dlen, hit, brace;
+    char        variable_name[JA_MAX_DATA_LEN];
+    const char  *__function_name = "ja_replace_variable";
+
+    zabbix_log(LOG_LEVEL_DEBUG, "In %s() inner_job_id: " ZBX_FS_UI64, __function_name, inner_job_id);
+
+    if (value_src == NULL || value_dest == NULL) {
+        ja_log("JAVALUE200001", 0, NULL, inner_job_id, __function_name, inner_job_id);
+        return FAIL;
+    }
+
+    if (dest_len < 1) {
+        ja_log("JAVALUE200002", 0, NULL, inner_job_id, __function_name, dest_len, inner_job_id);
+        return FAIL;
+    }
+
+    dlen = dest_len - 1;
+
+    /* get the number of jobs controller variable */
+    result = DBselect("select count(*) from ja_run_value_before_table"
+                      " where inner_job_id = " ZBX_FS_UI64, inner_job_id);
+
+    if (NULL == (row = DBfetch(result))) {
+        ja_log("JAVALUE200003", 0, NULL, inner_job_id, __function_name, inner_job_id);
+        DBfree_result(result);
+        return FAIL;
+    }
+
+    count = atoi(row[0]);
+    DBfree_result(result);
+
+    if (count <= 0) {
+        ja_log("JAVALUE200003", 0, NULL, inner_job_id, __function_name, inner_job_id);
+        return FAIL;
+    }
+
+    /* get the job controller variable before */
+    val = (ja_variable *)zbx_malloc(NULL, (sizeof(ja_variable) * count));
+
+    result = DBselect("select value_name, before_value from ja_run_value_before_table"
+                      " where inner_job_id = " ZBX_FS_UI64, inner_job_id);
+
+    idx = 0;
+    while (NULL != (row = DBfetch(result))) {
+        if (count <= idx) {
+            ja_log("JAVALUE200004", 0, NULL, inner_job_id, __function_name, inner_job_id);
+            DBfree_result(result);
+            ja_variable_free(count, val);
+            return FAIL;
+        }
+        val[idx].len1  = strlen(row[0]);
+        val[idx].len2  = strlen(row[1]);
+        val[idx].value = (char *)zbx_malloc(NULL, (val[idx].len2 + 1));
+        zbx_strlcpy(val[idx].name,  row[0], sizeof(val[idx].name));
+        zbx_strlcpy(val[idx].value, row[1], val[idx].len2 + 1);
+        idx = idx + 1;
+    }
+    DBfree_result(result);
+
+    /* variable is replaced by a value */
+    ss = value_src;
+    dd = value_dest;
+    while (*ss != '\0') {
+        /* other than the variable name ? */
+        if (*ss != '$') {
+            if (dlen < 1) {
+                ja_log("JAVALUE200007", 0, NULL, inner_job_id, __function_name, inner_job_id);
+                ja_variable_free(count, val);
+                return FAIL;
+            }
+            *dd  = *ss;
+            ss   = ss   + 1;
+            dd   = dd   + 1;
+            dlen = dlen - 1;
+            continue;
+        }
+
+        /* escape the '$' character */
+        if (*(ss + 1) == '$') {
+            if (dlen < 1) {
+                ja_log("JAVALUE200007", 0, NULL, inner_job_id, __function_name, inner_job_id);
+                ja_variable_free(count, val);
+                return FAIL;
+            }
+            *dd  = *ss;
+            ss   = ss   + 2;
+            dd   = dd   + 1;
+            dlen = dlen - 1;
+            continue;
+        }
+
+        /* start the replacement of variable */
+        brace = 0;
+        if (*(ss + 1) == '{') {
+            brace = 1;
+            ss = ss + 2;
+        }
+        else {
+            ss = ss + 1;
+        }
+
+        /* get the variable name */
+        for (vv = ss; *ss != '\0'; ss++) {
+            if (*ss == '$' || *ss == '\r' || *ss == '\n') {
+                break;
+            }
+            if (*ss == '}') {
+                brace = brace - 1;
+                break;
+            }
+        }
+
+        len = ss - vv;
+
+        /* incorrect variable name ? ($ or ${}) */
+        if (len == 0) {
+            if (*(vv - 1) == '{') {
+                zbx_strlcpy(variable_name, "${}", sizeof(variable_name));
+            }
+            else {
+                zbx_strlcpy(variable_name, "$", sizeof(variable_name));
+            }
+            ja_log("JAVALUE200008", 0, NULL, inner_job_id, __function_name, variable_name, inner_job_id);
+            ja_variable_free(count, val);
+            return FAIL;
+        }
+
+        /* get variable name */
+        memcpy(variable_name, vv, len);
+        variable_name[len] = '\0';
+
+        /* incorrect variable name ? (${xxx or $xxx}) */
+        if (brace != 0) {
+            ja_log("JAVALUE200008", 0, NULL, inner_job_id, __function_name, variable_name, inner_job_id);
+            ja_variable_free(count, val);
+            return FAIL;
+        }
+
+        /* the variable name is long ? */
+        if (len > (JA_VALUE_NAME_LEN - 1)) {
+            ja_log("JAVALUE200009", 0, NULL, inner_job_id, __function_name, (JA_VALUE_NAME_LEN - 1), len, variable_name, inner_job_id);
+            ja_variable_free(count, val);
+            return FAIL;
+        }
+
+        /* find the value of a variable */
+        hit = 0;
+        for (idx = 0; idx < count; idx++) {
+            if (val[idx].len1 != len) {
+                continue;
+            }
+
+            if (strcmp(val[idx].name, variable_name) == 0) {
+                if (val[idx].len2 > dlen) {
+                    ja_log("JAVALUE200005", 0, NULL, inner_job_id, __function_name, variable_name, inner_job_id);
+                    ja_variable_free(count, val);
+                    return FAIL;
+                }
+                memcpy(dd, val[idx].value, val[idx].len2);
+                dd   = dd   + val[idx].len2;
+                dlen = dlen - val[idx].len2;
+                hit  = 1;
+                break;
+            }
+        }
+
+        /* variable no hit ? */
+        if (hit == 0) {
+            ja_log("JAVALUE200006", 0, NULL, inner_job_id, __function_name, variable_name, inner_job_id);
+            ja_variable_free(count, val);
+            return FAIL;
+        }
+
+        if (*ss == '}') {
+            ss = ss + 1;
+        }
+    }
+
+    *dd = '\0';
+
+    ja_variable_free(count, val);
+
+    return SUCCEED;
 }

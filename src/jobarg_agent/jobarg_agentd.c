@@ -18,8 +18,8 @@
 **/
 
 /*
-** $Date:: 2014-02-10 14:15:00 +0900 #$
-** $Revision: 5782 $
+** $Date:: 2014-05-12 10:26:50 +0900 #$
+** $Revision: 5955 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -244,6 +244,7 @@ static void set_defaults()
         else
             zabbix_log(LOG_LEVEL_WARNING, "failed to get system hostname");
     }
+
 #ifdef USE_PID_FILE
     if (NULL == CONFIG_PID_FILE)
         CONFIG_PID_FILE = "/tmp/jobarg_agentd.pid";
@@ -269,28 +270,30 @@ static void set_defaults()
 static void jobarg_load_config(int requirement)
 {
     struct cfg_line cfg[] = {
-        /* PARAMETER, VAR, TYPE, MANDATORY, MIN, MAX */
+        /* PARAMETER,       VAR,                       TYPE,        MANDATORY, MIN, MAX */
 #ifdef USE_PID_FILE
-        {"JaPidFile", &CONFIG_PID_FILE, TYPE_STRING, PARM_OPT, 0, 0},
+        {"JaPidFile",       &CONFIG_PID_FILE,          TYPE_STRING, PARM_OPT,  0,   0},
 #endif
-        {"TmpDir", &CONFIG_TMPDIR, TYPE_STRING, PARM_MAND, 0, 0},
-        {"Server", &CONFIG_HOSTS_ALLOWED, TYPE_STRING, PARM_OPT, 0, 0},
-        {"Hostname", &CONFIG_HOSTNAME, TYPE_STRING, PARM_OPT, 0, 0},
-        {"AllowRoot", &CONFIG_ALLOW_ROOT, TYPE_INT, PARM_OPT, 0, 1},
-        {"ListenIP", &CONFIG_LISTEN_IP, TYPE_STRING, PARM_OPT, 0, 0},
-        {"ListenIP", &CONFIG_SOURCE_IP, TYPE_STRING, PARM_OPT, 0, 0},
-        {"Timeout", &CONFIG_TIMEOUT, TYPE_INT, PARM_OPT, 1, 30},
-        {"DebugLevel", &CONFIG_LOG_LEVEL, TYPE_INT, PARM_OPT, 0, 4},
-        {"LogFileSize", &CONFIG_LOG_FILE_SIZE, TYPE_INT, PARM_OPT, 0, 1024},
-        {"JaLogFile", &CONFIG_LOG_FILE, TYPE_STRING, PARM_OPT, 0, 0},
-        {"JaServerPort", &CONFIG_SERVER_PORT, TYPE_INT, PARM_OPT, 1, 65535},
-        {"JaListenPort", &CONFIG_LISTEN_PORT, TYPE_INT, PARM_OPT, 1, 65535},
-        {"JaSendRetry", &CONFIG_SEND_RETRY, TYPE_INT, PARM_OPT, 0, 3600},
-        {"JaDatabaseFile", &CONFIG_DATABASE_FILE, TYPE_STRING, PARM_MAND, 0, 0},
-        {"JaJobHistory", &CONFIG_JOB_HISTORY, TYPE_INT, PARM_OPT, 1, 365},
-        {"JaBackupTime", &CONFIG_BACKUP_TIME, TYPE_INT, PARM_OPT, 1, 24},
-        {"JaExtjobPath", &CONFIG_EXTJOB_PATH, TYPE_STRING, PARM_MAND, 0, 0},
-        {"JaFcopyTimeout", &CONFIG_FCOPY_TIMEOUT, TYPE_INT, PARM_OPT, 1, 3600},
+        {"TmpDir",          &CONFIG_TMPDIR,            TYPE_STRING, PARM_MAND, 0,   0},
+        {"Server",          &CONFIG_HOSTS_ALLOWED,     TYPE_STRING, PARM_OPT,  0,   0},
+        {"Hostname",        &CONFIG_HOSTNAME,          TYPE_STRING, PARM_OPT,  0,   0},
+        {"AllowRoot",       &CONFIG_ALLOW_ROOT,        TYPE_INT,    PARM_OPT,  0,   1},
+        {"ListenIP",        &CONFIG_LISTEN_IP,         TYPE_STRING, PARM_OPT,  0,   0},
+        {"ListenIP",        &CONFIG_SOURCE_IP,         TYPE_STRING, PARM_OPT,  0,   0},
+        {"Timeout",         &CONFIG_TIMEOUT,           TYPE_INT,    PARM_OPT,  1,   300},
+        {"DebugLevel",      &CONFIG_LOG_LEVEL,         TYPE_INT,    PARM_OPT,  0,   4},
+        {"LogFileSize",     &CONFIG_LOG_FILE_SIZE,     TYPE_INT,    PARM_OPT,  0,   1024},
+        {"JaLogFile",       &CONFIG_LOG_FILE,          TYPE_STRING, PARM_OPT,  0,   0},
+        {"JaServerPort",    &CONFIG_SERVER_PORT,       TYPE_INT,    PARM_OPT,  1,   65535},
+        {"JaListenPort",    &CONFIG_LISTEN_PORT,       TYPE_INT,    PARM_OPT,  1,   65535},
+        {"JaSendRetry",     &CONFIG_SEND_RETRY,        TYPE_INT,    PARM_OPT,  0,   3600},
+        {"JaDatabaseFile",  &CONFIG_DATABASE_FILE,     TYPE_STRING, PARM_MAND, 0,   0},
+        {"JaJobHistory",    &CONFIG_JOB_HISTORY,       TYPE_INT,    PARM_OPT,  1,   365},
+        {"JaBackupTime",    &CONFIG_BACKUP_TIME,       TYPE_INT,    PARM_OPT,  1,   24},
+        {"JaExtjobPath",    &CONFIG_EXTJOB_PATH,       TYPE_STRING, PARM_MAND, 0,   0},
+        {"JaFcopyTimeout",  &CONFIG_FCOPY_TIMEOUT,     TYPE_INT,    PARM_OPT,  1,   3600},
+        {"JaListenRetry",   &CONFIG_LISTEN_RETRY,      TYPE_INT,    PARM_OPT,  0,   3600},
+        {"JaExecutionUser", &CONFIG_JA_EXECUTION_USER, TYPE_STRING, PARM_OPT,  0,   0},
         {NULL}
     };
 
@@ -388,6 +391,7 @@ int MAIN_ZABBIX_ENTRY()
     zbx_thread_args_t *thread_args;
     zbx_sock_t listen_sock;
     int thread_num = 0;
+    int cnt = 0;
 
 #ifdef _WINDOWS
     DWORD res;
@@ -410,12 +414,20 @@ int MAIN_ZABBIX_ENTRY()
         exit(EXIT_FAILURE);
     }
 
-    if (FAIL ==
-        zbx_tcp_listen(&listen_sock, CONFIG_LISTEN_IP,
-                       (unsigned short) CONFIG_LISTEN_PORT)) {
-        zabbix_log(LOG_LEVEL_CRIT, "listener failed: %s",
-                   zbx_tcp_strerror());
-        exit(EXIT_FAILURE);
+    zabbix_log(LOG_LEVEL_DEBUG, "My host name is [%s]", CONFIG_HOSTNAME);
+
+    cnt = 0;
+    while (1) {
+        if (SUCCEED == zbx_tcp_listen(&listen_sock, CONFIG_LISTEN_IP, (unsigned short) CONFIG_LISTEN_PORT)) {
+            break;
+        }
+
+        if (cnt >= CONFIG_LISTEN_RETRY) {
+            zabbix_log(LOG_LEVEL_CRIT, "listener failed: %s", zbx_tcp_strerror());
+            exit(EXIT_FAILURE);
+        }
+        cnt = cnt + 1;
+        zbx_sleep(1);
     }
 
     if (listen_sock.num_socks != 1

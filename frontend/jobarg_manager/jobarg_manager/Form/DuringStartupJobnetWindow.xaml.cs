@@ -48,6 +48,12 @@ namespace jp.co.ftf.jobcontroller.JobController
         private DateTime startTime;
         /// <summary>監視時間秒で指定</summary>
         private static int TimeOut = 300;
+
+        //added by YAMA 2014/07/10 即時起動時の展開完了チェック
+        // 一度展開完了検出後、再度展開完了チェックし２秒、間を空ける
+        public int checkInvoid_counter = 0;
+
+
         #endregion
 
         #region コンストラクタ
@@ -95,21 +101,57 @@ namespace jp.co.ftf.jobcontroller.JobController
         private void checkInvoid(Object sender, EventArgs e)
         {
             DataTable dt = DBUtil.GetRunJobnetSummary(_innerJobnetId);
-            if (dt.Rows.Count>0)
+
+            if (dt.Rows.Count > 0)
             {
-                if ((Int32)dt.Rows[0]["load_status"] == 0)
+                //added by YAMA 2014/07/09
+                int load_status = (Int32)dt.Rows[0]["load_status"];
+
+                if (load_status == 0)
                 {
+                    //added by YAMA 2014/07/11
+                    int multiple_start_up = (Int32)dt.Rows[0]["multiple_start_up"];
+                    // 1：スキップ、2：待ち合せ の時だけ待つ
+                    if (multiple_start_up != 0)
+                    {
+                        //added by YAMA 2014/07/10
+                        if (checkInvoid_counter < 1)
+                        {
+                            checkInvoid_counter++;
+                            return;
+                        }
+                    }
+
+                    checkInvoid_counter = 0;
+
                     dispatcherTimer.Stop();
                     this.Close();
-                    JobnetExecDetail detail = new JobnetExecDetail(_innerJobnetId,false);
+                    JobnetExecDetail detail = new JobnetExecDetail(_innerJobnetId, false);
                     detail.Topmost = true;
                     detail.Show();
                     return;
                 }
+                // 遅延起動
+                else if (load_status == 2)
+                {
+                    dispatcherTimer.Stop();
+                    this.Close();
+                    CommonDialog.ShowErrorDialog(Consts.ERROR_JOBNET_LOAD_002);
+                    return;
+                }
+                // 実行スキップ
+                else if (load_status == 3)
+                {
+                    dispatcherTimer.Stop();
+                    this.Close();
+                    CommonDialog.ShowErrorDialog(Consts.ERROR_JOBNET_LOAD_003);
+                    return;
+                }
+                //added by YAMA 2014/07/10
                 else
                 {
                     dispatcherTimer.Stop();
-                    this.Close();                    
+                    this.Close();
                     CommonDialog.ShowErrorDialog(Consts.ERROR_JOBNET_LOAD_001);
                     return;
                 }

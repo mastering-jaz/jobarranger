@@ -27,6 +27,7 @@
 #define USE_PID_FILE	1
 
 extern char	*CONFIG_PID_FILE;
+extern char	*CONFIG_JA_EXECUTION_USER;
 
 #include "threads.h"
 

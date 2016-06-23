@@ -136,6 +136,10 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
         {
             hideContextMenu.IsEnabled = false;
             stopContextMenu.IsEnabled = false;
+
+            //added by YAMA 2014/04/25
+            DelayedContextMenu.IsEnabled = false;
+
             // 何らかのアイテムを選択した状態のとき
             if (listView1.SelectedItems.Count > 0)
             {
@@ -147,6 +151,15 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
                     stopContextMenu.IsEnabled = true;
                     stopContextMenu.Tag = jobnetExecInfo;
                 }
+
+                //added by YAMA 2014/04/25
+                // 展開状況が「遅延起動」
+                if ((LoadStausType)jobnetExecInfo.load_status == LoadStausType.Delay)
+                {
+                    DelayedContextMenu.IsEnabled = true;
+                    DelayedContextMenu.Tag = jobnetExecInfo;
+                }
+
             }
             #if VIEWER
                 this.stopContextMenu.Visibility = Visibility.Collapsed;

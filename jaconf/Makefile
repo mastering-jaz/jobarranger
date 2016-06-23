@@ -39,8 +39,8 @@ ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ax_lib_mysql.m4 \
 	$(top_srcdir)/m4/ax_lib_postgresql.m4 \
 	$(top_srcdir)/m4/iconv.m4 $(top_srcdir)/m4/libjson.m4 \
-	$(top_srcdir)/m4/libsqlite3.m4 $(top_srcdir)/m4/resolv.m4 \
-	$(top_srcdir)/configure.in
+	$(top_srcdir)/m4/libsqlite3.m4 $(top_srcdir)/m4/libssh2.m4 \
+	$(top_srcdir)/m4/resolv.m4 $(top_srcdir)/configure.in
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
@@ -141,9 +141,9 @@ OBJEXT = o
 PACKAGE = jobarranger
 PACKAGE_BUGREPORT = 
 PACKAGE_NAME = jobarranger
-PACKAGE_STRING = jobarranger 1.4.2
+PACKAGE_STRING = jobarranger 2.0.1
 PACKAGE_TARNAME = jobarranger
-PACKAGE_VERSION = 1.4.2
+PACKAGE_VERSION = 2.0.1
 PATH_SEPARATOR = :
 PG_CONFIG = 
 POSTGRESQL_CPPFLAGS = 
@@ -160,8 +160,11 @@ SQLITE3_CPPFLAGS =
 SQLITE3_LDFLAGS = 
 SQLITE3_LIBS = 
 SQLITE3_VERSION = 
+SSH2_CFLAGS = 
+SSH2_LDFLAGS = 
+SSH2_LIBS = 
 STRIP = 
-VERSION = 1.4.2
+VERSION = 2.0.1
 abs_builddir = /cus/jobarranger/infra/branches/jaconf
 abs_srcdir = /cus/jobarranger/infra/branches/jaconf
 abs_top_builddir = /cus/jobarranger/infra/branches

@@ -18,8 +18,8 @@
 **/
 
 /*
-** $Date:: 2014-02-17 14:40:27 +0900 #$
-** $Rev: 5797 $
+** $Date:: 2014-07-09 10:58:41 +0900 #$
+** $Rev: 6258 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -430,7 +430,7 @@ static int	jobnet_boot(char *now_date)
 			" update_date, multiple_start_up, load_status"
 			" from ja_run_jobnet_summary_table"
 			" where status = %d and (scheduled_time <= %s or scheduled_time = 0)"
-			" order by scheduled_time",
+			" order by scheduled_time, inner_jobnet_id",
 			JA_JOBNET_STATUS_BEGIN, now_date);
 
 	while (NULL != (row = DBfetch(result)))

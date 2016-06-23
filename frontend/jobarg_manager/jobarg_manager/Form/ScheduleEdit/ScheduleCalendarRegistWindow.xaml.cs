@@ -136,13 +136,26 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.ScheduleEdit
             // カレンダー稼働日の表示 
             ShowCalendarDetail();
             btnRegist.IsEnabled = true;
-            container.textBox_bootTimeHH.IsEnabled = true;
-            container.textBox_bootTimeMI.IsEnabled = true;
+            // container.textBox_bootTimeHH.IsEnabled = true;
+            // container.textBox_bootTimeMI.IsEnabled = true;
+
+            //added by YAMA 2014/04/10
+            container.rbStartTime.IsEnabled = true;
+            container.rbCycleStart.IsEnabled = true;
+            container.textBox_StartTime.IsEnabled = true;
+            container.textBox_CyclePeriodFrom.IsEnabled = true;
+            container.textBox_CyclePeriodTo.IsEnabled = true;
+            container.textBox_CycleInterval.IsEnabled = true;
+
+            //container.rbStartTime.IsChecked = true;
+
+
             container.btnLeft.IsEnabled = true;
             container.btnRight.IsEnabled = true;
             e.Handled = true;
 
         }
+
 
         //*******************************************************************
         /// <summary>登録ボタンをクリック</summary>
@@ -151,27 +164,96 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.ScheduleEdit
         //*******************************************************************
         private void regist_Click(object sender, RoutedEventArgs e)
         {
+            int interval = 0;
+            int[] stHM = new int[2];
+            int[] edHM = new int[2];
+
+            string bootTime = "";
+            string startTime = "";
+
+            string CycleInterval = "";
+            string[] TmData = new string[4];
+
+
             // 開始ログ
             base.WriteStartLog("regist_Click", Consts.PROCESS_001);
 
-            // 入力チェック 
-            if (!InputCheck())
-                return;
-            String bootTime = container.textBox_bootTimeHH.Text + container.textBox_bootTimeMI.Text;
-            if (bootTime.Length == 3) bootTime = "0" + bootTime;
-            DataRow[] rows = ParentContainer.ScheduleDetailTable.Select("calendar_id='" + CalendarId + "' and boot_time='" + bootTime + "'");
-
-            if (rows.Length < 1)
+            // 起動方法の判別
+            if (container.rbStartTime.IsChecked == true)
             {
-                DataRow row = ParentContainer.ScheduleDetailTable.NewRow();
-                row["calendar_id"] = CalendarId;
-                row["boot_time"] = bootTime;
-                row["schedule_id"] = ParentContainer.ScheduleId;
-                ParentContainer.ScheduleDetailTable.Rows.Add(row);
-                CalendarControlDAO calendarControlDAO = new CalendarControlDAO(dbAccess);
-                DataTable dt = calendarControlDAO.GetValidORMaxUpdateDateEntityById(_calendarId);
-                row["calendar_name"] = dt.Rows[0]["calendar_name"];
+                // 起動時刻ラジオボタンを選択
+
+                // 入力チェック 
+                if (!InputCheck(0, ref TmData))
+                    return;
+                // TmDataには時分に分解された起動時刻が格納されている
+                
+                // 起動時刻を取得
+                bootTime = TmData[0] + TmData[1];
+
+                if (bootTime.Length == 3) bootTime = "0" + bootTime;
+                DataRow[] rows = ParentContainer.ScheduleDetailTable.Select("calendar_id='" + CalendarId + "' and boot_time='" + bootTime + "'");
+
+                if (rows.Length < 1)
+                {
+                    DataRow row = ParentContainer.ScheduleDetailTable.NewRow();
+                    row["calendar_id"] = CalendarId;
+                    row["boot_time"] = bootTime;
+                    row["schedule_id"] = ParentContainer.ScheduleId;
+                    ParentContainer.ScheduleDetailTable.Rows.Add(row);
+                    CalendarControlDAO calendarControlDAO = new CalendarControlDAO(dbAccess);
+                    DataTable dt = calendarControlDAO.GetValidORMaxUpdateDateEntityById(_calendarId);
+                    row["calendar_name"] = dt.Rows[0]["calendar_name"];
+                }
             }
+            else
+            {
+                // サイクル起動ラジオボタンを選択
+
+                // 入力チェック 
+                if (!InputCheck(1, ref TmData))
+                    return;
+                // TmDataには時分に分解された開始時刻と終了時刻が格納されている
+
+                // 開始時刻を取得
+                stHM[0] = int.Parse(TmData[0]);
+                stHM[1] = int.Parse(TmData[1]);
+
+                // 終了時刻を取得
+                edHM[0] = int.Parse(TmData[2]);
+                edHM[1] = int.Parse(TmData[3]);
+
+                // 間隔時間（分）を取得
+                CycleInterval = container.textBox_CycleInterval.Text.Trim();
+
+                interval = int.Parse(CycleInterval);
+
+                TimeSpan t1 = new TimeSpan(stHM[0], stHM[1], 0);
+                TimeSpan t2 = new TimeSpan(0, 0, 0);
+                TimeSpan t3 = new TimeSpan(edHM[0], edHM[1], 0);
+
+                // 開始時刻を取得
+                startTime = TmData[0] + TmData[1];
+
+                DataRow[] rows = ParentContainer.ScheduleDetailTable.Select("calendar_id='" + CalendarId + "' and boot_time='" + startTime + "'");
+
+                if (rows.Length < 1)
+                {
+                    for (; t1 <= t3; t1 = t1 + t2)
+                    {
+                        t2 = new TimeSpan(0, interval, 0);
+                        DataRow row = ParentContainer.ScheduleDetailTable.NewRow();
+                        row["calendar_id"] = CalendarId;
+                        row["boot_time"] = t1.ToString("hhmm");
+                        row["schedule_id"] = ParentContainer.ScheduleId;
+                        ParentContainer.ScheduleDetailTable.Rows.Add(row);
+                        CalendarControlDAO calendarControlDAO = new CalendarControlDAO(dbAccess);
+                        DataTable dt = calendarControlDAO.GetValidORMaxUpdateDateEntityById(_calendarId);
+                        row["calendar_name"] = dt.Rows[0]["calendar_name"];
+                    }
+                }
+            }
+
             this.Close();
             // 終了ログ
             base.WriteEndLog("regist_Click", Consts.PROCESS_001);
@@ -249,8 +331,20 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.ScheduleEdit
             container.ParantWindow = this;
 
             btnRegist.IsEnabled = false;
-            container.textBox_bootTimeHH.IsEnabled = false;
-            container.textBox_bootTimeMI.IsEnabled = false;
+            // container.textBox_bootTimeHH.IsEnabled = false;
+            // container.textBox_bootTimeMI.IsEnabled = false;
+
+            //added by YAMA 2014/04/10
+            container.rbStartTime.IsEnabled = false;
+            container.rbCycleStart.IsEnabled = false;
+            container.textBox_StartTime.IsEnabled = false;
+            container.textBox_CyclePeriodFrom.IsEnabled = false;
+            container.textBox_CyclePeriodTo.IsEnabled = false;
+            container.textBox_CycleInterval.IsEnabled = false;
+
+            container.rbStartTime.IsChecked = true;
+
+
             ShowCalendarDetail();
             container.btnLeft.IsEnabled = false;
             container.btnRight.IsEnabled = false;
@@ -412,65 +506,322 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.ScheduleEdit
             dbaccess.CloseSqlConnect();
         }
 
+
+        //added by YAMA 2014/04/10
+        private int ChkTimeData(string inData, ref string[] outTimeData)
+        {
+            int idx = 0;
+            int ret = 0;
+
+            // 未入力チェック
+            if (CheckUtil.IsNullOrEmpty(inData))
+            {
+                return 1;
+            }
+
+            // 半角数字・コロンチェック
+            if (CheckUtil.IsHankakuStrAndColon(inData))
+            {
+            }
+            else
+            {
+                return 2;
+            }
+
+            // 時分に分解
+            idx = inData.IndexOf(":");
+            if (idx == -1)
+            {
+                return 3;
+            }
+            else
+            {
+                outTimeData[0] = inData.Substring(0, idx);
+                outTimeData[1] = inData.Substring(idx + 1);
+
+                // コロンのみ入力された場合
+                if (outTimeData[0].Length == 0 || outTimeData[1].Length == 0)
+                {
+                    return 4;
+                }
+            }
+            return ret;
+
+        }
+
         //*******************************************************************
         /// <summary>入力チェック </summary>
         /// <returns>チェック結果</returns>
         //*******************************************************************
-        private bool InputCheck()
+        private bool InputCheck(int selectRbType, ref string[] outTmData)
         {
-            // 起動時刻時間を取得 
-            string bootTimeHH = container.textBox_bootTimeHH.Text.Trim();
+            bool retCode = true;
+            int ret = 0;
+            int wktime = 0;
 
-            String[] errItem = new String[2];
-            errItem[0] = Properties.Resources.err_message_boot_time_hh;
-            errItem[1] = "2";
-            if (CheckUtil.IsNullOrEmpty(bootTimeHH))
+            string bootTime = "";
+            string CycleInterval = "";
+
+            String[] errItem = new String[3];
+
+            string[] CycleTimeDataData = new string[2];
+
+            int[] stHM = new int[2];
+            int[] edHM = new int[2];
+
+
+            // 起動時刻を選択時
+            if (selectRbType == 0)
             {
-                CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_001, errItem);
-                return false;
+                // 起動時刻を取得
+                bootTime = container.textBox_StartTime.Text.Trim();
+
+                // 起動時刻のデータチェック
+                ret = ChkTimeData(bootTime, ref outTmData);
+                // outTmDataには時分に分解された値が格納されている
+
+                errItem[0] = Properties.Resources.err_message_boot_time; // 起動時刻
+                errItem[1] = "2"; // 2バイト、2桁の２
+
+                switch (ret)
+                {
+                    // 未入力(1)
+                    case 1:
+                        CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_001, errItem);
+                        retCode = false;
+                        break;
+
+                    // 半角数字・コロン以外を入力(2)
+                    case 2:
+                        CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_027, errItem);
+                        retCode = false;
+                        break;
+
+                    // 時間の入力形式[hh:mm]誤り(3)
+                    case 3:
+                    case 4:
+                        CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_026, errItem);
+                        retCode = false;
+                        break;
+                    
+                }
+
+                if (retCode == false)
+                {
+                    return retCode;
+                }
+
+
+                // 起動時刻（時）の値が「0」～「99」以外の場合、エラー
+                if (CheckUtil.IsLenOver(outTmData[0], 2))
+                {
+                    errItem[0] = Properties.Resources.err_message_boot_time_hh; // 起動時刻の時間
+                    CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_003, errItem);
+                    return false;
+                }
+
+                // 起動時刻（分）の値が「00」～「59」以外の場合、エラー
+                wktime = int.Parse(outTmData[1]);
+
+                if (wktime < 0 || wktime > 59)
+                {
+                    errItem[0] = Properties.Resources.err_message_boot_time_mi; // 起動時刻の分
+                    CommonDialog.ShowErrorDialog(Consts.ERROR_BOOT_TIME_001, errItem);
+                    return false;
+                }
             }
-            if (CheckUtil.IsLenOver(bootTimeHH, 2))
+            else
             {
-                CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_003, errItem);
-                return false;
-            }
-            if (!CheckUtil.IsHankakuNum(bootTimeHH))
-            {
-                CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_007, errItem);
-                return false;
+                // サイクル起動を選択時
+                // 開始時刻を取得
+                bootTime = container.textBox_CyclePeriodFrom.Text.Trim();
+
+                // 開始時刻のデータチェック
+                ret = ChkTimeData(bootTime, ref CycleTimeDataData);
+
+                errItem[0] = Properties.Resources.err_message_boot_start_time; // 開始時刻
+                errItem[1] = "2"; // 2バイト、2桁の２
+                switch (ret)
+                {
+                    // 未入力(1)
+                    case 1:
+                        CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_001, errItem);
+                        retCode = false;
+                        break;
+
+                    // 半角数字・コロン以外を入力(2)
+                    case 2:
+                        CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_027, errItem);
+                        retCode = false;
+                        break;
+
+                    // 時間の入力形式[hh:mm]誤り(3)
+                    case 3:
+                    case 4:
+                        CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_026, errItem);
+                        retCode = false;
+                        break;
+                }
+
+                if (retCode == false)
+                {
+                    return retCode;
+                }
+
+                // outTmDataには時分に分解された値が格納されている
+                outTmData[0] = CycleTimeDataData[0];
+                outTmData[1] = CycleTimeDataData[1];
+                
+                // 開始時刻（時）の値が「0」～「23」以外の場合、エラーダイアログを表示する。
+                wktime = int.Parse(outTmData[0]);
+
+                if (wktime < 0 || wktime > 23)
+                {
+                    CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_017,
+                                                    new string[] { Properties.Resources.err_message_boot_start_time_hh, "0", "23" });
+                    return false;
+                }
+
+                // 開始時刻（分）の値が「00」～「59」以外の場合、エラーダイアログを表示する。
+                wktime = int.Parse(outTmData[1]);
+
+                if (wktime < 0 || wktime > 59)
+                {
+                    CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_017,
+                                                    new string[] { Properties.Resources.err_message_boot_start_time_mi, "0", "59" });
+                    return false;
+                }
+
+
+                // 終了時刻を取得
+                bootTime = container.textBox_CyclePeriodTo.Text.Trim();
+
+                // 終了時刻のデータチェック
+                ret = ChkTimeData(bootTime, ref CycleTimeDataData);
+
+                errItem[0] = Properties.Resources.err_message_boot_end_time; // 終了時刻
+                errItem[1] = "2"; // 2バイト、2桁の２
+                switch (ret)
+                {
+                    // 未入力(1)
+                    case 1:
+                        CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_001, errItem);
+                        retCode = false;
+                        break;
+
+                    // 半角数字・コロン以外を入力(2)
+                    case 2:
+                        CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_027, errItem);
+                        retCode = false;
+                        break;
+
+                    // 時間の入力形式[hh:mm]誤り(3)
+                    case 3:
+                    case 4:
+                        CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_026, errItem);
+                        retCode = false;
+                        break;
+                }
+
+                if (retCode == false)
+                {
+                    return retCode;
+                }
+
+
+                // outTmDataには時分に分解された値が格納されている
+                outTmData[2] = CycleTimeDataData[0];
+                outTmData[3] = CycleTimeDataData[1];
+
+                //added by YAMA 2014/06/23
+                // 終了時刻（時）の値が「0」～「23」以外の場合、エラーダイアログを表示する。 <-- 廃止
+                // 終了時刻（時）の値が「0」～「47」以外の場合、エラーダイアログを表示する。
+                wktime = int.Parse(outTmData[2]);
+
+                if (wktime < 0 || wktime > 47)
+                {
+                    CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_017,
+                                                    new string[] { Properties.Resources.err_message_boot_end_time_hh, "0", "47" });
+                    return false;
+                }
+
+                // 終了時刻（分）の値が「00」～「59」以外の場合、エラーダイアログを表示する。
+                wktime = int.Parse(outTmData[3]);
+
+                if (wktime < 0 || wktime > 59)
+                {
+                    CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_017,
+                                                    new string[] { Properties.Resources.err_message_boot_end_time_mi, "0", "59" });
+                    return false;
+                }
+
+                // 開始時刻＜終了時刻以外の場合、エラーダイアログを表示する。
+
+                // 開始時刻を取得
+                stHM[0] = int.Parse(outTmData[0]);
+                stHM[1] = int.Parse(outTmData[1]);
+
+                // 終了時刻を取得
+                edHM[0] = int.Parse(outTmData[2]);
+                edHM[1] = int.Parse(outTmData[3]);
+
+                TimeSpan t1 = new TimeSpan(stHM[0], stHM[1], 0);
+                TimeSpan t2 = new TimeSpan(edHM[0], edHM[1], 0);
+
+                if (t1 >= t2)
+                {
+                    CommonDialog.ShowErrorDialog(Consts.ERROR_BOOT_TIME_005);
+                    return false;
+                }
+
+                //added by YAMA 2014/06/23
+                // 開始時刻と終了時刻の時間幅が23時59分を超えてる場合、エラーダイアログを表示する
+                //23時間59分（23:59:00）を表すTimeSpanオブジェクトを作成する
+                TimeSpan ts3 = TimeSpan.Parse("23:59");
+                TimeSpan ts4 = t2 - t1;
+
+                if (ts3 < ts4)
+                {
+                    CommonDialog.ShowErrorDialog(Consts.ERROR_BOOT_TIME_006);
+                    return false;
+                }
+
+                // 間隔時間（分）の半角数字チェック
+                CycleInterval = container.textBox_CycleInterval.Text.Trim();
+                errItem[0] = Properties.Resources.err_message_boot_time_CycleInterval; // 間隔時間（分）
+
+                if (CycleInterval.Length == 0)
+                {
+                    CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_001, errItem);
+                    return false;
+                }
+
+                if (CheckUtil.IsHankakuNum(CycleInterval))
+                {
+                }
+                else
+                {
+                    CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_007, errItem);
+                    return false;
+                }
+
+                // 間隔時間（分）の値が「1」～「720（12時間）」以外の場合、エラーダイアログを表示する。
+                wktime = int.Parse(CycleInterval);
+
+                if (wktime < 1 || wktime > 720)
+                {
+                    errItem[1] = "1";
+                    errItem[2] = "720";
+
+                    CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_017, errItem);
+                    return false;
+                }
+
             }
 
-            // 起動時刻分を取得 
-            string bootTimeMI = container.textBox_bootTimeMI.Text.Trim();
-
-            errItem[0] = Properties.Resources.err_message_boot_time_mi;
-            errItem[1] = "2";
-            if (CheckUtil.IsNullOrEmpty(bootTimeMI))
-            {
-                CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_001, errItem);
-                return false;
-            }
-            if (!CheckUtil.IsLen(bootTimeMI, 2))
-            {
-                CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_012, errItem);
-                return false;
-            }
-            if (!CheckUtil.IsHankakuNum(bootTimeMI))
-            {
-                CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_007, errItem);
-                return false;
-            }
-
-            int iMI = int.Parse(bootTimeMI);
-
-            if (iMI < 0 || iMI > 59)
-            {
-                CommonDialog.ShowErrorDialog(Consts.ERROR_BOOT_TIME_001, errItem);
-                return false;
-            }
-
-            return true;
+            return retCode;
         }
+
 
         #endregion
 

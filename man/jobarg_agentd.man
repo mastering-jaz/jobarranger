@@ -1,4 +1,4 @@
-.TH JOBARG_AGENTD 8 "31 November 2012"
+.TH JOBARG_AGENTD 8 "17 March 2014"
 .SH NAME
 jobarg_agentd \- Job Arranger agent daemon.
 .SH SYNOPSIS
@@ -20,7 +20,10 @@ Output version information and exit.
 .I /usr/local/etc/jobarranger/jobarg_agentd.conf
 Default location of Job Arranger agent configuration file (if not modified during compile time).
 .SH "SEE ALSO"
-.BR jobarg_exec (8),
-.BR jobarg_server (8)
+.BR jobarg_server (8),
+.BR jobarg_exec (1),
+.BR jobarg_get (1),
+.BR jobarg_joblogput (1),
+.BR jobarg_release (1)
 .SH AUTHOR
 Komatsu Yuji <komatsu@fitechforce.jp>

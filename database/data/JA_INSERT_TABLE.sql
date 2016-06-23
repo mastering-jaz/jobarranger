@@ -47,13 +47,15 @@ INSERT INTO ja_index_table (count_id, nextid) VALUES (2, 1500000000000000000);
 INSERT INTO ja_index_table (count_id, nextid) VALUES (3, 1600000000000000000);
 INSERT INTO ja_index_table (count_id, nextid) VALUES (20, 1);
 INSERT INTO ja_index_table (count_id, nextid) VALUES (30, 1);
+INSERT INTO ja_index_table (count_id, nextid) VALUES (40, 1);
 INSERT INTO ja_index_table (count_id, nextid) VALUES (100, 1);
 INSERT INTO ja_index_table (count_id, nextid) VALUES (101, 1);
 INSERT INTO ja_index_table (count_id, nextid) VALUES (102, 1);
 
+INSERT INTO ja_parameter_table (parameter_name, value) VALUES ('JOBLOG_KEEP_SPAN', '43200');
 INSERT INTO ja_parameter_table (parameter_name, value) VALUES ('JOBNET_KEEP_SPAN', '60');
 INSERT INTO ja_parameter_table (parameter_name, value) VALUES ('JOBNET_LOAD_SPAN', '60');
-INSERT INTO ja_parameter_table (parameter_name, value) VALUES ('JOBLOG_KEEP_SPAN', '43200');
+INSERT INTO ja_parameter_table (parameter_name, value) VALUES ('JOBNET_VIEW_SPAN', '60');
 INSERT INTO ja_parameter_table (parameter_name, value) VALUES ('JOBNET_DUMMY_START_X', '117');
 INSERT INTO ja_parameter_table (parameter_name, value) VALUES ('JOBNET_DUMMY_START_Y', '39');
 INSERT INTO ja_parameter_table (parameter_name, value) VALUES ('JOBNET_DUMMY_JOB_X', '117');

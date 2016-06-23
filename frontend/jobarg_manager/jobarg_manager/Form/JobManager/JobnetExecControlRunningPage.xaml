@@ -50,6 +50,9 @@
                         CommandTarget="{Binding Path=PlacementTarget,RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItems}" />
                     <MenuItem Name="stopContextMenu" Header="{x:Static src:Properties.Resources.stop_context_menu_text}"  Command="{x:Static src:JobArrangerCommands.RunningStop}" 
                         CommandTarget="{Binding Path=PlacementTarget,RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItems}" />
+                    <MenuItem Name="DelayedContextMenu" Header="{x:Static src:Properties.Resources.delayedStart_context_menu_text}"  Command="{x:Static src:JobArrangerCommands.RunningDelayed}" 
+                        CommandTarget="{Binding Path=PlacementTarget,RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItems}" />
+
                 </ContextMenu>
             </ListView.ContextMenu>
             <ListView.View>
@@ -79,8 +82,11 @@
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
                                     <Grid>
+                                        <!--  added by YAMA 2014/07/01
                                         <TextBlock Text="{Binding display_status}" TextAlignment="Center" Background="{Binding status_color}" />
-                                    </Grid>
+                                        -->
+                                    <TextBlock Text="{Binding display_status}" TextAlignment="Center" Background="{Binding status_color}" Foreground="{Binding Foreground_color}"/>
+                                </Grid>
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>

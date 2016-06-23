@@ -29,8 +29,10 @@ using System.Windows.Media;
 //*******************************************************************
 namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
 {
+    //added by YAMA 2014/02/04
     /// <summary>各ジョブタイプ</summary>
-    public enum ElementType { START = 0, END, IF, ENV, JOB, JOBNET, MTS, MTE, LOOP, EXTJOB, CAL, TASK, INF, IFE, FCOPY, FWAIT, REBOOT, RELEASE, NONE  }
+    //public enum ElementType { START = 0, END, IF, ENV, JOB, JOBNET, MTS, MTE, LOOP, EXTJOB, CAL, TASK, INF, IFE, FCOPY, FWAIT, REBOOT, RELEASE, NONE  }
+    public enum ElementType { START = 0, END, IF, ENV, JOB, JOBNET, MTS, MTE, LOOP, EXTJOB, CAL, TASK, INF, IFE, FCOPY, FWAIT, REBOOT, RELEASE, AGENTLESS, COOPERATION, NONE }
 
     /// <summary>線のタイプ：直線、曲線</summary>
     public enum FlowLineType { Line = 0, Curve }
@@ -61,11 +63,17 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                                 SET_FALSE_FLOW, UPDATE_ICON, MOVE_ITEM, 
                                 SET_HOLD, SET_UNHOLD, SET_SKIP, SET_UNSKIP};
 
+    //added by YAMA 2014/04/25
+    /// <summary>展開状況</summary>
+    public enum LoadStausType { None = 0, LoadErr, Delay, Skip };
+
+
     /// <summary>データ種別</summary>
+    //added by YAMA 2014/02/04  add-> COOPERATION 
     public enum DataType
     {
-        JOB_CONTROL, FLOW, JOB, COMMAND, VALUE_JOB, VALUE_JOBCON, JOBNET, 
-        CAL, END, IF, ENV, EXTJOB, INF, TASK, FCOPY, FWAIT, REBOOT, RELEASE
+        JOB_CONTROL, FLOW, JOB, COMMAND, VALUE_JOB, VALUE_JOBCON, JOBNET,
+        CAL, END, IF, ENV, EXTJOB, INF, TASK, FCOPY, FWAIT, REBOOT, RELEASE, COOPERATION, AGENTLESS
     };
 
 
@@ -139,6 +147,10 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
 
         /// <summary>状態色をセット</summary>
         void SetStatusColor(SolidColorBrush color);
+
+        //added by YAMA 2014/07/01
+        /// <summary>文字色をセット</summary>
+        void SetStatusCharacterColor(SolidColorBrush color);
 
         //Point GetHotspot(ConnectType hotspotType);
 

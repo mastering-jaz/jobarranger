@@ -120,6 +120,23 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
         /// <summary>保留解除(名)</summary>
         public static readonly int LEN_JOBNAME_RELEASE = 13;
 
+        //added by YAMA 2014/02/04
+        /// <summary>Zabbix連携(ID)</summary>
+        public static readonly int LEN_JOBID_COOPERATION = 13;
+
+        //added by YAMA 2014/02/04
+        /// <summary>Zabbix連携(名)</summary>
+        public static readonly int LEN_JOBNAME_COOPERATION = 13;
+
+        //added by YAMA 2014/05/19
+        /// <summary>エージェントレス(ID)</summary>
+        public static readonly int LEN_JOBID_AGENTLESS = 13;
+
+        //added by YAMA 2014/05/19
+        /// <summary>エージェントレス(名)</summary>
+        public static readonly int LEN_JOBNAME_AGENTLESS = 13;
+        
+
         /// <summary>アイコン表示用の接尾辞</summary>
         public static readonly string SUFFIX_JOB = "...";
 
@@ -195,6 +212,19 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                     return brush;
                 }
             }
+
+            //added by YAMA 2014/07/01
+            /// <summary>白</summary>
+            public static Brush WhiteColor
+            {
+                get
+                {
+                    SolidColorBrush brush = new SolidColorBrush();
+                    brush.Color = Color.FromArgb(255, 255, 255, 255);
+                    return brush;
+                }
+            }
+
             /// <summary>保留色</summary>
             public static Brush HoldColor
             {

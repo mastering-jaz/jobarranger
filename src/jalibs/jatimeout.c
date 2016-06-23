@@ -18,9 +18,9 @@
 **/
 
 /*
-** $Date:: 2012-12-28 11:40:32 +0900 #$
-** $Revision: 3514 $
-** $Author: ossinfra@FITECHLABS.CO.JP $
+** $Date:: 2014-06-30 16:42:08 +0900 #$
+** $Revision: 6100 $
+** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
 #define _GNU_SOURCE

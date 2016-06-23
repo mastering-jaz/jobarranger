@@ -70,6 +70,11 @@ namespace jp.co.ftf.jobcontroller.Common
 
         public static Encoding EncSJis = Encoding.GetEncoding("shift_jis");
 
+        //added by YAMA 2014/04/10
+        /// <summary>半角数字とコロン</summary>
+        private const string MATCH_HANKAKU_COLON = "^[0-9\\:]*$";
+
+
         #endregion
 
         #region publicメソッド
@@ -400,6 +405,21 @@ namespace jp.co.ftf.jobcontroller.Common
             }
             return false;
         }
+
+        //added by YAMA 2014/04/10
+        /// <summary>半角数字とコロンチェック処理</summary>
+        /// <param name="str">チェックする文字列</param>
+        /// <return>「True：半角数字とコロン」「False：それ以外」</return>
+        public static bool IsHankakuStrAndColon(string str)
+        {
+            if (str == null || str.Length == 0
+                || Regex.IsMatch(str, MATCH_HANKAKU_COLON))
+            {
+                return true;
+            }
+            return false;
+        }
+
 
         #endregion
     }

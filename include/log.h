@@ -31,6 +31,7 @@
 #define LOG_TYPE_UNDEFINED	0
 #define LOG_TYPE_SYSLOG		1
 #define LOG_TYPE_FILE		2
+#define LOG_TYPE_FILELOG	3
 
 typedef enum
 {
@@ -60,6 +61,7 @@ void zabbix_close_log();
 void zabbix_set_log_level(int level);
 
 char *zbx_strerror(int errnum);
+void ja_stdout(const char *fmt, ...);
 char *strerror_from_system(unsigned long error);
 #ifdef _WINDOWS
 char *strerror_from_module(unsigned long error, LPCTSTR module);

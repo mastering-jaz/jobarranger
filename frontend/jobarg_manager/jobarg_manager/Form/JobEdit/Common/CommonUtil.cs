@@ -95,10 +95,19 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
 
         /// <summary> 保留解除の識別子</summary>
         private const string RELEASE_SIGN = "REL-";
+
+        //added by YAMA 2014/02/04
+        /// <summary> Zabbix連携の識別子</summary>
+        private const string COOPERATION_SIGN = "ZBX-";
+
+        //added by YAMA 2014/05/19
+        /// <summary> エージェントレスの識別子</summary>
+        private const string AGENTLESS_SIGN = "LESS-";
+
         #endregion
 
 
-        #region public メッソド     
+        #region public メッソド
         /// <summary>ジョブＩＤを取得</summary>
         public static string GetJobId(Hashtable JobNoHash, ElementType type)
         {
@@ -193,7 +202,20 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                     JobNoHash[type] = (int)JobNoHash[type] + 1;
                     jobId = RELEASE_SIGN + (int)JobNoHash[type];
                     break;
+                //added by YAMA 2014/02/04
+                // Zabbix連携の場合 
+                case ElementType.COOPERATION:
+                    JobNoHash[type] = (int)JobNoHash[type] + 1;
+                    jobId = COOPERATION_SIGN + (int)JobNoHash[type];
+                    break;
+                //added by YAMA 2014/05/19
+                // エージェントレスの場合 
+                case ElementType.AGENTLESS:
+                    JobNoHash[type] = (int)JobNoHash[type] + 1;
+                    jobId = AGENTLESS_SIGN + (int)JobNoHash[type];
+                    break;
             }
+
 
             return jobId;
         }
@@ -252,6 +274,14 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
 
             //保留解除アイコンの連番 
             JobNoHash[ElementType.RELEASE] = 0;
+
+            //added by YAMA 2014/02/04
+            //Zabbix連携アイコンの連番 
+            JobNoHash[ElementType.COOPERATION] = 0;
+
+            //added by YAMA 2014/05/19
+            //エージェントレスアイコンの連番 
+            JobNoHash[ElementType.AGENTLESS] = 0;
         }
 
         /// <summary>線の連接点を取得</summary>
@@ -437,7 +467,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             //double gapY = centerP1.Y - centerP2.Y;
 
             //double angle = gapY / gapX;
-            
+
             //// 左
             //if (gapX > 0 && angle > -1 && angle < 1)
             //{
@@ -476,7 +506,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             //    flow.BeginConType = ConnectType.BOTTOM;
             //    flow.EndConType = ConnectType.TOP;
             //}
-            
+
         }
 
         /// <summary>線の連接点を取得</summary>
@@ -552,7 +582,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                 return input;
             }
             // 保持バイト長
-            int keepByteLength = maxByteLen - 3; 
+            int keepByteLength = maxByteLen - 3;
 
             // バイト変換した文字列の桁数が、指定バイト数を上回る箇所を判定
 
@@ -579,13 +609,13 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             // INフローを更新
             DataRow[] rows = flowTbl.Select("end_job_id='" + oldJobId + "'");
 
-            foreach(DataRow row in rows)
+            foreach (DataRow row in rows)
                 row["end_job_id"] = newJobId;
 
             // OUTフローを更新
             rows = flowTbl.Select("start_job_id='" + oldJobId + "'");
 
-            foreach(DataRow row in rows)
+            foreach (DataRow row in rows)
                 row["start_job_id"] = newJobId;
         }
 
