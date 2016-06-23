@@ -19,18 +19,18 @@
 **/
 
 /*
-** $Date:: 2014-12-09 13:54:23 +0900 #$
-** $Revision: 6779 $
-** $Author: nagata@FITECHLABS.CO.JP $
+** $Date:: 2015-05-01 15:13:27 +0900 #$
+** $Revision: 6951 $
+** $Author: sypark@FITECHLABS.CO.JP $
 **/
 
 #ifndef JOBARG_JACOMMON_H
 #define JOBARG_JACOMMON_H
 
 /* version or revsion */
-#define JOBARG_VERSION          	"2.1.0"
-#define JOBARG_REVISION         	"6777"
-#define JOBARG_REVDATE			"2014-12-19"
+#define JOBARG_VERSION          	"2.1.1"
+#define JOBARG_REVISION         	"6955"
+#define JOBARG_REVDATE			"2015-05-01"
 
 /* treat unknown parameters as error */
 #define JA_CFG_STRICT			0

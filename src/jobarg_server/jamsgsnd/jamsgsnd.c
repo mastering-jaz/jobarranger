@@ -347,9 +347,9 @@ static int    message_send(ja_zbxsnd_info_t *zbxsnd)
     struct tm    *tm, stm;
     time_t       now;
     int          send_status, retry_count, message_type, rc, state;
-    char         *user_name, *host_name, *jobnet_id, *jobnet_name, *job_id, *job_id_full, *job_name, *log_message_id, *log_message;
+    char         *user_name, *jobnet_id, *jobnet_name, *job_id, *job_id_full, *job_name, *log_message_id, *log_message;
     char         yy[5], mm[3], dd[3], hh[3], mi[3], ss[3];
-    char         now_date[DATE_LEN], now_time[80], retry_date[DATE_LEN], msg_type[10], cmd[JA_MAX_DATA_LEN * 2];
+    char         now_date[DATE_LEN], now_time[80], retry_date[DATE_LEN], msg_type[10], cmd[JA_MAX_DATA_LEN * 2], host_name[JA_MAX_DATA_LEN];
     const char   *__function_name = "message_send";
 
     zabbix_log(LOG_LEVEL_DEBUG, "In %s()", __function_name);
@@ -373,7 +373,6 @@ static int    message_send(ja_zbxsnd_info_t *zbxsnd)
                    row[0], row[1], row[2], row[3], row[4]);
 
         user_name       = "";
-        host_name       = "";
         jobnet_id       = "";
         jobnet_name     = "";
         job_id          = "";
@@ -435,7 +434,15 @@ static int    message_send(ja_zbxsnd_info_t *zbxsnd)
         }
 
         if (SUCCEED != DBis_null(row[7])) {
-            host_name = row[7];
+            //host_name = row[7];
+            if(strlen(row[7]) > 0){
+            	zbx_snprintf(host_name, sizeof(host_name), "HOST=%s",row[7]);
+            }else{
+            	zbx_snprintf(host_name, sizeof(host_name), "HOST=JAZServer ");
+            }
+
+        }else{
+        	zbx_snprintf(host_name, sizeof(host_name), "HOST=JAZServer ");
         }
 
         if (SUCCEED != DBis_null(row[8])) {
@@ -466,9 +473,9 @@ static int    message_send(ja_zbxsnd_info_t *zbxsnd)
             log_message = row[14];
         }
 
-        zbx_snprintf(cmd, sizeof(cmd), "%s -z '%s' -p '%s' -s '%s' -k '%s' -o '[%s] [%s] [%s] %s (USER NAME=%s JOBNET=%s JOB=%s)'",
+        zbx_snprintf(cmd, sizeof(cmd), "%s -z '%s' -p '%s' -s '%s' -k '%s' -o '[%s] [%s] [%s] %s (USER NAME=%s %s JOBNET=%s JOB=%s)'",
                      zbxsnd->sender, zbxsnd->zabbix_ip, zbxsnd->zabbix_port, zbxsnd->zabbix_host, zbxsnd->item_key,
-                     now_time, msg_type, log_message_id, log_message, user_name, jobnet_id, job_id_full);
+                     now_time, msg_type, log_message_id, log_message, user_name, host_name, jobnet_id, job_id_full);
 
         /* command execution */
         state = system(cmd);

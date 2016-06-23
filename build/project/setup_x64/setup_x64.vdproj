@@ -588,15 +588,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Job Arranger Agent"
-        "ProductCode" = "8:{D060AE88-0425-4995-BE05-8BCEC2A5527F}"
-        "PackageCode" = "8:{D302D334-E559-44E9-B75E-FC164B6F53BA}"
+        "ProductCode" = "8:{4A8F3142-6DF4-4BC9-B51B-CBEB835FA124}"
+        "PackageCode" = "8:{4E32DA5D-E226-4B28-B7E7-A854CD85B69A}"
         "UpgradeCode" = "8:{3D9752F0-9CB2-4023-9737-249CF23D1F08}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:FALSE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:2.1.0"
+        "ProductVersion" = "8:2.1.1"
         "Manufacturer" = "8:Daiwa Institute of Research Business Innovation Ltd."
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
@@ -1137,7 +1137,7 @@
             {
             "UseDynamicProperties" = "11:TRUE"
             "IsDependency" = "11:FALSE"
-            "SourcePath" = "8:c:\\Program Files\\Common Files\\Merge Modules\\microsoft_vc100_crt_x64.msm"
+            "SourcePath" = "8:C:\\Program Files (x86)\\Common Files\\Merge Modules\\microsoft_vc100_crt_x64.msm"
                 "Properties"
                 {
                 }

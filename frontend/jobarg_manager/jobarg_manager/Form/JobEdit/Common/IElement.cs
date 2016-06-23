@@ -77,6 +77,10 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
         CAL, END, IF, ENV, EXTJOB, INF, TASK, FCOPY, FWAIT, REBOOT, RELEASE, COOPERATION, AGENTLESS
     };
 
+    //added by Park.iggy 2015/04/30
+    /// <summary>ジョブネット停止フラグ</summary>
+    public enum JobnetAbortFlag { FALASE = 0, TRUE};
+
 
     /// <summary>
     /// ジョブインターフェイス

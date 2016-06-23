@@ -468,7 +468,20 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                 }
                 else
                 {
-                    txtRunUserPW.Text = Decryption(Convert.ToString(rowJob[0]["run_user_password"]));
+                    //Park.iggy 修正 START
+                    //txtRunUserPW.Text = Decryption(Convert.ToString(rowJob[0]["run_user_password"]));
+                    string passwd = Convert.ToString(rowJob[0]["run_user_password"]).Substring(0, 1);
+                    if (passwd.CompareTo("1") == 0)
+                    {
+                        txtRunUserPW.Text = DecryptionX16(Convert.ToString(rowJob[0]["run_user_password"]));
+                    }
+                    else
+                    {
+                        txtRunUserPW.Text = Decryption(Convert.ToString(rowJob[0]["run_user_password"]));
+                    }
+                    //Park.iggy 修正 END
+                    
+                    
                 }
             }
 
@@ -1269,6 +1282,8 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
         /// <summary>パスワードの暗号化</summary>       
         private string Encryption(string str)
         {
+            /*
+             * Park.iggy コマンド 2015/08/21 #1967
             string key = "199907";
             string enc = "";
             int j;
@@ -1280,6 +1295,36 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                 j++;
                 if (j == key.Length) j = 0;
             }
+            */
+
+            string key = "199907";
+            string enc = "1";
+            string toX16 = "";
+
+            int j;
+            int b;
+            j = 0;
+
+            for (int i = 0; i < str.Length; i++)
+            {
+                b = (str[i] ^ key[j]);
+                toX16 = "";
+                if (b < 16)
+                {
+                    toX16 = "0" + Convert.ToString(b, 16);
+                }
+                else
+                {
+                    toX16 = Convert.ToString(b, 16);
+                }
+
+                //Console.WriteLine(i + "=encode=>" + b + "==" + toX16);
+                enc = enc + toX16;
+
+                j++;
+                if (j == key.Length) j = 0;
+            }
+
             return enc;
 
         }
@@ -1300,6 +1345,39 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                 if (j == key.Length) j = 0;
             }
             return dec;
+        }
+
+        //added by Park.iggy 2014/08/15
+        /// <summary>パスワードの復号化</summary>   
+        /// 
+        private string DecryptionX16(string str)
+        {
+            string enc_code = "";
+            string de_code = "";
+            string x16 = "";
+
+            //Console.WriteLine(str + "=str=x16==>");
+
+            for(int kk = 0; kk < str.Length ; kk++){
+                if(kk == 0){
+                    continue;
+                }
+                else if ((kk % 2) == 1)
+                {
+                    x16 = str[kk].ToString();
+                }else{
+                    x16 = x16 + str[kk].ToString();
+                    //Console.WriteLine(kk + "=decode=x16==>" + x16);
+                    enc_code = enc_code + (char)Convert.ToInt32(x16, 16);
+                    //enc_code = enc_code + Convert.ToInt32(x16, 16);
+                    x16 = "";
+                }
+
+            }
+            //Console.WriteLine(enc_code + "=decode+==->>>"+x16);
+            de_code = Decryption(enc_code);
+
+            return de_code;
         }
 
         #endregion

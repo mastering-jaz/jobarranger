@@ -40,13 +40,13 @@
         "Entry"
         {
         "MsmKey" = "8:_2E8D38B593AF5041D508FF007E600EB0"
-        "OwnerKey" = "8:_390ADA82E66D405D94648740580E9DA2"
+        "OwnerKey" = "8:_33112D6D07FD57379B54257DF1B11C36"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_2E8D38B593AF5041D508FF007E600EB0"
-        "OwnerKey" = "8:_33112D6D07FD57379B54257DF1B11C36"
+        "OwnerKey" = "8:_390ADA82E66D405D94648740580E9DA2"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -130,37 +130,7 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_390ADA82E66D405D94648740580E9DA2"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_F6C592782471E4C77140DEDA78BFE979"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_1D7B52FB0BF44B88BCDEE1D2B1744540"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_8BBA2D259AA9A2496D5FDE29DBA0381B"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_49AD556BFE53243D447AA9F3C3E2BA28"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_33112D6D07FD57379B54257DF1B11C36"
+        "OwnerKey" = "8:_D0DF5E140F3D4BF4995CDFFB48F5ADE9"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -172,7 +142,37 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_D0DF5E140F3D4BF4995CDFFB48F5ADE9"
+        "OwnerKey" = "8:_33112D6D07FD57379B54257DF1B11C36"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_49AD556BFE53243D447AA9F3C3E2BA28"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_8BBA2D259AA9A2496D5FDE29DBA0381B"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_1D7B52FB0BF44B88BCDEE1D2B1744540"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_F6C592782471E4C77140DEDA78BFE979"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_390ADA82E66D405D94648740580E9DA2"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -792,15 +792,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Job Arranger Manager"
-        "ProductCode" = "8:{919CE389-205D-4115-B0E1-A2CF369C0EE9}"
-        "PackageCode" = "8:{A6B8CF8E-3FC0-4730-A0B4-A136834EBF72}"
+        "ProductCode" = "8:{B8355584-5FE1-4C37-98D6-B7EF0ED612FC}"
+        "PackageCode" = "8:{0A79872D-7A2D-4F88-ADB7-FEE24AF1AB96}"
         "UpgradeCode" = "8:{C92DCD08-3B64-47D8-868C-CCF7BB2EC773}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:2.1.0"
+        "ProductVersion" = "8:2.1.1"
         "Manufacturer" = "8:Daiwa Institute of Research Business Innovation Ltd."
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
@@ -1496,7 +1496,7 @@
         {
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_D0DF5E140F3D4BF4995CDFFB48F5ADE9"
             {
-            "SourcePath" = "8:..\\Installer\\obj\\Release\\Installer.dll"
+            "SourcePath" = "8:..\\Installer\\obj\\Debug\\Installer.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_F84408CA886F43E89F132C973A70AD2F"

@@ -343,6 +343,8 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
         /// <summary>パスワードの復号化</summary>       
         private string Decryption(string str)
         {
+            //Park.iggy ADD START
+            /*
             string key = "199907";
             string dec = "";
             int j;
@@ -354,6 +356,9 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                 j++;
                 if (j == key.Length) j = 0;
             }
+             * */
+            string dec = "******";
+            //Park.iggy END 
             return dec;
         }
 

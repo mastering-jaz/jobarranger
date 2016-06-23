@@ -26,6 +26,10 @@
 #include "zbxconf.h"
 #include "perfmon.h"
 
+//Park.iggy ADD
+#include "jacommon.h"
+//END
+
 #define EVENTLOG_REG_PATH TEXT("SYSTEM\\CurrentControlSet\\Services\\EventLog\\")
 
 static	SERVICE_STATUS		serviceStatus;
@@ -75,7 +79,8 @@ static VOID WINAPI ServiceCtrlHandler(DWORD ctrlCode)
 			serviceStatus.dwWin32ExitCode	= 0;
 
 			zabbix_log(LOG_LEVEL_INFORMATION, "Job Arranger Agent stopped. Job Arranger %s (revision %s).",
-					ZABBIX_VERSION, ZABBIX_REVISION);
+					//ZABBIX_VERSION, ZABBIX_REVISION);
+					 JOBARG_VERSION, JOBARG_REVISION);
 
 			break;
 		default:

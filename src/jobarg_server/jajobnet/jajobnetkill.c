@@ -19,9 +19,9 @@
 **/
 
 /*
-** $Date:: 2014-10-17 16:00:02 +0900 #$
-** $Revision: 6528 $
-** $Author: nagata@FITECHLABS.CO.JP $
+** $Date:: 2015-05-01 11:36:22 +0900 #$
+** $Revision: 6948 $
+** $Author: sypark@FITECHLABS.CO.JP $
 **/
 
 #include "common.h"
@@ -94,7 +94,7 @@ int jajobnet_kill(const zbx_uint64_t inner_jobnet_id)
     db_ret =
         DBexecute
         ("update ja_run_jobnet_table set status = %d where inner_jobnet_main_id = "
-         ZBX_FS_UI64 " and main_flag = 0 and status in (%d, %d)",
+         ZBX_FS_UI64 " and status in (%d, %d)",
          JA_JOBNET_STATUS_ENDERR, inner_jobnet_id, JA_JOBNET_STATUS_RUN,
          JA_JOBNET_STATUS_RUNERR);
     if (db_ret < ZBX_DB_OK)

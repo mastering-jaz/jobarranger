@@ -57,6 +57,10 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
         /// <summary> 実行拡張ジョブアイコン設定テーブル </summary>
         private RunIconExtJobDAO _runIconExtJobDAO;
 
+        // added by Park.iggy 2014/11/05    ジョブネット停止のため
+        /// <summary> 実行ジョブネットサマリ管理テーブル </summary>
+        private RunJobnetSummaryDAO _runJobnetSummaryDAO;
+
         /// <>マウスの位置</>
         private Point mousePosition;
 
@@ -314,6 +318,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
         //added by YAMA 2014/05/19
         // <summary>エージェントレスアイコン設定テーブル</summary>
         public DataTable IconAgentlessTable { get; set; }
+
 
         #endregion
 
@@ -1010,6 +1015,14 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
             //処理フラグが保留の場合利用不可 
             if (((RunJobMethodType)existJob["method_flag"]).Equals(RunJobMethodType.HOLD))
                 return false;
+
+            //Park.iggy 追加 START
+            //親ジョブネットがジョブネット停止が行った場合利用不可
+            if (IsJobnetAbortFlag(existJob))
+                return false;
+
+            //Park.iggy 追加 END
+
             return true;
         }
 
@@ -1050,6 +1063,13 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
             if (isContinuousJOB(item, existJob))
                 return false;
 
+            //Park.iggy 追加 START
+            //親ジョブネットがジョブネット停止が行った場合利用不可
+            if (IsJobnetAbortFlag(existJob))
+                return false;
+
+            //Park.iggy 追加 END
+
             return true;
         }
 
@@ -1061,6 +1081,14 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
             //処理フラグがスキップ＆ステータスが未実行or実行準備以外利用不可 
             if (!(((RunJobMethodType)existJob["method_flag"]).Equals(RunJobMethodType.SKIP) && (((RunJobStatusType)existJob["status"]).Equals(RunJobStatusType.None) || ((RunJobStatusType)existJob["status"]).Equals(RunJobStatusType.Prepare))))
                 return false;
+
+            //Park.iggy 追加 START
+            //親ジョブネットがジョブネット停止が行った場合利用不可
+            if (IsJobnetAbortFlag(existJob))
+                return false;
+
+            //Park.iggy 追加 END
+
             return true;
         }
 
@@ -1106,6 +1134,13 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
             // 処理継続のジョブの場合、利用不可 
             if (isContinuousJOB(item, existJob))
                 return false;
+
+            //Park.iggy 追加 START
+            //親ジョブネットがジョブネット停止が行った場合利用不可
+            if (IsJobnetAbortFlag(existJob))
+                return false;
+
+            //Park.iggy 追加 END
 
             return true;
         }
@@ -1510,6 +1545,32 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
                 foreach (DataRow row in rows)
                     row.Delete();
             }
+        }
+
+        //added by Park.iggy 2015/04/30
+        //*******************************************************************
+        /// <>ジョブネット停止フラグ</>
+        /// <param name="type">ジョブタイプ</param>
+        /// <returns>true:ジョブネット停止 False:ジョブネット停止なし</returns>
+        //*******************************************************************
+        private bool IsJobnetAbortFlag(DataRow existJob)
+        {
+
+            Object innerJobnetId = (Object)existJob["inner_jobnet_main_id"];
+            Boolean reFlag = false;
+            _dbAccess.CreateSqlConnect();
+            _dbAccess.BeginTransaction();
+            _runJobnetSummaryDAO = new RunJobnetSummaryDAO(_dbAccess);
+            DataTable dt = _runJobnetSummaryDAO.GetEntityByPk(innerJobnetId);
+            DataRow row = dt.Rows[0];
+            if (((JobnetAbortFlag)row["jobnet_abort_flag"]).Equals(JobnetAbortFlag.TRUE))
+            {
+                reFlag = true;
+            }
+            _dbAccess.TransactionCommit();
+            _dbAccess.CloseSqlConnect();
+
+            return reFlag;
         }
 
         #endregion

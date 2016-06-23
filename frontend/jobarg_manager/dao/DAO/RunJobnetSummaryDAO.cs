@@ -264,17 +264,18 @@ namespace jp.co.ftf.jobcontroller.DAO
 
         }
 
+        // modified by Park.iggy 2015/05/01
         //************************************************************************
         /// <summary> データの取得</summary>
-        /// <param name="user_id">ユーザーＩＤ</param>
+        /// <param name="innerJobnetId">実行用ジョブネット内部管理ID</param>
         /// <return>検索結果</return>
         //************************************************************************
-        public DataTable GetEntityByPk(object user_id)
+        public DataTable GetEntityByPk(object innerJobnetId) 
         {
             _db.CreateSqlConnect();
 
             List<ComSqlParam> sqlParams = new List<ComSqlParam>();
-            sqlParams.Add(new ComSqlParam(DbType.UInt64, "inner_jobnet_id", user_id));
+            sqlParams.Add(new ComSqlParam(DbType.UInt64, "@inner_jobnet_id", innerJobnetId));
 
             DataTable dt = _db.ExecuteQuery(this._selectSqlByPk, sqlParams, TableName);
 

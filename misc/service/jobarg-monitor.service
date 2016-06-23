@@ -1,0 +1,16 @@
+[Unit]
+Description=Jobarranger Monitor
+After=syslog.target
+After=network.target
+
+[Service]
+Environment="CONFFILE=/etc/jobarranger/jobarg_monitor.conf"
+EnvironmentFile=-/etc/sysconfig/jobarg-monitor
+Type=forking
+Restart=always
+PIDFile=/run/jobarranger/jobarg_monitor.pid
+KillMode=process
+ExecStart=/usr/sbin/jobarg_monitor -c $CONFFILE
+
+[Install]
+WantedBy=multi-user.target

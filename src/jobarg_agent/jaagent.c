@@ -19,9 +19,9 @@
 **/
 
 /*
-** $Date:: 2014-11-11 09:11:15 +0900 #$
-** $Revision: 6641 $
-** $Author: nagata@FITECHLABS.CO.JP $
+** $Date:: 2015-08-27 11:00:59 +0900 #$
+** $Revision: 6964 $
+** $Author: sypark@FITECHLABS.CO.JP $
 **/
 
 #include <json.h>
@@ -311,6 +311,18 @@ int ja_agent_run(ja_job_object * job)
     char       cmd_passwd[JA_MAX_STRING_LEN];
     const char *__function_name = "ja_agent_run";
 
+	//Park.iggy ADD START
+	char    d_passwd[JA_MAX_STRING_LEN]; //16i”‚©‚çchar‚É•ÏX
+	char    d_dec[256];
+	char    d_flag[2]="1"; 
+    char    d_x16[3];
+    char    *d_cat="0x";
+    char    d_catX16[5];
+
+	int     k,kk,x16toX10;
+
+	//Park.iggy END
+
 #ifdef _WINDOWS
     STARTUPINFO si;
     PROCESS_INFORMATION pi;
@@ -368,6 +380,12 @@ int ja_agent_run(ja_job_object * job)
 
     zbx_snprintf(w_user,     sizeof(w_user),     "%s", job->run_user);
     zbx_snprintf(w_passwd,   sizeof(w_passwd),   "%s", job->run_user_password);
+
+	//Park.iggy ADD START
+	zbx_snprintf(d_passwd,   sizeof(d_passwd),   "%s", job->run_user_password);
+	//zabbix_log(LOG_LEVEL_DEBUG, "[jaagent]    d_passwd (Encryption) = %s  ", d_passwd );
+	//Park.iggy END
+
     zbx_snprintf(cmd_user,   sizeof(cmd_user),   "%s", CONFIG_JA_COMMAND_USER);
     zbx_snprintf(cmd_passwd, sizeof(cmd_passwd), "%s", CONFIG_JA_COMMAND_PASSWORD);
 
@@ -394,6 +412,33 @@ int ja_agent_run(ja_job_object * job)
     if (( isSeteuid == 0 ) || ( isSeteuid == 2 )) {
         /* decodes password */
         if ( isSeteuid == 0 ){
+
+			//Park.iggy ADD START
+			if(d_flag[0] == d_passwd[0]) {
+				j=0;
+				k=0;
+				for(kk = 1; kk < strlen(d_passwd) ; kk++){
+					if((kk%2) != 0){
+						d_x16[0] = d_passwd[kk];  
+					}else{
+						d_x16[1] = d_passwd[kk];  
+						d_x16[2] = '\0';
+						zbx_snprintf(d_catX16,   sizeof(d_catX16),   "0x%s", d_x16);
+						x16toX10 = (unsigned long)strtol(d_catX16,NULL,0);
+						*d_x16 = NULL;
+						*d_catX16 = NULL;
+						d_dec[k] = (char)(x16toX10) ;
+						dec[k] = (char)(d_dec[k]^key[j]);
+
+						j++;
+						k++;
+						if (j == strlen(key)) j =0;
+					}
+				}
+				*w_passwd = NULL;
+			}
+			//Park.iggy END
+
             j = 0;
             for (i = 0; i < strlen(w_passwd); i++)
             {

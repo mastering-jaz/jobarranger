@@ -19,9 +19,9 @@
 **/
 
 /*
-** $Date:: 2014-10-20 13:13:46 +0900 #$
-** $Revision: 6558 $
-** $Author: nagata@FITECHLABS.CO.JP $
+** $Date:: 2015-03-13 10:45:13 +0900 #$
+** $Revision: 6943 $
+** $Author: sypark@FITECHLABS.CO.JP $
 **/
 
 #include <stdio.h>
@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
     PROFILEINFOW        profileInfo;
     STARTUPINFO         lpStartupInfo;
     PROCESS_INFORMATION lpProcessInformation;
-    DWORD               exitCode;
+    //DWORD               exitCode;
     LPVOID              lpEnvironment;
     DWORD               dwSize;
     WCHAR               szUserProfile[256];
@@ -294,7 +294,7 @@ int main(int argc, char *argv[])
         }
 
         WaitForSingleObject(lpProcessInformation.hProcess, INFINITE);
-        GetExitCodeProcess(lpProcessInformation.hProcess, &exitCode);
+        GetExitCodeProcess(lpProcessInformation.hProcess, &ret);
         DestroyEnvironmentBlock(lpEnvironment);
         UnloadUserProfile(hToken, profileInfo.hProfile);
         CloseHandle(hToken);

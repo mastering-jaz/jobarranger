@@ -1814,11 +1814,16 @@ public partial class Container : UserControl,IContainer
         dbAccess.ExecuteNonQuery(insertRunJobStart, insertRunJobStartSqlParams);
 
 
+        //
         String insertRunJobJob = "insert into ja_run_job_table "
                 + "(inner_job_id, inner_jobnet_id, inner_jobnet_main_id, job_type, method_flag, invo_flag,"
+            //added by Park.iggy 2015/05/01
+                + " force_flag, "
             //added by YAMA 2014/09/26
                 + "boot_count, start_time, end_time, point_x, point_y, job_id, job_name, run_user, run_user_password) "
-                + "VALUES (?,?,?,?,?,1,1,0,0,?,?,?,?,?,?)";
+            //  + "VALUES (?,?,?,?,?,1,1,0,0,?,?,?,?,?,?)";
+            //added by Park.iggy 2015/05/01 add -> force_flag
+                + "VALUES (?,?,?,?,?,1,?,1,0,0,?,?,?,?,?,?)";  
             // + "boot_count, start_time, end_time, point_x, point_y, job_id, job_name) "
             // + "VALUES (?,?,?,?,?,1,1,0,0,?,?,?,?)";
 
@@ -1828,6 +1833,9 @@ public partial class Container : UserControl,IContainer
         insertRunJobJobSqlParams.Add(new ComSqlParam(DbType.String, "@inner_jobnet_main_id", strInnerJobnetNextId));
         insertRunJobJobSqlParams.Add(new ComSqlParam(DbType.String, "@job_type", (int)ElementType.JOB));
         insertRunJobJobSqlParams.Add(new ComSqlParam(DbType.String, "@method_flag", rowJob[0]["method_flag"]));
+        //added by Park.iggy 2015/05/01 START
+        insertRunJobJobSqlParams.Add(new ComSqlParam(DbType.String, "@force_flag", rowJob[0]["force_flag"]));
+        // END
         insertRunJobJobSqlParams.Add(new ComSqlParam(DbType.String, "@point_x", jobXPoint));
         insertRunJobJobSqlParams.Add(new ComSqlParam(DbType.String, "@point_y", jobYPoint));
         insertRunJobJobSqlParams.Add(new ComSqlParam(DbType.String, "@job_id", rowIconJob[0]["job_id"]));

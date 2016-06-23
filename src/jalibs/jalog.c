@@ -19,9 +19,9 @@
 **/
 
 /*
-** $Date:: 2014-10-17 16:00:02 +0900 #$
-** $Revision: 6528 $
-** $Author: nagata@FITECHLABS.CO.JP $
+** $Date:: 2015-05-01 11:37:22 +0900 #$
+** $Revision: 6949 $
+** $Author: sypark@FITECHLABS.CO.JP $
 **/
 
 #include "common.h"
@@ -565,51 +565,50 @@ int	ja_log(char *message_id, zbx_uint64_t inner_jobnet_id, char *jobnet_id, zbx_
 		zbx_free(host_name_esc);
 		zbx_free(jobnet_name_esc);
 		zbx_free(job_name_esc);
-	}
 
-	/* application execution error notification */
-	dir = opendir(CONFIG_ERROR_CMD_PATH);
-	if (dir == NULL)
-	{
-		zabbix_log(LOG_LEVEL_ERR, "failed to open the error notification directory: [%s]", CONFIG_ERROR_CMD_PATH);
-		zbx_free(message);
-		zbx_free(now_date);
-		return FAIL;
-	}
-
-	while ((dp = readdir(dir)) != NULL)
-	{
-		if (dp->d_name[0] == '.')
+		/* application execution error notification */
+		dir = opendir(CONFIG_ERROR_CMD_PATH);
+		if (dir == NULL)
 		{
-			continue;
-		}
-
-		/* start command in the background */
-		zbx_snprintf(cmd, sizeof(cmd), "%s/%s '%s' '%s' '%s' '%s' '%s' '%s' '%s' '%s' &",
-			CONFIG_ERROR_CMD_PATH, dp->d_name, s_user_name, s_jobnet_id, now_date, message_id, type, message, host_name, s_job_id_full);
-		rc = system(cmd);
-		zabbix_log(LOG_LEVEL_DEBUG, "application execution [%s] (%d)", cmd, rc);
-		if (rc != EXIT_SUCCESS)
-		{
-			if (WIFEXITED(rc))
-			{
-				state = WEXITSTATUS(rc);
-			}
-			else
-			{
-				state = rc;
-			}
-			zabbix_log(LOG_LEVEL_ERR, "failed to run the error notification application: (%d) [%s]", state, cmd);
+			zabbix_log(LOG_LEVEL_ERR, "failed to open the error notification directory: [%s]", CONFIG_ERROR_CMD_PATH);
 			zbx_free(message);
 			zbx_free(now_date);
-			closedir(dir);
 			return FAIL;
 		}
-	}
-	closedir(dir);
 
-	zbx_free(message);
-	zbx_free(now_date);
+		while ((dp = readdir(dir)) != NULL)
+		{
+			if (dp->d_name[0] == '.')
+			{
+				continue;
+			}
+			/* start command in the background */
+			zbx_snprintf(cmd, sizeof(cmd), "%s/%s '%s' '%s' '%s' '%s' '%s' '%s' '%s' '%s' &",
+				CONFIG_ERROR_CMD_PATH, dp->d_name, s_user_name, s_jobnet_id, now_date, message_id, type, message, host_name, s_job_id_full);
+			rc = system(cmd);
+			zabbix_log(LOG_LEVEL_DEBUG, "application execution [%s] (%d)", cmd, rc);
+			if (rc != EXIT_SUCCESS)
+			{
+				if (WIFEXITED(rc))
+				{
+					state = WEXITSTATUS(rc);
+				}
+				else
+				{
+					state = rc;
+				}
+				zabbix_log(LOG_LEVEL_ERR, "failed to run the error notification application: (%d) [%s]", state, cmd);
+				zbx_free(message);
+				zbx_free(now_date);
+				closedir(dir);
+				return FAIL;
+			}
+		}
+		closedir(dir);
+
+		zbx_free(message);
+		zbx_free(now_date);
+	}
 
 	return SUCCEED;
 }
