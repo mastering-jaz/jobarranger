@@ -364,6 +364,51 @@ namespace jp.co.ftf.jobcontroller.DAO
             return dt;
         }
 
+        //Park.iggy Add
+        public override DataTable GetEntityByObjectALL(Boolean public_flg)
+        {
+            int public_flag = Convert.ToInt32(public_flg);
+            bool isBelongToUSRGRP = LoginSetting.BelongToUsrgrpFlag;
+            String selectObjectAll = "SELECT * FROM ja_schedule_control_table WHERE valid_flag = 1 AND public_flag = ? " +
+                                   " UNION ALL  " +
+                                   "SELECT * FROM ja_schedule_control_table A " +
+                                   " WHERE A.update_date= ( SELECT MAX(update_date) FROM ja_schedule_control_table B " +
+                                   "                         WHERE B.schedule_id NOT IN (SELECT schedule_id FROM ja_schedule_control_table  " +
+                                   "                                                      WHERE valid_flag = 1 )  " +
+                                   "                           AND B.public_flag = ? AND A.schedule_id = B.schedule_id " +
+                                   "                           GROUP BY schedule_id  " +
+                                   "                       )  ";
+            String selectObjectAllStr = "";
+            List<ComSqlParam> sqlParams = new List<ComSqlParam>();
+
+            sqlParams.Add(new ComSqlParam(DbType.String, "@public_flag", public_flag));
+            sqlParams.Add(new ComSqlParam(DbType.String, "@public_flag", public_flag));
+
+            if (!(LoginSetting.Authority == Consts.AuthorityEnum.SUPER) && !public_flg)
+            {
+                selectObjectAllStr = "SELECT SCHEDULE.* FROM ( ";
+                selectObjectAllStr = selectObjectAllStr + selectObjectAll;
+                selectObjectAllStr = selectObjectAllStr + " ) AS SCHEDULE, users AS U, users_groups AS UG1, users_groups AS UG2  " +
+                                         "WHERE SCHEDULE.user_name = U.alias  " +
+                                         "AND U.userid = UG1.userid  " +
+                                         "AND UG2.userid=? " +
+                                         "AND UG1.usrgrpid = UG2.usrgrpid  " +
+                                         "ORDER BY SCHEDULE.schedule_id ";
+
+                sqlParams.Add(new ComSqlParam(DbType.String, "@userid", LoginSetting.UserID));
+            }
+            else
+            {
+                selectObjectAllStr = "SELECT SCHEDULE.* FROM ( ";
+                selectObjectAllStr = selectObjectAllStr + selectObjectAll;
+                selectObjectAllStr = selectObjectAllStr + " ) AS SCHEDULE ORDER BY SCHEDULE.schedule_id ";
+            }
+
+            DataTable dt = _db.ExecuteQuery(selectObjectAllStr, sqlParams, TableName);
+
+            return dt;
+        }
+
         #endregion
     }
 }

@@ -46,6 +46,10 @@ INSERT INTO ja_define_extjob_table (command_id, lang, command_name, memo) VALUES
 INSERT INTO ja_define_extjob_table (command_id, lang, command_name, memo) VALUES ('jacmdweek', 'ja_jp', '曜日判断', 'アイコン実行時の曜日が指定された曜日と一致するかを判断します。パラメータに比較したい曜日(Sun, Mon, Tue, Wed, Thu, Fri, Sat)を指定してください。曜日は複数指定が可能です。');
 INSERT INTO ja_define_extjob_table (command_id, lang, command_name, memo) VALUES ('zabbix_sender', 'ja_jp', 'Zabbix通知（zabbix_sender）', 'zabbix_senderを実行します。パラメータに zabbix_sender コマンドに渡すパラメータを指定してください。 例：-z Zabbixホスト名 -p Zabbixポート番号 -s ホスト名 -k アイテムキー -o "通知内容（値）"');
 
+INSERT INTO ja_define_extjob_table (command_id, lang, command_name, memo) VALUES ('jacmdsleep', 'ko_kr', '대기 (SLEEP)', '지정하신 수초간 처리를 대기합니다.Parameter에 대기시간을 초단위(0～999999)로 지정해 주세요.');
+INSERT INTO ja_define_extjob_table (command_id, lang, command_name, memo) VALUES ('jacmdtime', 'ko_kr', '지정시간 대기 (TIME)', '지정한 시각까지 처리를 대기 합니다. Parameter에 시각을 HHMM(0000～9959)의 형식으로 지정해 주세요.');
+INSERT INTO ja_define_extjob_table (command_id, lang, command_name, memo) VALUES ('jacmdweek', 'ko_kr', '요일 판정', '아이콘을 실행할때, 지정한 요일과 일치하는지를 판단합니다. Parameter에 비교하실 요일(Sun, Mon, Tue, Wed, Thu, Fri, Sat)로 지정해 주세요.');
+INSERT INTO ja_define_extjob_table (command_id, lang, command_name, memo) VALUES ('zabbix_sender', 'ko_kr', 'Zabbix통지 (zabbix_sender)', 'zabbix_sender를 실행합니다. Parameter에 zabbix_sender command에 넘길 Parameter를 지정해 주세요. 예) -z Zabbix호스트명 -p Zabbix포트  -s 대상호스트명 -k 아이템 키 -o "전달하고 싶은 내용(값)"');
 INSERT INTO ja_index_table (count_id, nextid) VALUES (1, 1);
 INSERT INTO ja_index_table (count_id, nextid) VALUES (2, 1500000000000000000);
 INSERT INTO ja_index_table (count_id, nextid) VALUES (3, 1600000000000000000);
@@ -111,5 +115,15 @@ INSERT INTO ja_define_run_log_message_table (message_id, lang, message, log_type
 INSERT INTO ja_define_run_log_message_table (message_id, lang, message, log_type) VALUES ('JC90000001', 'ja_jp', 'ジョブネットのスケジュール起動が行えませんでした。', 2);
 INSERT INTO ja_define_run_log_message_table (message_id, lang, message, log_type) VALUES ('JC90000002', 'ja_jp', 'ジョブが異常終了しました。', 2);
 INSERT INTO ja_define_run_log_message_table (message_id, lang, message, log_type) VALUES ('JC90000003', 'ja_jp', 'ジョブネットが異常終了しました。', 2);
+INSERT INTO ja_define_run_log_message_table (message_id, lang, message, log_type) VALUES ('JC00000001', 'ko_kr', 'JOBNET 시작', 0);
+INSERT INTO ja_define_run_log_message_table (message_id, lang, message, log_type) VALUES ('JC00000002', 'ko_kr', 'JOBNET 종료', 0);
+INSERT INTO ja_define_run_log_message_table (message_id, lang, message, log_type) VALUES ('JC00000003', 'ko_kr', 'JOB 시작', 0);
+INSERT INTO ja_define_run_log_message_table (message_id, lang, message, log_type) VALUES ('JC00000004', 'ko_kr', 'JOB 종료', 0);
+INSERT INTO ja_define_run_log_message_table (message_id, lang, message, log_type) VALUES ('JC00000005', 'ko_kr', 'JOB이 TIMEOUT되었습니다.', 1);
+INSERT INTO ja_define_run_log_message_table (message_id, lang, message, log_type) VALUES ('JC00000006', 'ko_kr', 'JOB이 SKIP되었습니다.', 1);
+INSERT INTO ja_define_run_log_message_table (message_id, lang, message, log_type) VALUES ('JC00000007', 'ko_kr', 'JOB이 재실행 되었습니다.', 1);
+INSERT INTO ja_define_run_log_message_table (message_id, lang, message, log_type) VALUES ('JC90000001', 'ko_kr', 'JOBNET이 스케줄에 의한 기동이 되지않았습니다.', 2);
+INSERT INTO ja_define_run_log_message_table (message_id, lang, message, log_type) VALUES ('JC90000002', 'ko_kr', 'JOB이 비정상 종료되었습니다.', 2);
+INSERT INTO ja_define_run_log_message_table (message_id, lang, message, log_type) VALUES ('JC90000003', 'ko_kr', 'JOBNET이 비정상 종료되었습니다.', 2);
 
 COMMIT;

@@ -38,6 +38,11 @@ using System.Collections;
 using System.Collections.Generic;
 //added by YAMA 2014/08/18
 using jp.co.ftf.jobcontroller.JobController.Form.SetParameter;
+//Park.iggy
+using System.Diagnostics;
+using System.Windows.Navigation;
+
+
 
 
 //*******************************************************************
@@ -97,6 +102,36 @@ namespace jp.co.ftf.jobcontroller.JobController
 
         /// <summary>ジョブネット編集画面コピー用SaveMinY</summary>
         public double SaveMinY = 0;
+
+        /// <summary>オブジェクトALL種別</summary>
+        /// Park.iggy Add
+        private Boolean _objectAllFlag = false;
+        public Boolean ObjectAllFlag
+        {
+            get
+            {
+                return _objectAllFlag;
+            }
+            set
+            {
+                _objectAllFlag = value;
+            }
+        }
+        /// <summary>オブジェクトList フラグ</summary>
+        /// Park.iggy Add
+        private Boolean _objectListFlag;
+        public Boolean ObjectListFlag
+        {
+            get
+            {
+                return _objectListFlag;
+            }
+            set
+            {
+                _objectListFlag = value;
+            }
+        }
+
 
 
         #endregion
@@ -189,6 +224,17 @@ namespace jp.co.ftf.jobcontroller.JobController
             // 終了ログ
             base.WriteEndLog("Window_Closed", Consts.PROCESS_011);
         }
+
+
+        //Park.iggy 
+        private void Hyperlink_SendClick(object sender, RequestNavigateEventArgs e)
+        {
+            Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri));
+            e.Handled = true;
+        }
+        //END
+
+
 
         //*******************************************************************
         /// <summary>タブ切り替え</summary>
@@ -557,7 +603,7 @@ namespace jp.co.ftf.jobcontroller.JobController
         //*******************************************************************
         private void Calendar_Selected(object sender, RoutedEventArgs e)
         {
-            if (_objList.ObjectId == null)
+            if (_objList.ObjectId == null && _objList.ObjectType != Consts.ObjectEnum.FILTER)
                 _objList.ObjectType = Consts.ObjectEnum.CALENDAR;
         }
 
@@ -568,9 +614,17 @@ namespace jp.co.ftf.jobcontroller.JobController
         //*******************************************************************
         private void Public_Calendar_Selected(object sender, RoutedEventArgs e)
         {
+            //Park.iggy Add
+            if (!_objectListFlag)
+            {
+                _objectAllFlag = true;
+            }
             SetTreeCalendar(true, null);
             if (_objList.ObjectId == null)
+            {
                 _objList.ObjectType = Consts.ObjectEnum.CALENDAR;
+                _objectAllFlag = true;
+            }
         }
 
 
@@ -581,9 +635,17 @@ namespace jp.co.ftf.jobcontroller.JobController
         //*******************************************************************
         private void Private_Calendar_Selected(object sender, RoutedEventArgs e)
         {
+            //Park.iggy Add
+            if (!_objectListFlag)
+            {
+                _objectAllFlag = true;
+            }
             SetTreeCalendar(false, null);
             if (_objList.ObjectId == null)
+            {
                 _objList.ObjectType = Consts.ObjectEnum.CALENDAR;
+                _objectAllFlag = true;
+            }
         }
         
         //*******************************************************************
@@ -593,9 +655,17 @@ namespace jp.co.ftf.jobcontroller.JobController
         //*******************************************************************
         private void Public_Filter_Selected(object sender, RoutedEventArgs e)
         {
+            //Park.iggy Add
+            if (!_objectListFlag)
+            {
+                _objectAllFlag = true;
+            }
             SetTreeFilter(true, null);
             if (_objList.ObjectId == null)
+            {
                 _objList.ObjectType = Consts.ObjectEnum.FILTER;
+                _objectAllFlag = true;
+            }
         }
 
 
@@ -606,9 +676,17 @@ namespace jp.co.ftf.jobcontroller.JobController
         //*******************************************************************
         private void Private_Filter_Selected(object sender, RoutedEventArgs e)
         {
+            //Park.iggy Add
+            if (!_objectListFlag)
+            {
+                _objectAllFlag = true;
+            }
             SetTreeFilter(false, null);
             if (_objList.ObjectId == null)
+            {
                 _objList.ObjectType = Consts.ObjectEnum.FILTER;
+                _objectAllFlag = true;
+            }
         }
 
         //*******************************************************************
@@ -629,9 +707,17 @@ namespace jp.co.ftf.jobcontroller.JobController
         //*******************************************************************
         private void Public_Schedule_Selected(object sender, RoutedEventArgs e)
         {
+            //Park.iggy Add
+            if (!_objectListFlag)
+            {
+                _objectAllFlag = true;
+            }
             SetTreeSchedule(true, null);
             if (_objList.ObjectId == null)
+            {
                 _objList.ObjectType = Consts.ObjectEnum.SCHEDULE;
+                _objectAllFlag = true;
+            }
         }
 
 
@@ -642,9 +728,17 @@ namespace jp.co.ftf.jobcontroller.JobController
         //*******************************************************************
         private void Private_Schedule_Selected(object sender, RoutedEventArgs e)
         {
+            //Park.iggy Add
+            if (!_objectListFlag)
+            {
+                _objectAllFlag = true;
+            }
             SetTreeSchedule(false, null);
             if (_objList.ObjectId == null)
+            {
                 _objList.ObjectType = Consts.ObjectEnum.SCHEDULE;
+                _objectAllFlag = true;
+            }
         }
 
         //*******************************************************************
@@ -665,9 +759,17 @@ namespace jp.co.ftf.jobcontroller.JobController
         //*******************************************************************
         private void Public_Jobnet_Selected(object sender, RoutedEventArgs e)
         {
+            //Park.iggy Add
+            if (!_objectListFlag)
+            {
+                _objectAllFlag = true;
+            }
             SetTreeJobnet(true, null);
             if (_objList.ObjectId == null)
+            {
                 _objList.ObjectType = Consts.ObjectEnum.JOBNET;
+                _objectAllFlag = true;
+            }
         }
 
         //*******************************************************************
@@ -677,9 +779,17 @@ namespace jp.co.ftf.jobcontroller.JobController
         //*******************************************************************
         private void Private_Jobnet_Selected(object sender, RoutedEventArgs e)
         {
+            //Park.iggy Add
+            if (!_objectListFlag)
+            {
+                _objectAllFlag = true;
+            }
             SetTreeJobnet(false, null);
             if (_objList.ObjectId == null)
+            {
                 _objList.ObjectType = Consts.ObjectEnum.JOBNET;
+                _objectAllFlag = true;
+            }
         }
 
         //*******************************************************************
@@ -858,6 +968,9 @@ namespace jp.co.ftf.jobcontroller.JobController
             // 開始ログ
             base.WriteStartLog("Object_Click", Consts.PROCESS_015);
 
+            //Park.iggy Add 朴朴
+            _objectAllFlag = false;
+
             // 登録を行う 
             if (_objectEdit != null && JobNetGrid.Children.Contains(_objectEdit))
             {
@@ -865,6 +978,7 @@ namespace jp.co.ftf.jobcontroller.JobController
                     return;
             }
             TreeViewItem item = (TreeViewItem)sender;
+            
             string objectId = item.Header.ToString();
             Consts.ObjectEnum objectType = (Consts.ObjectEnum)item.Tag;
             item.Focus();
@@ -873,6 +987,31 @@ namespace jp.co.ftf.jobcontroller.JobController
 
             // 終了ログ
             base.WriteEndLog("Object_Click", Consts.PROCESS_015);
+
+        }
+
+        //*******************************************************************
+        /// <summary>オブジェクトノードを選択</summary>
+        /// <param name="sender">源</param>
+        /// <param name="e">イベント</param>
+        //*******************************************************************
+        //Park.iggy Add
+        private void Object_All_List(Boolean public_flag, Consts.ObjectEnum objectType)
+        {
+            // 開始ログ
+            base.WriteStartLog("Object_All_List", Consts.PROCESS_015);
+
+            // 登録を行う 
+            if (_objectEdit != null && JobNetGrid.Children.Contains(_objectEdit))
+            {
+                if (!HandleEdit(_objectEdit))
+                    return;
+            }
+            //Consts.ObjectEnum objectType = (Consts.ObjectEnum)"JOBNET";
+            ShowObjectListALL(public_flag,objectType);
+
+            // 終了ログ
+            base.WriteEndLog("Object_All_List", Consts.PROCESS_015);
 
         }
 
@@ -970,6 +1109,9 @@ namespace jp.co.ftf.jobcontroller.JobController
         {
             // 開始ログ
             base.WriteStartLog("ShowObjectList", Consts.PROCESS_015);
+            //Park.iggy Add
+            String lObjectId = "";
+
             ClearGridContent();
 
             if (objectId != null)
@@ -985,11 +1127,110 @@ namespace jp.co.ftf.jobcontroller.JobController
 
             JobNetGrid.Children.Add(_objList);
 
+            //Park.iggy Add
+            if (objectId == null || objectId.Length == 0)
+            {
+                lObjectId = _objList.ObjectId;
+            }
+            else
+            { 
+                lObjectId = objectId;
+            }
+
+            Boolean publicFlag = false;
+            DataTable dt = DBUtil.GetObjectsById(lObjectId, objectType);
+            if (dt.Rows.Count > 0 && (Int32)(dt.Rows[0]["public_flag"]) == 1)
+                publicFlag = true;
+
+            TreeViewItem item = null;
+            if (publicFlag)
+            {
+                if (objectType == Consts.ObjectEnum.CALENDAR)
+                {
+                    item = publicCalendar;
+                }
+                else if (objectType == Consts.ObjectEnum.FILTER)
+                {
+                    item = publicFilter;
+                }
+                else if (objectType == Consts.ObjectEnum.SCHEDULE)
+                {
+                    item = publicSchedule;
+                }
+                else if (objectType == Consts.ObjectEnum.JOBNET)
+                {
+                    item = publicJobnet;
+                }
+            }
+            else 
+            {
+                if (objectType == Consts.ObjectEnum.CALENDAR)
+                {
+                    item = privateCalendar;
+                }
+                else if (objectType == Consts.ObjectEnum.FILTER)
+                {
+                    item = privateFilter;
+                }
+                else if (objectType == Consts.ObjectEnum.SCHEDULE)
+                {
+                    item = privateSchedule;
+                }
+                else if (objectType == Consts.ObjectEnum.JOBNET)
+                {
+                    item = privateJobnet;
+                }
+            }
+
+            for (int i = 0; i < item.Items.Count;i++ )
+            {
+                TreeViewItem chaView = (TreeViewItem)item.Items[i];
+                if (lObjectId != null && chaView.Header.Equals(lObjectId))
+                {
+                    chaView.IsSelected = true;
+                    break;
+                }
+            }
+
+            //Park.iggy END
+
             this.Title = MessageUtil.GetMsgById(_objList.GamenId) + " - " + LoginSetting.JobconName;
 
 
             // 終了ログ
             base.WriteEndLog("ShowObjectList", Consts.PROCESS_015);
+        }
+
+        //*******************************************************************
+        /// <summary>オブジェクトALL一覧を表示</summary>
+        /// <param name="objectId">オブジェクトＩＤ</param>
+        /// <param name="objecType">オブジェクトタイプ</param>
+        //*******************************************************************
+        //Park.iggy
+        public void ShowObjectListALL(Boolean public_flag,Consts.ObjectEnum objectType)
+        {
+            // 開始ログ
+            base.WriteStartLog("ShowObjectListALL", Consts.PROCESS_015);
+            ClearGridContent();
+
+            if (objectType != null)
+            {
+                _objList = new ObjectList(this, public_flag, objectType);
+                //リストにデータがない場合、選択された親TreeViewからオブジェクト種別を取得してセット
+                if (_objList.dgObject.Items.Count < 1)
+                {
+                    _objList.ObjectType = GetObjectEnum4NotData();
+                }
+
+            }
+
+            JobNetGrid.Children.Add(_objList);
+
+            this.Title = MessageUtil.GetMsgById(_objList.GamenId) + " - " + LoginSetting.JobconName;
+
+
+            // 終了ログ
+            base.WriteEndLog("ShowObjectListALL", Consts.PROCESS_015);
         }
 
         //*******************************************************************
@@ -1187,6 +1428,9 @@ namespace jp.co.ftf.jobcontroller.JobController
         //*******************************************************************
         public void SetTreeObject(bool publicFlag, Consts.ObjectEnum objectType, String objectID)
         {
+            //Park.iggy Add
+            _objectListFlag = true;
+
             switch (objectType)
             {
                 case Consts.ObjectEnum.CALENDAR:
@@ -1244,12 +1488,15 @@ namespace jp.co.ftf.jobcontroller.JobController
                     }
                     if (!publicFlag)
                     {
+                        
                         privateJobnet.IsExpanded = false;
                         SetTreeJobnet(publicFlag, objectID);
                         privateJobnet.IsExpanded = true;
                     }
                     break;
             }
+            //Park.iggy Add
+            _objectListFlag = false;
         }
         #endregion
 
@@ -1289,6 +1536,9 @@ namespace jp.co.ftf.jobcontroller.JobController
         private void NewObjectEditFromTreeView()
         {
             _objectEdit = null;
+            //Park.iggy Add
+            _objectAllFlag = false;
+            
             if (treeView1.SelectedItem == null)
             {
                 _objectEdit = new CalendarEdit(this);
@@ -1387,6 +1637,9 @@ namespace jp.co.ftf.jobcontroller.JobController
         private void NewObjectEditFromObjectList()
         {
             _objectEdit = null;
+            //Pakr.iggy Add
+            _objectAllFlag = false;
+
             switch (_objList.ObjectType)
             {
                 case Consts.ObjectEnum.CALENDAR:
@@ -1408,6 +1661,9 @@ namespace jp.co.ftf.jobcontroller.JobController
         private EditBaseUserControl getEditObject(string objectId, string updDate, Consts.EditType editType, Consts.ObjectEnum objecType)
         {
             _objectEdit = null;
+            //Park.iggy Add 朴
+            //_objectAllFlag = false;
+            
             switch (objecType)
             {
                 case Consts.ObjectEnum.CALENDAR:
@@ -1562,11 +1818,13 @@ namespace jp.co.ftf.jobcontroller.JobController
 
             int flg;
             TreeViewItem treeViewItem;
+
             if (public_flg)
             {
                 flg = 1;
                 treeViewItem = publicCalendar;
                 publicCalendar.Selected -= Public_Calendar_Selected;
+                //treeViewItem.Items.Clear();
             }
             else
             {
@@ -1574,6 +1832,7 @@ namespace jp.co.ftf.jobcontroller.JobController
                 treeViewItem = privateCalendar;
                 privateCalendar.Selected -= Private_Calendar_Selected;
             }
+
             treeViewItem.Items.Clear();
 
             string selectSql;
@@ -1653,11 +1912,21 @@ namespace jp.co.ftf.jobcontroller.JobController
             {
                 treeViewItem = publicCalendar;
                 publicCalendar.Selected += Public_Calendar_Selected;
+                //Park.iggy Add
+                if (_objectAllFlag)
+                {
+                    Object_All_List(true, Consts.ObjectEnum.CALENDAR);
+                }
             }
             else
             {
                 treeViewItem = privateCalendar;
                 privateCalendar.Selected += Private_Calendar_Selected;
+                //Park.iggy Add
+                if (_objectAllFlag)
+                {
+                    Object_All_List(false, Consts.ObjectEnum.CALENDAR);
+                }
             }
             dbaccess.CloseSqlConnect();
         }
@@ -1766,11 +2035,21 @@ namespace jp.co.ftf.jobcontroller.JobController
             {
                 treeViewItem = publicFilter;
                 publicFilter.Selected += Public_Filter_Selected;
+                //Park.iggy Add
+                if (_objectAllFlag)
+                {
+                    Object_All_List(true, Consts.ObjectEnum.FILTER);
+                }
             }
             else
             {
                 treeViewItem = privateFilter;
                 privateFilter.Selected += Private_Filter_Selected;
+                //Park.iggy Add
+                if (_objectAllFlag)
+                {
+                    Object_All_List(false, Consts.ObjectEnum.FILTER);
+                }
             }
             dbaccess.CloseSqlConnect();
         }
@@ -1881,11 +2160,21 @@ namespace jp.co.ftf.jobcontroller.JobController
             {
                 treeViewItem = publicSchedule;
                 publicSchedule.Selected += Public_Schedule_Selected;
+                //Park.iggy Add
+                if (_objectAllFlag)
+                {
+                    Object_All_List(true, Consts.ObjectEnum.SCHEDULE);
+                }
             }
             else
             {
                 treeViewItem = privateSchedule;
                 privateSchedule.Selected += Private_Schedule_Selected;
+                //Park.iggy Add
+                if (_objectAllFlag)
+                {
+                    Object_All_List(false, Consts.ObjectEnum.SCHEDULE);
+                }
             }
 
             dbaccess.CloseSqlConnect();
@@ -1995,12 +2284,24 @@ namespace jp.co.ftf.jobcontroller.JobController
             {
                 treeViewItem = publicJobnet;
                 publicJobnet.Selected += Public_Jobnet_Selected;
+                //Park.iggy Add
+                if (_objectAllFlag)
+                {
+                    Object_All_List(true, Consts.ObjectEnum.JOBNET);
+                }
+                
             }
             else
             {
                 treeViewItem = privateJobnet;
                 privateJobnet.Selected += Private_Jobnet_Selected;
+                //Park.iggy Add
+                if (_objectAllFlag)
+                {
+                    Object_All_List(false, Consts.ObjectEnum.JOBNET);
+                }
             }
+            
             dbaccess.CloseSqlConnect();
         }
 

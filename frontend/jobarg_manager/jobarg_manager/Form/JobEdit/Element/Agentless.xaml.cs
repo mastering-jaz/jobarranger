@@ -581,7 +581,16 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                     sbSSH.Append("  ");
                     sbSSH.Append(Properties.Resources.agentless_passwd_label_text);
                     if (!LoginSetting.Lang.StartsWith("ja_")) sbSSH.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
-                    sbSSH.Append(Convert.ToString(rowIconAgentless[0]["login_password"]));
+                    //Park.iggy Add
+                    //sbSSH.Append(Convert.ToString(rowIconAgentless[0]["login_password"]));
+                    if (Convert.ToString(rowIconAgentless[0]["login_password"]) != null)
+                    {
+                        sbSSH.Append("******");
+                    }
+                    else
+                    {
+                        sbSSH.Append(Convert.ToString(rowIconAgentless[0]["login_password"]));
+                    }
                 }
                 else
                 {

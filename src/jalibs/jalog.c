@@ -19,8 +19,8 @@
 **/
 
 /*
-** $Date:: 2015-05-01 11:37:22 +0900 #$
-** $Revision: 6949 $
+** $Date:: 2016-02-22 10:27:07 +0900 #$
+** $Revision: 6998 $
 ** $Author: sypark@FITECHLABS.CO.JP $
 **/
 
@@ -358,6 +358,7 @@ int	ja_log(char *message_id, zbx_uint64_t inner_jobnet_id, char *jobnet_id, zbx_
 				zbx_strlcpy(job_name, row[2], sizeof(job_name));
 			}
 		}
+
 		DBfree_result(result);
 
 		get_host_flag = 0;
@@ -535,6 +536,7 @@ int	ja_log(char *message_id, zbx_uint64_t inner_jobnet_id, char *jobnet_id, zbx_
 		host_name_esc   = DBdyn_escape_string(host_name);
 		jobnet_name_esc = DBdyn_escape_string(jobnet_name);
 		job_name_esc    = DBdyn_escape_string(job_name);
+
 		rc = DBexecute("insert into ja_send_message_table ("
 				"message_date, inner_jobnet_id, inner_jobnet_main_id, send_status, retry_count, retry_date, send_date, send_error_date, "
 				"message_type, user_name, host_name, jobnet_id, jobnet_name, job_id, job_id_full, job_name, "

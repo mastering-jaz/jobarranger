@@ -30,7 +30,6 @@ using jp.co.ftf.jobcontroller.Common;
 using jp.co.ftf.jobcontroller.JobController.Form.CalendarEdit;
 using jp.co.ftf.jobcontroller.JobController.Form.FilterEdit;
 using jp.co.ftf.jobcontroller.JobController.Form.ScheduleEdit;
-using jp.co.ftf.jobcontroller.JobController.Form.JobEdit;
 
 namespace jp.co.ftf.jobcontroller.JobController
 {
@@ -84,6 +83,22 @@ namespace jp.co.ftf.jobcontroller.JobController
             SetList();
 
         }
+
+
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="objectId">オブジェクトＩＤ</param>
+        /// <param name="objectType">オブジェクト種別</param>
+        /// Park.iggy ADD
+        public ObjectList(JobArrangerWindow win, Boolean public_flag, Consts.ObjectEnum objectType)
+        {
+            InitializeComponent();
+            _dadWindow = win;
+            _objectType = objectType;
+            SetListALL(public_flag);
+        }
+
         #endregion
 
         #region プロパティ
@@ -131,6 +146,7 @@ namespace jp.co.ftf.jobcontroller.JobController
                 _objectType = value;
             }
         }
+
         /// <summary>オブジェクト所有種別</summary>
         private Consts.ObjectOwnType _objectOwnType;
         public Consts.ObjectOwnType ListObjectOwnType
@@ -181,7 +197,6 @@ namespace jp.co.ftf.jobcontroller.JobController
         //*******************************************************************
         private void dgObject_PreviewMouseRightButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-
             DependencyObject dep = (DependencyObject)e.OriginalSource;
             while ((dep != null) && !(dep is DataGridCell))
             {
@@ -196,8 +211,23 @@ namespace jp.co.ftf.jobcontroller.JobController
                     dep = VisualTreeHelper.GetParent(dep);
                 }
                 DataGridRow row = dep as DataGridRow;
-                dgObject.SelectedItem = row.DataContext;
+                //dgObject.SelectedItem = row.DataContext; org
+                //Park.iggy Add
+                if (!_dadWindow.ObjectAllFlag)
+                {
+                    dgObject.SelectedItem = row.DataContext;
+                }
+                else
+                {
+                    if (int.Parse(dgObject.SelectedItems.Count.ToString()) <= 1)
+                    {
+                        dgObject.SelectedItem = row.DataContext;
+                    }
+
+                }
+                //Park.iggy END
             }
+
 
         }
 
@@ -234,6 +264,20 @@ namespace jp.co.ftf.jobcontroller.JobController
 
                 string updDate = dgObject.SelectedValue.ToString();
                 DataRow row = ((DataRowView)dgObject.SelectedItem).Row;
+
+                //Park.iggy Add
+                //System.Console.WriteLine("朴ですMouseDoubleClick==>" + updDate + row["object_id"].ToString());
+                _objectId = row["object_id"].ToString();
+                _objectUserName = row["user_name"].ToString();
+                _objectUserGroupList = DBUtil.GetGroupIDListByAlias(_objectUserName);
+                _objectOwnType = Consts.ObjectOwnType.Other;
+                if (CheckUtil.isExistGroupId(LoginSetting.GroupList, _objectUserGroupList))
+                {
+                    _objectOwnType = Consts.ObjectOwnType.Owner;
+                }
+
+
+                //Park.iggy END
 
                 //Viewerの場合
                 #if VIEWER
@@ -371,9 +415,11 @@ namespace jp.co.ftf.jobcontroller.JobController
         {
             // 開始ログ
             base.WriteStartLog("MenuitemAdd_Click", Consts.PROCESS_003);
-
+            
             DadWindow.ObjectEdit = null;
-
+            //Park.iggy Add
+            DadWindow.ObjectAllFlag = false;
+            
             if (_objectType != null)
             {
                 switch (_objectType)
@@ -422,8 +468,24 @@ namespace jp.co.ftf.jobcontroller.JobController
 
             string updDate = dgObject.SelectedValue.ToString();
 
+            //Park.iggy Add
+            DataRow row = ((DataRowView)dgObject.SelectedItem).Row;
+            _objectId = row["object_id"].ToString();
+            _objectUserName = row["user_name"].ToString();
+            _objectUserGroupList = DBUtil.GetGroupIDListByAlias(_objectUserName);
+            _objectOwnType = Consts.ObjectOwnType.Other;
+            if (CheckUtil.isExistGroupId(LoginSetting.GroupList, _objectUserGroupList))
+            {
+                _objectOwnType = Consts.ObjectOwnType.Owner;
+            }
+
+            //Park.iggy END
+
+
             // 運用モードの場合
-            if (LoginSetting.Mode == Consts.ActionMode.USE)
+            if (LoginSetting.Mode == Consts.ActionMode.USE ||
+                (!CheckUtil.isExistGroupId(LoginSetting.GroupList, _objectUserGroupList)  && !(LoginSetting.Authority == Consts.AuthorityEnum.SUPER))
+                )
             {
                 _dadWindow.EditObject(_objectId, updDate, Consts.EditType.READ, _objectType);
             }
@@ -445,6 +507,34 @@ namespace jp.co.ftf.jobcontroller.JobController
 
             string updDate = dgObject.SelectedValue.ToString();
 
+
+            //Park.iggy Add
+            if (_dadWindow.ObjectAllFlag)
+            {
+                DataRow row = ((DataRowView)dgObject.SelectedItem).Row;
+                _objectId = row["object_id"].ToString();
+                _objectUserName = row["user_name"].ToString();
+                _objectUserGroupList = DBUtil.GetGroupIDListByAlias(_objectUserName);
+                if (!CheckUtil.isExistGroupId(LoginSetting.GroupList, _objectUserGroupList) && !(LoginSetting.Authority == Consts.AuthorityEnum.SUPER))
+                {
+                    CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_029,
+                    new string[] { _objectId });
+                    return;
+                }
+            }
+
+            //Park.iggy END
+
+
+            // 運用モードの場合
+            if (LoginSetting.Mode == Consts.ActionMode.USE ||
+                (!CheckUtil.isExistGroupId(LoginSetting.GroupList, _objectUserGroupList)  && !(LoginSetting.Authority == Consts.AuthorityEnum.SUPER))
+                )
+            {
+                _dadWindow.ObjectAllFlag = false;
+            }
+            //Park.igg END
+
             _dadWindow.EditObject(_objectId, updDate, Consts.EditType.CopyNew, _objectType);
 
             // 終了ログ
@@ -460,6 +550,19 @@ namespace jp.co.ftf.jobcontroller.JobController
             base.WriteStartLog("MenuitemCopyVer_Click", Consts.PROCESS_005);
 
             string updDate = dgObject.SelectedValue.ToString();
+            //Park.iggy Add
+            DataRow row = ((DataRowView)dgObject.SelectedItem).Row;
+            _objectId = row["object_id"].ToString();
+            _objectUserName = row["user_name"].ToString();
+            _objectUserGroupList = DBUtil.GetGroupIDListByAlias(_objectUserName);
+            if (!CheckUtil.isExistGroupId(LoginSetting.GroupList, _objectUserGroupList) && !(LoginSetting.Authority == Consts.AuthorityEnum.SUPER))
+            {
+                CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_029,
+                    new string[] { _objectId });
+                return;
+            }
+
+            //Park.iggy END
 
             _dadWindow.EditObject(_objectId, updDate, Consts.EditType.CopyVer, _objectType);
 
@@ -476,6 +579,9 @@ namespace jp.co.ftf.jobcontroller.JobController
             base.WriteStartLog("MenuitemValid_Click", Consts.PROCESS_007);
 
             string updDate = dgObject.SelectedValue.ToString();
+            //Park.iggy Add
+            int public_int = 0;
+            int dataCnt = int.Parse(dgObject.SelectedItems.Count.ToString());
 
             // ジョブネットの場合、フローの整合性チェックをする
             if (_objectType == Consts.ObjectEnum.JOBNET)
@@ -483,15 +589,36 @@ namespace jp.co.ftf.jobcontroller.JobController
                 _db.CreateSqlConnect();
                 JobControlDAO jobControlDAO = new JobControlDAO(_db);
                 FlowControlDAO flowControlDAO = new FlowControlDAO(_db);
-                DataTable dtJob = jobControlDAO.GetEntityByJobIdForUpdate(_objectId, updDate);
-                DataTable dtFlow = flowControlDAO.GetEntityByJobnet(_objectId, updDate);
-                _db.CloseSqlConnect();
-
-                if (!ConformJobnetCheck(dtJob, dtFlow))
+                //Park.iggy Add
+                for (int i = 0; i < dataCnt; ++i)
                 {
 
-                    return;
+                    DataRowView row = (DataRowView)dgObject.SelectedItems[i];
+
+                   
+                    //System.Console.WriteLine("Object_id==>" + row["object_id"].ToString() + " public_flag=>" + row["public_flag"].ToString() + "<=>" + updDate);
+                    _objectId = row["object_id"].ToString();
+                    updDate = row["update_date"].ToString();
+
+                    DataTable dtJob = jobControlDAO.GetEntityByJobIdForUpdate(_objectId, updDate);
+                    DataTable dtFlow = flowControlDAO.GetEntityByJobnet(_objectId, updDate);
+                    if (!ConformJobnetCheck(dtJob, dtFlow))
+                    {
+                        _db.CloseSqlConnect();
+                        return;
+                    }
                 }
+
+                //Park.iggy END
+                //DataTable dtJob = jobControlDAO.GetEntityByJobIdForUpdate(_objectId, updDate);
+                //DataTable dtFlow = flowControlDAO.GetEntityByJobnet(_objectId, updDate);
+
+                _db.CloseSqlConnect();
+
+                //if (!ConformJobnetCheck(dtJob, dtFlow))
+                //{
+                //    return;
+                //}
             }
 
             // スケジュールの場合、起動時刻、ジョブネット登録チェックをする
@@ -500,13 +627,23 @@ namespace jp.co.ftf.jobcontroller.JobController
                 _db.CreateSqlConnect();
                 ScheduleDetailDAO scheduleDetailDAO = new ScheduleDetailDAO(_db);
                 ScheduleJobnetDAO scheduleJobnetDAO = new ScheduleJobnetDAO(_db);
-                DataTable dtBoot = scheduleDetailDAO.GetIdEntityBySchedule(_objectId, updDate);
-                DataTable dtJobnet = scheduleJobnetDAO.GetIdEntityBySchedule(_objectId, updDate);
-                _db.CloseSqlConnect();
-                if (!ConfirmScheduleCheck(dtBoot, dtJobnet))
+                //Park.iggy Add
+                for (int i = 0; i < dataCnt; ++i)
                 {
-                    return;
+                    DataRowView row = (DataRowView)dgObject.SelectedItems[i];
+                    _objectId = row["object_id"].ToString();
+                    updDate = row["update_date"].ToString();
+
+                    DataTable dtBoot = scheduleDetailDAO.GetIdEntityBySchedule(_objectId, updDate);
+                    DataTable dtJobnet = scheduleJobnetDAO.GetIdEntityBySchedule(_objectId, updDate);
+                    _db.CloseSqlConnect();
+                    if (!ConfirmScheduleCheck(dtBoot, dtJobnet))
+                    {
+                        return;
+                    }
                 }
+
+                
             }
             try
             {
@@ -515,23 +652,56 @@ namespace jp.co.ftf.jobcontroller.JobController
                 ChkValidData.Columns.Add("RelatedObject", typeof(string));
                 ChkValidData.Columns.Add("ErrMessage", typeof(string));
                 ChkValidData.Columns.Add("ObjectType", typeof(string));
-                DBUtil.SetObjectValid(_objectId, updDate, _objectType, ref ChkValidData);
-
-                if (ChkValidData.Rows.Count != 0)
+                //DBUtil.SetObjectValid(_objectId, updDate, _objectType, ref ChkValidData); org
+                //Park.iggy Add
+                for (int i = 0; i < dataCnt; ++i)
                 {
-                    ChkValidData.Rows[0]["ErrMessage"] = Properties.Resources.relatedObject_valid_message;
-                    relatedObjectList ObjectList = new relatedObjectList(ChkValidData, "Valid");
+                    DataRowView row = (DataRowView)dgObject.SelectedItems[i];
+                    //System.Console.WriteLine("Object_id==>" + row["object_id"].ToString() + " update=>" + row["update_date"].ToString() + "<=>" + updDate);
+                    _objectId = row["object_id"].ToString();
+                    updDate = row["update_date"].ToString();
+                    public_int = int.Parse(row["public_flag"].ToString());
 
-                    ObjectList.Owner = DadWindow;
-                    ObjectList.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
+                    _objectUserName = row["user_name"].ToString();
+                    _objectUserGroupList = DBUtil.GetGroupIDListByAlias(_objectUserName);
+                    if (!CheckUtil.isExistGroupId(LoginSetting.GroupList, _objectUserGroupList) && !(LoginSetting.Authority == Consts.AuthorityEnum.SUPER))
+                    {
+                        CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_029,
+                        new string[] { _objectId });
+                        if (DadWindow.ObjectAllFlag)
+                        {
+                            SetListALL(Convert.ToBoolean(public_int));
+                        }
+                        return;
+                    }
 
-                    ObjectList.ShowDialog();
+                    DBUtil.SetObjectValid(_objectId, updDate, _objectType, ref ChkValidData);
 
-                    if (ObjectList.ForceRun == false) return;
+                    if (ChkValidData.Rows.Count != 0)
+                    {
+                        ChkValidData.Rows[0]["ErrMessage"] = Properties.Resources.relatedObject_valid_message;
+                        relatedObjectList ObjectList = new relatedObjectList(ChkValidData, "Valid");
 
-                    // オブジェクトの有効化を強制実行する
-                    DBUtil.SetObjectValidForceRun(_objectId, updDate, _objectType);
+                        ObjectList.Owner = DadWindow;
+                        ObjectList.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
+
+                        ObjectList.ShowDialog();
+
+                        if (ObjectList.ForceRun == false)
+                        {
+                            if (DadWindow.ObjectAllFlag)
+                            {
+                                SetListALL(Convert.ToBoolean(public_int));
+                            }
+                            return;
+                        }
+
+                        // オブジェクトの有効化を強制実行する
+                        DBUtil.SetObjectValidForceRun(_objectId, updDate, _objectType);
+                    }
                 }
+
+                
             }
             catch (DBException ex)
             {
@@ -544,8 +714,15 @@ namespace jp.co.ftf.jobcontroller.JobController
                     throw ex;
                 }
             }
+            if (DadWindow.ObjectAllFlag)
+            {
+                SetListALL(Convert.ToBoolean(public_int));
+            }
+            else
+            {
 
-            SetList();
+                SetList();//org
+            }
 
             // 終了ログ
             base.WriteEndLog("MenuitemValid_Click", Consts.PROCESS_007);
@@ -558,6 +735,10 @@ namespace jp.co.ftf.jobcontroller.JobController
         {
             // 開始ログ
             base.WriteStartLog("MenuitemInValid_Click", Consts.PROCESS_008);
+            //Park.iggy Add
+            int public_int = 0;
+            int dataCnt = int.Parse(dgObject.SelectedItems.Count.ToString());
+
             try
             {
                 //added by YAMA 2014/10/17
@@ -566,23 +747,56 @@ namespace jp.co.ftf.jobcontroller.JobController
                 ChkValidData.Columns.Add("RelatedObject", typeof(string));
                 ChkValidData.Columns.Add("ErrMessage", typeof(string));
                 ChkValidData.Columns.Add("ObjectType", typeof(string));
-                DBUtil.SetObjectsInValid(_objectId, _objectType, GetSelectedRows(), ref ChkValidData);
-
-                if (ChkValidData.Rows.Count != 0)
+                //DBUtil.SetObjectsInValid(_objectId, _objectType, GetSelectedRows(), ref ChkValidData);
+                //Park.iggy Add
+                for (int i = 0; i < dataCnt; ++i)
                 {
-                    ChkValidData.Rows[0]["ErrMessage"] = Properties.Resources.relatedObject_invalid_message;
-                    relatedObjectList ObjectList = new relatedObjectList(ChkValidData, "InValid");
+                    DataRowView row = (DataRowView)dgObject.SelectedItems[i];
+                    //System.Console.WriteLine("Object_id==>" + row["object_id"].ToString() + " update=>" + row["update_date"].ToString() + "<=>" + updDate);
+                    _objectId = row["object_id"].ToString();
+                    public_int = int.Parse(row["public_flag"].ToString());
+                    
 
-                    ObjectList.Owner = DadWindow;
-                    ObjectList.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
+                    _objectUserName = row["user_name"].ToString();
+                    _objectUserGroupList = DBUtil.GetGroupIDListByAlias(_objectUserName);
+                    if (!CheckUtil.isExistGroupId(LoginSetting.GroupList, _objectUserGroupList) && !(LoginSetting.Authority == Consts.AuthorityEnum.SUPER) )
+                    {
+                        CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_029,
+                        new string[] { _objectId });
+                        if (DadWindow.ObjectAllFlag)
+                        {
+                            SetListALL(Convert.ToBoolean(public_int));
+                        }
+                        return;
+                    }
+                    DBUtil.SetObjectsInValid(_objectId, _objectType, GetSelectedRows(), ref ChkValidData);
 
-                    ObjectList.ShowDialog();
 
-                    if (ObjectList.ForceRun == false) return;
+                    if (ChkValidData.Rows.Count != 0)
+                    {
+                        ChkValidData.Rows[0]["ErrMessage"] = Properties.Resources.relatedObject_invalid_message;
+                        relatedObjectList ObjectList = new relatedObjectList(ChkValidData, "InValid");
 
-                    // オブジェクトの無効化を強制実行する
-                    DBUtil.SetObjectsInValidForceRun(_objectId, _objectType, GetSelectedRows());
+                        ObjectList.Owner = DadWindow;
+                        ObjectList.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
+
+                        ObjectList.ShowDialog();
+
+                        if (ObjectList.ForceRun == false)
+                        {
+                            if (DadWindow.ObjectAllFlag)
+                            {
+                                SetListALL(Convert.ToBoolean(public_int));
+                            }
+                            return;
+                        }
+                   
+                        // オブジェクトの無効化を強制実行する
+                        DBUtil.SetObjectsInValidForceRun(_objectId, _objectType, GetSelectedRows());
+                    }
                 }
+                //Park.iggy END
+
             }
             catch (DBException ex)
             {
@@ -595,7 +809,15 @@ namespace jp.co.ftf.jobcontroller.JobController
                     throw ex;
                 }
             }
-            SetList();
+            if (DadWindow.ObjectAllFlag)
+            {
+                SetListALL(Convert.ToBoolean(public_int));
+            }
+            else
+            {
+
+                SetList();//org
+            }
 
             // 終了ログ
             base.WriteEndLog("MenuitemInValid_Click", Consts.PROCESS_008);
@@ -610,6 +832,7 @@ namespace jp.co.ftf.jobcontroller.JobController
             base.WriteStartLog("MenuitemDel_Click", Consts.PROCESS_006);
 
             DelObject(_objectId, _objectType, GetSelectedRows());
+
 
             // 終了ログ
             base.WriteEndLog("MenuitemDel_Click", Consts.PROCESS_006);
@@ -690,26 +913,54 @@ namespace jp.co.ftf.jobcontroller.JobController
         public void DelObject(String objectId, Consts.ObjectEnum objectType, DataRow[] rows)
         {
             //added by YAMA 2014/10/17
-            /*
-            if (!DBUtil.CheckForRelation4Del(objectId, objectType, rows))
-            {
-                CommonDialog.ShowErrorDialog(Consts.MSG_COMMON_007);
-                return;
-            }
-            */
+
             DataTable ChkValidData = new DataTable();
             ChkValidData.Columns.Add("RelatedObject", typeof(string));
             ChkValidData.Columns.Add("ErrMessage", typeof(string));
             ChkValidData.Columns.Add("ObjectType", typeof(string));
-            if (!DBUtil.CheckForRelation4Del(objectId, objectType, rows, ref ChkValidData))
+            //Park.iggy Add
+            if (DadWindow.ObjectAllFlag)
             {
-                ChkValidData.Rows[0]["ErrMessage"] = Properties.Resources.relatedObject_del_message;
-                relatedObjectList ObjectList = new relatedObjectList(ChkValidData, "DelObject");
+                rows = null;
+                int dataCnt = int.Parse(dgObject.SelectedItems.Count.ToString());
 
-                ObjectList.Owner = DadWindow;
-                ObjectList.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
-                ObjectList.ShowDialog();
-                return;
+                for (int i = 0; i < dataCnt ; i++)
+                {
+                    DataRowView row = (DataRowView)dgObject.SelectedItems[i];
+                    objectId = row["object_id"].ToString();
+                    if (!DBUtil.CheckForRelation4Del(objectId, objectType, rows, ref ChkValidData))
+                    {
+                        ChkValidData.Rows[0]["ErrMessage"] = Properties.Resources.relatedObject_del_message;
+                        relatedObjectList ObjectList = new relatedObjectList(ChkValidData, "DelObject");
+
+                        ObjectList.Owner = DadWindow;
+                        ObjectList.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
+                        ObjectList.ShowDialog();
+                        return;
+                    }
+                    _objectUserName = row["user_name"].ToString();
+                    _objectUserGroupList = DBUtil.GetGroupIDListByAlias(_objectUserName);
+                    if (!CheckUtil.isExistGroupId(LoginSetting.GroupList, _objectUserGroupList) && !(LoginSetting.Authority == Consts.AuthorityEnum.SUPER) )
+                    {
+                        CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_029,
+                        new string[] { objectId });
+                        return;
+                    }
+
+                }
+            }
+            else
+            {
+                if (!DBUtil.CheckForRelation4Del(objectId, objectType, rows, ref ChkValidData))
+                {
+                    ChkValidData.Rows[0]["ErrMessage"] = Properties.Resources.relatedObject_del_message;
+                    relatedObjectList ObjectList = new relatedObjectList(ChkValidData, "DelObject");
+
+                    ObjectList.Owner = DadWindow;
+                    ObjectList.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
+                    ObjectList.ShowDialog();
+                    return;
+                }
             }
             MessageBoxResult result = CommonDialog.ShowDeleteDialog();
             if (result == MessageBoxResult.Yes)
@@ -720,9 +971,34 @@ namespace jp.co.ftf.jobcontroller.JobController
                     publicFlag = true;
                 try
                 {
+                    /* org
                     DBUtil.DelObject(objectId, objectType, rows);
                     SetList();
                     DadWindow.SetTreeObject(publicFlag, objectType, objectId);
+                     * 
+                     */
+                    if (DadWindow.ObjectAllFlag)
+                    {
+                        int dataCnt = int.Parse(dgObject.SelectedItems.Count.ToString());
+
+                        for (int i = 0; i < dataCnt; i++)
+                        {
+                            DataRowView row = (DataRowView)dgObject.SelectedItems[i];
+                            objectId = row["object_id"].ToString();
+                            publicFlag = int.Parse(row["public_flag"].ToString()) == 1?true : false;
+                            DBUtil.DelObject(objectId, objectType, rows);
+                            
+                        }
+                        SetListALL(publicFlag);
+                        DadWindow.SetTreeObject(publicFlag, objectType, objectId);
+                    }
+                    else
+                    {
+                        DBUtil.DelObject(objectId, objectType, rows);
+                        SetList();
+                        DadWindow.SetTreeObject(publicFlag, objectType, objectId);
+                    }
+                    
 
                 }
                 catch (DBException e)
@@ -759,6 +1035,9 @@ namespace jp.co.ftf.jobcontroller.JobController
         /// <summary>リスト内容をセット</summary>
         private void SetList()
         {
+            //Park.iggy Add
+            dgObject.SelectionMode = DataGridSelectionMode.Single;
+            //Prk.iggy END
             _db.CreateSqlConnect();
 
             _objectDao = GetObjectDAO();
@@ -794,6 +1073,39 @@ namespace jp.co.ftf.jobcontroller.JobController
             }
             _db.CloseSqlConnect();
         }
+
+        /// <summary>リスト内容全部をセット</summary>
+        /// Park.iggy
+        private void SetListALL(Boolean public_flag)
+        {
+            dgObject.SelectionMode = DataGridSelectionMode.Extended;
+            _db.CreateSqlConnect();
+            _objectDao = GetObjectDAO();
+            if (!_objectType.Equals(""))
+            {
+                _objectTbl = _objectDao.GetEntityByObjectALL(public_flag);
+                //Park.iggy ADD
+                _objectTbl.Columns[0].ColumnName = "object_id";
+                foreach (DataColumn cl in _objectTbl.Columns)
+                {
+                    if (!cl.ColumnName.Equals("user_name") && cl.ColumnName.IndexOf("_name") > 0)
+                    {
+                        cl.ColumnName = "object_name";
+                    }
+                }
+
+                dgObject.ItemsSource = _objectTbl.DefaultView;
+
+                dgObject.SelectedValuePath = Convert.ToString(_objectTbl.Columns["update_date"]);
+                
+                if (_objectTbl.Rows.Count < 1)
+                {
+                    _objectId = null;
+                }
+            }
+            _db.CloseSqlConnect();
+        }
+
 
         /// <summary>オブジェクト種別によるオブジェクトＤＡＯ取得</summary>
         private ObjectBaseDAO GetObjectDAO()
@@ -848,6 +1160,11 @@ namespace jp.co.ftf.jobcontroller.JobController
                 menuitemInValid.IsEnabled = false;
                 menuitemDel.IsEnabled = false;
                 menuitemExport.IsEnabled = false;
+
+                menuItemImmediateRun.IsEnabled = false;
+                menuItemReserveRun.IsEnabled = false;
+                menuItemTestRun.IsEnabled = false;
+
                 return;
             }
 
@@ -878,13 +1195,50 @@ namespace jp.co.ftf.jobcontroller.JobController
                     menuitemEdit.IsEnabled = false;
                 }
             }
+            
+
+            //Park.iggy Add
+
+            if (int.Parse(dgObject.SelectedItems.Count.ToString()) > 1
+                && LoginSetting.Mode != Consts.ActionMode.USE )
+            {
+                menuitemAdd.IsEnabled = true;
+                menuitemEdit.IsEnabled = false;
+                menuitemCopyNew.IsEnabled = false;
+                menuitemCopyVer.IsEnabled = false;
+                menuitemValid.IsEnabled = true;
+                menuitemInValid.IsEnabled = true;
+                menuitemDel.IsEnabled = true;
+                menuitemExport.IsEnabled = true;
+                menuItemImmediateRun.IsEnabled = false;
+                menuItemReserveRun.IsEnabled = false;
+                menuItemTestRun.IsEnabled = false;
+            }
+            else if (DadWindow.ObjectAllFlag
+                && LoginSetting.Mode != Consts.ActionMode.USE)
+            {
+
+                menuitemEdit.IsEnabled = true;
+                menuitemCopyNew.IsEnabled = true;
+                menuitemCopyVer.IsEnabled = true;
+                menuitemValid.IsEnabled = true;
+                menuitemInValid.IsEnabled = true;
+                menuitemDel.IsEnabled = true;
+            }
+            else
+            {
+                menuitemValid.IsEnabled = true;
+                menuitemInValid.IsEnabled = true;
+            }
+
+            //Park.iggy END
+
             if (_objectType != Consts.ObjectEnum.JOBNET)
             {
                 menuItemImmediateRun.IsEnabled = false;
                 menuItemReserveRun.IsEnabled = false;
                 menuItemTestRun.IsEnabled = false;
             }
-
         }
 
         //*******************************************************************
@@ -1085,6 +1439,14 @@ namespace jp.co.ftf.jobcontroller.JobController
         private void RunJobnet(Consts.RunTypeEnum runType)
         {
             String innerJobnetId = null;
+
+            //Park.iggy Add
+            if (DadWindow.ObjectAllFlag)
+            {
+                DataRow row = ((DataRowView)dgObject.SelectedItem).Row;
+                _objectId = row["object_id"].ToString();
+            }
+
 
             DataTable dtJobnet = DBUtil.GetValidJobnetVer(_objectId);
             if (dtJobnet.Rows.Count > 0)

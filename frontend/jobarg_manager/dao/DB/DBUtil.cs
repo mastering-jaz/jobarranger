@@ -1234,31 +1234,31 @@ namespace jp.co.ftf.jobcontroller.DAO
             }
 
             String[] sql = new String[tables.Length];
-
+            //Park.iggy ADD
             int i = 0;
-            int count = 0;
+            int j = 0;
             foreach (String tableName in tables)
             {
-                sql[i] = "select * from " + tables[i] + " where " + idColumnName + "='" + objectId + "' and (";
-                count = 0;
+                j = 0;
                 foreach (DataRow row in rows)
                 {
-                    count++;
-                    sql[i] = sql[i] + "update_date=" + Convert.ToString(row["update_date"]);
-                    if (count < rows.Length)
+                    String patchSql = "select * from " + tables[i] + " where " + idColumnName + "='" + Convert.ToString(row["object_id"]) + "' and "+
+                                      "update_date=" + Convert.ToString(row["update_date"]);
+                    if (j == 0)
                     {
-                        sql[i] = sql[i] + " OR ";
+                        sql[i] = patchSql;
                     }
                     else
                     {
-                        sql[i] = sql[i] + ")";
+                        sql[i] = sql[i] + " \n UNION ALL \n ";
+                        sql[i] = sql[i] + patchSql;
                     }
-
+                    j++;
                 }
                 db.AddSelectBatch(sql[i], tableName);
                 i++;
-
             }
+            //Park.iggy END
             DataSet ds = db.ExecuteBatchQuery();
             ds.DataSetName = dsName;
             db.CloseSqlConnect();
@@ -1921,7 +1921,7 @@ namespace jp.co.ftf.jobcontroller.DAO
                     db.AddBatch(strSql);
                 }
             }
-
+            chkResult.Clear();
             db.ExecuteBatchUpdate();
             db.TransactionCommit();
             db.CloseSqlConnect();

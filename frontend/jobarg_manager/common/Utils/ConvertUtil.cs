@@ -88,6 +88,90 @@ namespace jp.co.ftf.jobcontroller.Common
             }
             return displayFlag;
         }
+
+        //Park.iggy Add
+        public static String getPasswordFromString(String str)
+        {
+            string key = "199907";
+            string enc = "1";
+            string toX16 = "";
+
+            int j;
+            int b;
+            j = 0;
+
+            for (int i = 0; i < str.Length; i++)
+            {
+                b = (str[i] ^ key[j]);
+                toX16 = "";
+                if (b < 16)
+                {
+                    toX16 = "0" + Convert.ToString(b, 16);
+                }
+                else
+                {
+                    toX16 = Convert.ToString(b, 16);
+                }
+
+                //Console.WriteLine(i + "=encode=>" + b + "==" + toX16);
+                enc = enc + toX16;
+
+                j++;
+                if (j == key.Length) j = 0;
+            }
+
+            return enc;
+        }
+
+        public static String getStringFromPassword(String password)
+        {
+            string key = "199907";
+            string dec = "";
+            int j;
+
+            j = 0;
+            for (int i = 0; i < password.Length; i++)
+            {
+                dec = dec + (char)(password[i] ^ key[j]);
+                j++;
+                if (j == key.Length) j = 0;
+            }
+            return dec;
+        }
+
+        //added by Park.iggy 2014/08/15
+        /// <summary>パスワードの復号化</summary>   
+        /// 
+        public static String getStringFromX16Password(String password)
+        {
+            string enc_code = "";
+            string de_code = "";
+            string x16 = "";
+
+            for (int kk = 0; kk < password.Length; kk++)
+            {
+                if (kk == 0)
+                {
+                    continue;
+                }
+                else if ((kk % 2) == 1)
+                {
+                    x16 = password[kk].ToString();
+                }
+                else
+                {
+                    x16 = x16 + password[kk].ToString();
+                    enc_code = enc_code + (char)Convert.ToInt32(x16, 16);
+                    x16 = "";
+                }
+
+            }
+            de_code = getStringFromPassword(enc_code);
+
+            return de_code;
+        }
+        
+        //Park.iggy END
     }
 }
 

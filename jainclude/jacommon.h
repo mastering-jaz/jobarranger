@@ -19,8 +19,8 @@
 **/
 
 /*
-** $Date:: 2015-05-01 15:13:27 +0900 #$
-** $Revision: 6951 $
+** $Date:: 2016-04-19 17:34:03 +0900 #$
+** $Revision: 7062 $
 ** $Author: sypark@FITECHLABS.CO.JP $
 **/
 
@@ -28,9 +28,9 @@
 #define JOBARG_JACOMMON_H
 
 /* version or revsion */
-#define JOBARG_VERSION          	"2.1.1"
-#define JOBARG_REVISION         	"6955"
-#define JOBARG_REVDATE			"2015-05-01"
+#define JOBARG_VERSION          	"3.0.0"
+#define JOBARG_REVISION         	"7065"
+#define JOBARG_REVDATE			"2016-04-22"
 
 /* treat unknown parameters as error */
 #define JA_CFG_STRICT			0
@@ -48,8 +48,10 @@
 #define JA_CALENDAR_ID_LEN		32 + 1
 #define JA_SCHEDULE_ID_LEN		32 + 1
 #define JA_FILTER_ID_LEN		32 + 1
-#define JA_JOBNET_NAME_LEN		64 + 1
-#define JA_JOB_NAME_LEN			64 + 1
+
+#define JA_JOBNET_NAME_LEN		96 + 1
+#define JA_JOB_NAME_LEN			96 + 1
+
 #define JA_USER_NAME_LEN		100 + 1
 #define JA_VALUE_NAME_LEN		128 + 1
 #define JA_HOST_NAME_LEN		128 + 1

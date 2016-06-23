@@ -50,6 +50,13 @@ namespace jp.co.ftf.jobcontroller.DAO
         {
             return null;
         }
+
+        //Park.iggy Add
+
+        public virtual DataTable GetEntityByObjectALL(Boolean public_flag)
+        {
+            return null;
+        }
         #endregion
     }
 }

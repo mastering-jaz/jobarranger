@@ -433,6 +433,10 @@ namespace jp.co.ftf.jobcontroller.Common
         /// <summary> ERROR_END_SETTING_001 </summary>
         public static readonly String ERROR_END_SETTING_001 = "ERROR_END_SETTING_001";
 
+        //Park.iggy ADD
+        /// <summary> ERROR_COMMON_029 </summary>
+        public static readonly String ERROR_COMMON_029 = "ERROR_COMMON_029";
+
         
         #endregion
 

@@ -396,6 +396,54 @@ namespace jp.co.ftf.jobcontroller.DAO
             return GetMaxUpdateDateEntityById(filter_id);
 
         }
+
+        //Park.iggy Add
+        public override DataTable GetEntityByObjectALL(Boolean public_flg)
+        {
+            System.Console.WriteLine("LoginSetting.Authority=>" + LoginSetting.Authority);
+            System.Console.WriteLine("public_flag=>" + public_flg);
+            int public_flag = Convert.ToInt32(public_flg);
+            bool isBelongToUSRGRP = LoginSetting.BelongToUsrgrpFlag;
+            String selectObjectAll = "SELECT * FROM ja_filter_control_table WHERE valid_flag = 1 AND public_flag = ? " +
+                                   " UNION ALL  " +
+                                   "SELECT * FROM ja_filter_control_table A " +
+                                   " WHERE A.update_date= ( SELECT MAX(update_date) FROM ja_filter_control_table B " +
+                                   "                         WHERE B.filter_id NOT IN (SELECT filter_id FROM ja_filter_control_table  " +
+                                   "                                                      WHERE valid_flag = 1 )  " +
+                                   "                           AND B.public_flag = ? AND A.filter_id = B.filter_id " +
+                                   "                           GROUP BY filter_id  " +
+                                   "                       )  ";
+            String selectObjectAllStr = "";
+            List<ComSqlParam> sqlParams = new List<ComSqlParam>();
+
+            sqlParams.Add(new ComSqlParam(DbType.String, "@public_flag", public_flag));
+            sqlParams.Add(new ComSqlParam(DbType.String, "@public_flag", public_flag));
+
+            if (!(LoginSetting.Authority == Consts.AuthorityEnum.SUPER)  && !public_flg )
+            {
+                selectObjectAllStr = "SELECT FILTER.* FROM ( ";
+                selectObjectAllStr = selectObjectAllStr + selectObjectAll;
+                selectObjectAllStr = selectObjectAllStr + " ) AS FILTER, users AS U, users_groups AS UG1, users_groups AS UG2  " +
+                                         "WHERE FILTER.user_name = U.alias  " +
+                                         "AND U.userid = UG1.userid  " +
+                                         "AND UG2.userid=? " +
+                                         "AND UG1.usrgrpid = UG2.usrgrpid  " +
+                                         "ORDER BY FILTER.filter_id ";
+
+                sqlParams.Add(new ComSqlParam(DbType.String, "@userid", LoginSetting.UserID));
+            }
+            else
+            {
+                selectObjectAllStr = "SELECT FILTER.* FROM ( ";
+                selectObjectAllStr = selectObjectAllStr + selectObjectAll;
+                selectObjectAllStr = selectObjectAllStr + " ) AS FILTER ORDER BY FILTER.filter_id ";
+            }
+
+            DataTable dt = _db.ExecuteQuery(selectObjectAllStr, sqlParams, TableName);
+
+            return dt;
+        }
+
         #endregion
     }
 }

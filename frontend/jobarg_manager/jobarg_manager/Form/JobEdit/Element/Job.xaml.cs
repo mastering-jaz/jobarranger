@@ -341,22 +341,8 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
         }
 
         /// <summary>パスワードの復号化</summary>       
-        private string Decryption(string str)
+        private string printPassWord(string str)
         {
-            //Park.iggy ADD START
-            /*
-            string key = "199907";
-            string dec = "";
-            int j;
-
-            j = 0;
-            for (int i = 0; i < str.Length; i++)
-            {
-                dec = dec + (char)(str[i] ^ key[j]);
-                j++;
-                if (j == key.Length) j = 0;
-            }
-             * */
             string dec = "******";
             //Park.iggy END 
             return dec;
@@ -625,7 +611,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                 if ((Convert.ToString(rowJob[0]["run_user_password"]).Equals(""))) {
                     password = Convert.ToString(rowJob[0]["run_user_password"]);
                 } else {
-                    password = Decryption(Convert.ToString(rowJob[0]["run_user_password"]));
+                    password = printPassWord(Convert.ToString(rowJob[0]["run_user_password"]));
                 }
 
             }

@@ -19,9 +19,9 @@
 **/
 
 /*
-** $Date:: 2014-10-17 16:00:02 +0900 #$
-** $Revision: 6528 $
-** $Author: nagata@FITECHLABS.CO.JP $
+** $Date:: 2016-03-23 17:32:59 +0900 #$
+** $Revision: 7031 $
+** $Author: sypark@FITECHLABS.CO.JP $
 **/
 
 #include "common.h"
@@ -217,10 +217,45 @@ int ja_set_value_after(const zbx_uint64_t inner_job_id,
 
     ret = SUCCEED;
     value_name_esc = DBdyn_escape_string(value_name);
+
     if (after_value == NULL) {
         after_value_esc = DBdyn_escape_string("");
     } else {
         after_value_esc = DBdyn_escape_string(after_value);
+
+        char dst[JA_STD_OUT_LEN];
+        char n1 = 0, n2 = 0;
+        int i = 0, j = 0, k = 0;
+
+        for(i=0; i<strlen(after_value_esc); i++) {
+        	if ((after_value_esc[i] & 0x80) == 0){
+        		dst[j++] = after_value_esc[i];
+        		k = 0;
+        	}else if ((after_value_esc[i] & 0xf0) == 0xe0){
+        		n1 = after_value_esc[i];
+        		k = 1;
+        	}else if (((after_value_esc[i] & 0xc0) == 0x80)
+        			&& ( 0 < k && k < 7)){
+        		if ( n1 != 0  && n2 == 0 ){
+        			n2 = after_value_esc[i];
+        			++k;
+        		}else{
+        			if(n1 != 0 ){
+        				dst[j++] = n1;
+        			}
+        			if(n2 != 0 ){
+        				dst[j++] = n2;
+        			}
+        			dst[j++] = after_value_esc[i];
+        			n1 = n2 = 0;
+        			++k;
+        		}
+
+        	}else
+        		k = 0;
+        }
+        dst[j] = '\0';
+        after_value_esc = zbx_dsprintf(NULL,"%s",dst);
     }
 
     db_ret =

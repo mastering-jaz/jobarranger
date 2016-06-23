@@ -19,8 +19,8 @@
 **/
 
 /*
-** $Date:: 2015-08-27 11:00:59 +0900 #$
-** $Revision: 6964 $
+** $Date:: 2016-04-13 14:58:32 +0900 #$
+** $Revision: 7051 $
 ** $Author: sypark@FITECHLABS.CO.JP $
 **/
 
@@ -213,6 +213,7 @@ int ja_agent_begin(ja_job_object * job)
 {
     ja_reboot_arg reboot_arg;
     char reboot_flag_file[JA_MAX_STRING_LEN];
+    int status;
     const char *__function_name = "ja_agent_begin";
 
     if (job == NULL) {
@@ -251,9 +252,23 @@ int ja_agent_begin(ja_job_object * job)
             if (ja_jobdb_insert(job) == FAIL) {
                 goto error;
             }
-            if (ja_file_create(CONFIG_REQUEST_FLAG, 1) == FAIL) {
-                zbx_snprintf(job->message, sizeof(job->message), "Can not create the file [%s]", CONFIG_REQUEST_FLAG);
-                goto error;
+            if (ja_file_getsize(CONFIG_REQUEST_FLAG) < 0 ) {
+            	if (ja_file_create(CONFIG_REQUEST_FLAG, 1) == FAIL) {
+                	zbx_snprintf(job->message, sizeof(job->message), "Can not create the file [%s]", CONFIG_REQUEST_FLAG);
+                    status = ja_jobdb_get_status(job->jobid);
+                    if(status == JA_AGENT_STATUS_BEGIN){
+                    	job->status = JA_AGENT_STATUS_CLOSE;
+                    	if(ja_jobdb_update(job) == SUCCEED)
+                    		goto error;
+                    	else{
+                    		zabbix_log(LOG_LEVEL_WARNING, "In %s() jobid[" ZBX_FS_UI64 ",] Close failed  %s", __function_name, job->jobid, job->message);
+                    		if (ja_db_execute("delete from jobs where jobid = " ZBX_FS_UI64,job->jobid) == SUCCEED )
+                    			goto error;
+                    		else
+                    			zabbix_log(LOG_LEVEL_ERR, "In %s() jobid[" ZBX_FS_UI64 ",] Delete failed  %s", __function_name, job->jobid, job->message);
+                    	}
+                    }
+            	}
             }
         } else {
             zbx_snprintf(job->message, sizeof(job->message), "Invalid job type [%s]", job->type);
@@ -281,7 +296,7 @@ int ja_agent_begin(ja_job_object * job)
     return SUCCEED;
 
   error:
-    zabbix_log(LOG_LEVEL_ERR, "In %s() %s", __function_name, job->message);
+    zabbix_log(LOG_LEVEL_ERR, "In %s() jobid[" ZBX_FS_UI64 ",] %s", __function_name, job->jobid, job->message);
     return FAIL;
 }
 
@@ -312,9 +327,9 @@ int ja_agent_run(ja_job_object * job)
     const char *__function_name = "ja_agent_run";
 
 	//Park.iggy ADD START
-	char    d_passwd[JA_MAX_STRING_LEN]; //16i”‚©‚çchar‚É•ÏX
+	char    d_passwd[JA_MAX_STRING_LEN]; //16ï¿½iï¿½ï¿½ï¿½ï¿½ï¿½ï¿½charï¿½É•ÏX
 	char    d_dec[256];
-	char    d_flag[2]="1"; 
+	char    d_flag[2]="1";
     char    d_x16[3];
     char    *d_cat="0x";
     char    d_catX16[5];
@@ -419,9 +434,9 @@ int ja_agent_run(ja_job_object * job)
 				k=0;
 				for(kk = 1; kk < strlen(d_passwd) ; kk++){
 					if((kk%2) != 0){
-						d_x16[0] = d_passwd[kk];  
+						d_x16[0] = d_passwd[kk];
 					}else{
-						d_x16[1] = d_passwd[kk];  
+						d_x16[1] = d_passwd[kk];
 						d_x16[2] = '\0';
 						zbx_snprintf(d_catX16,   sizeof(d_catX16),   "0x%s", d_x16);
 						x16toX10 = (unsigned long)strtol(d_catX16,NULL,0);
@@ -450,7 +465,7 @@ int ja_agent_run(ja_job_object * job)
             zbx_snprintf(w_passwd, sizeof(w_passwd), "%s", dec);
             zabbix_log(LOG_LEVEL_DEBUG, "[jaagent]   password (Decryption) = %s  ", w_passwd );
         }
-        
+
         mbstowcs_s(&wLen, user, sizeof(user)/2, w_user,   _TRUNCATE);
         mbstowcs_s(&wLen, pwd,  sizeof(pwd)/2,  w_passwd, _TRUNCATE);
 

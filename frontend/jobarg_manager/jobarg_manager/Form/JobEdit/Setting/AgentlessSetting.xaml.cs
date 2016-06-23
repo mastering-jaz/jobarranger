@@ -262,7 +262,10 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                 // パスワード
                 if (txtPassword.IsEnabled == true)
                 {
-                    rowIconAgentlessTbl[0]["login_password"] = txtPassword.Text;
+                    //Park.iggy Add
+                    String strLength = txtPassword.Text.Length+"|";
+
+                    rowIconAgentlessTbl[0]["login_password"] = ConvertUtil.getPasswordFromString((strLength + txtPassword.Text));
                     // rowIconAgentlessTbl[0]["login_password"] = txtPassword.Password;
                 }
                 else
@@ -941,7 +944,64 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                 txtUserName.Text = Convert.ToString(rowIconAgentless[0]["login_user"]);
 
                 // パスワード
-                txtPassword.Text = Convert.ToString(rowIconAgentless[0]["login_password"]);
+                //Park.iggy Add
+                String strPassOrg = Convert.ToString(rowIconAgentless[0]["login_password"]);
+                int len = 0;
+                int strIndex = 0;
+                String passWd = null;
+
+                if (strPassOrg != null && strPassOrg.Length > 0 && strPassOrg.Substring(0, 1).Equals("1"))
+                {
+                    try
+                    {
+                        strPassOrg = ConvertUtil.getStringFromX16Password(strPassOrg);
+                        strIndex = strPassOrg.IndexOf("|");
+                        if (strIndex == 0) throw new FormatException();
+                        len = int.Parse(strPassOrg.Substring(0, strIndex));
+                        passWd = strPassOrg.Substring(strIndex+1);
+                        if (len != passWd.Length) throw new FormatException();
+                    }
+                    catch (FormatException)
+                    {
+                        passWd = Convert.ToString(rowIconAgentless[0]["login_password"]);
+                    }
+                }
+                else passWd = strPassOrg;
+
+
+                if (_myJob.ContentItem.InnerJobId == null)
+                {
+                    DataRow[] rowJobNet = _myJob.Container.JobnetControlTable.Select("jobnet_id='" + Convert.ToString(rowJob[0]["jobnet_id"]) + "'" +
+                       " AND update_date='" + Convert.ToString(rowJob[0]["update_date"]) + "'");
+                    if (rowJobNet.Length > 0)
+                    {
+                        String objectUserName = rowJobNet[0]["user_name"].ToString();
+                        List<Decimal> objectUserGroupList = DBUtil.GetGroupIDListByAlias(objectUserName);
+
+                        if (!(LoginSetting.Authority == Consts.AuthorityEnum.SUPER) &&
+                            (Consts.ActionMode.USE == LoginSetting.Mode ||
+                            !CheckUtil.isExistGroupId(LoginSetting.GroupList, objectUserGroupList)) &&
+                            objectUserName.Length > 0)
+                        {
+                            if (passWd != null && !passWd.Equals(""))
+                            {
+                                passWd = "******";
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    if (passWd != null && !passWd.Equals(""))
+                    {
+                        passWd = "******";
+                    }
+                }
+             
+
+                txtPassword.Text = passWd;
+
+                //txtPassword.Text = Convert.ToString(rowIconAgentless[0]["login_password"]);
                 // txtPassword.Password = Convert.ToString(rowIconAgentless[0]["login_password"]);
 
                 // 公開鍵

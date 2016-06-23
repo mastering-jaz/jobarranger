@@ -85,6 +85,12 @@
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_198CA7742D03407D9C8FA01EDB9487B8"
+        "MsmSig" = "8:_UNDEFINED"
+        }
     }
     "Configurations"
     {
@@ -238,6 +244,14 @@
         {
             "LaunchCondition"
             {
+                "{A06ECF26-33A3-4562-8140-9B0E340D4F24}:_ACD0377D552848589507E7BF7BD32323"
+                {
+                "Name" = "8:.NET Framework"
+                "Message" = "8:[VSDNETMSG]"
+                "FrameworkVersion" = "8:.NETFramework,Version=v4.0,Profile=Client"
+                "AllowLaterVersions" = "11:FALSE"
+                "InstallUrl" = "8:http://go.microsoft.com/fwlink/?LinkId=131000"
+                }
             }
         }
         "File"
@@ -588,15 +602,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Job Arranger Agent"
-        "ProductCode" = "8:{4A8F3142-6DF4-4BC9-B51B-CBEB835FA124}"
-        "PackageCode" = "8:{4E32DA5D-E226-4B28-B7E7-A854CD85B69A}"
+        "ProductCode" = "8:{8D5F290D-BE2A-419D-A782-65FCE2ED07C0}"
+        "PackageCode" = "8:{1E3512BB-5293-4979-8A4C-4F4C6F634F29}"
         "UpgradeCode" = "8:{3D9752F0-9CB2-4023-9737-249CF23D1F08}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:FALSE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:2.1.1"
+        "ProductVersion" = "8:3.0.0"
         "Manufacturer" = "8:Daiwa Institute of Research Business Innovation Ltd."
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"

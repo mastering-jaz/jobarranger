@@ -926,7 +926,7 @@ static int ssh_connect(const zbx_uint64_t inner_job_id)
                  zabbix_log(LOG_LEVEL_DEBUG, "%s() keyboard-interactive authentication succeeded", __function_name);
              }
              break;
- 
+
         case JA_SES_AUTH_PUBLICKEY:
              /* public key */
              /* check the authentication methods supported */
@@ -1217,6 +1217,19 @@ static int get_agentless_info(const zbx_uint64_t inner_job_id)
     DB_ROW          row;
     char            *prompt;
     const char      *__function_name = "get_agentless_info";
+    //Park.iggy Add
+    char	d_passwd[JA_MAX_STRING_LEN];
+    char	d_dec[256];
+    char	passwd[256];
+    char   d_num[256];
+    char	*d_flag="1";
+    char	d_catX16[5];
+    char   d_x16[3];
+    char   dec[256];
+    char   *key = "199907";
+    char	*searchChar;
+    int     i,j,k,kk,x16toX10,splitLen;
+    //Park.iggy END
 
     zabbix_log(LOG_LEVEL_DEBUG, "In %s() inner_job_id: " ZBX_FS_UI64, __function_name, inner_job_id);
 
@@ -1255,8 +1268,70 @@ static int get_agentless_info(const zbx_uint64_t inner_job_id)
              }
 
              if (SUCCEED != DBis_null(row[10])) {
-                 if (FAIL == ja_cpy_value(inner_job_id, row[10], login_password)) {
-                     ja_log("JASESSION200017", 0, NULL, inner_job_id, __function_name, row[10], JOBARG_REGISTRY_NUMBER, JOBARG_SESSION_ID, inner_job_id);
+            	 //Park.iggy Add
+            	 zbx_strlcpy(d_passwd, row[10], sizeof(d_passwd));
+            	 if(d_flag[0] == d_passwd[0] && strlen(d_passwd) > 0 ) {
+            		 j=0;
+            		 k=0;
+            		 for(kk = 1; kk < strlen(d_passwd) ; kk++){
+            			 if((kk%2) != 0){
+            				 d_x16[0] = d_passwd[kk];
+            			 }else{
+            				 d_x16[1] = d_passwd[kk];
+            				 d_x16[2] = '\0';
+            				 zbx_snprintf(d_catX16,   sizeof(d_catX16),   "0x%s", d_x16);
+            				 x16toX10 = (unsigned long)strtol(d_catX16,NULL,0);
+            				 *d_x16 = '\0';
+            				 *d_catX16 = '\0';
+            				 d_dec[k] = (char)(x16toX10) ;
+            				 dec[k] = (char)(d_dec[k]^key[j]);
+            				 j++;
+            				 k++;
+            				 if (j == strlen(key)) j =0;
+   		 				}
+            		 }
+
+            		 searchChar = strchr(dec,'|');
+            		 if ( searchChar == NULL )
+            			 zbx_strlcpy(passwd, d_passwd, sizeof(passwd));
+            	 	 else{
+            	 		 splitLen = strlen(dec) - strlen(searchChar) ;
+            	 		 for(i=0; i < splitLen;i++){
+            	 			d_num[i] = dec[i];
+            	 		 }
+            	 		 d_num[i] = '\0';
+
+            	 		 for(i=0; i < strlen(d_num); i++){
+            	 			 if ( !isdigit(d_num[i])){
+            	 				 i = 0;
+            	 			     break;
+            	 			 }
+            	 		 }
+            	 		 if( i != 0){
+            	 			 if ( atoi(d_num) == (strlen(searchChar)-1)) {
+            	 				 for(i=0; i < atoi(d_num) ;i++ ){
+            	 					passwd[i] = searchChar[i+1];
+            	 				 }
+            	 				 passwd[i] = '\0';
+            	 			 }else{
+            	 				 i = 0;
+            	 			 }
+            	 		 }
+            	 		 if ( i == 0 )
+            	 			 zbx_strlcpy(passwd, d_passwd, sizeof(passwd));
+
+            	 	 }
+
+            	 }else{
+            		 zbx_strlcpy(passwd, d_passwd, sizeof(passwd));
+            	 }
+            	 zabbix_log(LOG_LEVEL_DEBUG,
+            	                "SSH passwd[%s]: , d_passwd:[%s]", passwd, d_passwd);
+            	 //Park.iggy END
+                 //if (FAIL == ja_cpy_value(inner_job_id, row[10], login_password)) {
+            	 if (FAIL == ja_cpy_value(inner_job_id, passwd, login_password)) {
+                     //ja_log("JASESSION200017", 0, NULL, inner_job_id, __function_name, row[10], JOBARG_REGISTRY_NUMBER, JOBARG_SESSION_ID, inner_job_id);
+            		 ja_log("JASESSION200017", 0, NULL, inner_job_id, __function_name, passwd, JOBARG_REGISTRY_NUMBER, JOBARG_SESSION_ID, inner_job_id);
                      DBfree_result(result);
                      return FAIL;
                  }

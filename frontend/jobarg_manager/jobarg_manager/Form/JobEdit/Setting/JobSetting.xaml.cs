@@ -473,12 +473,40 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                     string passwd = Convert.ToString(rowJob[0]["run_user_password"]).Substring(0, 1);
                     if (passwd.CompareTo("1") == 0)
                     {
-                        txtRunUserPW.Text = DecryptionX16(Convert.ToString(rowJob[0]["run_user_password"]));
+                        txtRunUserPW.Text = ConvertUtil.getStringFromX16Password(Convert.ToString(rowJob[0]["run_user_password"]));
                     }
                     else
                     {
-                        txtRunUserPW.Text = Decryption(Convert.ToString(rowJob[0]["run_user_password"]));
+                        txtRunUserPW.Text = ConvertUtil.getStringFromPassword(Convert.ToString(rowJob[0]["run_user_password"]));
                     }
+
+                    if (_myJob.ContentItem.InnerJobId == null)
+                    {
+                        DataRow[] rowJobNet = _myJob.Container.JobnetControlTable.Select("jobnet_id='" + Convert.ToString(rowJob[0]["jobnet_id"]) + "'" +
+                            " AND update_date='" + Convert.ToString(rowJob[0]["update_date"]) + "'");
+                        if (rowJobNet.Length > 0)
+                        {
+                            String objectUserName = rowJobNet[0]["user_name"].ToString();
+                            List<Decimal> objectUserGroupList = DBUtil.GetGroupIDListByAlias(objectUserName);
+
+                            if (!(LoginSetting.Authority == Consts.AuthorityEnum.SUPER) &&
+                            (Consts.ActionMode.USE == LoginSetting.Mode ||
+                            !CheckUtil.isExistGroupId(LoginSetting.GroupList, objectUserGroupList)) &&
+                            objectUserName.Length > 0)
+                            {
+
+                                txtRunUserPW.Text = "******";
+                            }
+                        }
+
+                        
+                    }
+                    else
+                    {
+                        txtRunUserPW.Text = "******";
+                    }
+                   
+
                     //Park.iggy 修正 END
                     
                     
@@ -1112,7 +1140,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                 else
                 {
                     rowJobCon[0]["run_user"] = newRunUser;
-                    rowJobCon[0]["run_user_password"] = Encryption(newRunUserPW);
+                    rowJobCon[0]["run_user_password"] = ConvertUtil.getPasswordFromString(newRunUserPW);
                 }
 
             }
@@ -1278,107 +1306,6 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             this.Close();
         }
 
-        //added by YAMA 2014/08/15
-        /// <summary>パスワードの暗号化</summary>       
-        private string Encryption(string str)
-        {
-            /*
-             * Park.iggy コマンド 2015/08/21 #1967
-            string key = "199907";
-            string enc = "";
-            int j;
-
-            j = 0;
-            for (int i = 0; i < str.Length; i++)
-            {
-                enc = enc + (char)(str[i] ^ key[j]);
-                j++;
-                if (j == key.Length) j = 0;
-            }
-            */
-
-            string key = "199907";
-            string enc = "1";
-            string toX16 = "";
-
-            int j;
-            int b;
-            j = 0;
-
-            for (int i = 0; i < str.Length; i++)
-            {
-                b = (str[i] ^ key[j]);
-                toX16 = "";
-                if (b < 16)
-                {
-                    toX16 = "0" + Convert.ToString(b, 16);
-                }
-                else
-                {
-                    toX16 = Convert.ToString(b, 16);
-                }
-
-                //Console.WriteLine(i + "=encode=>" + b + "==" + toX16);
-                enc = enc + toX16;
-
-                j++;
-                if (j == key.Length) j = 0;
-            }
-
-            return enc;
-
-        }
-
-        //added by YAMA 2014/08/15
-        /// <summary>パスワードの復号化</summary>       
-        private string Decryption(string str)
-        {
-            string key = "199907";
-            string dec = "";
-            int j;
-
-            j = 0;
-            for (int i = 0; i < str.Length; i++)
-            {
-                dec = dec + (char)(str[i] ^ key[j]);
-                j++;
-                if (j == key.Length) j = 0;
-            }
-            return dec;
-        }
-
-        //added by Park.iggy 2014/08/15
-        /// <summary>パスワードの復号化</summary>   
-        /// 
-        private string DecryptionX16(string str)
-        {
-            string enc_code = "";
-            string de_code = "";
-            string x16 = "";
-
-            //Console.WriteLine(str + "=str=x16==>");
-
-            for(int kk = 0; kk < str.Length ; kk++){
-                if(kk == 0){
-                    continue;
-                }
-                else if ((kk % 2) == 1)
-                {
-                    x16 = str[kk].ToString();
-                }else{
-                    x16 = x16 + str[kk].ToString();
-                    //Console.WriteLine(kk + "=decode=x16==>" + x16);
-                    enc_code = enc_code + (char)Convert.ToInt32(x16, 16);
-                    //enc_code = enc_code + Convert.ToInt32(x16, 16);
-                    x16 = "";
-                }
-
-            }
-            //Console.WriteLine(enc_code + "=decode+==->>>"+x16);
-            de_code = Decryption(enc_code);
-
-            return de_code;
-        }
 
         #endregion
     }

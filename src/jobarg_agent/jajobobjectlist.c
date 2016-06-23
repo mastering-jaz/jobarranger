@@ -19,9 +19,9 @@
 **/
 
 /*
-** $Date:: 2014-10-17 16:00:02 +0900 #$
-** $Revision: 6528 $
-** $Author: nagata@FITECHLABS.CO.JP $
+** $Date:: 2016-04-15 14:38:43 +0900 #$
+** $Revision: 7058 $
+** $Author: sypark@FITECHLABS.CO.JP $
 **/
 
 #include "common.h"
@@ -182,7 +182,7 @@ int ja_job_object_list_add(ja_job_object_list * jobs)
  ******************************************************************************/
 int ja_job_object_list_executive(ja_job_object_list * jobs)
 {
-    int ret;
+    int ret,cnt;
     ja_job_object *job;
     ja_job_object_list *pre, *cur;
     const char *__function_name = "ja_job_object_list_executive";
@@ -197,9 +197,18 @@ int ja_job_object_list_executive(ja_job_object_list * jobs)
 
     pre = jobs;
     cur = pre->next;
+    cnt = 0;
     while (cur != NULL) {
-        job = cur->data;
+
+    	job = cur->data;
         if (job != NULL) {
+
+        	if(cnt > 2){
+        		zbx_sleep(1);
+        	    cnt=0;
+        	}
+        	cnt++;
+
             switch (job->status) {
             case JA_AGENT_STATUS_BEGIN:
                 zabbix_log(LOG_LEVEL_INFORMATION,

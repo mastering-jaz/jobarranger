@@ -254,6 +254,9 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.FilterEdit
             // 開始ログ
             base.WriteStartLog("regist_Click", Consts.PROCESS_001);
 
+            //Park.iggy Add
+            ParantWindow.ObjectAllFlag = false;
+
             // 入力チェック 
             if (!InputCheck())
                 return;
@@ -349,6 +352,9 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.FilterEdit
         //*******************************************************************
         public override void ResetTree(String objectId)
         {
+            //Park.iggy Add
+            ParantWindow.ObjectAllFlag = false;
+
             if (objectId == null && (_editType == Consts.EditType.Modify || _editType == Consts.EditType.READ))
                 objectId = ((TreeViewItem)ParantWindow.treeView1.SelectedItem).Header.ToString();
 

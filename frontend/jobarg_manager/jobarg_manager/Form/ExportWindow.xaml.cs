@@ -151,11 +151,37 @@ namespace jp.co.ftf.jobcontroller.JobController
             // 入力チェック 
             if (!InputCheck())
                 return;
+            System.IO.StreamWriter file = null;
             try
             {
-                System.IO.StreamWriter file =
+                file =
                     new System.IO.StreamWriter(textBox_fileName.Text, false);
-                DataSet ds = DBUtil.Export(_objectId, _objectType, _rows);
+                //DataSet ds = DBUtil.Export(_objectId, _objectType, _rows);//org
+                
+                if (_rows != null && _rows.Length > 1)
+                {
+                    for (int i = 0; i < _rows.Length; i++)
+                    {
+                        DataRow row = _rows[i];
+                        _objectId = row["object_id"].ToString();
+                    }
+                    DataSet ds = DBUtil.Export(_objectId, _objectType, _rows);
+                    ds.WriteXml(file);
+
+                    
+                }
+                else
+                {
+                    if (_objectId == null && _rows != null)
+                    {
+                        DataRow row = _rows[0];
+                        _objectId = row["object_id"].ToString();
+                    }
+
+                    DataSet ds = DBUtil.Export(_objectId, _objectType, _rows);
+                    ds.WriteXml(file);
+                }
+                /* org
                 ds.WriteXml(file);
                 file.Close();
                 this.Close();
@@ -164,6 +190,8 @@ namespace jp.co.ftf.jobcontroller.JobController
                 System.IO.DirectoryInfo dirInfo = dirInfoBar.Parent;
 
                 Consts.EXPORT_PATH = dirInfo.FullName;
+                 
+                */
             }
             catch (ArgumentException ex)
             {
@@ -188,6 +216,16 @@ namespace jp.co.ftf.jobcontroller.JobController
             catch (Exception ex)
             {
                 CommonDialog.ShowErrorDialogFromMessage(ex.Message);
+            }
+            finally
+            {
+                file.Close();
+                this.Close();
+
+                System.IO.DirectoryInfo dirInfoBar = new System.IO.DirectoryInfo(textBox_fileName.Text);
+                System.IO.DirectoryInfo dirInfo = dirInfoBar.Parent;
+
+                Consts.EXPORT_PATH = dirInfo.FullName;
             }
             // 終了ログ
             base.WriteEndLog("ok_Click", Consts.PROCESS_012);

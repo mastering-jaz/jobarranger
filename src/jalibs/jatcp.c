@@ -19,9 +19,9 @@
 **/
 
 /*
-** $Date:: 2014-10-17 16:00:02 +0900 #$
-** $Revision: 6528 $
-** $Author: nagata@FITECHLABS.CO.JP $
+** $Date:: 2016-02-22 10:20:50 +0900 #$
+** $Revision: 6997 $
+** $Author: sypark@FITECHLABS.CO.JP $
 **/
 
 #include <json.h>
@@ -144,17 +144,35 @@ int ja_tcp_send_to(zbx_sock_t * s, ja_job_object * job, int timeout)
  ******************************************************************************/
 int ja_tcp_recv_to(zbx_sock_t * s, ja_job_object * job, int timeout)
 {
-    int ret;
+    int ret, cnt=0;
     char *data;
     const char *__function_name = "ja_tcp_recv_to";
 
     zabbix_log(LOG_LEVEL_DEBUG, "In %s()", __function_name);
+    // 2016/01/07 Park.iggy ADD
+    /* ORG
     ret = zbx_tcp_recv_to(s, &data, timeout);
     if (ret == FAIL) {
         zbx_snprintf(job->message, sizeof(job->message), "%s",
                      zbx_tcp_strerror());
         goto error;
     }
+    */
+
+    while((ret = zbx_tcp_recv_to(s, &data, timeout+15)) == FAIL){
+    	if(cnt >= 1)
+    		break;
+    	cnt++;
+    }
+
+    if (ret == FAIL) {
+    	zbx_snprintf(job->message, sizeof(job->message), "%s",
+                     zbx_tcp_strerror());
+        goto error;
+    }
+    //Park.iggy END
+
+
     zabbix_log(LOG_LEVEL_DEBUG, "In %s() %s", __function_name, data);
     if (strlen(data) == 0) {
         zbx_snprintf(job->message, sizeof(job->message),
