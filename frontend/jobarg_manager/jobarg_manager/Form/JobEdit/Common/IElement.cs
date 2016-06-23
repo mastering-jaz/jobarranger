@@ -1,6 +1,7 @@
 ﻿/*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -151,6 +152,12 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
         //added by YAMA 2014/07/01
         /// <summary>文字色をセット</summary>
         void SetStatusCharacterColor(SolidColorBrush color);
+
+        /// <summary>ToolTipをセット</summary>
+        void SetToolTip();
+
+        /// <summary>ToolTipをリセット</summary>
+        void ResetToolTip(string toolTip);
 
         //Point GetHotspot(ConnectType hotspotType);
 

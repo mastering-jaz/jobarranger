@@ -1,6 +1,7 @@
 dnl
 dnl Job Arranger for ZABBIX
 dnl Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+dnl Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 dnl
 dnl This program is free software; you can redistribute it and/or modify
 dnl it under the terms of the GNU General Public License as published by
@@ -19,7 +20,7 @@ dnl
 
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT(jobarranger, 2.0.1)
+AC_INIT(jobarranger, 2.1.0)
 AC_CONFIG_SRCDIR(src/jobarg_server/server.c)
 AM_INIT_AUTOMAKE([tar-pax])
 
@@ -1058,7 +1059,7 @@ if test "x$server" = "xyes"; then
 	SERVER_LDFLAGS="${SERVER_LDFLAGS} ${DB_LDFLAGS}"
 	SERVER_LIBS="${SERVER_LIBS} ${DB_LIBS}"
 
-	dnl Check for LIBSSH2 [by default - yes] at least of version 1.0.0.
+	dnl Check for libssh2 [by default - yes] at least of version 1.0.0.
 	LIBSSH2_CHECK_CONFIG()
 	if test "x$found_ssh2" != "xyes"; then
 		AC_MSG_ERROR([SSH2 library not found])
@@ -1082,7 +1083,7 @@ if test "x$found_iconv" != "xyes"; then
 	AC_MSG_ERROR([Unable to use iconv (libiconv check failed)])
 fi
 
-dnl Checking for JSON-C support
+dnl Checking for JSON-C [by default - yes]
 LIBJSON_CHECK_CONFIG()
 if test "x$found_json" = "xyes"; then
     AC_MSG_RESULT([yes])
@@ -1090,9 +1091,17 @@ else
     AC_MSG_ERROR([JSON-C library not found])
 fi
 
-CFLAGS="$CFLAGS $ICONV_CFLAGS ${JSON_CPPFLAGS}"
-LDFLAGS="$LDFLAGS $ICONV_LDFLAGS ${JSON_LDFLAGS}"
-LIBS="$LIBS $ICONV_LIBS /usr/local/lib/libtar.a ${JSON_LIBS}"
+dnl Checking for libtar [by default - yes]
+LIBTAR_CHECK_CONFIG()
+if test "x$found_libtar" = "xyes"; then
+    AC_MSG_RESULT([yes])
+else
+    AC_MSG_ERROR([LIBTAR library not found])
+fi
+
+CFLAGS="$CFLAGS $ICONV_CFLAGS ${JSON_CPPFLAGS} ${LIBTAR_CPPFLAGS}"
+LDFLAGS="$LDFLAGS $ICONV_LDFLAGS ${JSON_LDFLAGS} ${LIBTAR_LDFLAGS}"
+LIBS="$LIBS $ICONV_LIBS ${JSON_LIBS} ${LIBTAR_LIBS}"
 
 RANLIB="ranlib"
 AC_SUBST(RANLIB)
@@ -1170,10 +1179,6 @@ AC_OUTPUT([
 	src/libs/zbxself/Makefile
 	src/jalibs/Makefile
 	src/jobarg_command/Makefile
-	src/jobarg_extjob/Makefile
-	src/jobarg_extjob/jacmdsleep/Makefile
-	src/jobarg_extjob/jacmdtime/Makefile
-	src/jobarg_extjob/jacmdweek/Makefile
 	src/jobarg_exec/Makefile
 	src/jobarg_get/Makefile
 	src/jobarg_release/Makefile
@@ -1188,6 +1193,7 @@ AC_OUTPUT([
 	src/jobarg_server/jarun/Makefile
 	src/jobarg_server/jajob/Makefile
 	src/jobarg_server/jatrapper/Makefile
+	src/jobarg_server/jamsgsnd/Makefile
 	src/jobarg_server/jaselfmon/Makefile
 	])
 

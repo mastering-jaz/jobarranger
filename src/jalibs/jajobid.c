@@ -1,6 +1,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -28,7 +29,52 @@
 #include "db.h"
 
 #include "jacommon.h"
+#include "jajobid.h"
 
+
+/******************************************************************************
+ *                                                                            *
+ * Function: ja_get_icon_info                                                 *
+ *                                                                            *
+ * Purpose: get the execution user name and job id and the main jobnet id     *
+ *                                                                            *
+ * Parameters: inner_job_id (in)  - inner job id                              *
+ *             icon         (out) - icon information                          *
+ *                                                                            *
+ * Return value: SUCCEED - normal end                                         *
+ *                                                                            *
+ * Comments:                                                                  *
+ *                                                                            *
+ ******************************************************************************/
+int ja_get_icon_info(zbx_uint64_t inner_job_id, ja_icon_info_t *icon)
+{
+    DB_RESULT    result;
+    DB_ROW       row;
+    const char   *__function_name = "ja_get_icon_info";
+
+    zabbix_log(LOG_LEVEL_DEBUG, "In %s() inner_job_id: " ZBX_FS_UI64, __function_name, inner_job_id);
+
+    icon->main_jobnet_id[0]      = '\0';
+    icon->execution_user_name[0] = '\0';
+    icon->job_id[0]              = '\0';
+
+    /* main jobnet id and user name get */
+    result = DBselect("select a.jobnet_id, a.execution_user_name from ja_run_jobnet_table a, ja_run_job_table b"
+                      " where a.inner_jobnet_id = b.inner_jobnet_main_id and b.inner_job_id = " ZBX_FS_UI64,
+                      inner_job_id);
+
+    if (NULL != (row = DBfetch(result))) {
+        zbx_strlcpy(icon->main_jobnet_id,      row[0], sizeof(icon->main_jobnet_id));
+        zbx_strlcpy(icon->execution_user_name, row[1], sizeof(icon->execution_user_name));
+    }
+    DBfree_result(result);
+
+    /* job id get */
+
+    zbx_strlcpy(icon->job_id, ja_get_jobid(inner_job_id), sizeof(icon->job_id));
+
+    return SUCCEED;
+}
 
 /******************************************************************************
  *                                                                            *

@@ -1,6 +1,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -18,8 +19,8 @@
 **/
 
 /*
-** $Date:: 2013-12-06 15:18:05 +0900 #$
-** $Revision: 5530 $
+** $Date:: 2014-10-17 16:00:02 +0900 #$
+** $Revision: 6528 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -33,6 +34,7 @@
 #include "jastatus.h"
 #include "jaflow.h"
 #include "jalog.h"
+#include "jajoblog.h"
 
 /******************************************************************************
  *                                                                            *
@@ -70,11 +72,8 @@ int jarun_skip(const zbx_uint64_t inner_job_id,
         || job_type == JA_JOB_TYPE_L) {
         ja_log("JARUNSKIP200001", inner_jobnet_id, NULL, inner_job_id,
                __function_name, job_type, inner_job_id);
-        return ja_set_runerr(inner_job_id);
+        return ja_set_runerr(inner_job_id, 2);
     }
-    ja_set_value_after(inner_job_id, inner_jobnet_id, "JOB_EXIT_CD", "");
-    ja_set_value_after(inner_job_id, inner_jobnet_id, "STD_OUT", "");
-    ja_set_value_after(inner_job_id, inner_jobnet_id, "STD_ERR", "");
-    ja_set_value_after(inner_job_id, inner_jobnet_id, "LAST_STATUS", "");
-    return ja_flow(inner_job_id, JA_FLOW_TYPE_NORMAL);
+
+    return ja_flow(inner_job_id, JA_FLOW_TYPE_NORMAL, 1);
 }

@@ -1,6 +1,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -18,18 +19,19 @@
 **/
 
 /*
-** $Date:: 2014-02-21 16:04:34 +0900 #$
-** $Revision: 5810 $
+** $Date:: 2014-10-17 16:00:02 +0900 #$
+** $Revision: 6528 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
-#include <json/json.h>
+#include <json.h>
 #include "common.h"
 #include "comms.h"
 #include "log.h"
 #include "db.h"
 
 #include "jacommon.h"
+#include "jalog.h"
 #include "jastatus.h"
 #include "javalue.h"
 #include "jaflow.h"
@@ -95,27 +97,27 @@ int jarun_icon_fcopy(const zbx_uint64_t inner_job_id, const int method)
             ja_log("JARUNICONFCOPY200004", 0, NULL, inner_job_id,
                    __function_name, row[6], inner_job_id);
             DBfree_result(result);
-            return ja_set_runerr(inner_job_id);
+            return ja_set_runerr(inner_job_id, 2);
         }
 
         if (ja_cpy_value(inner_job_id, row[7], from_file_name) == FAIL) {
             ja_log("JARUNICONFCOPY200004", 0, NULL, inner_job_id,
                    __function_name, row[7], inner_job_id);
             DBfree_result(result);
-            return ja_set_runerr(inner_job_id);
+            return ja_set_runerr(inner_job_id, 2);
         }
 
         if (ja_cpy_value(inner_job_id, row[9], to_directory) == FAIL) {
             ja_log("JARUNICONFCOPY200004", 0, NULL, inner_job_id,
                    __function_name, row[9], inner_job_id);
             DBfree_result(result);
-            return ja_set_runerr(inner_job_id);
+            return ja_set_runerr(inner_job_id, 2);
         }
     } else {
         ja_log("JARUNICONFCOPY200001", 0, NULL, inner_job_id,
                __function_name, inner_job_id);
         DBfree_result(result);
-        return ja_set_runerr(inner_job_id);
+        return ja_set_runerr(inner_job_id, 2);
     }
     DBfree_result(result);
 
@@ -124,14 +126,14 @@ int jarun_icon_fcopy(const zbx_uint64_t inner_job_id, const int method)
          from_host) == FAIL) {
         ja_log("JARUNICONFCOPY200005", 0, NULL, inner_job_id,
                __function_name, from_host_name, from_host_flag, inner_job_id);
-        return ja_set_runerr(inner_job_id);
+        return ja_set_runerr(inner_job_id, 2);
     }
 
     if (ja_host_getname(inner_job_id, to_host_flag, to_host_name, to_host)
         == FAIL) {
         ja_log("JARUNICONFCOPY200006", 0, NULL, inner_job_id,
                __function_name, to_host_name, to_host_flag, inner_job_id);
-        return ja_set_runerr(inner_job_id);
+        return ja_set_runerr(inner_job_id, 2);
     }
 
     if (ja_host_lockinfo(from_host) == SUCCEED) {
@@ -151,7 +153,7 @@ int jarun_icon_fcopy(const zbx_uint64_t inner_job_id, const int method)
     if (pid == -1) {
         ja_log("JARUNICONFCOPY200002", 0, NULL, inner_job_id,
                __function_name, inner_job_id);
-        return ja_set_runerr(inner_job_id);
+        return ja_set_runerr(inner_job_id, 2);
     } else if (pid != 0) {
         waitpid(pid, NULL, WNOHANG);
         return SUCCEED;
@@ -257,7 +259,7 @@ int jarun_icon_fcopy(const zbx_uint64_t inner_job_id, const int method)
         zbx_tcp_close(&sock_to);
     DBconnect(ZBX_DB_CONNECT_ONCE);
     if (ret == SUCCEED) {
-        ja_flow(inner_job_id, JA_FLOW_TYPE_NORMAL);
+        ja_flow(inner_job_id, JA_FLOW_TYPE_NORMAL, 1);
     } else {
         if (strlen(errmsg) == 0) {
             zbx_snprintf(errmsg, sizeof(errmsg), "%s", job_res.message);
@@ -265,7 +267,7 @@ int jarun_icon_fcopy(const zbx_uint64_t inner_job_id, const int method)
         if (msg_skip == 0) {
             ja_log("JARUNICONFCOPY200003", 0, NULL, inner_job_id, __function_name, errmsg, inner_job_id);
         }
-        ja_set_runerr(inner_job_id);
+        ja_set_runerr(inner_job_id, 2);
     }
     DBclose();
     zabbix_log(LOG_LEVEL_DEBUG, "In %s() END. inner_job_id: " ZBX_FS_UI64,

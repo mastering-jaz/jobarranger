@@ -1,6 +1,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -18,8 +19,8 @@
 **/
 
 /*
-** $Date:: 2014-02-26 10:24:08 +0900 #$
-** $Revision: 5821 $
+** $Date:: 2014-12-01 11:21:04 +0900 #$
+** $Revision: 6762 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -28,6 +29,7 @@
 #include "db.h"
 
 #include "jacommon.h"
+#include "jalog.h"
 #include "javalue.h"
 #include "jastatus.h"
 #include "jaflow.h"
@@ -83,9 +85,10 @@ int ja_flow_set_status(const zbx_uint64_t start_inner_job_id,
 
     upd_status = JA_JOB_STATUS_BEGIN;
     // reset job status 
-    if (status == JA_JOB_STATUS_END) {
-        if (test_flag == 1)
+    if (status == JA_JOB_STATUS_END || status == JA_JOB_STATUS_RUNERR) {
+        if (test_flag == JA_JOB_TEST_FLAG_ON) {
             return SUCCEED;
+        }
         // can not reset end icon status
         if (job_type == JA_JOB_TYPE_END) {
             ja_log("JAFLOW300001", 0, NULL, start_inner_job_id,
@@ -102,12 +105,17 @@ int ja_flow_set_status(const zbx_uint64_t start_inner_job_id,
         if (job_type == JA_JOB_TYPE_IFEND || job_type == JA_JOB_TYPE_L) {
             upd_status = JA_JOB_STATUS_READY;
         } else {
-            if (boot_count == end_count)
+            if (boot_count <= end_count) {
                 upd_status = JA_JOB_STATUS_READY;
-            else
+            }
+            else {
                 upd_status = JA_JOB_STATUS_BEGIN;
+            }
         }
     } else {
+        if (test_flag == JA_JOB_TEST_FLAG_ON) {
+            return SUCCEED;
+        }
         ja_log("JAFLOW200002", 0, NULL, start_inner_job_id,
                __function_name, end_inner_job_id, status);
         return ja_set_enderr(start_inner_job_id, 1);
@@ -164,7 +172,7 @@ int ja_flow_set_status(const zbx_uint64_t start_inner_job_id,
  * Comments:                                                                  *
  *                                                                            *
  ******************************************************************************/
-int ja_flow(const zbx_uint64_t inner_job_id, const int type)
+int ja_flow(const zbx_uint64_t inner_job_id, const int type, int msg_flag)
 {
     zbx_uint64_t inner_jobnet_id, end_inner_job_id;
     int flows, flow_type, jobnet_status;
@@ -199,9 +207,9 @@ int ja_flow(const zbx_uint64_t inner_job_id, const int type)
             jobnet_status = ja_get_status_jobnet(inner_jobnet_id);
             if (jobnet_status != JA_JOBNET_STATUS_RUN
                 && jobnet_status != JA_JOBNET_STATUS_RUNERR) {
-                ja_log("JAFLOW300002", inner_jobnet_id, NULL, inner_job_id,
+                ja_log("JAFLOW200005", inner_jobnet_id, NULL, inner_job_id,
                        __function_name, jobnet_status, inner_jobnet_id);
-                break;
+                return ja_set_runerr(inner_job_id, -99);
             }
         }
         if (flow_type == type
@@ -221,7 +229,7 @@ int ja_flow(const zbx_uint64_t inner_job_id, const int type)
                __function_name, inner_job_id);
         return ja_set_enderr(inner_job_id, 1);
     } else {
-        return ja_set_end(inner_job_id);
+        return ja_set_end(inner_job_id, msg_flag);
     }
 
     return SUCCEED;

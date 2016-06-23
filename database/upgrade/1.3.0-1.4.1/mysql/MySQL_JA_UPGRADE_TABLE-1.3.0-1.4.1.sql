@@ -2,6 +2,7 @@
 -- Job Arranger upgrade table SQL for MySQL (Ver 1.3.0 -> 1.4.0)  - 2013/10/17 -
 
 -- Copyright (C) 2012-2013 FitechForce, Inc. All Rights Reserved.
+-- Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 
 
 ALTER TABLE `ja_run_jobnet_summary_table` ADD COLUMN `execution_user_name` varchar(100) DEFAULT '' NOT NULL;

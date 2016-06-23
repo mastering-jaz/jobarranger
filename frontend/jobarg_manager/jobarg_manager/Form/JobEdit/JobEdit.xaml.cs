@@ -1,6 +1,7 @@
 ﻿/*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -1105,6 +1106,9 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                 room.SetValue(Canvas.LeftProperty, Convert.ToDouble(row["point_x"]));
                 // Y位置 
                 room.SetValue(Canvas.TopProperty, Convert.ToDouble(row["point_y"]));
+
+                // ToolTip設定
+                room.ContentItem.SetToolTip();
 
                 // 権限が運用の場合 
                 if (Consts.ActionMode.USE == LoginSetting.Mode || _editType == Consts.EditType.READ)

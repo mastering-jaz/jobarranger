@@ -1,6 +1,7 @@
 ﻿/*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -16,6 +17,9 @@
 ** along with this program; if not, write to the Free Software
 ** Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 **/
+using System;
+using System.Data;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -445,7 +449,106 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             }
         }
 
-        #endregion
+        /// <summary>ToolTip表示内容設定</summary>/// 
+        public void SetToolTip(){
+            StringBuilder sbHostName = new StringBuilder();
+            StringBuilder sbRebootMode = new StringBuilder();
+            StringBuilder sbWaitTime = new StringBuilder();
+            StringBuilder sbTimeOut = new StringBuilder();
+            string forceStr = Properties.Resources.tooltip_flag_off;
 
+            StringBuilder sb = new StringBuilder();
+            sb.Append(Properties.Resources.job_id_label_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(_jobId);
+            sb.Append("\n");
+            sb.Append(Properties.Resources.job_name_label_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(_jobName);
+
+            DataRow[] rowIconReboot;
+            if (InnerJobId == null) {
+                rowIconReboot = _container.IconRebootTable.Select("job_id='" + _jobId + "'");
+            } else {
+                rowIconReboot = _container.IconRebootTable.Select("inner_job_id=" + InnerJobId);
+            }
+            if (rowIconReboot != null && rowIconReboot.Length > 0){
+                string hostFlag = Convert.ToString(rowIconReboot[0]["host_flag"]);
+                string hostName = Convert.ToString(rowIconReboot[0]["host_name"]);
+                if ("1".Equals(hostFlag)) {
+                    sbHostName.Append("\n");
+                    sbHostName.Append("  ");
+                    sbHostName.Append(Properties.Resources.value_name_label_text);
+                    if (!LoginSetting.Lang.StartsWith("ja_")) sbHostName.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+                    sbHostName.Append(hostName);
+                } else {
+                    sbHostName.Append("\n");
+                    sbHostName.Append("  ");
+                    sbHostName.Append(Properties.Resources.host_name_label_text);
+                    if (!LoginSetting.Lang.StartsWith("ja_")) sbHostName.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+                    sbHostName.Append(hostName);
+                }
+                string rebootMode = Convert.ToString(rowIconReboot[0]["reboot_mode_flag"]);
+
+                if ("1".Equals(rebootMode))
+                {
+                    //added by YAMA 2014/12/04
+                    //sbRebootMode.Append("\n");
+                    //sbRebootMode.Append("  ");
+                    sbRebootMode.Append(Properties.Resources.waiting_reboot_label_text);
+                }
+                else
+                {
+                    //added by YAMA 2014/12/04
+                    //sbRebootMode.Append("\n");
+                    //sbRebootMode.Append("  ");
+                    sbRebootMode.Append(Properties.Resources.force_reboot_label_text);
+                }
+                string waitTime = Convert.ToString(rowIconReboot[0]["reboot_wait_time"]);
+                sbWaitTime.Append(waitTime);
+
+                string timeOut = Convert.ToString(rowIconReboot[0]["timeout"]);
+                if (!LoginSetting.Lang.StartsWith("ja_")) sbTimeOut.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+                sbTimeOut.Append(timeOut);
+
+                DataRow[] rowJob = _container.JobControlTable.Select("job_id='" + _jobId + "'");
+                string forceFlag = Convert.ToString(rowJob[0]["force_flag"]);
+                if ("1".Equals(forceFlag)) {
+                    forceStr = Properties.Resources.tooltip_flag_on;
+                }
+            }
+            sb.Append("\n");
+            sb.Append(Properties.Resources.host_label_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(sbHostName.ToString());
+            sb.Append("\n");
+
+            //added by YAMA 2014/12/04
+            sb.Append(Properties.Resources.process_mode_label_textToolTip);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            
+            sb.Append(sbRebootMode.ToString());
+            sb.Append("\n");
+            sb.Append(Properties.Resources.wait_time_label_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(sbWaitTime.ToString());
+            sb.Append("\n");
+            sb.Append(Properties.Resources.timeout_label_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(sbTimeOut.ToString());
+            sb.Append("\n");
+            sb.Append(Properties.Resources.tooltip_force_label_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(forceStr);
+
+            picToolTip.ToolTip = sb.ToString();
+        }
+
+        /// <summary>ToolTip表示内容リセット</summary>///
+        public void ResetToolTip(string toolTip)
+        {
+            picToolTip.ToolTip = toolTip;
+        }
+        #endregion
     }
 }

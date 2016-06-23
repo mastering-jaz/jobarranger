@@ -1,6 +1,7 @@
 ﻿/*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -62,7 +63,11 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
         private int jobnetViewSpan = 0;
 
         private DispatcherTimer dispatcherTimer;
-        
+
+        /* added by YAMA 2014/12/09    V2.1.0 No23 対応 */
+        /// <summary> エラーダイアログを表示するか </summary>
+        private bool _isDb;    // true：表示する
+
         #endregion
 
         #region コンストラクタ
@@ -79,7 +84,6 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
             dispatcherTimer = new DispatcherTimer(DispatcherPriority.Normal);
             dispatcherTimer.Tick += new EventHandler(refresh);
             dispatcherTimer.Start();
-
             _db.CreateSqlConnect();
             runJobnetSummaryDAO = new RunJobnetSummaryDAO(_db);
             hideJobnetInnerIdList = new List<decimal>();
@@ -88,6 +92,10 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
             //jobnetLoadSpan = Convert.ToInt32(DBUtil.GetParameterVelue("JOBNET_LOAD_SPAN"));
             jobnetViewSpan = Convert.ToInt32(DBUtil.GetParameterVelue("JOBNET_VIEW_SPAN"));
             _parent = parent;
+
+            /* added by YAMA 2014/12/09    V2.1.0 No23 対応 */
+            _isDb = true;
+
             SetInit();
 
         }
@@ -225,10 +233,30 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
         }
         private void refresh(object sender, EventArgs e)
         {
-            ((DispatcherTimer)sender).Interval = new TimeSpan(0, 0, 1);
-            SetInit();
-            resetDefinitions();
-            resetData();
+            /* added by YAMA 2014/12/09    V2.1.0 No23 対応 */
+            DBException dbEx;
+
+            dbEx = _db.exExecuteHealthCheck();
+            if (dbEx.MessageID.Equals(""))
+            {
+                ((DispatcherTimer)sender).Interval = new TimeSpan(0, 0, 1);
+                SetInit();
+                resetDefinitions();
+                resetData();
+            }
+            else
+            {
+                if (_isDb)
+                {
+                    _isDb = false;
+                    LogInfo.WriteErrorLog(Consts.SYSERR_001, dbEx.InnerException);
+                    CommonDialog.ShowErrorDialog(Consts.SYSERR_001);
+                }
+            }
+            //((DispatcherTimer)sender).Interval = new TimeSpan(0, 0, 1);
+            //SetInit();
+            //resetDefinitions();
+            //resetData();
         }
 
         /// <summary>コマンド実行可否</summary>
@@ -342,6 +370,40 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
             }
         }
 
+        // added by YAMA 2014/10/14    実行予定リスト起動時刻変更
+        /// <summary>開始予定時刻変更</summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void UpdtCommandBinding_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            JobnetExecInfo jobnetExecInfo = (JobnetExecInfo)allPage.updtContextMenu.Tag;
+            DBUtil.SetReserveJobnet(jobnetExecInfo.inner_jobnet_id);
+        }
+
+
+        // added by YAMA 2014/10/14    実行予定リスト起動時刻変更
+        /// <summary> 起動保留 </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ReserveCommandBinding_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            // 実行用ジョブネット内部管理IDをキーに実行ジョブネットサマリ管理テーブルの起動保留フラグを「起動保留」に更新する
+            JobnetExecInfo jobnetExecInfo = (JobnetExecInfo)allPage.reserveContextMenu.Tag;
+            DBUtil.SetReserveJobnet(jobnetExecInfo.inner_jobnet_id);
+        }
+
+
+        // added by YAMA 2014/10/14    実行予定リスト起動時刻変更
+        /// <summary>起動保留解除</summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ReleaseCommandBinding_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            // 実行用ジョブネット内部管理IDをキーに、当該内部管理IDが起動保留の場合、
+            // 実行ジョブネットサマリ管理テーブルの起動保留フラグを「保留解除」に更新する
+            JobnetExecInfo jobnetExecInfo = (JobnetExecInfo)allPage.releaseContextMenu.Tag;
+            DBUtil.SetReleaseJobnet(jobnetExecInfo.inner_jobnet_id);
+        }
 
 
         #endregion
@@ -371,7 +433,16 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
         /// <summary>refreshをスタート</summary>
         public void Start()
         {
-            dispatcherTimer.Start();
+            /* added by YAMA 2014/12/11    V2.1.0 No34 対応 */
+            //dispatcherTimer.Start();
+            DBException dbEx = _db.exExecuteHealthCheck();
+            if (dbEx.MessageID.Equals(""))
+            {
+                dispatcherTimer.Start();
+
+                /* added by YAMA 2014/12/18 （ DBアクセスエラー時画面クリア対応）*/
+                _isDb = true;
+            }
         }
         #endregion
 
@@ -450,10 +521,39 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
         /// <summary>ジョブネットリスト表示する</summary>
         private void viewJobnetList()
         {
-            allPage.JobnetExecList.Clear();
-            DataTable dt;
-            DateTime now = DateTime.Now;
+            /* added by YAMA 2014/12/09    V2.1.0 No23 対応 */
+            bool isDb = true;    // false：DBダウン
+            DBException dbEx;
 
+            /* added by YAMA 2014/12/18 （ DBアクセスエラー時画面クリア対応）*/
+            //allPage.JobnetExecList.Clear();
+            dbEx = _db.exExecuteHealthCheck();
+            if (dbEx.MessageID.Equals(""))
+                allPage.JobnetExecList.Clear();
+
+            DataTable dt;
+
+            /* added by YAMA 2014/12/09    V2.1.0 No23 対応 */
+            // added by YAMA 2014/10/20    マネージャ内部時刻同期
+            //DateTime now = DateTime.Now;
+            //DateTime now = DBUtil.GetSysTime();
+            DateTime now;
+            dbEx = _db.exExecuteHealthCheck();
+            if (dbEx.MessageID.Equals(""))
+            {
+                now = DBUtil.GetSysTime();
+            }
+            else
+            {
+                isDb = false;
+                now = DateTime.Now;
+                if (_isDb)
+                {
+                    _isDb = false;
+                    LogInfo.WriteErrorLog(Consts.SYSERR_001, dbEx.InnerException);
+                    CommonDialog.ShowErrorDialog(Consts.SYSERR_001);
+                }
+            }
 
             //added by YAMA 2014/07/07
             //DateTime before = now.AddMinutes(-1 * jobnetLoadSpan);
@@ -469,87 +569,293 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
 
             if (LoginSetting.Authority.Equals(Consts.AuthorityEnum.SUPER))
             {
-                dt = runJobnetSummaryDAO.GetEntitySuperAll(fromTime, toTime, startFromTime, startToTime);
+                /* added by YAMA 2014/12/09    V2.1.0 No23 対応 */
+                //dt = runJobnetSummaryDAO.GetEntitySuperAll(fromTime, toTime, startFromTime, startToTime);
+                dbEx = _db.exExecuteHealthCheck();
+                if (dbEx.MessageID.Equals(""))
+                {
+                    dt = runJobnetSummaryDAO.GetEntitySuperAll(fromTime, toTime, startFromTime, startToTime);
+                    if (dt == null)
+                    {
+                        isDb = false;
+                    }
+                }
+                else
+                {
+                    dt = null;
+                    if (_isDb)
+                    {
+                        _isDb = false;
+                        LogInfo.WriteErrorLog(Consts.SYSERR_001, dbEx.InnerException);
+                        CommonDialog.ShowErrorDialog(Consts.SYSERR_001);
+                    }
+                }
             }
             else
             {
-                dt = runJobnetSummaryDAO.GetEntityAll(fromTime, toTime, startFromTime, startToTime, LoginSetting.UserID);
-            }
-            int i = 0;
-            foreach (DataRow row in dt.Rows)
-            {
-                JobnetExecInfo jobnetExecInfo = createJobnetExecInfo(row);
-                allPage.JobnetExecList.Add(jobnetExecInfo);
-                if (allPage.AllSelectedInnerJobnetId.Equals(Convert.ToString(jobnetExecInfo.inner_jobnet_id)))
+                /* added by YAMA 2014/12/09    V2.1.0 No23 対応 */
+                //dt = runJobnetSummaryDAO.GetEntityAll(fromTime, toTime, startFromTime, startToTime, LoginSetting.UserID);
+                dbEx = _db.exExecuteHealthCheck();
+                if (dbEx.MessageID.Equals(""))
                 {
-                    allPage.listView1.SelectedIndex = i;
+                    dt = runJobnetSummaryDAO.GetEntityAll(fromTime, toTime, startFromTime, startToTime, LoginSetting.UserID);
+                    if (dt == null)
+                    {
+                        isDb = false;
+                    }
                 }
-                i++;
+                else
+                {
+                    isDb = false;
+                    dt = null;
+                    if (_isDb)
+                    {
+                        _isDb = false;
+                        LogInfo.WriteErrorLog(Consts.SYSERR_001, dbEx.InnerException);
+                        CommonDialog.ShowErrorDialog(Consts.SYSERR_001);
+                    }
+                }
             }
-            allPage.listView1.GetBindingExpression(System.Windows.Controls.ListView.ItemsSourceProperty).UpdateTarget();
+            /* added by YAMA 2014/12/09    V2.1.0 No23 対応 */
+            if (isDb)
+            {
 
+                int i = 0;
+                foreach (DataRow row in dt.Rows)
+                {
+                    JobnetExecInfo jobnetExecInfo = createJobnetExecInfo(row);
+                    allPage.JobnetExecList.Add(jobnetExecInfo);
+                    if (allPage.AllSelectedInnerJobnetId.Equals(Convert.ToString(jobnetExecInfo.inner_jobnet_id)))
+                    {
+                        allPage.listView1.SelectedIndex = i;
+                    }
+                    i++;
+                }
+                /* added by YAMA 2014/12/09    V2.1.0 No23 対応 */
+                //allPage.listView1.GetBindingExpression(System.Windows.Controls.ListView.ItemsSourceProperty).UpdateTarget();
+                dbEx = _db.exExecuteHealthCheck();
+                if (dbEx.MessageID.Equals(""))
+                {
+                    allPage.listView1.GetBindingExpression(System.Windows.Controls.ListView.ItemsSourceProperty).UpdateTarget();
+                }
+                else
+                {
+                    isDb = false;
+                    if (_isDb)
+                    {
+                        _isDb = false;
+                        LogInfo.WriteErrorLog(Consts.SYSERR_001, dbEx.InnerException);
+                        CommonDialog.ShowErrorDialog(Consts.SYSERR_001);
+                    }
+                }
+
+            }    /* added by YAMA 2014/12/09    V2.1.0 No23 対応 */
         }
 
         /// <summary>エラージョブネットリスト表示する</summary>
         private void viewErrJobnetList()
         {
-            errPage.JobnetExecList.Clear();
+            /* added by YAMA 2014/12/09    V2.1.0 No23 対応 */
+            bool isDb = true;    // false：DBダウン
+            DBException dbEx;
+
+            /* added by YAMA 2014/12/18 （ DBアクセスエラー時画面クリア対応）*/
+            //errPage.JobnetExecList.Clear();
+            dbEx = _db.exExecuteHealthCheck();
+            if (dbEx.MessageID.Equals(""))
+                errPage.JobnetExecList.Clear();
+
             DataTable dt;
             if (LoginSetting.Authority.Equals(Consts.AuthorityEnum.SUPER))
             {
-                dt = runJobnetSummaryDAO.GetEntitySuperErr();
+                /* added by YAMA 2014/12/09    V2.1.0 No23 対応 */
+                //dt = runJobnetSummaryDAO.GetEntitySuperErr();
+                dbEx = _db.exExecuteHealthCheck();
+                if (dbEx.MessageID.Equals(""))
+                {
+                    dt = runJobnetSummaryDAO.GetEntitySuperErr();
+                    if (dt == null)
+                    {
+                        isDb = false;
+                    }
+                }
+                else
+                {
+                    isDb = false;
+                    dt = null;
+                    if (_isDb)
+                    {
+                        _isDb = false;
+                        LogInfo.WriteErrorLog(Consts.SYSERR_001, dbEx.InnerException);
+                        CommonDialog.ShowErrorDialog(Consts.SYSERR_001);
+                    }
+                }
             }
             else
             {
-                dt = runJobnetSummaryDAO.GetEntityErr(LoginSetting.UserID);
-            }
-            int i = 0;
-
-            foreach (DataRow row in dt.Rows)
-            {
-                if (!hideJobnetInnerIdList.Contains(Convert.ToDecimal(row["inner_jobnet_id"])))
+                /* added by YAMA 2014/12/09    V2.1.0 No23 対応 */
+                //dt = runJobnetSummaryDAO.GetEntityErr(LoginSetting.UserID);
+                dbEx = _db.exExecuteHealthCheck();
+                if (dbEx.MessageID.Equals(""))
                 {
-                    JobnetExecInfo jobnetExecInfo = createJobnetExecInfo(row);
-                    errPage.JobnetExecList.Add(jobnetExecInfo);
-                    if (errPage.ErrSelectedInnerJobnetId.Equals(Convert.ToString(jobnetExecInfo.inner_jobnet_id)))
+                    dt = runJobnetSummaryDAO.GetEntityErr(LoginSetting.UserID);
+                    if (dt == null)
                     {
-                        errPage.listView1.SelectedIndex = i;
-
+                        isDb = false;
                     }
-                    i++;
+                }
+                else
+                {
+                    isDb = false;
+                    dt = null;
+                    if (_isDb)
+                    {
+                        _isDb = false;
+                        LogInfo.WriteErrorLog(Consts.SYSERR_001, dbEx.InnerException);
+                        CommonDialog.ShowErrorDialog(Consts.SYSERR_001);
+                    }
                 }
             }
+            /* added by YAMA 2014/12/09    V2.1.0 No23 対応 */
+            if (isDb)
+            {
 
-            errPage.listView1.GetBindingExpression(System.Windows.Controls.ListView.ItemsSourceProperty).UpdateTarget();
+                int i = 0;
 
+                foreach (DataRow row in dt.Rows)
+                {
+                    if (!hideJobnetInnerIdList.Contains(Convert.ToDecimal(row["inner_jobnet_id"])))
+                    {
+                        JobnetExecInfo jobnetExecInfo = createJobnetExecInfo(row);
+                        errPage.JobnetExecList.Add(jobnetExecInfo);
+                        if (errPage.ErrSelectedInnerJobnetId.Equals(Convert.ToString(jobnetExecInfo.inner_jobnet_id)))
+                        {
+                            errPage.listView1.SelectedIndex = i;
+
+                        }
+                        i++;
+                    }
+                }
+
+                /* added by YAMA 2014/12/09    V2.1.0 No23 対応 */
+                //errPage.listView1.GetBindingExpression(System.Windows.Controls.ListView.ItemsSourceProperty).UpdateTarget();
+                dbEx = _db.exExecuteHealthCheck();
+                if (dbEx.MessageID.Equals(""))
+                {
+                    errPage.listView1.GetBindingExpression(System.Windows.Controls.ListView.ItemsSourceProperty).UpdateTarget();
+                }
+                else
+                {
+                    if (_isDb)
+                    {
+                        _isDb = false;
+                        LogInfo.WriteErrorLog(Consts.SYSERR_001, dbEx.InnerException);
+                        CommonDialog.ShowErrorDialog(Consts.SYSERR_001);
+                    }
+                }
+
+            }    /* added by YAMA 2014/12/09    V2.1.0 No23 対応 */
         }
 
         /// <summary>実行中ジョブネットリスト表示する</summary>
         private void viewRunningJobnetList()
         {
-            runningPage.JobnetExecList.Clear();
+            /* added by YAMA 2014/12/09    V2.1.0 No23 対応 */
+            bool isDb = true;    // false：DBダウン
+            DBException dbEx;
+
+            /* added by YAMA 2014/12/18 （ DBアクセスエラー時画面クリア対応）*/
+            //runningPage.JobnetExecList.Clear();
+            dbEx = _db.exExecuteHealthCheck();
+            if (dbEx.MessageID.Equals(""))
+                runningPage.JobnetExecList.Clear();
+
             DataTable dt;
             if (LoginSetting.Authority.Equals(Consts.AuthorityEnum.SUPER))
             {
-                dt = runJobnetSummaryDAO.GetEntitySuperRunning();
+                /* added by YAMA 2014/12/09    V2.1.0 No23 対応 */
+                //dt = runJobnetSummaryDAO.GetEntitySuperRunning();
+                dbEx = _db.exExecuteHealthCheck();
+                if (dbEx.MessageID.Equals(""))
+                {
+                    dt = runJobnetSummaryDAO.GetEntitySuperRunning();
+                    if (dt == null)
+                    {
+                        isDb = false;
+                    }
+                }
+                else
+                {
+                    isDb = false;
+                    dt = null;
+                    if (_isDb)
+                    {
+                        _isDb = false;
+                        LogInfo.WriteErrorLog(Consts.SYSERR_001, dbEx.InnerException);
+                        CommonDialog.ShowErrorDialog(Consts.SYSERR_001);
+                    }
+                }
+
             }
             else
             {
-                dt = runJobnetSummaryDAO.GetEntityRunning(LoginSetting.UserID);
-            }
-            int i = 0;
-            foreach (DataRow row in dt.Rows)
-            {
-                JobnetExecInfo jobnetExecInfo = createJobnetExecInfo(row);
-                runningPage.JobnetExecList.Add(jobnetExecInfo);
-                if (runningPage.RunningSelectedInnerJobnetId.Equals(Convert.ToString(jobnetExecInfo.inner_jobnet_id)))
+                /* added by YAMA 2014/12/09    V2.1.0 No23 対応 */
+                //dt = runJobnetSummaryDAO.GetEntityRunning(LoginSetting.UserID);
+                dbEx = _db.exExecuteHealthCheck();
+                if (dbEx.MessageID.Equals(""))
                 {
-                    runningPage.listView1.SelectedItem = jobnetExecInfo;
+                    dt = runJobnetSummaryDAO.GetEntityRunning(LoginSetting.UserID);
+                    if (dt == null)
+                    {
+                        isDb = false;
+                    }
                 }
-                i++;
-            }
-            runningPage.listView1.GetBindingExpression(System.Windows.Controls.ListView.ItemsSourceProperty).UpdateTarget();
+                else
+                {
+                    isDb = false;
+                    dt = null;
+                    if (_isDb)
+                    {
+                        _isDb = false;
+                        LogInfo.WriteErrorLog(Consts.SYSERR_001, dbEx.InnerException);
+                        CommonDialog.ShowErrorDialog(Consts.SYSERR_001);
+                    }
+                }
 
+            }
+            /* added by YAMA 2014/12/09    V2.1.0 No23 対応 */
+            if (isDb)
+            {
+
+                int i = 0;
+                foreach (DataRow row in dt.Rows)
+                {
+                    JobnetExecInfo jobnetExecInfo = createJobnetExecInfo(row);
+                    runningPage.JobnetExecList.Add(jobnetExecInfo);
+                    if (runningPage.RunningSelectedInnerJobnetId.Equals(Convert.ToString(jobnetExecInfo.inner_jobnet_id)))
+                    {
+                        runningPage.listView1.SelectedItem = jobnetExecInfo;
+                    }
+                    i++;
+                }
+                /* added by YAMA 2014/12/09    V2.1.0 No23 対応 */
+                //runningPage.listView1.GetBindingExpression(System.Windows.Controls.ListView.ItemsSourceProperty).UpdateTarget();
+                dbEx = _db.exExecuteHealthCheck();
+                if (dbEx.MessageID.Equals(""))
+                {
+                    runningPage.listView1.GetBindingExpression(System.Windows.Controls.ListView.ItemsSourceProperty).UpdateTarget();
+                }
+                else
+                {
+                    if (_isDb)
+                    {
+                        _isDb = false;
+                        LogInfo.WriteErrorLog(Consts.SYSERR_001, dbEx.InnerException);
+                        CommonDialog.ShowErrorDialog(Consts.SYSERR_001);
+                    }
+                }
+
+            }    /* added by YAMA 2014/12/09    V2.1.0 No23 対応 */
         }
 
         /// <summary>実行ジョブネットデータを作成する</summary>
@@ -563,16 +869,27 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
             //added by YAMA 2014/04/25
             jobnetExecInfo.load_status = (int)row["load_status"];
 
-            jobnetExecInfo.display_status = getRunJobStatusStr((int)row["status"], (int)row["load_status"]);
+            // added by YAMA 2014/10/14    実行予定リスト起動時刻変更
+            // jobnetExecInfo.display_status = getRunJobStatusStr((int)row["status"], (int)row["load_status"]);
+            jobnetExecInfo.start_pending_flag = (int)row["start_pending_flag"];
+            jobnetExecInfo.display_status = getRunJobDisplayStatus((int)row["status"], (int)row["load_status"], (int)row["start_pending_flag"]);
 
             //added by YAMA 2014/04/25
             //jobnetExecInfo.status_color = getRunJobStatusColor((int)row["status"], (int)row["job_status"]);
-            jobnetExecInfo.status_color = getRunJobStatusOfColor((int)row["status"], (int)row["job_status"], (int)row["load_status"]);
+            // added by YAMA 2014/10/14    実行予定リスト起動時刻変更
+            // jobnetExecInfo.status_color = getRunJobStatusOfColor((int)row["status"], (int)row["job_status"], (int)row["load_status"]);
+            jobnetExecInfo.status_color = getRunJobStatusColor((int)row["status"], (int)row["job_status"], (int)row["load_status"], (int)row["start_pending_flag"]);
 
+            // added by YAMA 2014/10/14    実行予定リスト起動時刻変更
             //added by YAMA 2014/07/01
-            jobnetExecInfo.Foreground_color = getRunJobStatusOfChrColor((int)row["status"], (int)row["job_status"], (int)row["load_status"]);
+            // jobnetExecInfo.Foreground_color = getRunJobStatusOfChrColor((int)row["status"], (int)row["job_status"], (int)row["load_status"]);
+            jobnetExecInfo.Foreground_color = getRunJobStatusOfChrColor((int)row["status"], (int)row["job_status"], (int)row["load_status"], (int)row["start_pending_flag"]);
 
             jobnetExecInfo.jobnet_name = row["jobnet_name"].ToString();
+
+            //added by YAMA 2014/09/22 実行中ジョブID表示
+            jobnetExecInfo.running_job_id = row["running_job_id"].ToString();
+            jobnetExecInfo.running_job_name = row["running_job_name"].ToString();
 
             if (Convert.ToDecimal(row["scheduled_time"]) > 0)
             {
@@ -758,6 +1075,60 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
         }
 
 
+        // added by YAMA 2014/10/14    実行予定リスト起動時刻変更
+        /// <summary>ステータスを設定</summary>
+        /// <param name="status">実行ジョブネットステータス</param>
+        /// <param name="load_status">実行ジョブネット展開状況</param>
+        /// <param name="start_pending_flag">実行ジョブネット起動保留フラグ</param>
+        private String getRunJobDisplayStatus(int status, int load_status, int start_pending_flag)
+        {
+            String str;
+
+            switch (status)
+            {
+                case 0:
+                    // 「ステータス」が『未実行』の場合、表示優先順位は、「展開状況(load_status)」 ＜ 「起動保留フラグ(start_pending_flag)」
+                    str = Properties.Resources.job_run_status_schedule;
+                    if (load_status == 2)
+                        str = Properties.Resources.job_run_status_scheduled_wait;
+                    if (start_pending_flag == 1)
+                        str = Properties.Resources.job_run_status_reserve;
+                    break;
+                case 1:
+                    str = Properties.Resources.job_run_status_schedule;
+                    break;
+                case 2:
+                case 4:
+                    if (load_status == 2)
+                    {
+                        // 「『ｽﾃｰﾀｽ(status) = 実行中(2)』and『展開状況(load_status) = 遅延起動(2)』」の場合、『遅延起動エラー』を設定
+                        str = Properties.Resources.job_run_status_delay_err;
+                    }
+                    else
+                    {
+                        str = Properties.Resources.job_run_status_running;
+                    }
+                    break;
+                case 3:
+                    str = Properties.Resources.job_run_status_done;
+                    if (load_status == 3)
+                        str = Properties.Resources.job_run_status_skip;
+                    break;
+                case 5:
+                    str = Properties.Resources.job_run_status_done;
+                    if (load_status == 1)
+                    {
+                        str = Properties.Resources.load_err;
+                    }
+                    break;
+                default:
+                    str = Properties.Resources.job_run_status_schedule;
+                    break;
+            }
+            return str;
+        }
+
+
         /// <summary>各リストの画面Gridの行番号を取得</summary>
         /// <param name="status">実行ジョブネットステータス</param>
         /// <param name="run_type">実行ジョブネット実行種別</param>
@@ -868,6 +1239,72 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
         }
 
 
+        // added by YAMA 2014/10/14    実行予定リスト起動時刻変更
+        /// <summary>ステータスに対応する色を設定</summary>
+        /// <param name="status">実行ジョブネットステータス</param>
+        /// <param name="job_status">実行ジョブネットジョブ状況</param>
+        /// <param name="load_status">実行ジョブネット展開状況</param>
+        /// <param name="start_pending_flag">実行ジョブネット起動保留フラグ</param>
+        private SolidColorBrush getRunJobStatusColor(int status, int job_status, int load_status, int start_pending_flag)
+        {
+            SolidColorBrush color = new SolidColorBrush(Colors.Aquamarine);
+            switch (status)
+            {
+                case 0:
+                    switch (start_pending_flag)
+                    {
+                        case 1:
+                            color = new SolidColorBrush(Colors.Blue);
+                            break;
+                    }
+                    break;
+                case 1:
+                    break;
+                case 2:
+                case 6:
+                    switch (job_status)
+                    {
+                        case 0:
+                            color = new SolidColorBrush(Colors.Yellow);
+                            break;
+                        case 1:
+                            color = new SolidColorBrush(Colors.Orange);
+                            break;
+                        case 2:
+                            color = new SolidColorBrush(Colors.Red);
+                            break;
+                    }
+                    break;
+                case 3:
+                    switch (job_status)
+                    {
+                        case 0:
+                            if ((LoadStausType)load_status != LoadStausType.Skip)
+                            {
+                                color = new SolidColorBrush(Colors.Lime);
+                            }
+                            else
+                            {
+                                color = new SolidColorBrush(Colors.Gray);
+                            }
+                            break;
+                        case 1:
+                            color = new SolidColorBrush(Colors.Orange);
+                            break;
+                        case 2:
+                            color = new SolidColorBrush(Colors.Red);
+                            break;
+                    }
+                    break;
+                case 4:
+                case 5:
+                    color = new SolidColorBrush(Colors.Red);
+                    break;
+            }
+            return color;
+        }
+
+
         //added by YAMA 2014/07/01  (実行スキップ時の文字色対応)
         /// <summary>ステータスに対応する文字色を設定</summary>
         /// <param name="status">実行ジョブネットステータス</param>
@@ -915,6 +1352,66 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
                     break;
                 case 4:
                 case 5:                 // 5：異常終了
+                    break;
+            }
+            return color;
+        }
+
+
+        // added by YAMA 2014/10/14    実行予定リスト起動時刻変更
+        /// <summary>ステータスに対応する文字色を設定</summary>
+        /// <param name="status">実行ジョブネットステータス</param>
+        /// <param name="job_status">実行ジョブネットジョブ状況</param>
+        /// <param name="load_status">実行ジョブネット展開状況</param>
+        /// <param name="start_pending_flag">実行ジョブネット起動保留フラグ</param>
+        private String getRunJobStatusOfChrColor(int status, int job_status, int load_status, int start_pending_flag)
+        {
+            String color = "Black";
+            switch (status)
+            {
+                case 0:     // 0：未実行（初期値）
+                    switch (start_pending_flag)
+                    {
+                        case 1:
+                            color = "White";
+                            break;
+                    }
+                    break;
+                case 1:     // 1：実行準備
+                    break;
+                case 2:     // 2：実行中
+                case 6:
+                    switch (job_status)
+                    {
+                        case 0:             // 0：通常（初期値）
+                            break;
+                        case 1:             // 1：タイムアウト
+                            break;
+                        case 2:             // 2：エラー
+                            break;
+                    }
+                    break;
+                case 3:     // 3：正常終了
+                    switch (job_status)
+                    {
+                        case 0:             // 0：通常（初期値）
+                            if ((LoadStausType)load_status != LoadStausType.Skip)
+                            {
+                                ;
+                            }
+                            else
+                            {
+                                color = "White";
+                            }
+                            break;
+                        case 1:             // 1：タイムアウト
+                            break;
+                        case 2:             // 2：エラー
+                            break;
+                    }
+                    break;
+                case 4:
+                case 5:     // 5：異常終了
                     break;
             }
             return color;

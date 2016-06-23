@@ -1,6 +1,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -18,8 +19,8 @@
 **/
 
 /*
-** $Date:: 2014-05-01 16:37:08 +0900 #$
-** $Revision: 5945 $
+** $Date:: 2014-10-17 16:00:02 +0900 #$
+** $Revision: 6528 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -148,11 +149,11 @@ int jajobnet_run_sync(const zbx_uint64_t inner_jobnet_id,
                 (icon_jobnet_id, icon_inner_jobnet_id, "JOB_EXIT_CD",
                  exit_code))
                 return FAIL;
-            if (ja_flow(icon_jobnet_id, JA_FLOW_TYPE_NORMAL) == FAIL)
+            if (ja_flow(icon_jobnet_id, JA_FLOW_TYPE_NORMAL, 1) == FAIL)
                 return FAIL;
             break;
         case JA_JOBNET_STATUS_RUNERR:
-            if (ja_set_runerr(icon_jobnet_id) == FAIL)
+            if (ja_set_runerr(icon_jobnet_id, 2) == FAIL)
                 return FAIL;
             break;
         case JA_JOBNET_STATUS_ENDERR:
@@ -190,7 +191,7 @@ int jajobnet_run(const zbx_uint64_t inner_jobnet_id,
     double sec;
     zbx_uint64_t inner_job_id, icon_end_id;
     int renew_flag, renew_status, renew_timeout_flag;
-    int job_status, job_type, test_flag, job_timeout_flag;
+    int job_status, job_type, test_flag, job_timeout_flag, continue_flag;
     int count, ready_cnt, run_cnt, runerr_cnt, end_cnt, start_icons,
         end_icons, end_icons_end, timeout_cnt;
     const char *__function_name = "jajobnet_run";
@@ -203,7 +204,7 @@ int jajobnet_run(const zbx_uint64_t inner_jobnet_id,
 
     sec = zbx_time();
     result = DBselect("select inner_job_id, status, job_type, test_flag, timeout_flag,"
-                      " inner_jobnet_main_id, job_id from ja_run_job_table"
+                      " inner_jobnet_main_id, job_id, continue_flag from ja_run_job_table"
                       " where inner_jobnet_id = " ZBX_FS_UI64, inner_jobnet_id);
     sec = zbx_time() - sec;
     zabbix_log(LOG_LEVEL_DEBUG,
@@ -228,6 +229,7 @@ int jajobnet_run(const zbx_uint64_t inner_jobnet_id,
         job_type = atoi(row[2]);
         test_flag = atoi(row[3]);
         job_timeout_flag = atoi(row[4]);
+        continue_flag = atoi(row[7]);
 
         count++;
         if (job_timeout_flag == 1)
@@ -256,7 +258,12 @@ int jajobnet_run(const zbx_uint64_t inner_jobnet_id,
             break;
         case JA_JOB_STATUS_RUNERR:
         case JA_JOB_STATUS_ABORT:
-            runerr_cnt++;
+            if (continue_flag == JA_JOB_CONTINUE_FLAG_ON) {
+                end_cnt++;
+            }
+            else {
+                runerr_cnt++;
+            }
             break;
         case JA_JOB_STATUS_ENDERR:
             goto error;

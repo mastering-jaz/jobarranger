@@ -1,6 +1,7 @@
 ﻿/*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -42,6 +43,8 @@ namespace jp.co.ftf.jobcontroller.DAO
         private static String[] EXPORT_CALENDAR_TABLES = { "ja_calendar_control_table", 
                                                     "ja_calendar_detail_table" 
                                                   };
+        //エクスポートフィルターオブジェクト関連テーブル一覧最初が管理テーブル
+        private static String[] EXPORT_FILTER_TABLES = { "ja_filter_control_table" };
         //エクスポートスケジュールオブジェクト関連テーブル一覧最初が管理テーブル
         private static String[] EXPORT_SCHEDULE_TABLES = { "ja_schedule_control_table", 
                                                     "ja_schedule_detail_table", 
@@ -102,6 +105,14 @@ namespace jp.co.ftf.jobcontroller.DAO
         private static bool SET_DOUBLE_KEY = false;
         //整合性チェック情報セットフラグ
         private static bool SET_RELATE_KEY = true;
+
+        //オブジェクト関連チェック added by YAMA 2014/10/17
+        private const string RELATEDOBJECT_CALENDAR = "CALENDAR";
+        private const string RELATEDOBJECT_FILTER = "FILTER";
+        private const string RELATEDOBJECT_SCHEDULE = "SCHEDULE";
+        private const string RELATEDOBJECT_JOBNET = "JOBNET";
+
+
         #region 採番処理
 
 
@@ -245,6 +256,36 @@ namespace jp.co.ftf.jobcontroller.DAO
             return strParameterVelue;
         }
 
+        //added by YAMA 2014/08/18
+        public static string GetParameterVelueForStrData(string parameterName)
+        {
+            string strParameterVelue = "";
+
+            string strSql = "SELECT value FROM ja_parameter_table WHERE parameter_name = '" + parameterName + "'";
+
+            DBConnect db = new DBConnect(LoginSetting.ConnectStr);
+            db.CreateSqlConnect();
+
+            DataTable dt = db.ExecuteQuery(strSql);
+
+            if (dt.Rows.Count == 1)
+            {
+                strParameterVelue = dt.Rows[0]["value"].ToString();
+
+                db.CloseSqlConnect();
+            }
+            else
+            {
+                //added by YAMA 2014/04/25 該当データなしの場合、初期値を設定する
+                //strParameterVelue = "60";
+                strParameterVelue = GetParamDefaultData(parameterName);
+                db.CloseSqlConnect();
+            }
+
+            return strParameterVelue;
+        }
+
+
         //added by YAMA 2014/04/25
         private static string GetParamDefaultData(string parameterName)
         {
@@ -281,6 +322,34 @@ namespace jp.co.ftf.jobcontroller.DAO
                     break;
                 case "JOBNET_DUMMY_END_Y":
                     defaultValue = "146";
+                    break;
+                //added by YAMA 2014/08/18
+                case "MANAGER_TIME_SYNC":
+                    defaultValue = "0";
+                    break;
+                case "ZBXSND_ZABBIX_IP":
+                    defaultValue = "127.0.0.1";
+                    break;
+                case "ZBXSND_ZABBIX_PORT":
+                    defaultValue = "10051";
+                    break;
+                case "ZBXSND_ZABBIX_HOST":
+                    defaultValue = "Zabbix server";
+                    break;
+                case "ZBXSND_ITEM_KEY":
+                    defaultValue = "jasender";
+                    break;
+                case "ZBXSND_SENDER":
+                    defaultValue = "zabbix_sender";
+                    break;
+                case "ZBXSND_RETRY":
+                    defaultValue = "0";
+                    break;
+                case "ZBXSND_RETRY_COUNT":
+                    defaultValue = "0";
+                    break;
+                case "ZBXSND_RETRY_INTERVAL":
+                    defaultValue = "5";
                     break;
             }
             return defaultValue;
@@ -321,6 +390,11 @@ namespace jp.co.ftf.jobcontroller.DAO
 
             String tableName = "ja_calendar_control_table";
             String idColumnName = "calendar_id";
+            if (objectType == Consts.ObjectEnum.FILTER)
+            {
+                tableName = "ja_filter_control_table";
+                idColumnName = "filter_id";
+            }
             if (objectType == Consts.ObjectEnum.SCHEDULE)
             {
                 tableName = "ja_schedule_control_table";
@@ -362,6 +436,11 @@ namespace jp.co.ftf.jobcontroller.DAO
 
             String tableName = "ja_calendar_control_table";
             String idColumnName = "calendar_id";
+            if (objectType == Consts.ObjectEnum.FILTER)
+            {
+                tableName = "ja_filter_control_table";
+                idColumnName = "filter_id";
+            }
             if (objectType == Consts.ObjectEnum.SCHEDULE)
             {
                 tableName = "ja_schedule_control_table";
@@ -386,7 +465,7 @@ namespace jp.co.ftf.jobcontroller.DAO
         /// <param name="objectId">オブジェクトＩＤ</param>
         /// <param name="updDate">更新日</param>
         /// <param name="objectType">オブジェクト種別</param>
-        public static void SetObjectValid(String objectId, String updDate, Consts.ObjectEnum objectType)
+        public static void SetObjectValid_org(String objectId, String updDate, Consts.ObjectEnum objectType)
         {
             String tableName = "ja_calendar_control_table";
             String idColumnName = "calendar_id";
@@ -401,6 +480,13 @@ namespace jp.co.ftf.jobcontroller.DAO
                     idColumnName = "calendar_id";
                     CalendarControlDAO calendarControlDAO = new CalendarControlDAO(db);
                     calendarControlDAO.GetLock(objectId, LoginSetting.DBType);
+                }
+                if (objectType == Consts.ObjectEnum.FILTER)
+                {
+                    tableName = "ja_filter_control_table";
+                    idColumnName = "filter_id";
+                    FilterControlDAO filterControlDAO = new FilterControlDAO(db);
+                    filterControlDAO.GetLock(objectId, LoginSetting.DBType);
                 }
                 if (objectType == Consts.ObjectEnum.SCHEDULE)
                 {
@@ -523,6 +609,92 @@ namespace jp.co.ftf.jobcontroller.DAO
             db.CloseSqlConnect();
         }
 
+        // added by YAMA 2014/10/14    実行予定リスト起動時刻変更
+        /// <summary> 未実行 ジョブネットを起動保留にする <summary>
+        /// <param name="innerJobnetId"> 実行ジョブネット内部管理ＩＤ </param>
+        public static void SetReserveJobnet(object innerJobnetId)
+        {
+            // 稼働状態が未実行のジョブネットを起動保留にする
+            String _stop_err_jobnet = "update ja_run_jobnet_summary_table set start_pending_flag=1 where inner_jobnet_id=? and status=0";
+
+            List<ComSqlParam> sqlParams = new List<ComSqlParam>();
+
+            sqlParams.Add(new ComSqlParam(DbType.UInt64, "@inner_jobnet_id", innerJobnetId));
+            DBConnect db = new DBConnect(LoginSetting.ConnectStr);
+            db.CreateSqlConnect();
+            db.BeginTransaction();
+            db.ExecuteNonQuery(_stop_err_jobnet, sqlParams);
+            db.TransactionCommit();
+            db.CloseSqlConnect();
+        }
+
+
+        // added by YAMA 2014/10/14    実行予定リスト起動時刻変更
+        /// <summary> 未実行 ジョブネットを起動保留にする <summary>
+        /// <param name="innerJobnetId"> 実行ジョブネット内部管理ＩＤ </param>
+        public static int Set_Reserve_Jobnet(object innerJobnetId)
+        {
+            // 稼働状態が未実行のジョブネットを起動保留にする
+            int intNum = 0;
+            String _stop_err_jobnet = "update ja_run_jobnet_summary_table set start_pending_flag=1 where inner_jobnet_id=? and status=0";
+
+            List<ComSqlParam> sqlParams = new List<ComSqlParam>();
+
+            sqlParams.Add(new ComSqlParam(DbType.UInt64, "@inner_jobnet_id", innerJobnetId));
+            DBConnect db = new DBConnect(LoginSetting.ConnectStr);
+            db.CreateSqlConnect();
+            db.BeginTransaction();
+            intNum = db.ExecuteNonQuery(_stop_err_jobnet, sqlParams);
+            db.TransactionCommit();
+            db.CloseSqlConnect();
+
+            return intNum;
+        }
+
+
+        // added by YAMA 2014/10/14    実行予定リスト起動時刻変更
+        /// <summary> 未実行 ジョブネットを保留解除にする <summary>
+        /// <param name="innerJobnetId"> 実行ジョブネット内部管理ＩＤ </param>
+        public static void SetReleaseJobnet(object innerJobnetId)
+        {
+            // 稼働状態が未実行のジョブネットを起動保留にする
+            String _stop_err_jobnet = "update ja_run_jobnet_summary_table set start_pending_flag=2 where inner_jobnet_id=? and start_pending_flag=1";
+
+            List<ComSqlParam> sqlParams = new List<ComSqlParam>();
+
+            sqlParams.Add(new ComSqlParam(DbType.UInt64, "@inner_jobnet_id", innerJobnetId));
+            DBConnect db = new DBConnect(LoginSetting.ConnectStr);
+            db.CreateSqlConnect();
+            db.BeginTransaction();
+            db.ExecuteNonQuery(_stop_err_jobnet, sqlParams);
+            db.TransactionCommit();
+            db.CloseSqlConnect();
+        }
+
+
+        // added by YAMA 2014/10/14    実行予定リスト起動時刻変更
+        /// <summary> 未実行ジョブネットの実行予定時刻を更新する <summary>
+        /// <param name="innerJobnetId"> 実行ジョブネット内部管理ＩＤ </param>
+        /// <param name="scheduledtime"> 実行ジョブネット実行予定時刻 </param>
+        public static int SetScheduledTime(String innerJobnetId, String scheduledTime)
+        {
+            int intNum = 0;
+
+            DBConnect db = new DBConnect(LoginSetting.ConnectStr);
+            db.CreateSqlConnect();
+            db.BeginTransaction();
+
+            string strSql1 = "update ja_run_jobnet_summary_table set scheduled_time = '" + scheduledTime + "' where inner_jobnet_id = '" + innerJobnetId + "' and status = 0";
+            string strSql2 = "update ja_run_jobnet_table set scheduled_time = '" + scheduledTime + "' where inner_jobnet_id = '" + innerJobnetId + "' and status = 0";
+
+            db.AddBatch(strSql1);
+            db.AddBatch(strSql2);
+            intNum = db.ExecuteBatchUpdate();
+            db.TransactionCommit();
+            db.CloseSqlConnect();
+
+            return intNum;
+        }
 
 
 
@@ -530,7 +702,7 @@ namespace jp.co.ftf.jobcontroller.DAO
         /// <param name="objectId">オブジェクトＩＤ</param>
         /// <param name="objectType">オブジェクト種別</param>
         /// <param name="rows">オブジェクトRows</param>
-        public static void SetObjectsInValid(String objectId, Consts.ObjectEnum objectType, DataRow[] rows)
+        public static void SetObjectsInValid_org(String objectId, Consts.ObjectEnum objectType, DataRow[] rows)
         {
             DBConnect db = new DBConnect(LoginSetting.ConnectStr);
             db.CreateSqlConnect();
@@ -545,6 +717,13 @@ namespace jp.co.ftf.jobcontroller.DAO
                     idColumnName = "calendar_id";
                     CalendarControlDAO calendarControlDAO = new CalendarControlDAO(db);
                     calendarControlDAO.GetLock(objectId, LoginSetting.DBType);
+                }
+                if (objectType == Consts.ObjectEnum.FILTER)
+                {
+                    tableName = "ja_filter_control_table";
+                    idColumnName = "filter_id";
+                    FilterControlDAO filterControlDAO = new FilterControlDAO(db);
+                    filterControlDAO.GetLock(objectId, LoginSetting.DBType);
                 }
                 if (objectType == Consts.ObjectEnum.SCHEDULE)
                 {
@@ -585,19 +764,66 @@ namespace jp.co.ftf.jobcontroller.DAO
         /// <param name="objectId">オブジェクトＩＤ</param>
         /// <param name="objectType">オブジェクト種別</param>
         /// <param name="rows">オブジェクトRows</param>
-        public static bool CheckForRelation4Del(String objectId, Consts.ObjectEnum objectType, DataRow[] rows)
+        public static bool CheckForRelation4Del(String objectId, Consts.ObjectEnum objectType, DataRow[] rows, ref DataTable chkResult)
         {
             if (objectType == Consts.ObjectEnum.CALENDAR)
             {
-                if (IsExistRelate4Calendar(objectId, rows)) return false;
+                //added by YAMA 2014/10/17
+                //if (IsExistRelate4Calendar(objectId, rows)) return false;
+                if (CntObjectData(objectId, objectType, rows))
+                {
+                    if (!CheckRelatedObjectForCalendar(objectId, ref chkResult, "Delete")) return false;
+                }
+            }
+            if (objectType == Consts.ObjectEnum.FILTER)
+            {
+                //added by YAMA 2014/10/17
+                if (CntObjectData(objectId, objectType, rows))
+                {
+                    if (!CheckRelatedObjectForFilter(objectId, ref chkResult, "Delete")) return false;
+                }
             }
 
             if (objectType == Consts.ObjectEnum.JOBNET)
             {
-                if (IsExistRelate4Jobnet(objectId, rows)) return false;
+                //added by YAMA 2014/10/17
+                // if (IsExistRelate4Jobnet(objectId, rows)) return false;
+                if (CntObjectData(objectId, objectType, rows))
+                {
+                    if (!CheckRelatedObjectForJobNet(objectId, ref chkResult, "Delete")) return false;
+                }
             }
             return true;
         }
+
+        private static bool CntObjectData(String objectId, Consts.ObjectEnum objectType, DataRow[] rows)
+        {
+            String checkSql = "";
+
+            DBConnect db = new DBConnect(LoginSetting.ConnectStr);
+            db.CreateSqlConnect();
+
+            if (objectType == Consts.ObjectEnum.CALENDAR)
+            {
+                checkSql = "select calendar_id from ja_calendar_control_table where calendar_id = '" + objectId + "'";
+            }
+            if (objectType == Consts.ObjectEnum.FILTER)
+            {
+                checkSql = "select filter_id from ja_filter_control_table where filter_id = '" + objectId + "'";
+            }
+            if (objectType == Consts.ObjectEnum.JOBNET)
+            {
+                checkSql = "select jobnet_id from ja_jobnet_control_table where jobnet_id = '" + objectId + "'";
+            }
+            DataTable dtDB = db.ExecuteQuery(checkSql);
+            db.CloseSqlConnect();
+            if (dtDB.Rows.Count == 1 || rows == null)
+            {
+                return true;
+            }
+            return false;
+        }
+
 
         /// <summary>オブジェクトを削除する<summary>
         /// <param name="objectId">オブジェクトＩＤ</param>
@@ -644,6 +870,13 @@ namespace jp.co.ftf.jobcontroller.DAO
                     idColumnName = "calendar_id";
                     CalendarControlDAO calendarControlDAO = new CalendarControlDAO(db);
                     calendarControlDAO.GetLock(objectId, LoginSetting.DBType);
+                }
+                if (objectType == Consts.ObjectEnum.FILTER)
+                {
+                    tableName = "ja_filter_control_table";
+                    idColumnName = "filter_id";
+                    FilterControlDAO filterControlDAO = new FilterControlDAO(db);
+                    filterControlDAO.GetLock(objectId, LoginSetting.DBType);
                 }
                 if (objectType == Consts.ObjectEnum.SCHEDULE)
                 {
@@ -703,6 +936,13 @@ namespace jp.co.ftf.jobcontroller.DAO
                     idColumnName = "calendar_id";
                     CalendarControlDAO calendarControlDAO = new CalendarControlDAO(db);
                     calendarControlDAO.GetLock(objectId, LoginSetting.DBType);
+                }
+                if (objectType == Consts.ObjectEnum.FILTER)
+                {
+                    tableName = "ja_filter_control_table";
+                    idColumnName = "filter_id";
+                    FilterControlDAO filterControlDAO = new FilterControlDAO(db);
+                    filterControlDAO.GetLock(objectId, LoginSetting.DBType);
                 }
                 if (objectType == Consts.ObjectEnum.SCHEDULE)
                 {
@@ -843,6 +1083,31 @@ namespace jp.co.ftf.jobcontroller.DAO
                 db.AddSelectBatch(sqlCalendar[i], calendarTableName);
                 i++;
             }
+
+            // added by YAMA 2014/11/07    インポート・エクスポート
+            String[] sqlFilter = new String[EXPORT_FILTER_TABLES.Length];
+            i = 0;
+            foreach (String filterTableName in EXPORT_FILTER_TABLES)
+            {
+                idColumnName = "filter_id";
+                sqlFilter[i] = "select * from " + filterTableName;
+                if (!(LoginSetting.Authority == Consts.AuthorityEnum.SUPER))
+                {
+                    if (i == 0)
+                    {
+                        sqlFilter[i] = "select distinct A.* from " + filterTableName + " AS A,users AS U,users_groups AS UG1, users_groups AS UG2 where A.user_name=U.alias and UG1.userid=U.userid and UG2.userid=" + LoginSetting.UserID + " and UG1.usrgrpid=UG2.usrgrpid";
+                    }
+                    else
+                    {
+                        sqlFilter[i] = "select distinct B.* from " + filterTableName + " AS B," + EXPORT_FILTER_TABLES[0] + " AS A,users AS U,users_groups AS UG1, users_groups AS UG2 "
+                                                + "where A." + idColumnName + "=B." + idColumnName + " and A.update_date=B.update_date and "
+                                                + "A.user_name=U.alias and UG1.userid=U.userid and UG2.userid=" + LoginSetting.UserID + " and UG1.usrgrpid=UG2.usrgrpid";
+                    }
+                }
+                db.AddSelectBatch(sqlFilter[i], filterTableName);
+                i++;
+            }
+
             String[] sqlSchedule = new String[EXPORT_SCHEDULE_TABLES.Length];
             i = 0;
             foreach (String scheduleTableName in EXPORT_SCHEDULE_TABLES)
@@ -905,6 +1170,12 @@ namespace jp.co.ftf.jobcontroller.DAO
             String idColumnName = "calendar_id";
             String dsName = "Calendar";
             String[] tables = EXPORT_CALENDAR_TABLES;
+            if (objectType == Consts.ObjectEnum.FILTER)
+            {
+                idColumnName = "filter_id";
+                dsName = "Filter";
+                tables = EXPORT_FILTER_TABLES;
+            }
             if (objectType == Consts.ObjectEnum.SCHEDULE)
             {
                 idColumnName = "schedule_id";
@@ -943,6 +1214,12 @@ namespace jp.co.ftf.jobcontroller.DAO
             String idColumnName = "calendar_id";
             String dsName = "Calendar";
             String[] tables = EXPORT_CALENDAR_TABLES;
+            if (objectType == Consts.ObjectEnum.FILTER)
+            {
+                idColumnName = "filter_id";
+                dsName = "Filter";
+                tables = EXPORT_FILTER_TABLES;
+            }
             if (objectType == Consts.ObjectEnum.SCHEDULE)
             {
                 idColumnName = "schedule_id";
@@ -991,19 +1268,41 @@ namespace jp.co.ftf.jobcontroller.DAO
         }
 
         /// <summary>システム時間を取得</summary>
-        /// <returns>システム時間</returns>
+        /// <returns>パラメータ設定テーブルのマネージャ内部時刻同期（MANAGER_TIME_SYNC）が「1：同期あり」の場合、ジョブサーバのシステム時間、「0：同期なし」の場合、ローカルタイム</returns>
         public static DateTime GetSysTime()
         {
-            DBConnect db = new DBConnect(LoginSetting.ConnectStr);
-            db.CreateSqlConnect();
+            // added by YAMA 2014/10/20    マネージャ内部時刻同期
+            DateTime sysTime;
 
-            string strSql = "SELECT CURRENT_TIMESTAMP AS systemtime";
+            if (LoginSetting.ManagerTimeSync == 1)
+            {
+                // ジョブサーバー時刻を使用
+                DBConnect db = new DBConnect(LoginSetting.ConnectStr);
+                db.CreateSqlConnect();
 
-            DataTable resultTbl = db.ExecuteQuery(strSql);
+                string strSql = "SELECT CURRENT_TIMESTAMP AS systemtime";
 
-            DateTime sysTime = Convert.ToDateTime(resultTbl.Rows[0]["systemtime"]);
+                DataTable resultTbl = db.ExecuteQuery(strSql);
 
-            db.CloseSqlConnect();
+                sysTime = Convert.ToDateTime(resultTbl.Rows[0]["systemtime"]);
+
+                db.CloseSqlConnect();
+            }
+            else
+            {
+                // ローカルタイムを使用
+                sysTime = System.DateTime.Now;
+            }
+            //            DBConnect db = new DBConnect(LoginSetting.ConnectStr);
+            //            db.CreateSqlConnect();
+
+            //            string strSql = "SELECT CURRENT_TIMESTAMP AS systemtime";
+
+            //            DataTable resultTbl = db.ExecuteQuery(strSql);
+
+            //            DateTime sysTime = Convert.ToDateTime(resultTbl.Rows[0]["systemtime"]);
+
+            //            db.CloseSqlConnect();
 
             return sysTime;
 
@@ -1072,7 +1371,10 @@ namespace jp.co.ftf.jobcontroller.DAO
                         {
                             if (!dc.ColumnName.Equals("valid_flag"))
                             {
-                                sqlParams.Add(new ComSqlParam(DbType.String, "@" + dc.ColumnName, dr[dc.ColumnName]));
+                                /* added by YAMA 2014/12/12    V2.1.0 No33 対応(「created_date」の除外) */
+                                //sqlParams.Add(new ComSqlParam(DbType.String, "@" + dc.ColumnName, dr[dc.ColumnName]));
+                                if (!dc.ColumnName.Equals("created_date"))
+                                    sqlParams.Add(new ComSqlParam(DbType.String, "@" + dc.ColumnName, dr[dc.ColumnName]));
                             }
                             else
                             {
@@ -1096,6 +1398,8 @@ namespace jp.co.ftf.jobcontroller.DAO
             {
                 KEY_FOR_DOUBLE_CHECK.Add("ja_calendar_control_table",
                     new ImportDoubleRelationCheck("ja_calendar_control_table", new String[] { "calendar_id", "update_date" }, null, null));
+                KEY_FOR_DOUBLE_CHECK.Add("ja_filter_control_table",
+                    new ImportDoubleRelationCheck("ja_filter_control_table", new String[] { "filter_id", "update_date" }, null, null));
                 KEY_FOR_DOUBLE_CHECK.Add("ja_schedule_control_table",
                     new ImportDoubleRelationCheck("ja_schedule_control_table", new String[] { "schedule_id", "update_date" }, null, null));
                 KEY_FOR_DOUBLE_CHECK.Add("ja_jobnet_control_table",
@@ -1133,20 +1437,36 @@ namespace jp.co.ftf.jobcontroller.DAO
         {
             String insertSql;
             int collumnCount = 0;
+
             insertSql = "insert into " + dt.TableName + " (";
             foreach (DataColumn dc in dt.Columns)
             {
-                if (collumnCount > 0) insertSql = insertSql + ",";
-                insertSql = insertSql + dc.ColumnName;
-                collumnCount++;
+                /* added by YAMA 2014/12/12    V2.1.0 No33 対応(「created_date」の除外) */
+                //if (collumnCount > 0) insertSql = insertSql + ",";
+                //insertSql = insertSql + dc.ColumnName;
+                //collumnCount++;
+                if (!dc.ColumnName.Equals("created_date"))
+                {
+                    if (collumnCount > 0) insertSql = insertSql + ",";
+                    insertSql = insertSql + dc.ColumnName;
+                    collumnCount++;
+                }
             }
+
             insertSql = insertSql + ") values (";
             collumnCount = 0;
             foreach (DataColumn dc in dt.Columns)
             {
-                if (collumnCount > 0) insertSql = insertSql + ",";
-                insertSql = insertSql + "?";
-                collumnCount++;
+                /* added by YAMA 2014/12/12    V2.1.0 No33 対応(「created_date」の除外) */
+                //if (collumnCount > 0) insertSql = insertSql + ",";
+                //insertSql = insertSql + "?";
+                //collumnCount++;
+                if (!dc.ColumnName.Equals("created_date"))
+                {
+                    if (collumnCount > 0) insertSql = insertSql + ",";
+                    insertSql = insertSql + "?";
+                    collumnCount++;
+                }
             }
             insertSql = insertSql + ")";
             return insertSql;
@@ -1289,6 +1609,1006 @@ namespace jp.co.ftf.jobcontroller.DAO
             if (dt.Rows.Count > 0) return true;
             return false;
         }
+
+
+        // added by YAMA 2014/10/20    マネージャ内部時刻同期
+        /// <summary>マネージャ内部時刻同期を取得</summary>
+        /// <returns>0：同期なし(パラメータ未登録含む)，1：同期あり</returns>
+        public static int GetManagerTimeSync()
+        {
+            int rtn = 0;
+
+            DBConnect db = new DBConnect(LoginSetting.ConnectStr);
+            db.CreateSqlConnect();
+
+            string strSql = "select value from ja_parameter_table where parameter_name='MANAGER_TIME_SYNC'";
+
+            DataTable resultTbl = db.ExecuteQuery(strSql);
+
+            if (!(resultTbl.Rows.Count == 0))
+            {
+                rtn = Convert.ToInt32(resultTbl.Rows[0]["value"]);
+            }
+            return rtn;
+        }
+
+        //added by YAMA 2014/10/17
+        public static bool CheckRelatedInValidCalendar(String calendar_id, String updDate, ref DataTable dt)
+        {
+            bool fstFilterflg = false;
+            bool fstScheduleflg = false;
+            bool chkflg = false;
+            String sql = "";
+            String chkDatesql = "";
+
+            DBConnect db = new DBConnect(LoginSetting.ConnectStr);
+            db.CreateSqlConnect();
+            DataTable chkDt;
+
+            // カレンダーに紐付くフィルターをチェック
+            if (string.IsNullOrEmpty(updDate))
+            {
+                chkDatesql = "' ";
+            }
+            else
+            {
+                chkDatesql = "' and cal.update_date = " + updDate + " ";
+            }
+
+            sql = "select fil.filter_id from ja_calendar_control_table as cal, ja_filter_control_table as fil " +
+                  "where cal.calendar_id = '" + calendar_id + chkDatesql +
+                  "and cal.calendar_id = fil.base_calendar_id and fil.valid_flag = 1";
+
+            chkDt = db.ExecuteQuery(sql);
+
+            if (chkDt.Rows.Count != 0)
+            {
+                DataRow validDataRow;
+
+                for (int i = 0; i < chkDt.Rows.Count; i++)
+                {
+                    if (fstFilterflg == false)
+                    {
+                        validDataRow = dt.NewRow();
+                        validDataRow["RelatedObject"] = RELATEDOBJECT_FILTER;
+                        validDataRow["ObjectType"] = RELATEDOBJECT_FILTER;
+                        dt.Rows.Add(validDataRow);
+                        fstFilterflg = true;
+                        chkflg = true;
+                    }
+                    validDataRow = dt.NewRow();
+                    validDataRow["RelatedObject"] = chkDt.Rows[i]["filter_id"];
+                    validDataRow["ObjectType"] = RELATEDOBJECT_FILTER;
+                    dt.Rows.Add(validDataRow);
+                }
+            }
+
+            // カレンダーに紐付くスケジュールをチェック
+            sql = "select distinct scDtl.schedule_id " +
+                  "from ja_calendar_control_table as cal, ja_schedule_control_table as scCtl, ja_schedule_detail_table as scDtl " +
+                  "where cal.calendar_id = '" + calendar_id + chkDatesql + " and cal.calendar_id = scDtl.calendar_id " +
+                  "and scDtl.schedule_id = scCtl.schedule_id and scCtl.valid_flag = 1";
+
+            chkDt = db.ExecuteQuery(sql);
+
+            if (chkDt.Rows.Count != 0)
+            {
+                DataRow validDataRow;
+
+                for (int i = 0; i < chkDt.Rows.Count; i++)
+                {
+                    if (fstScheduleflg == false)
+                    {
+                        validDataRow = dt.NewRow();
+                        validDataRow["RelatedObject"] = RELATEDOBJECT_SCHEDULE;
+                        validDataRow["ObjectType"] = RELATEDOBJECT_SCHEDULE;
+                        dt.Rows.Add(validDataRow);
+                        fstScheduleflg = true;
+                        chkflg = true;
+                    }
+                    validDataRow = dt.NewRow();
+                    validDataRow["RelatedObject"] = chkDt.Rows[i]["schedule_id"];
+                    validDataRow["ObjectType"] = RELATEDOBJECT_SCHEDULE;
+                    dt.Rows.Add(validDataRow);
+                }
+            }
+            db.CloseSqlConnect();
+            return chkflg;
+        }
+
+
+        //added by YAMA 2014/10/17
+        public static bool CheckRelatedInValidJobNet(String jobnetId, ref DataTable dt)
+        {
+            bool fstScheduleflg = false;
+            bool chkflg = false;
+            String sql = "";
+
+            DBConnect db = new DBConnect(LoginSetting.ConnectStr);
+            db.CreateSqlConnect();
+            DataTable chkDt;
+
+            // スケジュールをチェック
+            sql = "select distinct ctl.schedule_id " +
+                  "from ja_schedule_jobnet_table as sch, ja_schedule_control_table as ctl " +
+                  "where sch.jobnet_id = '" + jobnetId + "' and sch.schedule_id = ctl.schedule_id and ctl.valid_flag = 1";
+
+            chkDt = db.ExecuteQuery(sql);
+
+            if (chkDt.Rows.Count != 0)
+            {
+                DataRow validDataRow;
+
+                for (int i = 0; i < chkDt.Rows.Count; i++)
+                {
+                    if (fstScheduleflg == false)
+                    {
+                        validDataRow = dt.NewRow();
+                        validDataRow["RelatedObject"] = RELATEDOBJECT_SCHEDULE;
+                        validDataRow["ObjectType"] = RELATEDOBJECT_SCHEDULE;
+                        dt.Rows.Add(validDataRow);
+                        fstScheduleflg = true;
+                        chkflg = true;
+                    }
+                    validDataRow = dt.NewRow();
+                    validDataRow["RelatedObject"] = chkDt.Rows[i]["schedule_id"];
+                    validDataRow["ObjectType"] = RELATEDOBJECT_SCHEDULE;
+                    dt.Rows.Add(validDataRow);
+                }
+            }
+            db.CloseSqlConnect();
+            return chkflg;
+        }
+
+
+        //added by YAMA 2014/10/17
+        public static void SetObjectValid(String objectId, String updDate, Consts.ObjectEnum objectType, ref DataTable chkResult)
+        {
+            String tableName = "ja_calendar_control_table";
+            String idColumnName = "calendar_id";
+
+            bool ret = true;
+
+            DBConnect db = new DBConnect(LoginSetting.ConnectStr);
+            db.CreateSqlConnect();
+            db.BeginTransaction();
+            try
+            {
+                if (objectType == Consts.ObjectEnum.CALENDAR)
+                {
+                    tableName = "ja_calendar_control_table";
+                    idColumnName = "calendar_id";
+                    CalendarControlDAO calendarControlDAO = new CalendarControlDAO(db);
+                    calendarControlDAO.GetLock(objectId, LoginSetting.DBType);
+                }
+                if (objectType == Consts.ObjectEnum.FILTER)
+                {
+                    //added by YAMA 2014/10/17
+                    ret = CheckRelatedValidFilter(objectId, updDate, ref chkResult);
+                    if (ret == false)
+                    {
+                        db.CloseSqlConnect();
+                        return;
+                    }
+                    tableName = "ja_filter_control_table";
+                    idColumnName = "filter_id";
+                    FilterControlDAO filterControlDAO = new FilterControlDAO(db);
+                    filterControlDAO.GetLock(objectId, LoginSetting.DBType);
+                }
+                if (objectType == Consts.ObjectEnum.SCHEDULE)
+                {
+                    //added by YAMA 2014/10/17
+                    ret = CheckRelatedValidSchedule(objectId, updDate, ref chkResult);
+                    if (ret == false)
+                    {
+                        db.CloseSqlConnect();
+                        return;
+                    }
+                    tableName = "ja_schedule_control_table";
+                    idColumnName = "schedule_id";
+                    ScheduleControlDAO scheduleControlDAO = new ScheduleControlDAO(db);
+                    scheduleControlDAO.GetLock(objectId, LoginSetting.DBType);
+                }
+                if (objectType == Consts.ObjectEnum.JOBNET)
+                {
+                    //added by YAMA 2014/10/17
+                    ret = CheckRelatedValidJobNet(objectId, updDate, ref chkResult);
+                    if (ret == true)
+                    {
+                        db.CloseSqlConnect();
+                        return;
+                    }
+                    tableName = "ja_jobnet_control_table";
+                    idColumnName = "jobnet_id";
+                    JobnetControlDAO jobnetControlDAO = new JobnetControlDAO(db);
+                    jobnetControlDAO.GetLock(objectId, LoginSetting.DBType);
+                }
+            }
+            catch (DBException e)
+            {
+                e.MessageID = Consts.ERROR_DB_LOCK;
+                throw e;
+            }
+            string strSql1 = "update " + tableName + " set valid_flag=0 where " + idColumnName + "='" + objectId + "' and valid_flag=1";
+            string strSql2 = "update " + tableName + " set valid_flag=1 where " + idColumnName + "='" + objectId + "' and update_date=" + updDate;
+            db.AddBatch(strSql1);
+            db.AddBatch(strSql2);
+            db.ExecuteBatchUpdate();
+            db.TransactionCommit();
+            db.CloseSqlConnect();
+        }
+
+
+
+
+        //added by YAMA 2014/10/17
+        public static void SetObjectsInValid(String objectId, Consts.ObjectEnum objectType, DataRow[] rows, ref DataTable chkResult)
+        {
+            DBConnect db = new DBConnect(LoginSetting.ConnectStr);
+            db.CreateSqlConnect();
+            db.BeginTransaction();
+            String tableName = "ja_calendar_control_table";
+            String idColumnName = "calendar_id";
+
+            String updDate = Convert.ToString(rows[0]["update_date"]);
+
+            bool ret = true;
+
+            try
+            {
+                if (objectType == Consts.ObjectEnum.CALENDAR)
+                {
+                    //added by YAMA 2014/10/17
+                    ret = CheckRelatedObjectForCalendar(objectId, ref chkResult, "Invalid");
+                    if (ret == false)
+                    {
+                        db.CloseSqlConnect();
+                        return;
+                    }
+                    tableName = "ja_calendar_control_table";
+                    idColumnName = "calendar_id";
+                    CalendarControlDAO calendarControlDAO = new CalendarControlDAO(db);
+                    calendarControlDAO.GetLock(objectId, LoginSetting.DBType);
+                }
+                if (objectType == Consts.ObjectEnum.FILTER)
+                {
+
+                    //added by YAMA 2014/10/17
+                    ret = CheckRelatedObjectForFilter(objectId, ref chkResult, "Invalid");
+                    if (ret == false)
+                    {
+                        // db.TransactionCommit();
+                        db.CloseSqlConnect();
+                        return;
+                    }
+                    tableName = "ja_filter_control_table";
+                    idColumnName = "filter_id";
+                    FilterControlDAO filterControlDAO = new FilterControlDAO(db);
+                    filterControlDAO.GetLock(objectId, LoginSetting.DBType);
+                }
+                if (objectType == Consts.ObjectEnum.SCHEDULE)
+                {
+                    tableName = "ja_schedule_control_table";
+                    idColumnName = "schedule_id";
+                    ScheduleControlDAO scheduleControlDAO = new ScheduleControlDAO(db);
+                    scheduleControlDAO.GetLock(objectId, LoginSetting.DBType);
+                }
+                if (objectType == Consts.ObjectEnum.JOBNET)
+                {
+                    //added by YAMA 2014/10/17
+                    ret = CheckRelatedObjectForJobNet(objectId, ref chkResult, "Invalid");
+                    if (ret == false)
+                    {
+                        db.CloseSqlConnect();
+                        return;
+                    }
+                    tableName = "ja_jobnet_control_table";
+                    idColumnName = "jobnet_id";
+                    JobnetControlDAO jobnetControlDAO = new JobnetControlDAO(db);
+                    jobnetControlDAO.GetLock(objectId, LoginSetting.DBType);
+                }
+            }
+            catch (DBException e)
+            {
+                e.MessageID = Consts.ERROR_DB_LOCK;
+                throw e;
+            }
+            foreach (DataRow row in rows)
+            {
+                if ((Int32)row["valid_flag"] == 1)
+                {
+                    string strSql = "update " + tableName + " set valid_flag=0 where " + idColumnName + "='" + objectId + "' and update_date=" + Convert.ToString(row["update_date"]);
+                    db.AddBatch(strSql);
+                }
+            }
+
+            db.ExecuteBatchUpdate();
+            db.TransactionCommit();
+            db.CloseSqlConnect();
+
+        }
+
+
+        //added by YAMA 2014/10/17
+        /// <summary>選択したカレンダーの関連オブジェクトの有効チェック</summary>
+        /// <param name="filter_id">選択したカレンダーID</param>
+        /// <param name="dt">関連データ格納後返却</param>
+        /// <param name="Operation">操作種別「Invalid」、「Delete」</param>
+        /// <return>「True：関連する有効オブジェクトがない」「False：それ以外」</return>
+        public static bool CheckRelatedObjectForCalendar(String calendar_id, ref DataTable dt, String Operation)
+        {
+            bool fstFilterflg = false;
+            bool fstScheduleflg = false;
+            bool chkflg = true;
+            String sql = "";
+
+            DBConnect db = new DBConnect(LoginSetting.ConnectStr);
+            db.CreateSqlConnect();
+            DataTable chkDt;
+            DateTime chgDate;
+
+            // カレンダーに紐付くフィルターをチェック
+            sql = "select distinct fil.filter_id" + (Operation == "Delete" ? " , fil.update_date " : " ") +
+                  "from ja_calendar_control_table as cal, ja_filter_control_table as fil " +
+                  "where cal.calendar_id = '" + calendar_id + "' " +
+                  "and cal.calendar_id = fil.base_calendar_id" + (Operation == "Delete" ? "" : " and fil.valid_flag = 1");
+
+            chkDt = db.ExecuteQuery(sql);
+
+            if (chkDt.Rows.Count != 0)
+            {
+                DataRow validDataRow;
+                for (int i = 0; i < chkDt.Rows.Count; i++)
+                {
+                    if (fstFilterflg == false)
+                    {
+                        validDataRow = dt.NewRow();
+                        validDataRow["RelatedObject"] = RELATEDOBJECT_FILTER;
+                        validDataRow["ObjectType"] = RELATEDOBJECT_FILTER;
+                        dt.Rows.Add(validDataRow);
+                        fstFilterflg = true;
+                        chkflg = false;
+                    }
+                    if (Operation == "Delete")
+                    {
+                        chgDate = DateTime.ParseExact(chkDt.Rows[i]["update_date"].ToString(), "yyyyMMddHHmmss", null);
+                    }
+                    else
+                    {
+                        chgDate = DateTime.MinValue;
+                    }
+                    validDataRow = dt.NewRow();
+                    validDataRow["RelatedObject"] = chkDt.Rows[i]["filter_id"] + (Operation == "Delete" ? " (" + chgDate.ToString() + ")" : "");
+                    validDataRow["ObjectType"] = RELATEDOBJECT_FILTER;
+                    dt.Rows.Add(validDataRow);
+                }
+            }
+            // カレンダーに紐付くスケジュールをチェック
+            sql = "select distinct ctl.schedule_id" + (Operation == "Delete" ? ", ctl.update_date " : " ") +
+                  "from ja_calendar_control_table as cal, ja_schedule_detail_table as dtl, ja_schedule_control_table as ctl " +
+                  "where cal.calendar_id = '" + calendar_id + "' and cal.calendar_id = dtl.calendar_id " +
+                  "and dtl.schedule_id = ctl.schedule_id" + (Operation == "Delete" ? "" : " and ctl.valid_flag = 1");
+            chkDt = db.ExecuteQuery(sql);
+
+            if (chkDt.Rows.Count != 0)
+            {
+                DataRow validDataRow;
+
+                for (int i = 0; i < chkDt.Rows.Count; i++)
+                {
+                    if (fstScheduleflg == false)
+                    {
+                        validDataRow = dt.NewRow();
+                        validDataRow["RelatedObject"] = RELATEDOBJECT_SCHEDULE;
+                        validDataRow["ObjectType"] = RELATEDOBJECT_SCHEDULE;
+                        dt.Rows.Add(validDataRow);
+                        fstScheduleflg = true;
+                        chkflg = false;
+                    }
+                    if (Operation == "Delete")
+                    {
+                        chgDate = DateTime.ParseExact(chkDt.Rows[i]["update_date"].ToString(), "yyyyMMddHHmmss", null);
+                    }
+                    else
+                    {
+                        chgDate = DateTime.MinValue;
+                    }
+                    validDataRow = dt.NewRow();
+                    validDataRow["RelatedObject"] = chkDt.Rows[i]["schedule_id"] + (Operation == "Delete" ? " (" + chgDate.ToString() + ")" : "");
+                    validDataRow["ObjectType"] = RELATEDOBJECT_SCHEDULE;
+                    dt.Rows.Add(validDataRow);
+                }
+            }
+            db.CloseSqlConnect();
+            return chkflg;
+        }
+
+        //added by YAMA 2014/10/17
+        /// <summary>選択したフィルターの関連オブジェクトの有効チェック</summary>
+        /// <param name="filter_id">選択したフィルターID</param>
+        /// <param name="dt">関連データ格納後返却</param>
+        /// <param name="Operation">操作種別「Invalid」、「Delete」</param>
+        /// <return>「True：関連する有効オブジェクトがない」「False：それ以外」</return>
+        public static bool CheckRelatedObjectForFilter(String filter_id, ref DataTable dt, String Operation)
+        {
+            bool fstScheduleflg = false;
+            bool chkflg = true;
+            String sql = "";
+
+            DBConnect db = new DBConnect(LoginSetting.ConnectStr);
+            db.CreateSqlConnect();
+            DataTable chkDt;
+            DateTime chgDate;
+
+            // フィルターに紐付くスケジュールをチェック
+            sql = "select distinct ctl.schedule_id, ctl.update_date " +
+                  "from ja_filter_control_table as fil, ja_schedule_detail_table as dtl, ja_schedule_control_table as ctl " +
+                  "where fil.filter_id = '" + filter_id + "' and fil.filter_id = dtl.calendar_id " +
+                  "and dtl.schedule_id = ctl.schedule_id" + (Operation == "Delete" ? "" : " and ctl.valid_flag = 1");
+
+            chkDt = db.ExecuteQuery(sql);
+
+            if (chkDt.Rows.Count != 0)
+            {
+                DataRow validDataRow;
+
+                for (int i = 0; i < chkDt.Rows.Count; i++)
+                {
+                    if (fstScheduleflg == false)
+                    {
+                        validDataRow = dt.NewRow();
+                        validDataRow["RelatedObject"] = RELATEDOBJECT_SCHEDULE;
+                        validDataRow["ObjectType"] = RELATEDOBJECT_SCHEDULE;
+                        dt.Rows.Add(validDataRow);
+                        fstScheduleflg = true;
+                        chkflg = false;
+                    }
+                    if (Operation == "Delete")
+                    {
+                        chgDate = DateTime.ParseExact(chkDt.Rows[i]["update_date"].ToString(), "yyyyMMddHHmmss", null);
+                    }
+                    else
+                    {
+                        chgDate = DateTime.MinValue;
+                    }
+                    validDataRow = dt.NewRow();
+                    validDataRow["RelatedObject"] = chkDt.Rows[i]["schedule_id"] + (Operation == "Delete" ? " (" + chgDate.ToString() + ")" : "");
+                    validDataRow["ObjectType"] = RELATEDOBJECT_SCHEDULE;
+                    dt.Rows.Add(validDataRow);
+                }
+            }
+            db.CloseSqlConnect();
+            return chkflg;
+        }
+
+
+
+        //added by YAMA 2014/10/17
+        /// <summary>選択したジョブネットの関連オブジェクトの有効チェック</summary>
+        /// <param name="filter_id">選択したジョブネットID</param>
+        /// <param name="dt">関連データ格納後返却</param>
+        /// <param name="Operation">操作種別「Invalid」、「Delete」</param>
+        /// <return>「True：関連する有効オブジェクトがない」「False：それ以外」</return>
+        public static bool CheckRelatedObjectForJobNet(String jobnetId, ref DataTable dt, String Operation)
+        {
+            bool fstScheduleflg = false;
+            bool fstJobNetflg = false;
+            bool chkflg = true;
+            String sql = "";
+
+            DBConnect db = new DBConnect(LoginSetting.ConnectStr);
+            db.CreateSqlConnect();
+            DataTable chkDt;
+            DataRow validDataRow;
+            DateTime chgDate;
+
+            // 選択したジョブネットがスケジュールで使用されているかをチェック
+            sql = "select distinct sch.schedule_id" + (Operation == "Delete" ? ", sch.update_date " : " ") +
+                  "from ja_schedule_jobnet_table as sch, ja_schedule_control_table as ctl " +
+                   "where sch.jobnet_id = '" + jobnetId + "' " +
+                   " and sch.schedule_id = ctl.schedule_id" + (Operation == "Delete" ? "" : " and ctl.valid_flag = 1");
+
+            chkDt = db.ExecuteQuery(sql);
+
+            if (chkDt.Rows.Count != 0)
+            {
+                for (int i = 0; i < chkDt.Rows.Count; i++)
+                {
+                    if (fstScheduleflg == false)
+                    {
+                        validDataRow = dt.NewRow();
+                        validDataRow["RelatedObject"] = RELATEDOBJECT_SCHEDULE;
+                        validDataRow["ObjectType"] = RELATEDOBJECT_SCHEDULE;
+                        dt.Rows.Add(validDataRow);
+                        fstScheduleflg = true;
+                        chkflg = false;
+                    }
+                    if (Operation == "Delete")
+                    {
+                        chgDate = DateTime.ParseExact(chkDt.Rows[i]["update_date"].ToString(), "yyyyMMddHHmmss", null);
+                    }
+                    else
+                    {
+                        chgDate = DateTime.MinValue;
+                    }
+                    validDataRow = dt.NewRow();
+                    validDataRow["RelatedObject"] = chkDt.Rows[i]["schedule_id"] + (Operation == "Delete" ? " (" + chgDate.ToString() + ")" : "");
+                    validDataRow["ObjectType"] = RELATEDOBJECT_SCHEDULE;
+                    dt.Rows.Add(validDataRow);
+                }
+            }
+
+            // 選択したジョブネットがジョブネットアイコン、タスクアイコンとして他ジョブネットで使用されているかをチェック
+            sql = "select icon.jobnet_id ,icon.update_date from ja_icon_jobnet_table as icon where icon.link_jobnet_id = '" + jobnetId + "' " +
+                  "union " +
+                  "select tsk.jobnet_id , tsk.update_date from ja_icon_task_table as tsk where tsk.submit_jobnet_id = '" + jobnetId + "'";
+            chkDt = db.ExecuteQuery(sql);
+            if (chkDt.Rows.Count != 0)
+            {
+
+                // 該当するジョブネットをチェック
+                for (int i = 0; i < chkDt.Rows.Count; i++)
+                {
+                    sql = "select jobnet_id, update_date, valid_flag, user_name, jobnet_name " +
+                          "from ja_jobnet_control_table " +
+                          "where jobnet_id = '" + chkDt.Rows[i]["jobnet_id"] + "' and update_date = " + chkDt.Rows[i]["update_date"] + (Operation == "Delete" ? "" : " and valid_flag = 1");
+                    DataTable objDt;
+                    objDt = db.ExecuteQuery(sql);
+                    if (objDt.Rows.Count != 0)
+                    {
+                        if (fstJobNetflg == false)
+                        {
+                            validDataRow = dt.NewRow();
+                            validDataRow["RelatedObject"] = RELATEDOBJECT_JOBNET;
+                            validDataRow["ObjectType"] = RELATEDOBJECT_JOBNET;
+                            dt.Rows.Add(validDataRow);
+                            fstJobNetflg = true;
+                            chkflg = false;
+                        }
+                        if (Operation == "Delete")
+                        {
+                            chgDate = DateTime.ParseExact(objDt.Rows[0]["update_date"].ToString(), "yyyyMMddHHmmss", null);
+                        }
+                        else
+                        {
+                            chgDate = DateTime.MinValue;
+                        }
+                        validDataRow = dt.NewRow();
+                        validDataRow["RelatedObject"] = objDt.Rows[0]["jobnet_id"] + (Operation == "Delete" ? " (" + chgDate.ToString() + ")" : "");
+                        validDataRow["ObjectType"] = RELATEDOBJECT_JOBNET;
+                        dt.Rows.Add(validDataRow);
+                    }
+                }
+            }
+            db.CloseSqlConnect();
+            return chkflg;
+        }
+
+        //added by YAMA 2014/10/17
+        /// <summary>選択したフィルターの有効化チェック</summary>
+        /// <param name="filter_id">選択したフィルターID</param>
+        /// <param name="updDate">カレンダーレコードの更新日</param>
+        /// <param name="dt">関連データ格納後返却</param>
+        /// <return>「True：フィルターが有効化可能」「False：それ以外」</return>
+        public static bool CheckRelatedValidFilter(String filter_id, String updDate, ref DataTable dt)
+        {
+            int errCnt = 0;
+            String sql = "";
+
+            DBConnect db = new DBConnect(LoginSetting.ConnectStr);
+            db.CreateSqlConnect();
+            DataTable chkDt;
+
+            // フィルターに紐付くカレンダーのチェック
+            sql = "select distinct cal.calendar_id from ja_filter_control_table as fil, ja_calendar_control_table as cal " +
+                  "where fil.filter_id = '" + filter_id + "' and fil.update_date = " + updDate + " " +
+                  "and fil.base_calendar_id = cal.calendar_id ";
+
+            chkDt = db.ExecuteQuery(sql);
+
+            if (chkDt.Rows.Count != 0)
+            {
+                for (int i = 0; i < chkDt.Rows.Count; i++)
+                {
+                    // 無効カレンダーがあればerrCntを加算
+                    if (!CheckValidCalendar(chkDt.Rows[i]["calendar_id"].ToString(), db, ref dt, errCnt)) errCnt++;
+                }
+
+            }
+            db.CloseSqlConnect();
+            return (errCnt == 0 ? true : false);
+        }
+
+
+
+        //added by YAMA 2014/10/17
+        /// <summary>選択したスケジュールの有効化チェック</summary>
+        /// <summary>関連する[カレンダー、フィルター、ジョブネット]の有効チェック</summary>
+        /// <param name="schedule_id">選択したスケジュールID</param>
+        /// <param name="updDate">カレンダー、フィルター」レコードの更新日</param>
+        /// <param name="dt">関連データ格納後返却</param>
+        /// <return>「True：スケジュールが有効化可能」「False：それ以外」</return>
+        public static bool CheckRelatedValidSchedule(String schedule_id, String updDate, ref DataTable dt)
+        {
+            int errCnt = 0;
+            bool fstJobNetflg = false;
+            String sql = "";
+
+            DBConnect db = new DBConnect(LoginSetting.ConnectStr);
+            db.CreateSqlConnect();
+            DataTable chkDt;
+
+            // スケジュールに紐付くカレンダー・フィルターのチェック
+            sql = "select scDtl.calendar_id, scDtl.object_flag from ja_schedule_control_table as scCtl, ja_schedule_detail_table as scDtl " +
+                  "where scCtl.schedule_id = '" + schedule_id + "' and scCtl.update_date = " + updDate + " " +
+                  "and scCtl.schedule_id = scDtl.schedule_id and scCtl.update_date = scDtl.update_date " +
+                  "order by object_flag, scDtl.calendar_id ";
+
+            chkDt = db.ExecuteQuery(sql);
+
+            if (chkDt.Rows.Count != 0)
+            {
+
+                for (int i = 0; i < chkDt.Rows.Count; i++)
+                {
+                    switch ((Int32)chkDt.Rows[i]["object_flag"])
+                    {
+                        // カレンダー
+                        case 0:
+                            if (!CheckValidCalendar(chkDt.Rows[i]["calendar_id"].ToString(), db, ref dt, errCnt)) errCnt++;
+
+                            break;
+                        // フィルター
+                        case 1:
+                            if (!CheckValidFilter(chkDt.Rows[i]["calendar_id"].ToString(), db, ref dt)) errCnt++;
+
+                            break;
+                    }
+                }
+            }
+
+            // スケジュールに紐付くジョブネットのチェック
+            sql = "select scNet.jobnet_id from ja_schedule_control_table as scCtl, ja_schedule_jobnet_table as scNet " +
+                  "where scCtl.schedule_id = '" + schedule_id + "' and scCtl.update_date = " + updDate + " " +
+                  "and scCtl.schedule_id = scNet.schedule_id and scCtl.update_date = scNet.update_date ";
+
+            chkDt = db.ExecuteQuery(sql);
+
+            if (chkDt.Rows.Count != 0)
+            {
+                DataTable InvalidDt;
+                DataRow validDataRow;
+
+                for (int i = 0; i < chkDt.Rows.Count; i++)
+                {
+                    sql = "select jobnet_id from ja_jobnet_control_table " +
+                          "where jobnet_id = '" + chkDt.Rows[i]["jobnet_id"] + "' and valid_flag = 1 ";
+
+                    InvalidDt = db.ExecuteQuery(sql);
+
+                    if (InvalidDt.Rows.Count == 0)
+                    {
+                        if (fstJobNetflg == false)
+                        {
+                            validDataRow = dt.NewRow();
+                            validDataRow["RelatedObject"] = RELATEDOBJECT_JOBNET;
+                            validDataRow["ObjectType"] = RELATEDOBJECT_JOBNET;
+                            dt.Rows.Add(validDataRow);
+                            fstJobNetflg = true;
+                            errCnt++;
+                        }
+                        validDataRow = dt.NewRow();
+                        validDataRow["RelatedObject"] = chkDt.Rows[i]["jobnet_id"];
+                        validDataRow["ObjectType"] = RELATEDOBJECT_JOBNET;
+                        dt.Rows.Add(validDataRow);
+                    }
+                }
+            }
+            db.CloseSqlConnect();
+
+            return (errCnt == 0 ? true : false);
+        }
+
+
+        //added by YAMA 2014/10/17
+        /// <summary>選択したジョブネットの有効化チェック</summary>
+        /// <summary>関連する[ジョブネット]の有効チェック</summary>
+        /// <param name="schedule_id">選択したスケジュールID</param>
+        /// <param name="updDate">ジョブネットレコードの更新日</param>
+        /// <param name="dt">関連データ格納後返却</param>
+        /// <return>「True：ジョブネットが有効化可能」「False：それ以外」</return>
+        public static bool CheckRelatedValidJobNet(String jobnetId, String updDate, ref DataTable dt)
+        {
+            bool fstJobNetflg = false;
+            bool chkflg = false;
+            String sql = "select netCtl.jobnet_id, jobCtl.job_id, jobCtl.job_name, jobCtl.job_type " +
+                         "from ja_jobnet_control_table as netCtl, ja_job_control_table as jobCtl " +
+                         "where netCtl.jobnet_id = '" + jobnetId + "' and netCtl.update_date = " + updDate + " " +
+                         "and netCtl.jobnet_id = jobCtl.jobnet_id and netCtl.update_date = jobCtl.update_date " +
+                         "and jobCtl.job_type in (5, 11) ";
+            DBConnect db = new DBConnect(LoginSetting.ConnectStr);
+            db.CreateSqlConnect();
+            DataTable chkDt;
+            chkDt = db.ExecuteQuery(sql);
+
+            if (chkDt.Rows.Count != 0)
+            {
+                DataTable InvalidDt;
+                DataRow validDataRow;
+
+                for (int i = 0; i < chkDt.Rows.Count; i++)
+                {
+                    switch ((Int32)chkDt.Rows[i]["job_type"])
+                    {
+                        // chkJobnetIconData
+                        case 5:
+                            // ジョブネットアイコン設定テーブルのリンク先ジョブネットIDの有効をチェック
+                            sql = "select icon.link_jobnet_id from ja_icon_jobnet_table as icon, ja_jobnet_control_table as netCtl " +
+                                  "where icon.jobnet_id = '" + chkDt.Rows[i]["jobnet_id"] + "' and icon.job_id = '" + chkDt.Rows[i]["job_id"] + "' " +
+                                  "and icon.link_jobnet_id = netCtl.jobnet_id and netCtl.valid_flag = 1 and icon.update_date = " + updDate;
+
+                            InvalidDt = db.ExecuteQuery(sql);
+
+                            if (InvalidDt.Rows.Count == 0)
+                            {   // 無効となっているリンク先ジョブネットIDを抽出
+                                sql = "select distinct icon.link_jobnet_id from ja_icon_jobnet_table as icon, ja_jobnet_control_table as netCtl " +
+                                      "where icon.jobnet_id = '" + chkDt.Rows[i]["jobnet_id"] + "' and icon.job_id = '" + chkDt.Rows[i]["job_id"] + "' " +
+                                      "and icon.link_jobnet_id = netCtl.jobnet_id and netCtl.valid_flag = 0 and icon.update_date = " + updDate;
+
+                                InvalidDt = db.ExecuteQuery(sql);
+                                if (InvalidDt.Rows.Count != 0)
+                                {
+                                    if (fstJobNetflg == false)
+                                    {
+                                        validDataRow = dt.NewRow();
+                                        validDataRow["RelatedObject"] = RELATEDOBJECT_JOBNET;
+                                        validDataRow["ObjectType"] = RELATEDOBJECT_JOBNET;
+                                        dt.Rows.Add(validDataRow);
+                                        fstJobNetflg = true;
+                                        chkflg = true;
+                                    }
+                                    validDataRow = dt.NewRow();
+                                    validDataRow["RelatedObject"] = InvalidDt.Rows[0]["link_jobnet_id"];
+                                    validDataRow["ObjectType"] = RELATEDOBJECT_JOBNET;
+                                    dt.Rows.Add(validDataRow);
+                                }
+                            }
+
+                            break;
+                        // chkTaskIconData
+                        case 11:
+                            sql = "select  jobnet_id from ja_jobnet_control_table where jobnet_id = " +
+                                  "(select submit_jobnet_id from ja_icon_task_table " +
+                                  "where jobnet_id = '" + jobnetId + "' and job_id = '" + chkDt.Rows[i]["job_id"] + "' and update_date = " + updDate + ") " +
+                                  "and valid_flag = 1 ";
+
+
+                            InvalidDt = db.ExecuteQuery(sql);
+                            if (InvalidDt.Rows.Count == 0)
+                            {
+                                if (fstJobNetflg == false)
+                                {
+                                    validDataRow = dt.NewRow();
+                                    validDataRow["RelatedObject"] = RELATEDOBJECT_JOBNET;
+                                    validDataRow["ObjectType"] = RELATEDOBJECT_JOBNET;
+                                    dt.Rows.Add(validDataRow);
+                                    fstJobNetflg = true;
+                                    chkflg = true;
+                                }
+                                sql = "select distinct submit_jobnet_id from ja_icon_task_table " +
+                                      "where jobnet_id = '" + jobnetId + "' and job_id = '" + chkDt.Rows[i]["job_id"] + "' and update_date = " + updDate;
+                                InvalidDt = db.ExecuteQuery(sql);
+
+                                validDataRow = dt.NewRow();
+                                validDataRow["RelatedObject"] = InvalidDt.Rows[0]["submit_jobnet_id"];
+                                validDataRow["ObjectType"] = RELATEDOBJECT_JOBNET;
+                                dt.Rows.Add(validDataRow);
+                            }
+                            break;
+                    }
+                }
+            }
+            db.CloseSqlConnect();
+            return chkflg;
+        }
+
+        //added by YAMA 2014/10/17
+        public static void SetObjectValidForceRun(String objectId, String updDate, Consts.ObjectEnum objectType)
+        {
+            String tableName = "ja_calendar_control_table";
+            String idColumnName = "calendar_id";
+
+            bool ret = true;
+
+            DBConnect db = new DBConnect(LoginSetting.ConnectStr);
+            db.CreateSqlConnect();
+            db.BeginTransaction();
+            try
+            {
+                if (objectType == Consts.ObjectEnum.CALENDAR)
+                {
+                    tableName = "ja_calendar_control_table";
+                    idColumnName = "calendar_id";
+                    CalendarControlDAO calendarControlDAO = new CalendarControlDAO(db);
+                    calendarControlDAO.GetLock(objectId, LoginSetting.DBType);
+                }
+                if (objectType == Consts.ObjectEnum.FILTER)
+                {
+                    tableName = "ja_filter_control_table";
+                    idColumnName = "filter_id";
+                    FilterControlDAO filterControlDAO = new FilterControlDAO(db);
+                    filterControlDAO.GetLock(objectId, LoginSetting.DBType);
+                }
+                if (objectType == Consts.ObjectEnum.SCHEDULE)
+                {
+                    tableName = "ja_schedule_control_table";
+                    idColumnName = "schedule_id";
+                    ScheduleControlDAO scheduleControlDAO = new ScheduleControlDAO(db);
+                    scheduleControlDAO.GetLock(objectId, LoginSetting.DBType);
+                }
+                if (objectType == Consts.ObjectEnum.JOBNET)
+                {
+                    tableName = "ja_jobnet_control_table";
+                    idColumnName = "jobnet_id";
+                    JobnetControlDAO jobnetControlDAO = new JobnetControlDAO(db);
+                    jobnetControlDAO.GetLock(objectId, LoginSetting.DBType);
+                }
+            }
+            catch (DBException e)
+            {
+                e.MessageID = Consts.ERROR_DB_LOCK;
+                throw e;
+            }
+            string strSql1 = "update " + tableName + " set valid_flag=0 where " + idColumnName + "='" + objectId + "' and valid_flag=1";
+            string strSql2 = "update " + tableName + " set valid_flag=1 where " + idColumnName + "='" + objectId + "' and update_date=" + updDate;
+            db.AddBatch(strSql1);
+            db.AddBatch(strSql2);
+            db.ExecuteBatchUpdate();
+            db.TransactionCommit();
+            db.CloseSqlConnect();
+        }
+
+
+        //added by YAMA 2014/10/17
+        public static void SetObjectsInValidForceRun(String objectId, Consts.ObjectEnum objectType, DataRow[] rows)
+        {
+            DBConnect db = new DBConnect(LoginSetting.ConnectStr);
+            db.CreateSqlConnect();
+            db.BeginTransaction();
+            String tableName = "ja_calendar_control_table";
+            String idColumnName = "calendar_id";
+            try
+            {
+                if (objectType == Consts.ObjectEnum.CALENDAR)
+                {
+                    tableName = "ja_calendar_control_table";
+                    idColumnName = "calendar_id";
+                    CalendarControlDAO calendarControlDAO = new CalendarControlDAO(db);
+                    calendarControlDAO.GetLock(objectId, LoginSetting.DBType);
+                }
+                if (objectType == Consts.ObjectEnum.FILTER)
+                {
+                    tableName = "ja_filter_control_table";
+                    idColumnName = "filter_id";
+                    FilterControlDAO filterControlDAO = new FilterControlDAO(db);
+                    filterControlDAO.GetLock(objectId, LoginSetting.DBType);
+                }
+                if (objectType == Consts.ObjectEnum.SCHEDULE)
+                {
+                    tableName = "ja_schedule_control_table";
+                    idColumnName = "schedule_id";
+                    ScheduleControlDAO scheduleControlDAO = new ScheduleControlDAO(db);
+                    scheduleControlDAO.GetLock(objectId, LoginSetting.DBType);
+                }
+                if (objectType == Consts.ObjectEnum.JOBNET)
+                {
+                    tableName = "ja_jobnet_control_table";
+                    idColumnName = "jobnet_id";
+                    JobnetControlDAO jobnetControlDAO = new JobnetControlDAO(db);
+                    jobnetControlDAO.GetLock(objectId, LoginSetting.DBType);
+                }
+            }
+            catch (DBException e)
+            {
+                e.MessageID = Consts.ERROR_DB_LOCK;
+                throw e;
+            }
+            foreach (DataRow row in rows)
+            {
+                if ((Int32)row["valid_flag"] == 1)
+                {
+                    string strSql = "update " + tableName + " set valid_flag=0 where " + idColumnName + "='" + objectId + "' and update_date=" + Convert.ToString(row["update_date"]);
+                    db.AddBatch(strSql);
+                }
+            }
+
+            db.ExecuteBatchUpdate();
+            db.TransactionCommit();
+            db.CloseSqlConnect();
+
+        }
+
+        //added by YAMA 2014/10/17
+        /// <summary>カレンダーの有効チェック</summary>
+        /// <param name="calendar_id">カレンダーID</param>
+        /// <param name="db">dBコネクション情報</param>
+        /// <param name="dt">関連データ格納後返却</param>
+        /// <return>「True：カレンダーが有効」「False：それ以外」</return>
+        private static bool CheckValidCalendar(String calendar_id, DBConnect db, ref DataTable dt, int errCnt)
+        {
+            DataTable validDt;
+            DataRow validDataRow;
+            String sql = "";
+            bool chkflg = true;
+
+            // 該当するカレンダーが有効化されているかチェック
+            sql = "select calendar_id from ja_calendar_control_table " +
+                  "where calendar_id = '" + calendar_id + "' and valid_flag = 1";
+
+            validDt = db.ExecuteQuery(sql);
+
+            // 有効化レコードが無い場合、そのカレンダーIDをエラー表示用に格納
+            if (validDt.Rows.Count == 0)
+            {
+                if (errCnt == 0)
+                {
+                    validDataRow = dt.NewRow();
+                    validDataRow["RelatedObject"] = RELATEDOBJECT_CALENDAR;
+                    validDataRow["ObjectType"] = RELATEDOBJECT_CALENDAR;
+                    dt.Rows.Add(validDataRow);
+                    chkflg = false;
+                }
+                validDataRow = dt.NewRow();
+                validDataRow["RelatedObject"] = calendar_id;
+                validDataRow["ObjectType"] = RELATEDOBJECT_CALENDAR;
+                dt.Rows.Add(validDataRow);
+            }
+
+            return chkflg;
+        }
+
+        //added by YAMA 2014/10/17
+        /// <summary>フィルターの有効チェック</summary>
+        /// <param name="filter_id">カレンダーID</param>
+        /// <param name="db">dBコネクション情報</param>
+        /// <param name="dt">関連データ格納後返却</param>
+        /// <return>「True：フィルターが有効」「False：それ以外」</return>
+        private static bool CheckValidFilter(String filter_id, DBConnect db, ref DataTable dt)
+        {
+            bool fstfilterflg = false;
+            DataTable validDt;
+            DataRow validDataRow;
+            String sql = "";
+            bool chkflg = true;
+
+            // 該当するフィルターが有効化されているかチェック
+            sql = "select filter_id from ja_filter_control_table " +
+                  "where filter_id = '" + filter_id + "' and valid_flag = 1";
+
+            validDt = db.ExecuteQuery(sql);
+
+            // 有効化レコードが無い場合、そのフィルターIDをエラー表示用に格納
+            if (validDt.Rows.Count == 0)
+            {
+                if (fstfilterflg == false)
+                {
+                    validDataRow = dt.NewRow();
+                    validDataRow["RelatedObject"] = RELATEDOBJECT_FILTER;
+                    validDataRow["ObjectType"] = RELATEDOBJECT_FILTER;
+                    dt.Rows.Add(validDataRow);
+                    fstfilterflg = true;
+                    chkflg = false;
+                }
+                validDataRow = dt.NewRow();
+                validDataRow["RelatedObject"] = filter_id;
+                validDataRow["ObjectType"] = RELATEDOBJECT_FILTER;
+                dt.Rows.Add(validDataRow);
+            }
+
+            return chkflg;
+        }
+
+
 
         #endregion
 

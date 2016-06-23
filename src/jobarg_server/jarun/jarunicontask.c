@@ -1,6 +1,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -18,8 +19,8 @@
 **/
 
 /*
-** $Date:: 2013-12-18 16:41:02 +0900 #$
-** $Revision: 5657 $
+** $Date:: 2014-10-17 16:00:02 +0900 #$
+** $Revision: 6528 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -31,6 +32,7 @@
 #include "jalog.h"
 #include "jastatus.h"
 #include "jaflow.h"
+#include "jaindex.h"
 
 /******************************************************************************
  *                                                                            *
@@ -78,7 +80,7 @@ int jarun_icon_task(const zbx_uint64_t inner_job_id, const int test_flag)
         ja_log("JARUNICONTASK200001", 0, NULL, inner_job_id,
                __function_name, inner_job_id);
         DBfree_result(result);
-        return ja_set_runerr(inner_job_id);
+        return ja_set_runerr(inner_job_id, 2);
     }
     DBfree_result(result);
 
@@ -86,7 +88,7 @@ int jarun_icon_task(const zbx_uint64_t inner_job_id, const int test_flag)
     submit_inner_jobnet_id = get_next_id(JA_RUN_ID_JOBNET_EX, 0, NULL, inner_job_id);
     if (submit_inner_jobnet_id == 0) {
         zbx_free(inner_jobnet_id);
-        return ja_set_runerr(inner_job_id);
+        return ja_set_runerr(inner_job_id, 2);
     }
 
     // get execution_user_name
@@ -99,7 +101,7 @@ int jarun_icon_task(const zbx_uint64_t inner_job_id, const int test_flag)
                __function_name, inner_jobnet_id);
         zbx_free(inner_jobnet_id);
         DBfree_result(result);
-        return ja_set_runerr(inner_job_id);
+        return ja_set_runerr(inner_job_id, 2);
     }
     zbx_free(inner_jobnet_id);
 
@@ -124,9 +126,9 @@ int jarun_icon_task(const zbx_uint64_t inner_job_id, const int test_flag)
         ja_log("JARUNICONTASK200004", 0, NULL, inner_job_id,
                __function_name, submit_jobnet_id);
         DBfree_result(result);
-        return ja_set_runerr(inner_job_id);
+        return ja_set_runerr(inner_job_id, 2);
     }
 
     DBfree_result(result);
-    return ja_flow(inner_job_id, JA_FLOW_TYPE_NORMAL);
+    return ja_flow(inner_job_id, JA_FLOW_TYPE_NORMAL, 1);
 }

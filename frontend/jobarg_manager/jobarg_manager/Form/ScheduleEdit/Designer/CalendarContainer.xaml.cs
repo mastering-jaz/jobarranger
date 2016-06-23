@@ -1,6 +1,7 @@
 ﻿/*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -28,6 +29,9 @@ using System.Data;
 using System.Collections;
 using System.Windows.Forms;
 using jp.co.ftf.jobcontroller.Common;
+// added by YAMA 2014/10/20    マネージャ内部時刻同期
+using jp.co.ftf.jobcontroller.DAO;
+using System.Text;
 //*******************************************************************
 //                                                                  *
 //                                                                  *
@@ -59,7 +63,9 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.ScheduleEdit
             monthCalendar.CalendarDimensions = new System.Drawing.Size(4, 3);
             monthCalendar.Location = new System.Drawing.Point(0, 25);
             monthCalendar.Font = new System.Drawing.Font("MS UI Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            monthCalendar.ViewStart = new DateTime(DateTime.Now.Year, 1, 1);
+            // added by YAMA 2014/10/20    マネージャ内部時刻同期
+            //monthCalendar.ViewStart = new DateTime(DateTime.Now.Year, 1, 1);
+            monthCalendar.ViewStart = new DateTime((DBUtil.GetSysTime()).Year, 1, 1);
             this.winForm.Child = monthCalendar;
         }
         #endregion
@@ -143,6 +149,9 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.ScheduleEdit
         /// <summary>カレンダー管理テーブル</summary>
         public DataTable CalendarControlTable { get; set; }
 
+        /// <summary>フィルター稼働日テーブル</summary>
+        public DataTable FilterControlTable { get; set; }
+
         /// <summary>カレンダー稼働日テーブル</summary>
         public DataTable CalendarDetailTable { get; set; }
 
@@ -208,9 +217,108 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.ScheduleEdit
 
         }
 
+        //*******************************************************************
+        /// <summary>フィルター選択時のカレンダー表示</summary>
+        //*******************************************************************
+        public void SetFilterCalendarDetail()
+        {
+            int baseYear = GetCurrentYear();
+            monthCalendar.Enabled = true;
+            monthCalendar.SelectionRanges.Clear();
+            monthCalendar.ViewStart = new DateTime(baseYear, 1, 1);
+            DataRow row = FilterControlTable.Rows[0];
+            if (row == null){
+                monthCalendar.Enabled = false;
+                return;
+            }
+            int baseDate = Convert.ToInt16(row["base_date_flag"]);
+            int shiftDay = Convert.ToInt16(row["shift_day"]);
+            decimal [] targetDate = new decimal[14];
+            try {
+                int month = -1;
+                int year  = -1;
+                for (int i = 0; i < targetDate.Length; i++) {
+                    if (i == 0){
+                        year = baseYear - 1;
+                        month = 12;
+                    }else if (i == (targetDate.Length -1)){
+                        year = baseYear + 1;
+                        month = 1;
+                    }else {
+                        year = baseYear;
+                        month = i;
+                    }
+                    if (baseDate == 0) {
+                        targetDate[i] = ConvertUtil.ConverDate2IntYYYYMMDD(new DateTime (year, month, 1));
+                    } else if (baseDate == 1){
+                        targetDate[i] = ConvertUtil.ConverDate2IntYYYYMMDD(new DateTime (year, month, DateTime.DaysInMonth(year, month)));
+                    } else if (baseDate == 2){
+                        int designatedDay = Convert.ToInt16(row["designated_day"]);
+                        StringBuilder yyyymmdd = new StringBuilder();
+                        yyyymmdd.Append(year.ToString("D4"));
+                        yyyymmdd.Append(month.ToString("D2"));
+                        yyyymmdd.Append(designatedDay.ToString("D2"));
+                        targetDate[i] = Convert.ToDecimal(yyyymmdd.ToString());
+                    } else {
+                        monthCalendar.Enabled = false;
+                        return;
+                    }
+                    if (isOperatingDay(targetDate[i])){
+                        // 稼働日移動しない
+                        SetSelectDate(ConvertUtil.ConverIntYYYYMMDD2Date(targetDate[i]));
+                    }else{
+                        // 非稼働日
+                        if (shiftDay > 0){
+                            string condition = "operating_date > " + targetDate[i];
+                            string sortExpression = "operating_date asc";
+                            DataRow[] rows = CalendarDetailTable.Select(condition, sortExpression);
+                            if (rows.Length > 0){
+                                DateTime shifted = ConvertUtil.ConverIntYYYYMMDD2Date(Convert.ToDecimal(rows[shiftDay - 1]["operating_date"]));
+                                SetSelectDate(shifted);
+                            }
+                        } else if (shiftDay < 0){
+                            string condition = "operating_date < " + targetDate[i];
+                            string sortExpression = "operating_date desc";
+                            DataRow[] rows = CalendarDetailTable.Select(condition, sortExpression);
+                            if (rows.Length > 0){
+                                DateTime shifted = ConvertUtil.ConverIntYYYYMMDD2Date(Convert.ToDecimal(rows[-1 - shiftDay]["operating_date"]));
+                                SetSelectDate(shifted);
+                            }
+                        } else {
+                            string condition = "operating_date = " + targetDate[i];
+                            DataRow[] rows = CalendarDetailTable.Select(condition);
+                            if (rows.Length > 0){
+                                DateTime shifted = ConvertUtil.ConverIntYYYYMMDD2Date(Convert.ToDecimal(rows[0]["operating_date"]));
+                                SetSelectDate(shifted);
+                            }
+                        }
+                    }
+
+                }
+            }
+            catch (Exception e) {
+                //log error msg
+                monthCalendar.Enabled = false;
+                return;
+            }
+            monthCalendar.Enabled = false;
+        }
         #endregion
 
         #region privateメッソド
+
+        //*******************************************************************
+        /// <summary>稼働日かどうかチェック</summary>
+        //*******************************************************************
+        private bool isOperatingDay(decimal theDay){
+            string condition = "operating_date = " +  theDay;
+            DataRow[] rows = CalendarDetailTable.Select(condition);
+            if (rows.Length > 0){
+                return true;
+            }
+            return false;
+
+        }
 
         //*******************************************************************
         /// <summary>カレンダー選択日付をセット</summary>

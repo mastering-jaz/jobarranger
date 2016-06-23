@@ -2,6 +2,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -57,7 +58,10 @@
         <TextBox Height="Auto" Width="700" Margin="96,63,0,0" HorizontalAlignment="Left" Name="tbComment" VerticalAlignment="Top" VerticalContentAlignment="Center" 
                  MaxLength="100" TextWrapping="WrapWithOverflow"/>
         <design:Container x:Name="container" Grid.Row="1"></design:Container>
+        <!--  added by YAMA 2014/11/10    JAMのGUIの名称の変更
         <Button Grid.Row="2" Content="{x:Static src:Properties.Resources.regist_button_text}" Height="28" Name="btnRegist" Width="75" Margin="0,6,120,6" 
+        -->
+        <Button Grid.Row="2" Content="{x:Static src:Properties.Resources.save_button_text}" Height="28" Name="btnRegist" Width="75" Margin="0,6,120,6" 
                 HorizontalAlignment="Right" Click="regist_Click" IsDefault="True"/>
         <Button Grid.Row="2" Content="{x:Static src:Properties.Resources.cancel_button_text}" Height="28" Name="btnCancle" Width="75"
                 Margin="0,6,40,6" HorizontalAlignment="Right" Click="cancel_Click" IsCancel="True"/>

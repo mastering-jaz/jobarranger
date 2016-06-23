@@ -1,6 +1,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -18,8 +19,8 @@
 **/
 
 /*
-** $Date:: 2014-04-25 14:25:43 +0900 #$
-** $Revision: 5924 $
+** $Date:: 2014-10-17 16:00:02 +0900 #$
+** $Revision: 6528 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -73,14 +74,21 @@ int jarun_normal(zbx_uint64_t inner_job_id, int job_type, int test_flag)
                ", job_type: %d, test_flag: %d", __function_name,
                inner_job_id, job_type, test_flag);
 
-    if (jarun_value_before(inner_job_id) == FAIL)
+    if (jarun_value_before(inner_job_id) == FAIL) {
         return FAIL;
+    }
 
-    if (ja_set_run(inner_job_id) == FAIL)
+    if (ja_set_run(inner_job_id) == FAIL) {
         return FAIL;
+    }
 
-    if (ja_value_before_after(inner_job_id) == FAIL)
+    if (ja_set_run_job_id(inner_job_id) == FAIL) {
         return FAIL;
+    }
+
+    if (ja_value_before_after(inner_job_id) == FAIL) {
+        return FAIL;
+    }
 
     ret = SUCCEED;
     switch (job_type) {
@@ -99,7 +107,8 @@ int jarun_normal(zbx_uint64_t inner_job_id, int job_type, int test_flag)
     case JA_JOB_TYPE_JOB:
         if (test_flag == JA_JOB_TEST_FLAG_ON) {
             ret = jarun_icon_job(inner_job_id, JA_AGENT_METHOD_TEST);
-        } else {
+        }
+        else {
             ret = jarun_icon_job(inner_job_id, JA_AGENT_METHOD_NORMAL);
         }
         break;
@@ -149,9 +158,8 @@ int jarun_normal(zbx_uint64_t inner_job_id, int job_type, int test_flag)
         ret = jarun_icon_zabbixlink(inner_job_id, test_flag);
         break;
     default:
-        ja_log("JARUNNORMAL200001", 0, NULL, inner_job_id, __function_name,
-               job_type, inner_job_id);
-        ret = ja_set_runerr(inner_job_id);
+        ja_log("JARUNNORMAL200001", 0, NULL, inner_job_id, __function_name, job_type, inner_job_id);
+        ret = ja_set_runerr(inner_job_id, 2);
         break;
     }
 

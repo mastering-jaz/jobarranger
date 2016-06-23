@@ -1,6 +1,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -18,18 +19,17 @@
 **/
 
 /*
-** $Date:: 2012-11-26 13:25:18 +0900 #$
-** $Revision: 2727 $
-** $Author: ossinfra@FITECHLABS.CO.JP $
+** $Date:: 2014-11-07 11:49:31 +0900 #$
+** $Revision: 6634 $
+** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
 #ifndef JOBARG_JAJOBFILE_H
 #define JOBARG_JAJOBFILE_H
 
-int ja_jobfile_create(const char *filepath, char *jobext[],
-                      const char *script);
+int ja_jobfile_create(const char *filepath, char *jobext[], const char *script);
 int ja_jobfile_remove(const char *filepath, char *jobext[]);
-int ja_jobfile_chkend(const char *filepath, JA_PID pid);
+int ja_jobfile_chkend(const char *filepath, JA_PID pid, const char *type);
 int ja_jobfile_load(const char *filepath, ja_job_object * job);
 
 #endif

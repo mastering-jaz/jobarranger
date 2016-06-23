@@ -1,6 +1,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -18,8 +19,8 @@
 **/
 
 /*
-** $Date:: 2014-06-17 15:23:46 +0900 #$
-** $Revision: 6053 $
+** $Date:: 2014-10-17 16:00:02 +0900 #$
+** $Revision: 6528 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -29,12 +30,76 @@
 #include "dbcache.h"
 
 #include "jacommon.h"
+#include "jajobid.h"
+#include "jalog.h"
+
+#define JALOG_TYPE_INFO		0
+#define JALOG_TYPE_CRIT		1
+#define JALOG_TYPE_ERR		2
+#define JALOG_TYPE_WARN		3
+#define JALOG_TYPE_DEBUG	4
+
+#define JASENDER_OFF		0
+#define JASENDER_ON		1
+
+#define ZBXSND_NOTICE_OFF	0
+#define ZBXSND_NOTICE_ON	1
 
 #define VALID_FLAG_ON		1
 #define USE_HOSTNAME		0
 
 #define AP_MESSAGE_BUF_SIZE	4096
 #define JA_DATA_BUFFER_LEN	256
+
+#define JOBARG_MESSAGE		"JOBARG_MESSAGE"
+#define ZBXSND_ON		"ZBXSND_ON"
+
+/******************************************************************************
+ *                                                                            *
+ * Function: ja_get_zbxsnd_on                                                 *
+ *                                                                            *
+ * Purpose: gets the zabbix notification existence                            *
+ *                                                                            *
+ * Parameters:                                                                *
+ *                                                                            *
+ * Return value:  value of Zabbix notification existence that get             *
+ *                                                                            *
+ * Comments:                                                                  *
+ *                                                                            *
+ ******************************************************************************/
+int ja_get_zbxsnd_on()
+{
+	DB_RESULT	result;
+	DB_ROW		row;
+	int		vl;
+	const char	*__function_name = "ja_get_zbxsnd_on";
+
+	zabbix_log(LOG_LEVEL_DEBUG, "In %s()", __function_name);
+
+	result = DBselect("select value from ja_parameter_table where parameter_name = '%s'", ZBXSND_ON);
+
+	if (NULL == (row = DBfetch(result)))
+	{
+		DBfree_result(result);
+		return ZBXSND_NOTICE_ON;
+	}
+
+	if (strlen(row[0]) != 1)
+	{
+		DBfree_result(result);
+		return ZBXSND_NOTICE_ON;
+	}
+
+	vl = atoi(row[0]);
+	DBfree_result(result);
+
+	if (vl == ZBXSND_NOTICE_OFF || vl == ZBXSND_NOTICE_ON)
+	{
+		return vl;
+	}
+
+	return ZBXSND_NOTICE_ON;
+}
 
 /******************************************************************************
  *                                                                            *
@@ -68,26 +133,33 @@ int	ja_log(char *message_id, zbx_uint64_t inner_jobnet_id, char *jobnet_id, zbx_
 	DB_ROW		row;
 	DB_ROW		row2;
 	int		log_type, log_level, send_flag, rc, hit, m, n, cnt, job_type, host_flag, get_host_flag;
-	zbx_uint64_t	w_inner_jobnet_id;
+	int		state, zbxsnd;
+	zbx_uint64_t	w_inner_jobnet_id, inner_jobnet_main_id;
 	char		*now_date, *message = NULL, *name = NULL, *type = NULL, *send = NULL, *msg = NULL;
-	char		*after_value_esc;
+	char		*after_value_esc, *user_name_esc, *host_name_esc, *jobnet_name_esc, *job_name_esc;
 	char		s_jobnet_id[JA_DATA_BUFFER_LEN] = "none";
 	char		s_user_name[JA_DATA_BUFFER_LEN] = "none";
+	char		s_job_id[JA_DATA_BUFFER_LEN] = "none";
+	char		s_job_id_full[JA_DATA_BUFFER_LEN] = "none";
 	char		line[AP_MESSAGE_BUF_SIZE];
 	char		cmd[AP_MESSAGE_BUF_SIZE];
 	char		host_name[JA_DATA_BUFFER_LEN] = "";
-	char		s_job_id[JA_DATA_BUFFER_LEN] = "none";
+	char		jobnet_name[JA_JOBNET_NAME_LEN] = "";
+	char		job_name[JA_JOB_NAME_LEN] = "";
+	char		now_time[20];
 	const char	*__function_name = "ja_log";
 
-	zabbix_log(LOG_LEVEL_DEBUG, "In %s() message_id: %s", __function_name, message_id);
+	zabbix_log(LOG_LEVEL_DEBUG, "In %s() message_id: %s inner_jobnet_id: " ZBX_FS_UI64 " inner_job_id: " ZBX_FS_UI64,
+	           __function_name, message_id, inner_jobnet_id, inner_job_id);
 
-	w_inner_jobnet_id = inner_jobnet_id;
+	w_inner_jobnet_id    = inner_jobnet_id;
+	inner_jobnet_main_id = 0;
 
 	/* message file open */
 	fp = fopen(CONFIG_JA_LOG_MESSAGE_FILE, "r");
 	if (fp == NULL)
 	{
-		zabbix_log(LOG_LEVEL_ERR, "failed to open the log message file: [%s]", CONFIG_JA_LOG_MESSAGE_FILE);
+		zabbix_log(LOG_LEVEL_ERR, "failed to open the log message file: [%s] (%s)", CONFIG_JA_LOG_MESSAGE_FILE, strerror(errno));
 		return FAIL;
 	}
 
@@ -243,6 +315,7 @@ int	ja_log(char *message_id, zbx_uint64_t inner_jobnet_id, char *jobnet_id, zbx_
 	/* get the current time */
 	time(&now);
 	tm = localtime(&now);
+	strftime(now_time, sizeof(now_time), "%Y%m%d%H%M%S", tm);
 	now_date = zbx_dsprintf(NULL, "%04d/%02d/%02d %02d:%02d:%02d",
 				(tm->tm_year + 1900),
 				(tm->tm_mon  + 1),
@@ -268,8 +341,10 @@ int	ja_log(char *message_id, zbx_uint64_t inner_jobnet_id, char *jobnet_id, zbx_
 	/* get the host name and job id */
 	if (inner_job_id != 0)
 	{
+		zbx_strlcpy(s_job_id_full, ja_get_jobid(inner_job_id), sizeof(s_job_id_full));
+
 		job_type = -1;
-		result = DBselect("select job_type, job_id"
+		result = DBselect("select job_type, job_id, job_name"
 				" from ja_run_job_table"
 				" where inner_job_id = " ZBX_FS_UI64,
 				inner_job_id);
@@ -278,6 +353,10 @@ int	ja_log(char *message_id, zbx_uint64_t inner_jobnet_id, char *jobnet_id, zbx_
 		{
 			job_type = atoi(row[0]);
 			zbx_strlcpy(s_job_id, row[1], sizeof(s_job_id));
+			if (SUCCEED != DBis_null(row[2]))
+			{
+				zbx_strlcpy(job_name, row[2], sizeof(job_name));
+			}
 		}
 		DBfree_result(result);
 
@@ -357,24 +436,26 @@ int	ja_log(char *message_id, zbx_uint64_t inner_jobnet_id, char *jobnet_id, zbx_
 	{
 		if (w_inner_jobnet_id != 0)
 		{
-			result = DBselect("select inner_jobnet_id, inner_jobnet_main_id, jobnet_id, user_name"
+			result = DBselect("select inner_jobnet_id, inner_jobnet_main_id, jobnet_id, user_name, jobnet_name"
 					" from ja_run_jobnet_table"
 					" where inner_jobnet_id = " ZBX_FS_UI64,
 					w_inner_jobnet_id);
 
 			if (NULL != (row = DBfetch(result)))
 			{
+				ZBX_STR2UINT64(inner_jobnet_main_id, row[1]);
 				if (strcmp(row[0], row[1]) != 0)
 				{
-					result2 = DBselect("select jobnet_id, user_name"
+					result2 = DBselect("select jobnet_id, user_name, jobnet_name"
 							" from ja_run_jobnet_table"
-							" where inner_jobnet_main_id = %s",
+							" where inner_jobnet_id = %s",
 							row[1]);
 
 					if (NULL != (row2 = DBfetch(result2)))
 					{
 						zbx_strlcpy(s_jobnet_id, row2[0], sizeof(s_jobnet_id));
 						zbx_strlcpy(s_user_name, row2[1], sizeof(s_user_name));
+						zbx_strlcpy(jobnet_name, row2[2], sizeof(jobnet_name));
 					}
 					DBfree_result(result2);
 				}
@@ -382,12 +463,13 @@ int	ja_log(char *message_id, zbx_uint64_t inner_jobnet_id, char *jobnet_id, zbx_
 				{
 					zbx_strlcpy(s_jobnet_id, row[2], sizeof(s_jobnet_id));
 					zbx_strlcpy(s_user_name, row[3], sizeof(s_user_name));
+					zbx_strlcpy(jobnet_name, row[4], sizeof(jobnet_name));
 				}
 			}
 		}
 		else
 		{
-			result = DBselect("select jobnet_id, user_name"
+			result = DBselect("select jobnet_id, user_name, jobnet_name"
 					" from ja_jobnet_control_table"
 					" where jobnet_id = '%s' and valid_flag = %d",
 					jobnet_id, VALID_FLAG_ON);
@@ -396,6 +478,7 @@ int	ja_log(char *message_id, zbx_uint64_t inner_jobnet_id, char *jobnet_id, zbx_
 			{
 				zbx_strlcpy(s_jobnet_id, row[0], sizeof(s_jobnet_id));
 				zbx_strlcpy(s_user_name, row[1], sizeof(s_user_name));
+				zbx_strlcpy(jobnet_name, row[2], sizeof(jobnet_name));
 			}
 		}
 		DBfree_result(result);
@@ -432,11 +515,56 @@ int	ja_log(char *message_id, zbx_uint64_t inner_jobnet_id, char *jobnet_id, zbx_
 		zbx_free(after_value_esc);
 	}
 
+	/* no notification of message ? */
 	if (send_flag == JASENDER_OFF)
 	{
 		zbx_free(message);
 		zbx_free(now_date);
 		return SUCCEED;
+	}
+
+	/* get zabbix notification existence */
+	zbxsnd = ja_get_zbxsnd_on();
+
+	/* with no notice of Zabbix ? */
+	if (zbxsnd == ZBXSND_NOTICE_ON)
+	{
+		/* registration of the send message information */
+		after_value_esc = DBdyn_escape_string(message);
+		user_name_esc   = DBdyn_escape_string(s_user_name);
+		host_name_esc   = DBdyn_escape_string(host_name);
+		jobnet_name_esc = DBdyn_escape_string(jobnet_name);
+		job_name_esc    = DBdyn_escape_string(job_name);
+		rc = DBexecute("insert into ja_send_message_table ("
+				"message_date, inner_jobnet_id, inner_jobnet_main_id, send_status, retry_count, retry_date, send_date, send_error_date, "
+				"message_type, user_name, host_name, jobnet_id, jobnet_name, job_id, job_id_full, job_name, "
+				"log_message_id, log_message) "
+				"values (%s, " ZBX_FS_UI64 ", " ZBX_FS_UI64 ", %d, 0, 0, 0, 0, "
+				"%d, '%s', '%s', '%s', '%s', '%s', '%s', '%s', "
+				"'%s', '%s')",
+				now_time, w_inner_jobnet_id, inner_jobnet_main_id, JA_SNT_SEND_STATUS_BEGIN,
+				log_type, user_name_esc, host_name_esc, s_jobnet_id, jobnet_name_esc, s_job_id, s_job_id_full, job_name_esc,
+				message_id, after_value_esc);
+
+		if (rc <= ZBX_DB_OK)
+		{
+			zabbix_log(LOG_LEVEL_ERR, "failed to insert the ja_send_message_table (ja_log): "
+				" message date[%s] message id[%s]",
+				now_time, message_id);
+			zbx_free(after_value_esc);
+			zbx_free(user_name_esc);
+			zbx_free(host_name_esc);
+			zbx_free(jobnet_name_esc);
+			zbx_free(job_name_esc);
+			zbx_free(message);
+			zbx_free(now_date);
+			return FAIL;
+		}
+		zbx_free(after_value_esc);
+		zbx_free(user_name_esc);
+		zbx_free(host_name_esc);
+		zbx_free(jobnet_name_esc);
+		zbx_free(job_name_esc);
 	}
 
 	/* application execution error notification */
@@ -458,12 +586,20 @@ int	ja_log(char *message_id, zbx_uint64_t inner_jobnet_id, char *jobnet_id, zbx_
 
 		/* start command in the background */
 		zbx_snprintf(cmd, sizeof(cmd), "%s/%s '%s' '%s' '%s' '%s' '%s' '%s' '%s' '%s' &",
-			CONFIG_ERROR_CMD_PATH, dp->d_name, s_user_name, s_jobnet_id, now_date, message_id, type, message, host_name, s_job_id);
+			CONFIG_ERROR_CMD_PATH, dp->d_name, s_user_name, s_jobnet_id, now_date, message_id, type, message, host_name, s_job_id_full);
 		rc = system(cmd);
 		zabbix_log(LOG_LEVEL_DEBUG, "application execution [%s] (%d)", cmd, rc);
 		if (rc != EXIT_SUCCESS)
 		{
-			zabbix_log(LOG_LEVEL_ERR, "failed to run the error notification application: [%s]", cmd);
+			if (WIFEXITED(rc))
+			{
+				state = WEXITSTATUS(rc);
+			}
+			else
+			{
+				state = rc;
+			}
+			zabbix_log(LOG_LEVEL_ERR, "failed to run the error notification application: (%d) [%s]", state, cmd);
 			zbx_free(message);
 			zbx_free(now_date);
 			closedir(dir);

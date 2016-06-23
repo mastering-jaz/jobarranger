@@ -2,6 +2,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -60,8 +61,8 @@
                 </Style>
             </DataGrid.Resources>
             <DataGrid.Columns>
-                <DataGridTextColumn Header="{x:Static src:Properties.Resources.calendar_id_col_head_text}" CellStyle="{StaticResource IDDataListCellStyle}" Binding="{Binding Path=calendar_id}" Width="Auto" IsReadOnly="True" />
-                <DataGridTextColumn Header="{x:Static src:Properties.Resources.calendar_name_col_head_text}" Binding="{Binding Path=calendar_name}" Width="*" IsReadOnly="True">
+                <DataGridTextColumn Header="{x:Static src:Properties.Resources.object_id_col_head_text}" CellStyle="{StaticResource IDDataListCellStyle}" Binding="{Binding Path=calendar_id}" Width="Auto" IsReadOnly="True" />
+                <DataGridTextColumn Header="{x:Static src:Properties.Resources.object_name_col_head_text}" Binding="{Binding Path=object_name}" Width="*" IsReadOnly="True">
                     <DataGridTextColumn.CellStyle>
                         <Style TargetType="{x:Type DataGridCell}">
                             <Setter Property="VerticalAlignment" Value="Stretch"/>

@@ -2,6 +2,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -22,9 +23,11 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
         xmlns:src="clr-namespace:jp.co.ftf.jobcontroller.JobController" 
-        Title="{x:Static src:Properties.Resources.cooperation_icon_screen_name}" Height="401" Width="443" FontSize="11" FontFamily="Meiryo"
+        Title="{x:Static src:Properties.Resources.cooperation_icon_screen_name}" Height="401" Width="425" FontSize="11" FontFamily="Meiryo"
         WindowStartupLocation="CenterScreen" ResizeMode="NoResize"  Closing="Window_Closed" xmlns:my="clr-namespace:jp.co.ftf.jobcontroller.JobController.Properties">
-    <Grid Background="#FFEEECE1" Width="422" Height="363" Name="GridSetting">
+    <!--  added by YAMA 2014/09/22 設定ダイアログ背景色不備対応 -->
+    <!--  Grid Background="#FFEEECE1" Width="422" Height="363" Name="GridSetting" -->
+    <Grid Background="#FFEEECE1" Name="GridSetting" Width="425">
         <Grid.RowDefinitions>
             <RowDefinition Height="30" />
             <RowDefinition Height="30" />
@@ -98,9 +101,9 @@
                 <RadioButton Content="{x:Static my:Resources.cooperation_get_data}" GroupName="modeGroup" Height="16" HorizontalAlignment="Left" Margin="38,6,0,0" Name="rbGetData" VerticalAlignment="Top" Width="107" Grid.Column="3" />
             </Grid>
         </GroupBox>
-        <Button Grid.Row="5" Content="{x:Static src:Properties.Resources.regist_button_text}" Height="28" HorizontalAlignment="Left" Margin="230,76,0,0" 
+        <Button Grid.Row="5" Content="{x:Static src:Properties.Resources.regist_button_text}" Height="28" HorizontalAlignment="Left" Margin="240,76,0,0" 
                 Name="btnToroku" VerticalAlignment="Top" Width="75" Click="btnToroku_Click" IsDefault="True"/>
-        <Button Grid.Row="5" Content="{x:Static src:Properties.Resources.cancel_button_text}" Height="28" HorizontalAlignment="Right" Margin="0,76,9,0" 
+        <Button Grid.Row="5" Content="{x:Static src:Properties.Resources.cancel_button_text}" Height="28" HorizontalAlignment="Right" Margin="0,76,30,0" 
                 Name="btnCancel" VerticalAlignment="Top" Width="75" Click="btnCancel_Click" IsCancel="True"/>
     </Grid>
 </Window>

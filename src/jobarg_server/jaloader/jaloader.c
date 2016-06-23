@@ -1,6 +1,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -18,8 +19,8 @@
 **/
 
 /*
-** $Date:: 2014-05-21 14:08:02 +0900 #$
-** $Rev: 5985 $
+** $Date:: 2014-12-04 10:13:29 +0900 #$
+** $Rev: 6771 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -34,6 +35,9 @@
 #include "../events.h"
 
 #include "jacommon.h"
+#include "jalog.h"
+#include "jaself.h"
+#include "jaindex.h"
 #include "jaloader.h"
 
 #define JOBNET_LOAD_SPAN	"JOBNET_LOAD_SPAN"
@@ -56,6 +60,86 @@ static char		msgwork[2048];
 
 /******************************************************************************
  *                                                                            *
+ * Function: get_end_of_month                                                 *
+ *                                                                            *
+ * Purpose: get the last day of the specified month                           *
+ *                                                                            *
+ * Parameters: p_date (in) - specified month (YYYYMM)                         *
+ *                                                                            *
+ * Return value: last day of the month                                        *
+ *                                                                            *
+ * Comments:                                                                  *
+ *                                                                            *
+ ******************************************************************************/
+static int	get_end_of_month(char *p_date)
+{
+	int		leap_year, year, month, day;
+	char		w_year[5], w_month[3];
+	const char	*__function_name = "get_end_of_month";
+
+	zabbix_log(LOG_LEVEL_DEBUG, "In %s(%s)", __function_name, p_date);
+
+	zbx_strlcpy(w_year,   p_date,      5);
+	zbx_strlcpy(w_month, (p_date + 4), 3);
+
+	year  = atoi(w_year);
+	month = atoi(w_month);
+
+        /* check of the month */
+	switch (month)
+	{
+		case 2:  /* February */
+			leap_year = 0;
+			if ((year % 4) == 0)
+			{
+				leap_year = 1;
+				if ((year % 100) == 0)
+				{
+					leap_year = 0;
+					if ((year % 400) == 0)
+					{
+						leap_year = 1;
+					}
+				}
+			}
+
+			/* leap year ? */
+			if (leap_year == 1)
+			{
+				day = 29;
+			}
+			else
+			{
+				day = 28;
+			}
+			break;
+
+		case 4:  /* April */
+			day = 30;
+			break;
+
+		case 6:  /* June */
+			day = 30;
+			break;
+
+		case 9:  /* September */
+			day = 30;
+			break;
+
+		case 11: /* November */
+			day = 30;
+			break;
+
+		default: /* other month */
+			day = 31;
+			break;
+	}
+
+	return day;
+}
+
+/******************************************************************************
+ *                                                                            *
  * Function: get_search_date                                                  *
  *                                                                            *
  * Purpose: calculate the search time of the schedule                         *
@@ -69,7 +153,7 @@ static char		msgwork[2048];
  * Comments:                                                                  *
  *                                                                            *
  ******************************************************************************/
-void	get_search_date(int span, char **start_date, char **end_date)
+static void	get_search_date(int span, char **start_date, char **end_date)
 {
 	struct tm	*tm;
 	time_t		now;
@@ -102,6 +186,101 @@ void	get_search_date(int span, char **start_date, char **end_date)
 
 /******************************************************************************
  *                                                                            *
+ * Function: shift_month                                                      *
+ *                                                                            *
+ * Purpose: shift the month by a specified number of months                   *
+ *                                                                            *
+ * Parameters: edit_date (in/out) - date to be changed (YYYYMM)               *
+ *             months (in) - number of months to shift                        *
+ *                                                                            *
+ * Return value:                                                              *
+ *                                                                            *
+ * Comments:                                                                  *
+ *                                                                            *
+ ******************************************************************************/
+static void	shift_month(char *edit_date, int months)
+{
+	struct tm	tm;
+	int		i_year, i_mon;
+	char		year[5], mon[3];
+	const char	*__function_name = "shift_month";
+
+	zabbix_log(LOG_LEVEL_DEBUG, "In %s(%s %d)", __function_name, edit_date, months);
+
+	zbx_strlcpy(year,  edit_date,      5);
+	zbx_strlcpy(mon,  (edit_date + 4), 3);
+
+	i_year = atoi(year);
+	i_mon  = atoi(mon);
+
+	tm.tm_year  = i_year - 1900;
+	tm.tm_mon   = (i_mon - 1) + months;
+	tm.tm_mday  = 1;
+	tm.tm_hour  = 0;
+	tm.tm_min   = 0;
+	tm.tm_sec   = 0;
+	tm.tm_isdst = -1;
+
+	mktime(&tm);
+
+	zbx_snprintf(edit_date, OPERATING_DATE_LEN, "%04d%02d",
+		(tm.tm_year + 1900),
+		(tm.tm_mon  + 1));
+
+	return;
+}
+
+/******************************************************************************
+ *                                                                            *
+ * Function: shift_days                                                       *
+ *                                                                            *
+ * Purpose: shift the day by a specified number of days                       *
+ *                                                                            *
+ * Parameters: edit_date (in/out) - date to be changed (YYYYMMDD)             *
+ *             days (in) - number of days to shift                            *
+ *                                                                            *
+ * Return value:                                                              *
+ *                                                                            *
+ * Comments:                                                                  *
+ *                                                                            *
+ ******************************************************************************/
+static void	shift_days(char *edit_date, int days)
+{
+	struct tm	tm;
+	int		i_year, i_mon, i_day;
+	char		year[5], mon[3], day[3];
+	const char	*__function_name = "shift_days";
+
+	zabbix_log(LOG_LEVEL_DEBUG, "In %s(%s %d)", __function_name, edit_date, days);
+
+	zbx_strlcpy(year,  edit_date,      5);
+	zbx_strlcpy(mon,  (edit_date + 4), 3);
+	zbx_strlcpy(day,  (edit_date + 6), 3);
+
+	i_year = atoi(year);
+	i_mon  = atoi(mon);
+	i_day  = atoi(day);
+
+	tm.tm_year  = i_year - 1900;
+	tm.tm_mon   = i_mon - 1;
+	tm.tm_mday  = i_day + days;
+	tm.tm_hour  = 0;
+	tm.tm_min   = 0;
+	tm.tm_sec   = 0;
+	tm.tm_isdst = -1;
+
+	mktime(&tm);
+
+	zbx_snprintf(edit_date, OPERATING_DATE_LEN, "%04d%02d%02d",
+		(tm.tm_year + 1900),
+		(tm.tm_mon  + 1),
+		 tm.tm_mday);
+
+	return;
+}
+
+/******************************************************************************
+ *                                                                            *
  * Function: get_load_span                                                    *
  *                                                                            *
  * Purpose: gets the deployment time of a jobnet                              *
@@ -126,10 +305,12 @@ static int	get_load_span()
 
 	if (NULL != (row = DBfetch(result)))
 	{
-		span = atoi(row[0]);
+		if (strlen(row[0]) <= 10) {
+			span = atoi(row[0]);
+		}
 		if (span < 1)
 		{
-			span = 1;
+			span = DEFAULT_LOAD_SPAN;
 		}
 	}
 	DBfree_result(result);
@@ -152,7 +333,7 @@ static int	get_load_span()
  * Comments:                                                                  *
  *                                                                            *
  ******************************************************************************/
-void	make_end_operating_date(char *end_ope_date, char *end_date, char *boot_time)
+static void	make_end_operating_date(char *end_ope_date, char *end_date, char *boot_time)
 {
 	struct tm	tm;
 	int		i_year, i_mon, i_day, i_bt, i_sday;
@@ -216,7 +397,7 @@ void	make_end_operating_date(char *end_ope_date, char *end_date, char *boot_time
  * Comments:                                                                  *
  *                                                                            *
  ******************************************************************************/
-void	make_scheduled_time(char *scheduled_time, char *operating_date, char *boot_time)
+static void	make_scheduled_time(char *scheduled_time, char *operating_date, char *boot_time)
 {
 	struct tm	tm;
 	int		i_year, i_mon, i_day, i_bt, i_sday, w_bt;
@@ -1050,9 +1231,9 @@ static int	load_icon_reboot(zbx_uint64_t inner_jobnet_id, zbx_uint64_t inner_job
 
 	rc = DBexecute("insert into ja_run_icon_reboot_table ("
 			" inner_job_id, inner_jobnet_id,"
-			" host_flag, reboot_mode_flag, reboot_wait_time, host_name)"
+			" host_flag, reboot_mode_flag, reboot_wait_time, host_name, timeout)"
 			" select '" ZBX_FS_UI64 "','" ZBX_FS_UI64 "',"
-			" host_flag, reboot_mode_flag, reboot_wait_time, host_name"
+			" host_flag, reboot_mode_flag, reboot_wait_time, host_name, timeout"
 			" from ja_icon_reboot_table"
 			" where jobnet_id = '%s' and job_id = '%s' and update_date = %s",
 			inner_job_id, inner_jobnet_id, jobnet_id, job_id, update_date);
@@ -1269,6 +1450,8 @@ static int	load_job_definition(zbx_uint64_t inner_jobnet_main_id, zbx_uint64_t i
 	DB_ROW		row;
 	int		rc, job_type, boot_count;
 	char		*job_name, *job_name_esc = NULL;
+	char		*run_user, *run_user_esc = NULL;
+	char		*run_user_password, *run_user_password_esc = NULL;
 	zbx_uint64_t	inner_job_id, inner_job_id_fs_link, inner_flow_id, start_inner_job_id, end_inner_job_id;
 	const char	*__function_name = "load_job_definition";
 
@@ -1278,7 +1461,7 @@ static int	load_job_definition(zbx_uint64_t inner_jobnet_main_id, zbx_uint64_t i
 
 	/* expand the information icon */
 	result = DBselect("select jobnet_id, job_id, update_date, job_type, point_x, point_y,"
-			" job_name, method_flag, force_flag"
+			" job_name, method_flag, force_flag, continue_flag, run_user, run_user_password"
 			" from ja_job_control_table"
 			" where jobnet_id = '%s' and update_date = %s",
 			jobnet_id, update_date);
@@ -1322,18 +1505,41 @@ static int	load_job_definition(zbx_uint64_t inner_jobnet_main_id, zbx_uint64_t i
 			job_name = "";
 		}
 
+		if (SUCCEED != DBis_null(row[10]))
+		{
+			run_user_esc = DBdyn_escape_string(row[10]);
+			run_user     = run_user_esc;
+		}
+		else
+		{
+			run_user = "";
+		}
+
+		if (SUCCEED != DBis_null(row[11]))
+		{
+			run_user_password_esc = DBdyn_escape_string(row[11]);
+			run_user_password     = run_user_password_esc;
+		}
+		else
+		{
+			run_user_password = "";
+		}
+
 		rc = DBexecute("insert into ja_run_job_table ("
 				" inner_job_id, inner_jobnet_id, inner_jobnet_main_id, inner_job_id_fs_link,"
 				" invo_flag, job_type, test_flag, method_flag, force_flag, timeout_flag, status,"
-				" boot_count, end_count, start_time, end_time, point_x, point_y, job_id, job_name)"
+				" boot_count, end_count, start_time, end_time, point_x, point_y, job_id, job_name,"
+				" continue_flag, run_user, run_user_password)"
 				" values (" ZBX_FS_UI64 "," ZBX_FS_UI64 "," ZBX_FS_UI64 "," ZBX_FS_UI64 ","
 				" %d, %d, %d, %s, %s, 0, %d,"
-				" %d, 0, 0, 0, %s, %s, '%s', '%s')",
+				" %d, 0, 0, 0, %s, %s, '%s', '%s', %s, '%s', '%s')",
 				inner_job_id, inner_jobnet_id, inner_jobnet_main_id, inner_job_id_fs_link,
 				JA_JOB_INVO_FLAG_OFF, job_type, test_flag, row[7], row[8], JA_JOB_STATUS_BEGIN,
-				boot_count, row[4], row[5], row[1], job_name);
+				boot_count, row[4], row[5], row[1], job_name, row[9], run_user, run_user_password);
 
 		zbx_free(job_name_esc);
+		zbx_free(run_user_esc);
+		zbx_free(run_user_password_esc);
 
 		if (rc <= ZBX_DB_OK)
 		{
@@ -1582,10 +1788,12 @@ static int	load_sub_jobnet_definition(zbx_uint64_t inner_jobnet_main_id,
 			rc = DBexecute("insert into ja_run_jobnet_table ("
 					" inner_jobnet_id, inner_jobnet_main_id, inner_job_id, update_date, run_type, main_flag,"
 					" timeout_flag, status, scheduled_time, start_time, end_time, public_flag, multiple_start_up,"
-					" jobnet_id, user_name, jobnet_name, memo, execution_user_name)"
+					" jobnet_id, user_name, jobnet_name, memo, execution_user_name,"
+					" virtual_time, virtual_start_time, virtual_end_time, initial_scheduled_time)"
 					" values (" ZBX_FS_UI64 ", " ZBX_FS_UI64 ", %s, %s, %d, %d,"
 					" 0, %d, 0, 0, 0, %s, %s,"
-					" '%s', '%s', '%s', '%s', '%s')",
+					" '%s', '%s', '%s', '%s', '%s',"
+					" 0, 0, 0, 0)",
 					link_inner_jobnet_id, inner_jobnet_main_id, row[0], row3[1], run_type, JA_JOBNET_MAIN_FLAG_SUB,
 					JA_JOBNET_STATUS_BEGIN, row3[2], row3[6],
 					row3[0], user_name_esc, jobnet_name_esc, memo, execution_user_name_esc);
@@ -1677,7 +1885,7 @@ static int	load_jobnet_definition(char *jobnet_id, char *scheduled_time,
 	/* double check the expansion of jobnet */
 	result = DBselect("select count(*)"
 			" from ja_run_jobnet_table"
-			" where jobnet_id = '%s' and scheduled_time = %s and run_type = %d and main_flag = %d"
+			" where jobnet_id = '%s' and initial_scheduled_time = %s and run_type = %d and main_flag = %d"
 			" and schedule_id = '%s' and calendar_id = '%s'",
 			jobnet_id, scheduled_time, JA_JOBNET_RUN_TYPE_NORMAL, JA_JOBNET_MAIN_FLAG_MAIN,
 			schedule_id, calendar_id);
@@ -1698,7 +1906,7 @@ static int	load_jobnet_definition(char *jobnet_id, char *scheduled_time,
 	if (count > 0)
 	{
 		/* skip registration */
-		/* zabbix_log(LOG_LEVEL_DEBUG, "-DEBUG- jobnet already registered: jobnet[%s] scheduled time[%s]", jobnet_id, scheduled_time); */
+		/* zabbix_log(LOG_LEVEL_DEBUG, "=DEBUG= jobnet already registered: jobnet[%s] scheduled time[%s]", jobnet_id, scheduled_time); */
 		return SUCCEED;
 	}
 
@@ -1721,9 +1929,9 @@ static int	load_jobnet_definition(char *jobnet_id, char *scheduled_time,
 	if (NULL == (row = DBfetch(result)))
 	{
 		no_valid_flag = 1;
+		DBrollback();
 		ja_log("JALOADER200004", 0, NULL, 0, jobnet_id, schedule_id);
 		DBfree_result(result);
-		DBrollback();
 		return FAIL;
 	}
 
@@ -1744,38 +1952,44 @@ static int	load_jobnet_definition(char *jobnet_id, char *scheduled_time,
 			" inner_jobnet_id, inner_jobnet_main_id, inner_job_id, update_date,"
 			" run_type, main_flag, timeout_flag, status,"
 			" scheduled_time, start_time, end_time, public_flag, multiple_start_up,"
-			" jobnet_id, user_name, jobnet_name, memo, schedule_id, calendar_id, boot_time, execution_user_name)"
+			" jobnet_id, user_name, jobnet_name, memo, schedule_id, calendar_id, boot_time, execution_user_name,"
+			" virtual_time, virtual_start_time, virtual_end_time, initial_scheduled_time)"
 			" values (" ZBX_FS_UI64 ", " ZBX_FS_UI64 ", 0, %s,"
 			" %d, %d, 0, %d,"
 			" %s, 0, 0, %s, %s,"
-			" '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')",
+			" '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s',"
+			" 0, 0, 0, %s)",
 			inner_jobnet_main_id, inner_jobnet_main_id, row[1],
 			JA_JOBNET_RUN_TYPE_NORMAL, JA_JOBNET_MAIN_FLAG_MAIN, JA_JOBNET_STATUS_BEGIN,
 			scheduled_time, row[2], row[6],
-			row[0], user_name_esc, jobnet_name_esc, memo, schedule_id, calendar_id, boot_time, user_name_esc);
+			row[0], user_name_esc, jobnet_name_esc, memo, schedule_id, calendar_id, boot_time, user_name_esc,
+			scheduled_time);
 
 	if (rc <= ZBX_DB_OK)
 	{
+		DBrollback();
 		zbx_snprintf(msgwork, sizeof(msgwork), "%s %s", row[0], row[1]);
 		ja_log("JALOADER200002", 0, jobnet_id, 0, "ja_run_jobnet_table", msgwork);
 		DBfree_result(result);
 		zbx_free(memo_esc);
 		zbx_free(user_name_esc);
 		zbx_free(jobnet_name_esc);
-		DBrollback();
 		return FAIL;
 	}
 
 	rc = DBexecute("insert into ja_run_jobnet_summary_table ("
 			" inner_jobnet_id, update_date, invo_flag, run_type, status, job_status, jobnet_abort_flag, load_status,"
 			" scheduled_time, start_time, end_time, public_flag, multiple_start_up, jobnet_id, user_name, jobnet_name, memo,"
-			" schedule_id, calendar_id, boot_time, execution_user_name)"
+			" schedule_id, calendar_id, boot_time, execution_user_name,"
+			" virtual_time, virtual_start_time, virtual_end_time, start_pending_flag, initial_scheduled_time)"
 			" values (" ZBX_FS_UI64 ", %s, 1, %d, %d, 0, 0, %d,"
 			" %s, 0, 0, %s, %s, '%s', '%s', '%s', '%s',"
-			" '%s', '%s', '%s', '%s')",
+			" '%s', '%s', '%s', '%s',"
+			" 0, 0, 0, %d, %s)",
 			inner_jobnet_main_id, row[1], JA_JOBNET_RUN_TYPE_NORMAL, JA_JOBNET_STATUS_BEGIN, JA_SUMMARY_LOAD_STATUS_NORMAL,
 			scheduled_time, row[2], row[6], row[0], user_name_esc, jobnet_name_esc, memo,
-			schedule_id, calendar_id, boot_time, user_name_esc);
+			schedule_id, calendar_id, boot_time, user_name_esc,
+			JA_SUMMARY_START_PENDING_NONE, scheduled_time);
 
 	zbx_free(memo_esc);
 	zbx_free(user_name_esc);
@@ -1783,10 +1997,10 @@ static int	load_jobnet_definition(char *jobnet_id, char *scheduled_time,
 
 	if (rc <= ZBX_DB_OK)
 	{
+		DBrollback();
 		zbx_snprintf(msgwork, sizeof(msgwork), "%s %s", row[0], row[1]);
 		ja_log("JALOADER200002", 0, jobnet_id, 0, "ja_run_jobnet_summary_table", msgwork);
 		DBfree_result(result);
-		DBrollback();
 		return FAIL;
 	}
 
@@ -1867,6 +2081,7 @@ static int	get_schedule_jobnet(char *schedule_id, char *update_date,
  *             end_date (in) - search end time (current time)                 *
  *             calendar_id (in) - calendar id                                 *
  *             boot_time (in) - boot time (HHMM 0000-9959)                    *
+ *             object_flag (in) - object flag                                 *
  *                                                                            *
  * Return value:  SUCCEED - processed successfully                            *
  *                FAIL - an error occurred                                    *
@@ -1875,56 +2090,220 @@ static int	get_schedule_jobnet(char *schedule_id, char *update_date,
  *                                                                            *
  ******************************************************************************/
 static int	get_calendar_detail(char *schedule_id, char *update_date,
-				char *start_date, char *end_date, char *calendar_id, char *boot_time)
+				char *start_date, char *end_date, char *calendar_id, char *boot_time, int object_flag)
 {
 	DB_RESULT	result;
 	DB_ROW		row;
+	int		hit, cnt, months;
+	int		base_date_flag, designated_day, w_designated_day, shift_day, w_shift_day;
 	char		jc_update_date[UPDATE_DATE_LEN];
 	char		start_ope_date[OPERATING_DATE_LEN], end_ope_date[OPERATING_DATE_LEN];
+	char		base_date[OPERATING_DATE_LEN];
+	char		edit_date[OPERATING_DATE_LEN] , edit_month[OPERATING_DATE_LEN];
+	char		operating_date[OPERATING_DATE_LEN];
 	char		scheduled_time[SCHEDULED_TIME_LEN];
+	char		base_calendar_id[JA_CALENDAR_ID_LEN];
 	const char	*__function_name = "get_calendar_detail";
 
 	zabbix_log(LOG_LEVEL_DEBUG, "In %s(%s %s %s %s %s %s)",
 		__function_name, schedule_id, update_date, start_date, end_date, calendar_id, boot_time);
 
-	result = DBselect("select update_date"
-			" from ja_calendar_control_table"
-			" where calendar_id = '%s' and valid_flag = %d",
-			calendar_id, VALID_FLAG_ON);
+	/* check the type of object */
+	if (object_flag == 0) {
+		/* calendar object */
+		result = DBselect("select update_date"
+				" from ja_calendar_control_table"
+				" where calendar_id = '%s' and valid_flag = %d",
+				calendar_id, VALID_FLAG_ON);
 
-	if (NULL == (row = DBfetch(result)))
-	{
-		no_valid_flag = 1;
-		ja_log("JALOADER200006", 0, NULL, 0, calendar_id, schedule_id);
-		DBfree_result(result);
-		return FAIL;
-	}
-
-	zbx_strlcpy(jc_update_date, row[0], sizeof(jc_update_date));
-	DBfree_result(result);
-
-	/* edit the start and end dates of the search range (YYYYMMDD <- YYYYMMDDHHMM) */
-	zbx_strlcpy(start_ope_date, start_date, sizeof(start_ope_date));
-	make_end_operating_date(end_ope_date, end_date, boot_time);
-
-	result = DBselect("select operating_date"
-			" from ja_calendar_detail_table"
-			" where calendar_id = '%s' and update_date = %s"
-			" and operating_date <= %s and operating_date >= %s",
-			calendar_id, jc_update_date, start_ope_date, end_ope_date);
-
-	while (NULL != (row = DBfetch(result)))
-	{
-		/* schedule time edit and check */
-		make_scheduled_time(scheduled_time, row[0], boot_time);
-		zabbix_log(LOG_LEVEL_DEBUG, "-DEBUG- scheduled_time[%s] <= start_date[%s] && scheduled_time[%s] >= end_date[%s]",
-			scheduled_time, start_date, scheduled_time, end_date);
-		if (strcmp(scheduled_time, start_date) <= 0 && strcmp(scheduled_time, end_date) >= 0)
+		if (NULL == (row = DBfetch(result)))
 		{
-			get_schedule_jobnet(schedule_id, update_date, scheduled_time, calendar_id, boot_time);
+			no_valid_flag = 1;
+			ja_log("JALOADER200006", 0, NULL, 0, calendar_id, schedule_id);
+			DBfree_result(result);
+			return FAIL;
+		}
+
+		zbx_strlcpy(jc_update_date, row[0], sizeof(jc_update_date));
+		DBfree_result(result);
+
+		/* edit the start and end dates of the search range (YYYYMMDD <- YYYYMMDDHHMM) */
+		zbx_strlcpy(start_ope_date, start_date, sizeof(start_ope_date));
+		make_end_operating_date(end_ope_date, end_date, boot_time);
+
+		result = DBselect("select operating_date"
+				" from ja_calendar_detail_table"
+				" where calendar_id = '%s' and update_date = %s"
+				" and operating_date <= %s and operating_date >= %s",
+				calendar_id, jc_update_date, start_ope_date, end_ope_date);
+
+		while (NULL != (row = DBfetch(result)))
+		{
+			/* schedule time edit and check */
+			make_scheduled_time(scheduled_time, row[0], boot_time);
+			zabbix_log(LOG_LEVEL_DEBUG, "=DEBUG= scheduled_time[%s] <= start_date[%s] && scheduled_time[%s] >= end_date[%s]",
+				scheduled_time, start_date, scheduled_time, end_date);
+			if (strcmp(scheduled_time, start_date) <= 0 && strcmp(scheduled_time, end_date) >= 0)
+			{
+				get_schedule_jobnet(schedule_id, update_date, scheduled_time, calendar_id, boot_time);
+			}
+		}
+		DBfree_result(result);
+	}
+	else {
+		/* filter object */
+		result = DBselect("select base_date_flag, designated_day, shift_day, base_calendar_id"
+				" from ja_filter_control_table"
+				" where filter_id = '%s' and valid_flag = %d",
+				calendar_id, VALID_FLAG_ON);
+
+		if (NULL == (row = DBfetch(result)))
+		{
+			no_valid_flag = 1;
+			ja_log("JALOADER200008", 0, NULL, 0, calendar_id, schedule_id);
+			DBfree_result(result);
+			return FAIL;
+		}
+
+		base_date_flag   = atoi(row[0]);
+		designated_day   = atoi(row[1]);
+		shift_day        = atoi(row[2]);
+		w_designated_day = designated_day;
+		w_shift_day      = shift_day;
+		zbx_strlcpy(base_calendar_id, row[3], sizeof(base_calendar_id));
+		DBfree_result(result);
+
+		if (w_shift_day < 0)
+		{
+			w_shift_day = w_shift_day * -1;
+		}
+
+		/* beginning of the month ? */
+		if (base_date_flag == 0)
+		{
+			w_designated_day = 1;
+		}
+
+		result = DBselect("select update_date"
+				" from ja_calendar_control_table"
+				" where calendar_id = '%s' and valid_flag = %d",
+				base_calendar_id, VALID_FLAG_ON);
+
+		if (NULL == (row = DBfetch(result)))
+		{
+			no_valid_flag = 1;
+			ja_log("JALOADER200006", 0, NULL, 0, calendar_id, schedule_id);
+			DBfree_result(result);
+			return FAIL;
+		}
+
+		zbx_strlcpy(jc_update_date, row[0], sizeof(jc_update_date));
+		DBfree_result(result);
+
+		/* operating day shift check */
+		memcpy(base_date, end_date, 6);  /* YYYYMMDDHHMM -> YYYYMM */
+		base_date[6] = '\0';
+
+		months = -2;
+		while (months <= 1)
+		{
+			/* check out one month before and after */
+			hit = 0;
+			cnt = 0;
+			operating_date[0] = '\0';
+
+			zbx_strlcpy(edit_month, base_date, sizeof(edit_month));
+			shift_month(edit_month, months);
+
+			switch (base_date_flag)
+			{
+				case 1: /* end of month */
+					w_designated_day = get_end_of_month(edit_month);
+					break;
+
+				case 2: /* specified day */
+					w_designated_day = get_end_of_month(edit_month);
+					if (designated_day > w_designated_day)
+					{
+						if (shift_day >= 0)
+						{
+							/* search from the first day of the next month */
+							shift_month(edit_month, 1);
+							w_designated_day = 1;
+							cnt = 1;
+						}
+						else
+						{
+							cnt = designated_day - w_designated_day;
+						}
+					}
+					else
+					{
+						w_designated_day = designated_day;
+					}
+					break;
+			}
+			zbx_snprintf(edit_date, sizeof(edit_date), "%s%02d", edit_month, w_designated_day);
+
+			while (cnt < 30)
+			{
+				/* check before and after 30 days from the month */
+				zabbix_log(LOG_LEVEL_DEBUG, "=DEBUG= cnt[%d] designated_day[%d] shift_day[%d] edit_date[%s]",
+					cnt, w_designated_day, shift_day, edit_date);
+
+				result = DBselect("select operating_date from ja_calendar_detail_table"
+						" where calendar_id = '%s' and update_date = %s and operating_date = %s",
+						base_calendar_id, jc_update_date, edit_date);
+
+				if (NULL != (row = DBfetch(result)))
+				{
+					hit = hit + 1;
+
+					/* designated dates are operating days ? */
+					if (cnt == 0 || hit >= w_shift_day)
+					{
+						zbx_strlcpy(operating_date, row[0], sizeof(operating_date));
+						DBfree_result(result);
+						break;
+					}
+				}
+
+				/* no moving date ? */
+				if (shift_day == 0)
+				{
+					break;
+				}
+
+				/* next day */
+				if (shift_day >= 0)
+				{
+					shift_days(edit_date, 1);
+				}
+				else
+				{
+					shift_days(edit_date, -1);
+				}
+				cnt = cnt + 1;
+				DBfree_result(result);
+			}
+
+			/* operating day get ? */
+			if (operating_date[0] != '\0')
+			{
+				/* schedule time edit and check */
+				make_scheduled_time(scheduled_time, operating_date, boot_time);
+				zabbix_log(LOG_LEVEL_DEBUG, "=DEBUG= scheduled_time[%s] <= start_date[%s] && scheduled_time[%s] >= end_date[%s]",
+					scheduled_time, start_date, scheduled_time, end_date);
+				if (strcmp(scheduled_time, start_date) <= 0 && strcmp(scheduled_time, end_date) >= 0)
+				{
+					zabbix_log(LOG_LEVEL_DEBUG, "=DEBUG= jobnet schedule registration start. schedule_id[%s] update_date[%s] scheduled_time[%s] calendar_id[%s] boot_time[%s]",
+						schedule_id, update_date, scheduled_time, calendar_id, boot_time);
+					get_schedule_jobnet(schedule_id, update_date, scheduled_time, calendar_id, boot_time);
+				}
+			}
+			months = months + 1;
 		}
 	}
-	DBfree_result(result);
 
 	return SUCCEED;
 }
@@ -1954,14 +2333,14 @@ static int	get_schedule_detail(char *schedule_id, char *update_date, char *start
 	zabbix_log(LOG_LEVEL_DEBUG, "In %s(%s %s %s %s)",
 		__function_name, schedule_id, update_date, start_date, end_date);
 
-	result = DBselect("select calendar_id, boot_time"
+	result = DBselect("select calendar_id, boot_time, object_flag"
 			" from ja_schedule_detail_table"
 			" where schedule_id = '%s' and update_date = %s",
 			schedule_id, update_date);
 
 	while (NULL != (row = DBfetch(result)))
 	{
-		get_calendar_detail(schedule_id, update_date, start_date, end_date, row[0], row[1]);
+		get_calendar_detail(schedule_id, update_date, start_date, end_date, row[0], row[1], atoi(row[2]));
 	}
 	DBfree_result(result);
 
@@ -2010,9 +2389,9 @@ static int	jobnet_load_schedule(int load_span)
 
 			if (rc <= ZBX_DB_OK)
 			{
+				DBrollback();
 				zbx_snprintf(msgwork, sizeof(msgwork), "%s %s", row[0], row[1]);
 				ja_log("JALOADER200003", 0, NULL, 0, "ja_schedule_control_table", msgwork);
-				DBrollback();
 				continue;
 			}
 			DBcommit();
@@ -2056,7 +2435,7 @@ static int	jobnet_load_immediate()
 
 	result = DBselect("select inner_jobnet_id, inner_job_id, update_date, run_type, scheduled_time,"
 			" public_flag, jobnet_id, user_name, jobnet_name, memo, execution_user_name,"
-			" multiple_start_up"
+			" multiple_start_up, initial_scheduled_time"
 			" from ja_run_jobnet_table"
 			" where run_type <> %d and main_flag = %d and status = %d",
 			JA_JOBNET_RUN_TYPE_NORMAL, JA_JOBNET_MAIN_FLAG_MAIN, JA_JOBNET_STATUS_BEGIN);
@@ -2069,7 +2448,7 @@ static int	jobnet_load_immediate()
 		if (rc != SUCCEED)
 		{
 			/* skip registration */
-			/* zabbix_log(LOG_LEVEL_DEBUG, "-DEBUG- immediate jobnet already registered: jobnet[%s] inner_jobnet_id[%s]", row[6], row[0]); */
+			/* zabbix_log(LOG_LEVEL_DEBUG, "=DEBUG= immediate jobnet already registered: jobnet[%s] inner_jobnet_id[%s]", row[6], row[0]); */
 			continue;
 		}
 
@@ -2133,9 +2512,9 @@ static int	jobnet_load_immediate()
 
 				if (rc <= ZBX_DB_OK)
 				{
+					DBrollback();
 					zbx_snprintf(msgwork, sizeof(msgwork), "%s", row[0]);
 					ja_log("JALOADER200003", inner_jobnet_id, NULL, 0, "ja_run_jobnet_table", msgwork);
-					DBrollback();
 					zbx_free(memo_esc);
 					zbx_free(user_name_esc);
 					zbx_free(jobnet_name_esc);
@@ -2147,21 +2526,24 @@ static int	jobnet_load_immediate()
 						" inner_jobnet_id, update_date, invo_flag, run_type, status,"
 						" job_status, jobnet_abort_flag, load_status,"
 						" scheduled_time, start_time, end_time, public_flag, multiple_start_up,"
-						" jobnet_id, user_name, jobnet_name, memo, execution_user_name)"
+						" jobnet_id, user_name, jobnet_name, memo, execution_user_name,"
+						" virtual_time, virtual_start_time, virtual_end_time, start_pending_flag, initial_scheduled_time)"
 						" values (%s, %s, 1, %s, %d,"
 						" 2, 0, %d,"
 						" %s, %s, %s, %s, %s,"
-						" '%s', '%s', '%s', '%s', '%s')",
+						" '%s', '%s', '%s', '%s', '%s',"
+						" 0, 0, 0, %d, %s)",
 						row[0], row[2], row[3], JA_JOBNET_STATUS_ENDERR,
 						JA_SUMMARY_LOAD_STATUS_ERROR,
 						row[4], now_time, now_time, row[5], row[11],
-						row[6], user_name_esc, jobnet_name_esc, memo, execution_user_name_esc);
+						row[6], user_name_esc, jobnet_name_esc, memo, execution_user_name_esc,
+						JA_SUMMARY_START_PENDING_NONE, row[12]);
 
 				if (rc <= ZBX_DB_OK)
 				{
+					DBrollback();
 					zbx_snprintf(msgwork, sizeof(msgwork), "%s %s", row[0], row[6]);
 					ja_log("JALOADER200002", inner_jobnet_id, NULL, 0, "ja_run_jobnet_summary_table", msgwork);
-					DBrollback();
 					zbx_free(memo_esc);
 					zbx_free(user_name_esc);
 					zbx_free(jobnet_name_esc);
@@ -2180,13 +2562,16 @@ static int	jobnet_load_immediate()
 		rc = DBexecute("insert into ja_run_jobnet_summary_table ("
 				" inner_jobnet_id, update_date, invo_flag, run_type, status, job_status, jobnet_abort_flag, load_status,"
 				" scheduled_time, start_time, end_time, public_flag, multiple_start_up,"
-				" jobnet_id, user_name, jobnet_name, memo, execution_user_name)"
+				" jobnet_id, user_name, jobnet_name, memo, execution_user_name,"
+				" virtual_time, virtual_start_time, virtual_end_time, start_pending_flag, initial_scheduled_time)"
 				" values (%s, %s, 1, %s, %d, 0, 0, %d,"
 				" %s, 0, 0, %s, %s,"
-				" '%s', '%s', '%s', '%s', '%s')",
+				" '%s', '%s', '%s', '%s', '%s',"
+				" 0, 0, 0, %d, %s)",
 				row[0], row[2], row[3], JA_JOBNET_STATUS_BEGIN, JA_SUMMARY_LOAD_STATUS_NORMAL,
 				row[4], row[5], row[11],
-				row[6], user_name_esc, jobnet_name_esc, memo, execution_user_name_esc);
+				row[6], user_name_esc, jobnet_name_esc, memo, execution_user_name_esc,
+				JA_SUMMARY_START_PENDING_NONE, row[12]);
 
 		zbx_free(memo_esc);
 		zbx_free(user_name_esc);
@@ -2195,9 +2580,9 @@ static int	jobnet_load_immediate()
 
 		if (rc <= ZBX_DB_OK)
 		{
+			DBrollback();
 			zbx_snprintf(msgwork, sizeof(msgwork), "%s %s", row[0], row[6]);
 			ja_log("JALOADER200002", inner_jobnet_id, NULL, 0, "ja_run_jobnet_summary_table", msgwork);
-			DBrollback();
 			continue;
 		}
 

@@ -2,6 +2,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -57,7 +58,7 @@
                    Canvas.Left="13" Canvas.Top="28"
                    StrokeThickness="1" RadiusX="0" RadiusY="0" Opacity="1.0" Visibility="Collapsed">
         </Rectangle>
-        <Rectangle Canvas.ZIndex="102"  Name="picToolTip" Height="30" Width="30" Stroke="Transparent"
+        <Rectangle Canvas.ZIndex="10000"  Name="picToolTip" Height="30" Width="30" Stroke="Transparent"
                    Canvas.Top="0" Canvas.Left="0" Fill="Transparent" >
         </Rectangle>
     </Canvas>

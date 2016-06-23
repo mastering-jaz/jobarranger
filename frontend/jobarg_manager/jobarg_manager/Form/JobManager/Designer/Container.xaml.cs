@@ -1,6 +1,7 @@
 ﻿/*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -51,6 +52,10 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
 
         /// <summary> 実行ジョブ管理テーブル </summary>
         private RunJobDAO _runJobControlDAO;
+
+        // added by YAMA 2014/11/05    拡張ジョブアイコンの再実行
+        /// <summary> 実行拡張ジョブアイコン設定テーブル </summary>
+        private RunIconExtJobDAO _runIconExtJobDAO;
 
         /// <>マウスの位置</>
         private Point mousePosition;
@@ -1033,12 +1038,18 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
                 return false;
 
             //ステータスが未実行、実行準備、実行エラー以外の場合利用不可 
-
             if (!(((RunJobStatusType)existJob["status"]).Equals(RunJobStatusType.None) || ((RunJobStatusType)existJob["status"]).Equals(RunJobStatusType.Prepare) || ((RunJobStatusType)existJob["status"]).Equals(RunJobStatusType.RunErr)))
                 return false;
+
             //処理フラグがスキップの場合利用不可 
             if (((RunJobMethodType)existJob["method_flag"]).Equals(RunJobMethodType.SKIP))
                 return false;
+
+            // added by YAMA 2014/11/05    処理継続時の実行ジョブ詳細画面でのコンテキストメニュー
+            // 処理継続のジョブの場合、利用不可 
+            if (isContinuousJOB(item, existJob))
+                return false;
+
             return true;
         }
 
@@ -1090,6 +1101,12 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
             //ステータスが実行エラー以外の場合利用不可 
             if (!((RunJobStatusType)existJob["status"]).Equals(RunJobStatusType.RunErr))
                 return false;
+
+            // added by YAMA 2014/11/05    処理継続時の実行ジョブ詳細画面でのコンテキストメニュー
+            // 処理継続のジョブの場合、利用不可 
+            if (isContinuousJOB(item, existJob))
+                return false;
+
             return true;
         }
 
@@ -1109,6 +1126,12 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
                     (((RunJobStatusType)existJob["status"]).Equals(RunJobStatusType.Prepare) && ((RunJobMethodType)existJob["method_flag"]).Equals(RunJobMethodType.HOLD)) ||
                     ((RunJobStatusType)existJob["status"]).Equals(RunJobStatusType.RunErr)))
                 return false;
+
+            // added by YAMA 2014/11/05    処理継続時の実行ジョブ詳細画面でのコンテキストメニュー
+            // 処理継続のジョブの場合、利用不可 
+            if (isContinuousJOB(item, existJob))
+                return false;
+
             return true;
         }
         //*******************************************************************
@@ -1236,6 +1259,16 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
                 row["status"] = (int)RunJobStatusType.Prepare;
                 row["method_flag"] = (int)RunJobMethodType.RERUN;
                 _dbAccess.ExecuteNonQuery(dt, _runJobControlDAO);
+
+                // added by YAMA 2014/11/05    拡張ジョブアイコンの再実行
+                // 実行ジョブ管理テーブルのジョブタイプが「拡張ジョブ」の場合、
+                // 実行用ジョブネット内部管理IDをキーに実行拡張ジョブアイコン設定テーブルの待合せ回数を「0」に更新する
+                if (((ElementType)row["job_type"]).Equals(ElementType.EXTJOB))
+                {
+                    _runIconExtJobDAO = new RunIconExtJobDAO(_dbAccess);
+                    int cnt = _runIconExtJobDAO.SetWaitCountByJobnet(0, jobId);
+                }
+
             }
             _dbAccess.TransactionCommit();
             _dbAccess.CloseSqlConnect();
@@ -1310,6 +1343,21 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
 
         }
 
+        // added by YAMA 2014/11/05    処理継続時の実行ジョブ詳細画面でのコンテキストメニュー
+        //*******************************************************************
+        /// <>処理継続のジョブか否かの判定</>
+        //    true：「ステータスが実行エラー」かつ「処理継続」の場合
+        //*******************************************************************
+        private bool isContinuousJOB(IElement item, DataRow existJob)
+        {
+
+            // 「ステータスが実行エラー」かつ「処理継続」の場合、"true" を返す
+            if ((((RunJobStatusType)existJob["status"]).Equals(RunJobStatusType.RunErr)) && (existJob["continue_flag"].ToString().Equals("1")))
+                return true;
+
+            // 上記以外の場合、"false"  を返す
+            return false;
+        }
 
         #endregion
 

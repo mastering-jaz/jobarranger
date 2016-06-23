@@ -1,11 +1,13 @@
 
--- Job Arranger drop table SQL for PostgreSQL  - 2014/03/25 -
+-- Job Arranger drop table SQL for PostgreSQL  - 2014/09/17 -
 
 -- Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+-- Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 
 
 DROP TABLE ja_calendar_control_table CASCADE;
 DROP TABLE ja_calendar_detail_table CASCADE;
+DROP TABLE ja_filter_control_table CASCADE;
 DROP TABLE ja_schedule_control_table CASCADE;
 DROP TABLE ja_schedule_detail_table CASCADE;
 DROP TABLE ja_schedule_jobnet_table CASCADE;
@@ -61,6 +63,7 @@ DROP TABLE ja_value_after_jobnet_table CASCADE;
 DROP TABLE ja_session_table CASCADE;
 DROP TABLE ja_run_log_table CASCADE;
 DROP TABLE ja_define_run_log_message_table CASCADE;
+DROP TABLE ja_send_message_table CASCADE;
 DROP TABLE ja_index_table CASCADE;
 DROP TABLE ja_parameter_table CASCADE;
 DROP TABLE ja_host_lock_table CASCADE;

@@ -1,6 +1,7 @@
 ﻿/*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -60,40 +61,59 @@ namespace jp.co.ftf.jobcontroller.DAO
                                         "and update_date = ?";
 
         
-        private string _selectSqlByScheduleEmpty = "select js.*, jc1.calendar_name " +
+        private string _selectSqlByScheduleEmpty = "select js.*, jc1.calendar_name as object_name " +
                         "from ja_schedule_detail_table js, ja_calendar_control_table jc1 " +
                         "where 0!=0 " +
                         "and js.calendar_id = jc1.calendar_id " +
                         "and jc1.update_date = (select max(jc2.update_date) from ja_calendar_control_table jc2 group by jc2.calendar_id having jc1.calendar_id = jc2.calendar_id)";
 
 
-        private string _selectSqlBySchedule = "select js.*, jc.calendar_name from ja_schedule_detail_table js, "+
-                        "(SELECT A.calendar_id,A.calendar_name "+
+        private string _selectSqlBySchedule = "select js.*, jc.object_name from ja_schedule_detail_table js, "+
+                        "(SELECT A.calendar_id as object_id, A.calendar_name as object_name, 0 as object_flag "+
                         "FROM  ja_calendar_control_table  A "+
                         "WHERE " +
-		                    "(EXISTS ( "+
-		                        "SELECT * "+
-		                        "FROM ja_calendar_control_table "+
-		                        "WHERE calendar_id=A.calendar_id "+
-		                        "AND valid_flag=1) and A.valid_flag=1)"+
+                            "(EXISTS ( "+
+                                "SELECT * "+
+                                "FROM ja_calendar_control_table "+
+                                "WHERE calendar_id=A.calendar_id "+
+                                "AND valid_flag=1) and A.valid_flag=1)"+
                         "OR ( "+
-		                        "NOT EXISTS ( "+
-		                        "SELECT  * "+
-		                        "FROM ja_calendar_control_table "+
-		                        "WHERE calendar_id=A.calendar_id "+
-		                        "AND valid_flag=1) "+
-	                        "and "+
-		                        "NOT EXISTS ( "+
-		                        "SELECT  * "+
-		                        "FROM ja_calendar_control_table "+
-		                        "WHERE calendar_id=A.calendar_id "+
-		                        "AND update_date>A.update_date) "+
-	                    ")) jc "+
+                                "NOT EXISTS ( "+
+                                "SELECT  * "+
+                                "FROM ja_calendar_control_table "+
+                                "WHERE calendar_id=A.calendar_id "+
+                                "AND valid_flag=1) "+
+                            "and "+
+                                "NOT EXISTS ( "+
+                                "SELECT  * "+
+                                "FROM ja_calendar_control_table "+
+                                "WHERE calendar_id=A.calendar_id "+
+                                "AND update_date>A.update_date)) "+
+                        "UNION " +
+                        "SELECT A.filter_id as object_id, A.filter_name as object_name, 1 as object_flag "+
+                        "FROM  ja_filter_control_table  A "+
+                        "WHERE " +
+                            "(EXISTS ( "+
+                                "SELECT * "+
+                                "FROM ja_filter_control_table "+
+                                "WHERE filter_id=A.filter_id "+
+                                "AND valid_flag=1) and A.valid_flag=1)"+
+                        "OR ( "+
+                                "NOT EXISTS ( "+
+                                "SELECT  * "+
+                                "FROM ja_filter_control_table "+
+                                "WHERE filter_id=A.filter_id "+
+                                "AND valid_flag=1) "+
+                            "and "+
+                                "NOT EXISTS ( "+
+                                "SELECT  * "+
+                                "FROM ja_filter_control_table "+
+                                "WHERE filter_id=A.filter_id "+
+                                "AND update_date>A.update_date)) "+
+                        ") jc "+
                         "where js.schedule_id = ? and js.update_date = ? "+
-                        "and js.calendar_id = jc.calendar_id ";
+                        "and js.calendar_id = jc.object_id and js.object_flag = jc.object_flag";
 
-
- 
         private DBConnect _db = null;
 
         #endregion

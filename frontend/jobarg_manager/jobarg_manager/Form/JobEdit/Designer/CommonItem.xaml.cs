@@ -1,6 +1,7 @@
 ﻿/*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -58,7 +59,7 @@ public partial class CommonItem : UserControl, IRoom
         InitContentItem(data, editType, methodType);
 
         // 内容のコンテナのセット  
-        _contentItem.Container = container; ;
+        _contentItem.Container = container;
 
         // 各アイコン設定テーブルを登録 
         if (Consts.EditType.Add == editType)
@@ -83,7 +84,7 @@ public partial class CommonItem : UserControl, IRoom
         InitContentItem(data, editType, color);
 
         // 内容のコンテナのセット  
-        _contentItem.Container = container; ;
+        _contentItem.Container = container;
 
         // 各アイコン設定テーブルを登録 
         if (Consts.EditType.Add == editType)
@@ -107,7 +108,7 @@ public partial class CommonItem : UserControl, IRoom
         InitContentItem(data, editType, color, characterColor);
 
         // 内容のコンテナのセット  
-        _contentItem.Container = container; ;
+        _contentItem.Container = container;
 
         // 各アイコン設定テーブルを登録 
         if (Consts.EditType.Add == editType)
@@ -902,6 +903,8 @@ public partial class CommonItem : UserControl, IRoom
             default:
                 break;
         }
+        // ToolTip更新
+        _contentItem.SetToolTip();
     }
 
 
@@ -1288,7 +1291,12 @@ public partial class CommonItem : UserControl, IRoom
         this.JobId = jobId;
         // ジョブネットの場合、ジョブ名にリンク先ジョブネットIDをセット 
         if (ElementType.JOBNET == type && Consts.EditType.Add == editType)
+        {
             this.JobName = data.Data.ToString();
+            jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobNet jobnet =
+                (jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobNet)item;
+            jobnet.SetToolTip(jobId, data.Data.ToString());
+        }
         else
             this.JobName = "";
 
@@ -1926,6 +1934,9 @@ public partial class CommonItem : UserControl, IRoom
         // 待合せ時間(初期値:0) 
         row["reboot_wait_time"] = 0;
 
+        //added by YAMA 2014/09/22
+        // タイムアウト警告(初期値:0) 
+        row["timeout"] = 0;
     }
 
     //************************************************************************

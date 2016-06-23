@@ -2,6 +2,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -72,5 +73,19 @@
                    Canvas.Left="38" Canvas.Top="27"
                    StrokeThickness="1" RadiusX="0" RadiusY="0" Opacity="1.0" Visibility="Collapsed">
         </Rectangle>
+        <Path Name="picToolTip" Canvas.ZIndex="10000" Stroke="Transparent" Fill="Transparent"  StrokeThickness="1">
+            <Path.Data>
+                <PathGeometry>
+                    <PathFigure StartPoint="0,0" IsClosed="False">
+                        <LineSegment Point="70,0"/>
+                        <LineSegment Point="80,10"/>
+                        <LineSegment Point="80,30"/>
+                        <LineSegment Point="10,30"/>
+                        <LineSegment Point="0,20"/>
+                        <LineSegment Point="0,0"/>
+                    </PathFigure>
+                </PathGeometry>
+            </Path.Data>
+        </Path>
     </Canvas>
 </UserControl>

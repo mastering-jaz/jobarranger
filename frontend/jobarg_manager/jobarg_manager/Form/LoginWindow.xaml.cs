@@ -1,6 +1,7 @@
 ﻿/*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -273,6 +274,19 @@ namespace jp.co.ftf.jobcontroller.JobController
 
                 //added by YAMA 2014/03/03
                 LoginSetting.JaZabbixVersion = ((JobconDBSource)comboBox_jobarg.SelectedItem).JaZabbixVersion;
+
+                // added by YAMA 2014/10/20    マネージャ内部時刻同期
+                LoginSetting.ManagerTimeSync = DBUtil.GetManagerTimeSync();
+
+                // added by YAMA 2014/10/30    グループ所属無しユーザーでのマネージャ動作
+                if (LoginSetting.GroupList.Count == 0)
+                {
+                    LoginSetting.BelongToUsrgrpFlag = false;
+                }
+                else
+                {
+                    LoginSetting.BelongToUsrgrpFlag = true;
+                }
 
                 return true;
             }

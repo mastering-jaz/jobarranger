@@ -1,6 +1,7 @@
 ﻿/*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -115,7 +116,9 @@ namespace jp.co.ftf.jobcontroller.JobController
 
             // 存在しないファイルを指定した場合は、
             // 新しく作成するかどうかの問い合わせを表示する (初期値 false)
-            saveFileDialog1.CreatePrompt = true;
+            /* added by YAMA 2014/09/22 フォルダ選択ダイアログの操作性向上 */
+            //saveFileDialog1.CreatePrompt = true;
+            saveFileDialog1.CreatePrompt = false;
             saveFileDialog1.OverwritePrompt = true;
 
             //ダイアログを表示する

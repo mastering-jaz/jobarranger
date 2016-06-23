@@ -2,6 +2,7 @@
 -- Job Arranger upgrade table SQL for MySQL (Ver 1.4.1 -> 1.4.2)  - 2014/02/19 -
 
 -- Copyright (C) 2012-2014 FitechForce, Inc. All Rights Reserved.
+-- Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 
 
 ALTER TABLE `ja_jobnet_control_table`     ADD COLUMN `multiple_start_up` integer DEFAULT '0' NOT NULL;

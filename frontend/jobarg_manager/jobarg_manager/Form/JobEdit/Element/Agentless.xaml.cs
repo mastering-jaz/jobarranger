@@ -1,6 +1,7 @@
 ﻿/*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -16,6 +17,9 @@
 ** along with this program; if not, write to the Free Software
 ** Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 **/
+using System;
+using System.Data;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -446,6 +450,267 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
 
                 this._state = IElementState.Selected;
             }
+        }
+
+        /// <summary>ToolTip表示内容設定</summary>/// 
+        public void SetToolTip()
+        {
+            StringBuilder sbSession = new StringBuilder();
+            StringBuilder sbHost = new StringBuilder();
+            StringBuilder sbSSH = new StringBuilder();
+            StringBuilder sbExec = new StringBuilder();
+            StringBuilder sbPrompt = new StringBuilder();
+            bool showHostAndSSH = false;
+            string characterCode = "";
+            string linefeed = "";
+            string timeout = "";
+            string stopCode = "";
+            string forceStr = Properties.Resources.tooltip_flag_off;
+            StringBuilder sb = new StringBuilder();
+
+            sb.Append(Properties.Resources.job_id_label_text);
+            /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            if (!LoginSetting.Lang.StartsWith("ja_"))  sb.Append(" ");
+            sb.Append(_jobId);
+            sb.Append("\n");
+            sb.Append(Properties.Resources.job_name_label_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(_jobName);
+
+            DataRow[] rowIconAgentless;
+            if (InnerJobId == null) {
+                rowIconAgentless = _container.IconAgentlessTable.Select("job_id='" + _jobId + "'");
+            } else {
+                rowIconAgentless = _container.IconAgentlessTable.Select("inner_job_id=" + InnerJobId);
+            }
+
+            if (rowIconAgentless != null && rowIconAgentless.Length > 0) {
+                int sessionFlg = Convert.ToInt16(rowIconAgentless[0]["session_flag"]);
+                switch (sessionFlg)
+                {
+                    // ワンタイム
+                    case 0:
+                        showHostAndSSH = true;
+                        sbSession.Append("\n");
+                        sbSession.Append("  ");
+                        sbSession.Append(Properties.Resources.agentless_onetime_label_text);
+                        break;
+                    // 接続
+                    case 1:
+                        showHostAndSSH = true;
+                        sbSession.Append("\n");
+                        sbSession.Append("  ");
+                        sbSession.Append(Properties.Resources.agentless_connection_label_text);
+                        sbSession.Append("\n");
+                        sbSession.Append("  ");
+                        sbSession.Append(Properties.Resources.agentless_sessionid_label_text);
+                        if (!LoginSetting.Lang.StartsWith("ja_")) sbSession.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+                        sbSession.Append(Convert.ToString(rowIconAgentless[0]["session_id"]));
+                        break;
+                    // 継続
+                    case 2:
+                        showHostAndSSH = false;
+                        sbSession.Append("\n");
+                        sbSession.Append("  ");
+                        sbSession.Append(Properties.Resources.agentless_continue_label_text);
+                        sbSession.Append("\n");
+                        sbSession.Append("  ");
+                        sbSession.Append(Properties.Resources.agentless_sessionid_label_text);
+                        if (!LoginSetting.Lang.StartsWith("ja_")) sbSession.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+                        sbSession.Append(Convert.ToString(rowIconAgentless[0]["session_id"]));
+                        break;
+                    // 切断
+                    case 3:
+                        showHostAndSSH = false;
+                        sbSession.Append("\n");
+                        sbSession.Append("  ");
+                        sbSession.Append(Properties.Resources.agentless_disconnect_label_text);
+                        sbSession.Append("\n");
+                        sbSession.Append("  ");
+                        sbSession.Append(Properties.Resources.agentless_sessionid_label_text);
+                        if (!LoginSetting.Lang.StartsWith("ja_")) sbSession.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+                        sbSession.Append(Convert.ToString(rowIconAgentless[0]["session_id"]));
+                        break;
+                }
+                string hostFlag = Convert.ToString(rowIconAgentless[0]["host_flag"]);
+                string hostName = Convert.ToString(rowIconAgentless[0]["host_name"]);
+                if ("1".Equals(hostFlag)) {
+                    sbHost.Append("\n");
+                    sbHost.Append("  ");
+                    sbHost.Append(Properties.Resources.value_name_label_text);
+                    if (!LoginSetting.Lang.StartsWith("ja_")) sbHost.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+                    sbHost.Append(hostName);
+                } else {
+                    sbHost.Append("\n");
+                    sbHost.Append("  ");
+                    sbHost.Append(Properties.Resources.host_name_label_text);
+                    if (!LoginSetting.Lang.StartsWith("ja_")) sbHost.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+                    sbHost.Append(hostName);
+                }
+
+                // 認証方式
+                string authMethod = Convert.ToString(rowIconAgentless[0]["auth_method"]);
+                if (Convert.ToInt16(authMethod) == 0)
+                {
+                    sbSSH.Append("\n");
+                    sbSSH.Append("  ");
+                    sbSSH.Append(Properties.Resources.agentless_authentic_label_text);
+                    if (!LoginSetting.Lang.StartsWith("ja_")) sbSSH.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+                    sbSSH.Append(Properties.Resources.agentless_comb_passwd_text);
+                    sbSSH.Append("\n");
+                    sbSSH.Append("  ");
+                    sbSSH.Append(Properties.Resources.agentless_executemode_label_text);
+
+                    string run_mode = Convert.ToString(rowIconAgentless[0]["run_mode"]);
+                    if ("0".Equals(run_mode))
+                    {
+                        if (!LoginSetting.Lang.StartsWith("ja_")) sbSSH.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+                        sbSSH.Append(Properties.Resources.agentless_comb_interactive_text);
+                    }
+                    else
+                    {
+                        if (!LoginSetting.Lang.StartsWith("ja_")) sbSSH.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+                        sbSSH.Append(Properties.Resources.agentless_comb_noninteractive_text);
+                    }
+                    sbSSH.Append("\n");
+                    sbSSH.Append("  ");
+                    sbSSH.Append(Properties.Resources.user_name_label_text);
+                    if (!LoginSetting.Lang.StartsWith("ja_")) sbSSH.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+                    sbSSH.Append(Convert.ToString(rowIconAgentless[0]["login_user"]));
+                    sbSSH.Append("\n");
+                    sbSSH.Append("  ");
+                    sbSSH.Append(Properties.Resources.agentless_passwd_label_text);
+                    if (!LoginSetting.Lang.StartsWith("ja_")) sbSSH.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+                    sbSSH.Append(Convert.ToString(rowIconAgentless[0]["login_password"]));
+                }
+                else
+                {
+                    sbSSH.Append("\n");
+                    sbSSH.Append("  ");
+                    sbSSH.Append(Properties.Resources.agentless_authentic_label_text);
+                    sbSSH.Append(Properties.Resources.agentless_comb_publickey_text);
+
+                    //added by YAMA 2014/12/04
+                    sbSSH.Append("\n");
+                    sbSSH.Append("  ");
+                    sbSSH.Append(Properties.Resources.agentless_executemode_label_text);
+
+                    string run_mode = Convert.ToString(rowIconAgentless[0]["run_mode"]);
+                    if ("0".Equals(run_mode))
+                    {
+                        if (!LoginSetting.Lang.StartsWith("ja_")) sbSSH.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+                        sbSSH.Append(Properties.Resources.agentless_comb_interactive_text);
+                    }
+                    else
+                    {
+                        if (!LoginSetting.Lang.StartsWith("ja_")) sbSSH.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+                        sbSSH.Append(Properties.Resources.agentless_comb_noninteractive_text);
+                    }
+
+                    //added by YAMA 2014/12/04
+                    sbSSH.Append("\n");
+                    sbSSH.Append("  ");
+                    sbSSH.Append(Properties.Resources.user_name_label_text);
+                    if (!LoginSetting.Lang.StartsWith("ja_")) sbSSH.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+                    sbSSH.Append(Convert.ToString(rowIconAgentless[0]["login_user"]));
+
+                    // 公開鍵
+                    sbSSH.Append("\n");
+                    sbSSH.Append("  ");
+                    sbSSH.Append(Properties.Resources.agentless_publickey_label_text);
+                    if (!LoginSetting.Lang.StartsWith("ja_")) sbSSH.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+                    sbSSH.Append(Convert.ToString(rowIconAgentless[0]["public_key"]));
+                    // 秘密鍵
+                    sbSSH.Append("\n");
+                    sbSSH.Append("  ");
+                    sbSSH.Append(Properties.Resources.agentless_privatekey_label_text);
+                    if (!LoginSetting.Lang.StartsWith("ja_")) sbSSH.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+                    sbSSH.Append(Convert.ToString(rowIconAgentless[0]["private_key"]));
+                    // パスフレーズ
+                    sbSSH.Append("\n");
+                    sbSSH.Append("  ");
+                    sbSSH.Append(Properties.Resources.agentless_passphrase_label_text);
+                    if (!LoginSetting.Lang.StartsWith("ja_")) sbSSH.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+                    sbSSH.Append(Convert.ToString(rowIconAgentless[0]["passphrase"]));
+                }
+                sbPrompt.Append("\n");
+                sbPrompt.Append("  ");
+                sbPrompt.Append(Convert.ToString(rowIconAgentless[0]["prompt_string"]));
+                characterCode = Convert.ToString(rowIconAgentless[0]["character_code"]);
+                string linefeedCode = Convert.ToString(rowIconAgentless[0]["line_feed_code"]);
+                if("0".Equals(linefeedCode)){
+                    linefeed = jp.co.ftf.jobcontroller.JobController.Properties.Resources.agentless_comb_LF_text;
+                }else if("1".Equals(linefeedCode)){
+                    linefeed = jp.co.ftf.jobcontroller.JobController.Properties.Resources.agentless_comb_CR_text;
+                }else if("2".Equals(linefeedCode)){
+                    linefeed = jp.co.ftf.jobcontroller.JobController.Properties.Resources.agentless_comb_CRLF_text;
+                }
+                timeout = Convert.ToString(rowIconAgentless[0]["timeout"]);
+                stopCode = Convert.ToString(rowIconAgentless[0]["stop_code"]);
+
+                DataRow[] rowJob = _container.JobControlTable.Select("job_id='" + _jobId + "'");
+                string forceFlag = Convert.ToString(rowJob[0]["force_flag"]);
+                if ("1".Equals(forceFlag)) {
+                    forceStr = Properties.Resources.tooltip_flag_on;
+                }
+            }
+
+            // 実行 
+            string command = Convert.ToString(rowIconAgentless[0]["command"]);
+            foreach (string line in command.Trim().Split(new Char[] {'\n'})){
+                sbExec.Append("\n");
+                sbExec.Append("  ");
+                sbExec.Append(line);
+            }
+
+            sb.Append("\n");
+            sb.Append(Properties.Resources.agentless_session_label_text);
+            sb.Append(sbSession.ToString());
+            if(showHostAndSSH){
+                sb.Append("\n");
+                sb.Append(Properties.Resources.host_label_text);
+                sb.Append(sbHost.ToString());
+                sb.Append("\n");
+                sb.Append(Properties.Resources.agentless_ssh_label_text);
+                sb.Append(sbSSH.ToString());
+            }
+
+            sb.Append("\n");
+            sb.Append(Properties.Resources.exec_label_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(sbExec.ToString());
+            sb.Append("\n");
+            sb.Append(Properties.Resources.agentless_prompt_label_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(sbPrompt.ToString());
+            sb.Append("\n");
+            sb.Append(Properties.Resources.agentless_charcode_label_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(characterCode);
+            sb.Append("\n");
+            sb.Append(Properties.Resources.agentless_linefeedcode_label_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(linefeed);
+            sb.Append("\n");
+            sb.Append(Properties.Resources.agentless_timeout_label_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(timeout);
+            sb.Append("\n");
+            sb.Append(Properties.Resources.stop_code_label_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(stopCode);
+            sb.Append("\n");
+            sb.Append(Properties.Resources.tooltip_force_label_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(forceStr);
+
+            picToolTip.ToolTip = sb.ToString();
+        }
+
+        /// <summary>ToolTip表示内容リセット</summary>///
+        public void ResetToolTip(string toolTip)
+        {
+            picToolTip.ToolTip = toolTip;
         }
 
         #endregion

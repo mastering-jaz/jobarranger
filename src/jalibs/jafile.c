@@ -1,6 +1,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -18,9 +19,9 @@
 **/
 
 /*
-** $Date:: 2013-05-14 09:55:36 +0900 #$
-** $Revision: 4619 $
-** $Author: ossinfra@FITECHLABS.CO.JP $
+** $Date:: 2014-10-17 16:00:02 +0900 #$
+** $Revision: 6528 $
+** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
 #include "common.h"
@@ -165,8 +166,8 @@ int ja_file_load(const char *filename, const int size, void *data)
     } else {
         fseek(fp, 0, SEEK_END);
         fsize = ftell(fp);
-        if (fsize >= JA_MAX_DATA_LEN)
-            fsize = JA_MAX_DATA_LEN - 1;
+        if (fsize >= JA_STD_OUT_LEN)
+            fsize = JA_STD_OUT_LEN - 1;
         fseek(fp, 0, SEEK_SET);
         if (fread(data, sizeof(char), fsize, fp) != fsize)
             err = 0;

@@ -1,6 +1,7 @@
 ﻿/*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -44,6 +45,13 @@ namespace jp.co.ftf.jobcontroller.JobController
         public int load_status { get; set; }
 
         //added by YAMA 2014/07/01
-        public String Foreground_color { get; set; }    
+        public String Foreground_color { get; set; }
+
+        //added by YAMA 2014/09/22  実行中ジョブID表示
+        public String running_job_id { get; set; }
+        public String running_job_name { get; set; }
+
+        // added by YAMA 2014/10/14    実行予定リスト起動時刻変更
+        public int start_pending_flag { get; set; }
     }
 }

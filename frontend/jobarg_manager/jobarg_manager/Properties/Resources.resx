@@ -169,8 +169,14 @@ registered operating days are held and it registers by addition.</value>
   <data name="can_update_auth" xml:space="preserve">
     <value>Can update</value>
   </data>
+  <data name="filter_id_label_text" xml:space="preserve">
+    <value>Filter id:</value>
+  </data>
+  <data name="filter_name_label_text" xml:space="preserve">
+    <value>Filter name:</value>
+  </data>
   <data name="new_version_context_menu_text" xml:space="preserve">
-    <value>Create new version(_V)</value>
+    <value>Copy &amp; New Version(_V)</value>
   </data>
   <data name="day_week_checkbox_text" xml:space="preserve">
     <value>Day-of-the-week</value>
@@ -306,6 +312,12 @@ At a later time, please try again.</value>
   <data name="err_message_calendar_name" xml:space="preserve">
     <value>calendar name</value>
   </data>
+  <data name="err_message_filter_id" xml:space="preserve">
+    <value>filter id</value>
+  </data>
+  <data name="err_message_filter_name" xml:space="preserve">
+    <value>filter name</value>
+  </data>
   <data name="err_message_db_dbs" xml:space="preserve">
     <value>Data source name</value>
   </data>
@@ -346,7 +358,7 @@ At a later time, please try again.</value>
     <value>Exit(_X)</value>
   </data>
   <data name="export_menu_text" xml:space="preserve">
-    <value>Export(_E)</value>
+    <value>Export All(_E)</value>
   </data>
   <data name="export_screen_language" xml:space="preserve">
     <value>Please input the output place of an export file.</value>
@@ -391,7 +403,7 @@ At a later time, please try again.</value>
     <value>Initial registration</value>
   </data>
   <data name="invalidity_context_menu_text" xml:space="preserve">
-    <value>Invalidity(_I)</value>
+    <value>Disable(_I)</value>
   </data>
   <data name="jobnet_editing_screen_name" xml:space="preserve">
     <value>Jobnet editing screen</value>
@@ -532,7 +544,7 @@ to enter the job name, user name, and password.</value>
     <value>Operation day file reading screen</value>
   </data>
   <data name="operation_day_label_text" xml:space="preserve">
-    <value>Operation day:</value>
+    <value>Date:</value>
   </data>
   <data name="operation_information_err_jobnet_label" xml:space="preserve">
     <value>Operation information error jobnet</value>
@@ -546,11 +558,32 @@ to enter the job name, user name, and password.</value>
   <data name="private_calendar_node_text" xml:space="preserve">
     <value>Private calendar</value>
   </data>
+  <data name="private_filter_node_text" xml:space="preserve">
+    <value>Private filter</value>
+  </data>
   <data name="private_jobnet_node_text" xml:space="preserve">
     <value>Private jobnet</value>
   </data>
   <data name="private_schedule_node_text" xml:space="preserve">
     <value>Private schedule</value>
+  </data>
+  <data name="calendar_label_text" xml:space="preserve">
+    <value>Calendar:</value>
+  </data>
+  <data name="base_date_node_text" xml:space="preserve">
+    <value>Base date:</value>
+  </data>
+  <data name="first_day_button_text" xml:space="preserve">
+    <value>FirstDay</value>
+  </data>
+  <data name="last_day_button_text" xml:space="preserve">
+    <value>LastDay</value>
+  </data>
+  <data name="designated_day_button_text" xml:space="preserve">
+    <value>DesignatedDay</value>
+  </data>
+  <data name="shift_day_node_text" xml:space="preserve">
+    <value>Shift day:</value>
   </data>
   <data name="PROCESS_001" xml:space="preserve">
     <value>Registration process</value>
@@ -603,6 +636,9 @@ to enter the job name, user name, and password.</value>
   <data name="public_calendar_node_text" xml:space="preserve">
     <value>Public calendar</value>
   </data>
+  <data name="public_filter_node_text" xml:space="preserve">
+    <value>Public filter</value>
+  </data>
   <data name="public_col_head_text" xml:space="preserve">
     <value>Public</value>
   </data>
@@ -628,7 +664,7 @@ to enter the job name, user name, and password.</value>
     <value>Please select the import file.</value>
   </data>
   <data name="regist_button_text" xml:space="preserve">
-    <value>Regist</value>
+    <value>Apply</value>
   </data>
   <data name="regist_dialog_screen_name" xml:space="preserve">
     <value>Edit registration confirmation</value>
@@ -637,7 +673,7 @@ to enter the job name, user name, and password.</value>
     <value>I want to register the data being edited. Would you like?</value>
   </data>
   <data name="reservation_run_menu_text" xml:space="preserve">
-    <value>Reservation run(_W)</value>
+    <value>Immediate run &amp; hold(_W)</value>
   </data>
   <data name="run_job_management_screen" xml:space="preserve">
     <value>Run job management screen</value>
@@ -713,7 +749,7 @@ Please contact a system administrator.</value>
     <value>Tue</value>
   </data>
   <data name="update_context_menu_text" xml:space="preserve">
-    <value>Update(_U)</value>
+    <value>Edit(_U)</value>
   </data>
   <data name="update_date_col_head_text" xml:space="preserve">
     <value>Update date</value>
@@ -725,7 +761,7 @@ Please contact a system administrator.</value>
     <value>User name:</value>
   </data>
   <data name="validity_context_menu_text" xml:space="preserve">
-    <value>Validity(_A)</value>
+    <value>Enable(_A)</value>
   </data>
   <data name="valid_col_head_text" xml:space="preserve">
     <value>Valid</value>
@@ -907,10 +943,10 @@ At a later time, please try again.</value>
     <value>Value:</value>
   </data>
   <data name="value_name_col_head_text" xml:space="preserve">
-    <value>Value name</value>
+    <value>Variable Name</value>
   </data>
   <data name="value_name_label_text" xml:space="preserve">
-    <value>Value name:</value>
+    <value>Variable:</value>
   </data>
   <data name="calc_icon_screen_name" xml:space="preserve">
     <value>Clac icon setting</value>
@@ -1169,7 +1205,7 @@ At a later time, please try again.</value>
     <value>F-WAIT</value>
   </data>
   <data name="copy_new_context_menu_text" xml:space="preserve">
-    <value>Copy new(_C)</value>
+    <value>Copy &amp; New Object(_C)</value>
   </data>
   <data name="PROCESS_017" xml:space="preserve">
     <value>Copy new process</value>
@@ -1282,10 +1318,10 @@ Please confirm ODBC and a database.</value>
     <value>Processing mode</value>
   </data>
   <data name="waiting_reboot_label_text" xml:space="preserve">
-    <value>Job waiting after reboot</value>
+    <value>Reboot after Completing Jobs</value>
   </data>
   <data name="wait_time_label_text" xml:space="preserve">
-    <value>Wait time(sec):</value>
+    <value>Timeout(sec):</value>
   </data>
   <data name="err_message_wait_time" xml:space="preserve">
     <value>Wait time</value>
@@ -1306,19 +1342,19 @@ Please confirm ODBC and a database.</value>
     <value>release job id</value>
   </data>
   <data name="file_check_label_text" xml:space="preserve">
-    <value>File exist check</value>
+    <value>Checking File Existence</value>
   </data>
   <data name="file_delete_checkbox_text" xml:space="preserve">
     <value>Delete file:</value>
   </data>
   <data name="file_wait_label_text" xml:space="preserve">
-    <value>File wait</value>
+    <value>Waiting File Creation</value>
   </data>
   <data name="release_icon_label_text" xml:space="preserve">
     <value>RELEASE</value>
   </data>
   <data name="release_job_id_label_text" xml:space="preserve">
-    <value>Release job id:</value>
+    <value>UnHold job id:</value>
   </data>
   <data name="calendar_info_text" xml:space="preserve">
     <value>Calendar info</value>
@@ -1470,7 +1506,7 @@ Please confirm ODBC and a database.</value>
   <data name="MSG_COMMON_003" xml:space="preserve">
     <value>Job Arranger for Zabbix
 
-Job Manager Version 2.0.1 (Rev:6308)
+Job Manager Version 2.1.0 (Rev:6777-1)
 
 Copyright (C) 2012-2013 FitechForce, Inc. All Rights Reserved. 
 Copyright (C) 2013-2014 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.</value>
@@ -1524,16 +1560,16 @@ Copyright (C) 2013-2014 Daiwa Institute of Research Business Innovation Ltd. All
     <value>Since data is in use, it cannot be operated.At a later time, please try again.</value>
   </data>
   <data name="force_label_text" xml:space="preserve">
-    <value>Compulsory run</value>
+    <value>Force run</value>
   </data>
   <data name="rbCycleStart_label_text" xml:space="preserve">
-    <value>cycle start:</value>
+    <value>cycle:     </value>
   </data>
   <data name="rbStartTime_label_text" xml:space="preserve">
-    <value>start time:</value>
+    <value>time:</value>
   </data>
   <data name="textBox_CycleInterval_label_text" xml:space="preserve">
-    <value>cycle interval:</value>
+    <value>minutes</value>
   </data>
   <data name="ERROR_COMMON_027" xml:space="preserve">
     <value>Please input {0} with a half-width alphanumeric character and a colon (:).</value>
@@ -1608,7 +1644,7 @@ Copyright (C) 2013-2014 Daiwa Institute of Research Business Innovation Ltd. All
     <value>ZABBIX cooperation</value>
   </data>
   <data name="cooperation_icon_screen_name" xml:space="preserve">
-    <value>Zabbix cooperation icon Setting</value>
+    <value>Zabbix linkage icon Setting</value>
   </data>
   <data name="cooperation_itemname_label_text" xml:space="preserve">
     <value>Item name</value>
@@ -1623,10 +1659,10 @@ Copyright (C) 2013-2014 Daiwa Institute of Research Business Innovation Ltd. All
     <value>Enabled</value>
   </data>
   <data name="cooperation_mode_label_text" xml:space="preserve">
-    <value>Cooperation mode</value>
+    <value>Link mode</value>
   </data>
   <data name="cooperation_Object_label_text" xml:space="preserve">
-    <value>Object of the cooperation</value>
+    <value>Link target</value>
   </data>
   <data name="cooperation_triggername_label_text" xml:space="preserve">
     <value>Trigger name</value>
@@ -1703,9 +1739,6 @@ Copyright (C) 2013-2014 Daiwa Institute of Research Business Innovation Ltd. All
   <data name="agentless_ssh_label_text" xml:space="preserve">
     <value>SSH</value>
   </data>
-  <data name="String1" xml:space="preserve">
-    <value />
-  </data>
   <data name="agentless_comb_passwd_text" xml:space="preserve">
     <value>Password</value>
   </data>
@@ -1743,7 +1776,7 @@ Copyright (C) 2013-2014 Daiwa Institute of Research Business Innovation Ltd. All
     <value>UTF-8</value>
   </data>
   <data name="agentless_linefeedcode_label_text" xml:space="preserve">
-    <value>Line feed code</value>
+    <value>Line feed code:</value>
   </data>
   <data name="agentless_passwd_label_text" xml:space="preserve">
     <value>Password:</value>
@@ -1786,5 +1819,319 @@ Copyright (C) 2013-2014 Daiwa Institute of Research Business Innovation Ltd. All
   </data>
   <data name="ERROR_JOBNET_LOAD_003" xml:space="preserve">
     <value>The practice of the job net was canceled(skipped).</value>
+  </data>
+  <data name="ERROR_ZABBIX_LINK_004" xml:space="preserve">
+    <value>Please choose a Cooperation mode</value>
+  </data>
+  <data name="continue_label_text" xml:space="preserve">
+    <value>Continue</value>
+  </data>
+  <data name="ERROR_JOBEDIT_014" xml:space="preserve">
+    <value>A user name is inaccurate.</value>
+  </data>
+  <data name="ERROR_JOBEDIT_015" xml:space="preserve">
+    <value>A password is inaccurate.</value>
+  </data>
+  <data name="err_message_run_user" xml:space="preserve">
+    <value>run user</value>
+  </data>
+  <data name="err_message_run_user_pw" xml:space="preserve">
+    <value>password</value>
+  </data>
+  <data name="run_user_label_text" xml:space="preserve">
+    <value>Run user:</value>
+  </data>
+  <data name="run_user_password_label_text" xml:space="preserve">
+    <value>Password:</value>
+  </data>
+  <data name="running_job_name_col_head_text" xml:space="preserve">
+    <value>Job name</value>
+  </data>
+  <data name="running_job_name_id_col_head_text" xml:space="preserve">
+    <value>Job id</value>
+  </data>
+  <data name="ERROR_SETTING_001" xml:space="preserve">
+    <value>Parameter table is being edited by other users.
+At a later time, please try again.</value>
+  </data>
+  <data name="err_message_settings_joblog_keep_span" xml:space="preserve">
+    <value>Joblog keep span</value>
+  </data>
+  <data name="err_message_settings_jobnet_keep_span" xml:space="preserve">
+    <value>Jobnet keep span</value>
+  </data>
+  <data name="err_message_settings_jobnet_load_span" xml:space="preserve">
+    <value>Jobnet load span</value>
+  </data>
+  <data name="err_message_settings_jobnet_view_span" xml:space="preserve">
+    <value>Jobnet view span</value>
+  </data>
+  <data name="err_message_settings_zbxsnd_retry_count" xml:space="preserve">
+    <value>Retry count</value>
+  </data>
+  <data name="err_message_settings_zbxsnd_retry_interval" xml:space="preserve">
+    <value>Retry interval</value>
+  </data>
+  <data name="err_message_settings_zbxsnd_sender" xml:space="preserve">
+    <value>Zabbix Sender command</value>
+  </data>
+  <data name="err_message_settings_zbxsnd_zabbix_host" xml:space="preserve">
+    <value>Message destination Zabbix Host</value>
+  </data>
+  <data name="err_message_settings_zbxsnd_zabbix_ip" xml:space="preserve">
+    <value>Zabbix IP address</value>
+  </data>
+  <data name="err_message_settings_zbxsnd_zabbix_item" xml:space="preserve">
+    <value>Item key</value>
+  </data>
+  <data name="err_message_settings_zbxsnd_zabbix_port" xml:space="preserve">
+    <value>Zabbix Port Number</value>
+  </data>
+  <data name="general_settings_tab_text" xml:space="preserve">
+    <value>General settings</value>
+  </data>
+  <data name="redisplay_button_text" xml:space="preserve">
+    <value>redisplay</value>
+  </data>
+  <data name="settings_Annotation1" xml:space="preserve">
+    <value>*1 The value that you changed becomes effective after the reboot of the Job Server.</value>
+  </data>
+  <data name="settings_Annotation2" xml:space="preserve">
+    <value>*2 Jobnet view span becomes effective after relogin Job Manager.</value>
+  </data>
+  <data name="settings_JobArranger_std_time_label_text" xml:space="preserve">
+    <value>Job Arranger standard time:</value>
+  </data>
+  <data name="settings_joblog_keep_span_label_text" xml:space="preserve">
+    <value>Joblog keep span(minute):</value>
+  </data>
+  <data name="settings_jobnet_keep_span_label_text" xml:space="preserve">
+    <value>Jobnet keep span(minute):</value>
+  </data>
+  <data name="settings_jobnet_load_span_label_text" xml:space="preserve">
+    <value>Jobnet load span(minute):</value>
+  </data>
+  <data name="settings_jobnet_view_span_label_text" xml:space="preserve">
+    <value>Jobnet view span(minute):</value>
+  </data>
+  <data name="settings_Job_Arranger_std_time0" xml:space="preserve">
+    <value>Local time</value>
+  </data>
+  <data name="settings_Job_Arranger_std_time1" xml:space="preserve">
+    <value>Server time</value>
+  </data>
+  <data name="settings_system_setting_label_text" xml:space="preserve">
+    <value>System settings</value>
+  </data>
+  <data name="settings_zbxsnd_notice0" xml:space="preserve">
+    <value>no</value>
+  </data>
+  <data name="settings_zbxsnd_notice1" xml:space="preserve">
+    <value>yes</value>
+  </data>
+  <data name="settings_zbxsnd_retry0" xml:space="preserve">
+    <value>no retry</value>
+  </data>
+  <data name="settings_zbxsnd_retry1" xml:space="preserve">
+    <value>retry</value>
+  </data>
+  <data name="settings_zbxsnd_retry_count_label_text" xml:space="preserve">
+    <value>Retry count:</value>
+  </data>
+  <data name="settings_zbxsnd_retry_interval_label_text" xml:space="preserve">
+    <value>Retry interval(second):</value>
+  </data>
+  <data name="settings_zbxsnd_retry_label_text" xml:space="preserve">
+    <value>Retry:</value>
+  </data>
+  <data name="settings_zbxsnd_sender_label_text" xml:space="preserve">
+    <value>Zabbix sender command (full path):</value>
+  </data>
+  <data name="settings_zbxsnd_zabbix_host_label_text" xml:space="preserve">
+    <value>Message destination server:</value>
+  </data>
+  <data name="settings_zbxsnd_zabbix_ip_label_text" xml:space="preserve">
+    <value>Zabbix server IP address:</value>
+  </data>
+  <data name="settings_zbxsnd_zabbix_item_label_text" xml:space="preserve">
+    <value>Message destination item key:</value>
+  </data>
+  <data name="settings_zbxsnd_zabbix_notice_label_text" xml:space="preserve">
+    <value>Zabbix Notification:</value>
+  </data>
+  <data name="settings_zbxsnd_zabbix_notice_setting_label_text" xml:space="preserve">
+    <value>Zabbix Notification settings</value>
+  </data>
+  <data name="settings_zbxsnd_zabbix_port_label_text" xml:space="preserve">
+    <value>Zabbix Server Port Number:</value>
+  </data>
+  <data name="update_button_text" xml:space="preserve">
+    <value>update</value>
+  </data>
+  <data name="WINDOW_NAME_600" xml:space="preserve">
+    <value>Settings general screen</value>
+  </data>
+  <data name="ERROR_COMMON_028" xml:space="preserve">
+    <value>Please input {0} by the half-width alphanumeric character, space, the underscore (_), and a period (.), and a hyphen (_).</value>
+  </data>
+  <data name="ERROR_END_SETTING_001" xml:space="preserve">
+    <value>A ExitCode is inaccurate.
+Please input ExitCode by the half-width alphanumeric character, the underscore (_), and a dollar ($).
+In the case of numerical value, please set it from 0 to 255.
+In the case of jobcontrol variable, please start with $.</value>
+  </data>
+  <data name="err_message_calendar" xml:space="preserve">
+    <value>calendar</value>
+  </data>
+  <data name="err_message_designated_day" xml:space="preserve">
+    <value>desiganeted day</value>
+  </data>
+  <data name="err_message_shift_day" xml:space="preserve">
+    <value>shift day</value>
+  </data>
+  <data name="filter_annotation" xml:space="preserve">
+    <value>*Shift day is  the number of working day to be shifted from the base date. </value>
+  </data>
+  <data name="ERROR_SCHEDULE_005" xml:space="preserve">
+    <value>Cannot update this jobnet.</value>
+  </data>
+  <data name="ERROR_SCHEDULE_006" xml:space="preserve">
+    <value>This is an invalid date. Please enter 'M/d/yyyy h:mm tt'.</value>
+  </data>
+  <data name="ERROR_SCHEDULE_007" xml:space="preserve">
+    <value>Please enter a valid date.</value>
+  </data>
+  <data name="job_run_status_reserve" xml:space="preserve">
+    <value>Hold</value>
+  </data>
+  <data name="PROCESS_026" xml:space="preserve">
+    <value>Update schedule process</value>
+  </data>
+  <data name="release_context_menu_text" xml:space="preserve">
+    <value>Release(_C)</value>
+  </data>
+  <data name="reserve_context_menu_text" xml:space="preserve">
+    <value>Hold(_S)</value>
+  </data>
+  <data name="schedule_label_text" xml:space="preserve">
+    <value>Schedule:</value>
+  </data>
+  <data name="time_of_day_label_text" xml:space="preserve">
+    <value>Start time:</value>
+  </data>
+  <data name="updt_context_menu_text" xml:space="preserve">
+    <value>Update schedule(_M)</value>
+  </data>
+  <data name="upd_schedule_screen_name" xml:space="preserve">
+    <value>Update schedule screen</value>
+  </data>
+  <data name="err_message_exit_code" xml:space="preserve">
+    <value>ExitCode</value>
+  </data>
+  <data name="relatedobject_calendar" xml:space="preserve">
+    <value>[CALENDAR]--------------------------------------------------------------------</value>
+  </data>
+  <data name="relatedObject_del_message" xml:space="preserve">
+    <value>Because this was used in other objects, you failed in deletion.
+Please cancel the summons from an object shown below concerned or registration, and operation again.</value>
+  </data>
+  <data name="relatedobject_filter" xml:space="preserve">
+    <value>[FILTER]----------------------------------------------------------------------</value>
+  </data>
+  <data name="relatedObject_invalid_message" xml:space="preserve">
+    <value>Because related　other objects are valid, you cannot invalidate this.
+Please invalidate objects shown below concerned, and operate it again.</value>
+  </data>
+  <data name="relatedobject_jobnet" xml:space="preserve">
+    <value>[JOBNET]----------------------------------------------------------------------</value>
+  </data>
+  <data name="relatedobject_schedule" xml:space="preserve">
+    <value>[SCHEDULE]--------------------------------------------------------------------</value>
+  </data>
+  <data name="relatedObject_Title" xml:space="preserve">
+    <value>Related Objects:</value>
+  </data>
+  <data name="relatedObject_valid_message" xml:space="preserve">
+    <value>Because this was used in other objects, you failed in deletion.
+Please cancel the summons from an object shown below concerned 
+or registration, and operation again.</value>
+  </data>
+  <data name="ERROR_SETTING_002" xml:space="preserve">
+    <value>A Zabbix IP Address is inaccurate.
+Please input IP Address by the half-width alphanumeric character, the underscore (_), and a period (.), and a hyphen (_).
+You cannot enter numbers only.
+In the case of numerical value, please set it from 0 to 255.</value>
+  </data>
+  <data name="relatedObject_screen_name" xml:space="preserve">
+    <value>Related data error screen</value>
+  </data>
+  <data name="WINDOW_NAME_260" xml:space="preserve">
+    <value>Related data error screen</value>
+  </data>
+  <data name="tooltip_continue_label_text" xml:space="preserve">
+    <value>Continue:</value>
+  </data>
+  <data name="tooltip_flag_off" xml:space="preserve">
+    <value>OFF</value>
+  </data>
+  <data name="tooltip_flag_on" xml:space="preserve">
+    <value>ON</value>
+  </data>
+  <data name="tooltip_force_label_text" xml:space="preserve">
+    <value>Force run:</value>
+  </data>
+  <data name="tooltip_err_jobarg_message" xml:space="preserve">
+    <value>JOBARG_MESSAGE:</value>
+  </data>
+  <data name="tooltip_err_job_exit_cd" xml:space="preserve">
+    <value>JOB_EXIT_CD:</value>
+  </data>
+  <data name="tooltip_err_stderr" xml:space="preserve">
+    <value>STD_ERR:</value>
+  </data>
+  <data name="tooltip_err_stdout" xml:space="preserve">
+    <value>STD_OUT:</value>
+  </data>
+  <data name="export_menu_list_text" xml:space="preserve">
+    <value>Export Version(_E)</value>
+  </data>
+  <data name="export_menu_tree_text" xml:space="preserve">
+    <value>Export Object(_E)</value>
+  </data>
+  <data name="save_button_text" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="ForceRun_dialog_text" xml:space="preserve">
+    <value>Do you want to run this operation?</value>
+  </data>
+  <data name="force_button_text" xml:space="preserve">
+    <value>Force run</value>
+  </data>
+  <data name="Title_Msgbox_ForceRun" xml:space="preserve">
+    <value>Force run</value>
+  </data>
+  <data name="WINDOW_NAME_213" xml:space="preserve">
+    <value>Operating-days filter screen</value>
+  </data>
+  <data name="variable_name_label_text" xml:space="preserve">
+    <value>Variable Name:</value>
+  </data>
+  <data name="calc_method_label_textToolTip" xml:space="preserve">
+    <value>Calc method:</value>
+  </data>
+  <data name="cooperation_mode_label_textToolTip" xml:space="preserve">
+    <value>Link mode:</value>
+  </data>
+  <data name="cooperation_Object_label_textToolTip" xml:space="preserve">
+    <value>Link target:</value>
+  </data>
+  <data name="exec_label_textToolTip" xml:space="preserve">
+    <value>Exec:</value>
+  </data>
+  <data name="memo_col_head_textToolTip" xml:space="preserve">
+    <value>Description:</value>
+  </data>
+  <data name="process_mode_label_textToolTip" xml:space="preserve">
+    <value>Processing mode:</value>
   </data>
 </root>

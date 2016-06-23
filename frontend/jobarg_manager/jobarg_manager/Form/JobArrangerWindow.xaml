@@ -2,6 +2,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -164,14 +165,17 @@
                                 <TreeViewItem Header="{x:Static src:Properties.Resources.calendar_node_text}" Name="treeViewCalendar" Tag="0"  PreviewMouseRightButtonDown="TreeViewItem_PreviewMouseRightButtonDown" Selected="Calendar_Selected">
                                     <TreeViewItem Header="{x:Static src:Properties.Resources.public_calendar_node_text}" Name="publicCalendar" Selected="Public_Calendar_Selected" Tag="0" PreviewMouseRightButtonDown="TreeViewItem_PreviewMouseRightButtonDown"/>
                                     <TreeViewItem Header="{x:Static src:Properties.Resources.private_calendar_node_text}" Name="privateCalendar" Selected="Private_Calendar_Selected" Tag="0" PreviewMouseRightButtonDown="TreeViewItem_PreviewMouseRightButtonDown"/>
+
+                                    <TreeViewItem Header="{x:Static src:Properties.Resources.public_filter_node_text}" Name="publicFilter"  Selected="Public_Filter_Selected" Tag="1" PreviewMouseRightButtonDown="TreeViewItem_PreviewMouseRightButtonDown"/>
+                                    <TreeViewItem Header="{x:Static src:Properties.Resources.private_filter_node_text}" Name="privateFilter" Selected="Private_Filter_Selected" Tag="1" PreviewMouseRightButtonDown="TreeViewItem_PreviewMouseRightButtonDown"/>
                                 </TreeViewItem>
                                 <TreeViewItem Header="{x:Static src:Properties.Resources.schedule_node_text}" Name="treeViewSchedule" Tag="1" PreviewMouseRightButtonDown="TreeViewItem_PreviewMouseRightButtonDown" Selected="Schedule_Selected">
-                                    <TreeViewItem Header="{x:Static src:Properties.Resources.public_schedule_node_text}" Name="publicSchedule" Selected="Public_Schedule_Selected" Tag="1" PreviewMouseRightButtonDown="TreeViewItem_PreviewMouseRightButtonDown"/>
-                                    <TreeViewItem Header="{x:Static src:Properties.Resources.private_schedule_node_text}" Name="privateSchedule" Selected="Private_Schedule_Selected" Tag="1" PreviewMouseRightButtonDown="TreeViewItem_PreviewMouseRightButtonDown"/>
+                                    <TreeViewItem Header="{x:Static src:Properties.Resources.public_schedule_node_text}" Name="publicSchedule" Selected="Public_Schedule_Selected" Tag="2" PreviewMouseRightButtonDown="TreeViewItem_PreviewMouseRightButtonDown"/>
+                                    <TreeViewItem Header="{x:Static src:Properties.Resources.private_schedule_node_text}" Name="privateSchedule" Selected="Private_Schedule_Selected" Tag="2" PreviewMouseRightButtonDown="TreeViewItem_PreviewMouseRightButtonDown"/>
                                 </TreeViewItem>
                                 <TreeViewItem Header="{x:Static src:Properties.Resources.jobnet_node_text}" Name="treeViewJobNet" Tag="2" PreviewMouseRightButtonDown="TreeViewItem_PreviewMouseRightButtonDown" Selected="Jobnet_Selected">
-                                    <TreeViewItem Header="{x:Static src:Properties.Resources.public_jobnet_node_text}" Name="publicJobnet" Selected="Public_Jobnet_Selected" Tag="2" PreviewMouseRightButtonDown="TreeViewItem_PreviewMouseRightButtonDown"/>
-                                    <TreeViewItem Header="{x:Static src:Properties.Resources.private_jobnet_node_text}" Name="privateJobnet" Selected="Private_Jobnet_Selected" Tag="2" PreviewMouseRightButtonDown="TreeViewItem_PreviewMouseRightButtonDown"/>
+                                    <TreeViewItem Header="{x:Static src:Properties.Resources.public_jobnet_node_text}" Name="publicJobnet" Selected="Public_Jobnet_Selected" Tag="3" PreviewMouseRightButtonDown="TreeViewItem_PreviewMouseRightButtonDown"/>
+                                    <TreeViewItem Header="{x:Static src:Properties.Resources.private_jobnet_node_text}" Name="privateJobnet" Selected="Private_Jobnet_Selected" Tag="3" PreviewMouseRightButtonDown="TreeViewItem_PreviewMouseRightButtonDown"/>
                                 </TreeViewItem>
                                 <TreeView.ContextMenu>
                                     <ContextMenu Opened="ContextMenu_Open" Name="contextMenu">
@@ -188,7 +192,10 @@
                                         <Separator></Separator>
                                         <MenuItem Header="{x:Static src:Properties.Resources.del_menu_text}"  Name="contextMenuitemDel" Click="ContextMenuitemDel_Click"></MenuItem>
                                         <Separator></Separator>
+                                        <!--  added by YAMA 2014/11/10    JAMのGUIの名称の変更
                                         <MenuItem Header="{x:Static src:Properties.Resources.export_menu_text}"  Name="contextMenuitemExport" Click="ContextMenuitemExport_Click"></MenuItem>
+                                        -->
+                                        <MenuItem Header="{x:Static src:Properties.Resources.export_menu_tree_text}"  Name="contextMenuitemExport" Click="ContextMenuitemExport_Click"></MenuItem>
                                         <Separator></Separator>
                                         <MenuItem Header="{x:Static src:Properties.Resources.immediate_run_menu_text}" Name="contextMenuItemImmediateRun" Click="MenuitemImmediateRun_Click"/>
                                         <MenuItem Header="{x:Static src:Properties.Resources.reservation_run_menu_text}" Name="contextMenuItemReserveRun"  Click="MenuitemReserveRun_Click"/>
@@ -206,6 +213,9 @@
                 <TabItem Header="{x:Static src:Properties.Resources.job_control_tab_text}" Name="tabItemJobManager" Background="#FF897F7F">
                 </TabItem>
                 <TabItem Header="{x:Static src:Properties.Resources.job_result_tab_text}" Name="tabItemJobResult" Background="#FF897F7F">
+                </TabItem>
+                <!--  added by YAMA 2014/08/18 タブ追加 -->
+                <TabItem Header="{x:Static src:Properties.Resources.general_settings_tab_text}" Name="tabItemSetParameter" Background="#FF897F7F">
                 </TabItem>
             </TabControl>
         </Grid>

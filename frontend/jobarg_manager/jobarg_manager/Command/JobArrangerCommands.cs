@@ -1,6 +1,7 @@
 ﻿/*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -110,6 +111,13 @@ namespace jp.co.ftf.jobcontroller.JobController
         public static readonly RoutedUICommand RunningDelayed = new RoutedUICommand(
                 Properties.Resources.stop_context_menu_text, "RunningDelayed", typeof(JobArrangerCommands));
 
+        // added by YAMA 2014/10/14    実行予定リスト起動時刻変更
+        public static readonly RoutedUICommand Updt = new RoutedUICommand(
+                Properties.Resources.updt_context_menu_text, "Updt", typeof(JobArrangerCommands));
+        public static readonly RoutedUICommand Reserve = new RoutedUICommand(
+                Properties.Resources.reserve_context_menu_text, "Reserve", typeof(JobArrangerCommands));
+        public static readonly RoutedUICommand Release = new RoutedUICommand(
+                Properties.Resources.release_context_menu_text, "Release", typeof(JobArrangerCommands));
 
 
         public JobArrangerCommands(JobArrangerWindow window)

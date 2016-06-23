@@ -1,6 +1,7 @@
 ﻿/*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -16,6 +17,9 @@
 ** along with this program; if not, write to the Free Software
 ** Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 **/
+using System;
+using System.Data;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -447,6 +451,178 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             }
         }
 
+        /// <summary>ToolTip表示内容設定</summary>/// 
+        public void SetToolTip(){
+            //string sqlSelectHostName = "select hostid, host from hosts where hostid = ?";
+            //string sqlSelectItemName = "select itemid, name from items where itemid = ?";
+            //string sqlSelectTriggerName = "select triggerid, name from items where itemid = ?";
+            //List<ComSqlParam> sqlParams = new List<ComSqlParam>();
+            //sqlParams.Add(new ComSqlParam(DbType.String,  "@alias", LoginSetting.UserName));
+            //sqlParams.Add(new ComSqlParam(DbType.String, "@groupid", selectedHostGroupId));
+
+            StringBuilder sbLinkTarget = new StringBuilder();
+            StringBuilder sbLinkOperation = new StringBuilder();
+            StringBuilder sb = new StringBuilder();
+            sb.Append(Properties.Resources.job_id_label_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(_jobId);
+            sb.Append("\n");
+            sb.Append(Properties.Resources.job_name_label_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(_jobName);
+
+            // Zabbix連携アイコン設定テーブルのデータを取得 
+            DataRow[] rowIconCooperation;
+            if (InnerJobId == null) {
+                rowIconCooperation = _container.IconCooperationTable.Select("job_id='" + _jobId + "'");
+            } else {
+                rowIconCooperation = _container.IconCooperationTable.Select("inner_job_id=" + InnerJobId);
+            }
+
+            if (rowIconCooperation != null && rowIconCooperation.Length > 0) {
+                // 連携対象
+                int linkTarget = Convert.ToInt16(rowIconCooperation[0]["link_target"]);
+                // 前回選択されたホストグループID
+                string selectedHostGrpID = Convert.ToString(rowIconCooperation[0]["groupid"]);
+
+                // 前回選択されたホストID
+                string selectedHostID = Convert.ToString(rowIconCooperation[0]["hostid"]);
+
+                // 前回選択されたアイテムID
+                string selectedItemID = Convert.ToString(rowIconCooperation[0]["itemid"]);
+
+                // 前回選択されたトリガーID
+                string selectedTriggerID = Convert.ToString(rowIconCooperation[0]["triggerid"]);
+                switch (linkTarget)
+                {
+                    case 0:
+
+                        //added by YAMA 2014/12/04
+                        //sbLinkTarget.Append("\n");
+                        //sbLinkTarget.Append("  ");
+                        sbLinkTarget.Append(Properties.Resources.cooperation_hostgroup_label_text);
+                        //sbLinkTarget.Append("\n");
+                        //sbLinkTarget.Append("  ");
+                        //sbLinkTarget.Append(Properties.Resources.cooperation_hostgroup_pdl_label_text);
+                        //sbLinkTarget.Append(Properties.Resources.cooperation_hostgroup_pdl_label_text);
+                        break;
+
+                    // ホストを選択
+                    case 1:
+
+                        //added by YAMA 2014/12/04
+                        //sbLinkTarget.Append("\n");
+                        //sbLinkTarget.Append("  ");
+                        sbLinkTarget.Append(Properties.Resources.cooperation_hostname_label_text);
+                        //sbLinkTarget.Append("\n");
+                        //sbLinkTarget.Append("  ");
+                        //sbLinkTarget.Append(Properties.Resources.cooperation_hostgroup_pdl_label_text);
+                        //sbLinkTarget.Append("\n");
+                        //sbLinkTarget.Append("  ");
+                        //sbLinkTarget.Append(Properties.Resources.cooperation_hostname_pdl_label_text);
+                        //sbLinkTarget.Append(Properties.Resources.cooperation_hostname_pdl_label_text);
+
+                        break;
+                    // アイテムを選択
+                    case 2:
+
+                        //added by YAMA 2014/12/04
+                        //sbLinkTarget.Append("\n");
+                        //sbLinkTarget.Append("  ");
+                        sbLinkTarget.Append(Properties.Resources.cooperation_itemname_label_text);
+                        //sbLinkTarget.Append("\n");
+                        //sbLinkTarget.Append("  ");
+                        //sbLinkTarget.Append(Properties.Resources.cooperation_hostgroup_pdl_label_text);
+                        //sbLinkTarget.Append("\n");
+                        //sbLinkTarget.Append("  ");
+                        //sbLinkTarget.Append(Properties.Resources.cooperation_hostname_pdl_label_text);
+                        //sbLinkTarget.Append("\n");
+                        //sbLinkTarget.Append("  ");
+                        //sbLinkTarget.Append(Properties.Resources.cooperation_itemname_pdl_label_text);
+                        break;
+
+                    // トリガーを選択
+                    case 3:
+
+                        //added by YAMA 2014/12/04
+                        //sbLinkTarget.Append("\n");
+                        //sbLinkTarget.Append("  ");
+                        sbLinkTarget.Append(Properties.Resources.cooperation_triggername_label_text);
+                        //sbLinkTarget.Append("\n");
+                        //sbLinkTarget.Append("  ");
+                        //sbLinkTarget.Append(Properties.Resources.cooperation_hostgroup_pdl_label_text);
+                        //sbLinkTarget.Append("\n");
+                        //sbLinkTarget.Append("  ");
+                        //sbLinkTarget.Append(Properties.Resources.cooperation_hostgroup_pdl_label_text);
+                        //sbLinkTarget.Append("\n");
+                        //sbLinkTarget.Append("  ");
+                        //sbLinkTarget.Append(Properties.Resources.cooperation_triggername_pdl_label_text);
+                        break;
+                }
+
+                // 連携動作
+                int linkOperation = Convert.ToInt16(rowIconCooperation[0]["link_operation"]);
+
+                switch (linkOperation)
+                {
+                    // 有効化
+                    case 0:
+                        if (selectedHostGrpID != "")
+                        {
+                            // 新規作成でない
+
+                            //added by YAMA 2014/12/04
+                            //sbLinkOperation.Append("\n");
+                            //sbLinkOperation.Append("  ");
+                            sbLinkOperation.Append(Properties.Resources.cooperation_mode_enabled);
+                        }
+                        break;
+                    // 無効化
+                    case 1:
+
+                        //added by YAMA 2014/12/04
+                        //sbLinkOperation.Append("\n");
+                        //sbLinkOperation.Append("  ");
+                        sbLinkOperation.Append(Properties.Resources.cooperation_mode_disabled);
+                        break;
+                    // 状態取得
+                    case 2:
+
+                        //added by YAMA 2014/12/04
+                        //sbLinkOperation.Append("\n");
+                        //sbLinkOperation.Append("  ");
+                        sbLinkOperation.Append(Properties.Resources.cooperation_get_stat);
+                        break;
+                    // データ取得
+                    case 3:
+
+                        //added by YAMA 2014/12/04
+                        //sbLinkOperation.Append("\n");
+                        //sbLinkOperation.Append("  ");
+                        sbLinkOperation.Append(Properties.Resources.cooperation_get_data);
+                        break;
+                }
+            }
+            sb.Append("\n");
+
+            //added by YAMA 2014/12/04
+            sb.Append(Properties.Resources.cooperation_Object_label_textToolTip);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(sbLinkTarget.ToString());
+            sb.Append("\n");
+            //added by YAMA 2014/12/04
+            sb.Append(Properties.Resources.cooperation_mode_label_textToolTip);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(sbLinkOperation.ToString());
+
+            picToolTip.ToolTip = sb.ToString();
+        }
+
+        /// <summary>ToolTip表示内容リセット</summary>///
+        public void ResetToolTip(string toolTip)
+        {
+            picToolTip.ToolTip = toolTip;
+        }
         #endregion
 
     }

@@ -2,6 +2,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -35,8 +36,8 @@
             <Border Grid.Column="0" Margin="1,1,1,1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" BorderThickness="1" BorderBrush="Black" >
                 <TreeView Name="treeView1" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Visible" ScrollViewer.VerticalScrollBarVisibility="Auto">
                     <TreeViewItem Header="{x:Static src:Properties.Resources.jobnet_node_text}" Name="treeViewJobNet" ScrollViewer.HorizontalScrollBarVisibility="Visible" ScrollViewer.VerticalScrollBarVisibility="Auto">
-                        <TreeViewItem Header="{x:Static src:Properties.Resources.public_jobnet_node_text}" Name="publicJobnet" Expanded="Public_Jobnet_Expended" Selected="Public_Jobnet_Selected"/>
-                        <TreeViewItem Header="{x:Static src:Properties.Resources.private_jobnet_node_text}" Name="privateJobnet" Expanded="Private_Jobnet_Expended" Selected="Private_Jobnet_Selected"/>
+                        <TreeViewItem Header="{x:Static src:Properties.Resources.public_jobnet_node_text}" Name="publicJobnet" Selected="Public_Jobnet_Selected"/>
+                        <TreeViewItem Header="{x:Static src:Properties.Resources.private_jobnet_node_text}" Name="privateJobnet" Selected="Private_Jobnet_Selected"/>
                     </TreeViewItem>
                 </TreeView>
             </Border>

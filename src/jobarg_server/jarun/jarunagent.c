@@ -1,6 +1,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -23,12 +24,13 @@
 ** $Author: ossinfra@FITECHLABS.CO.JP $
 **/
 
-#include <json/json.h>
+#include <json.h>
 #include "common.h"
 #include "log.h"
 #include "db.h"
 
 #include "jacommon.h"
+#include "jalog.h"
 #include "javalue.h"
 #include "jastatus.h"
 #include "jaflow.h"
@@ -70,7 +72,7 @@ int jarun_agent(ja_job_object * job, const char *host_name,
     if (ja_host_getname(job->jobid, host_flag, host_name, host) == FAIL) {
         ja_log("JARUNAGENT200001", 0, NULL, inner_job_id,
                __function_name, host_name, host_flag, inner_job_id);
-        return ja_set_runerr(job->jobid);
+        return ja_set_runerr(job->jobid, 2);
     }
 
     if (ja_host_lockinfo(host) == SUCCEED) {
@@ -99,7 +101,7 @@ int jarun_agent(ja_job_object * job, const char *host_name,
         if (job->method == JA_AGENT_METHOD_KILL)
             return FAIL;
         else
-            return ja_set_runerr(job->jobid);
+            return ja_set_runerr(job->jobid, 2);
     } else if (pid != 0) {
         waitpid(pid, NULL, WNOHANG);
         return SUCCEED;
@@ -109,7 +111,7 @@ int jarun_agent(ja_job_object * job, const char *host_name,
     ja_job_object_init(&job_res);
     DBconnect(ZBX_DB_CONNECT_ONCE);
     if (ja_connect(&sock, host, inner_job_id) == FAIL) {
-        ja_set_runerr(job->jobid);
+        ja_set_runerr(job->jobid, 2);
         DBclose();
         exit(1);
     }
@@ -136,7 +138,7 @@ int jarun_agent(ja_job_object * job, const char *host_name,
         ja_log("JARUNAGENT200004", 0, NULL, inner_job_id,
                __function_name, inner_job_id, job_res.message);
         if (job->method != JA_AGENT_METHOD_KILL)
-            ja_set_runerr(job->jobid);
+            ja_set_runerr(job->jobid, 2);
         DBclose();
         exit(1);
     }

@@ -15,6 +15,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonthCalendarControl", "MonthCalendarControl\MonthCalendarControl.csproj", "{19BBA547-3515-4E3E-ADB7-E9895171A43E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Installer", "Installer\Installer.csproj", "{50CD0256-F3DB-4AA8-80F7-5F8C8B4C4E80}"
+	ProjectSection(ProjectDependencies) = postProject
+		{EBE7D28F-A658-402A-A223-DC4F0869C755} = {EBE7D28F-A658-402A-A223-DC4F0869C755}
+	EndProjectSection
 EndProject
 Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "setup_x86", "setup_x86\setup_x86.vdproj", "{C214F831-73E6-4971-BDD3-2956B5AFF3A7}"
 EndProject
@@ -73,13 +76,17 @@ Global
 		{C214F831-73E6-4971-BDD3-2956B5AFF3A7}.Debug|Any CPU.ActiveCfg = Debug
 		{C214F831-73E6-4971-BDD3-2956B5AFF3A7}.Debug|Any CPU.Build.0 = Debug
 		{C214F831-73E6-4971-BDD3-2956B5AFF3A7}.Release_viewer|Any CPU.ActiveCfg = Release
+		{C214F831-73E6-4971-BDD3-2956B5AFF3A7}.Release_viewer|Any CPU.Build.0 = Release
 		{C214F831-73E6-4971-BDD3-2956B5AFF3A7}.Release|Any CPU.ActiveCfg = Release
+		{C214F831-73E6-4971-BDD3-2956B5AFF3A7}.Release|Any CPU.Build.0 = Release
 		{B31A049B-4FB5-4DDB-8165-403DA353A757}.Debug_viewer|Any CPU.ActiveCfg = Debug
 		{B31A049B-4FB5-4DDB-8165-403DA353A757}.Debug_viewer|Any CPU.Build.0 = Debug
 		{B31A049B-4FB5-4DDB-8165-403DA353A757}.Debug|Any CPU.ActiveCfg = Debug
 		{B31A049B-4FB5-4DDB-8165-403DA353A757}.Debug|Any CPU.Build.0 = Debug
 		{B31A049B-4FB5-4DDB-8165-403DA353A757}.Release_viewer|Any CPU.ActiveCfg = Release
+		{B31A049B-4FB5-4DDB-8165-403DA353A757}.Release_viewer|Any CPU.Build.0 = Release
 		{B31A049B-4FB5-4DDB-8165-403DA353A757}.Release|Any CPU.ActiveCfg = Release
+		{B31A049B-4FB5-4DDB-8165-403DA353A757}.Release|Any CPU.Build.0 = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

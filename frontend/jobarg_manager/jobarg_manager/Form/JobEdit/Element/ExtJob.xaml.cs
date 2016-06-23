@@ -1,6 +1,7 @@
 ﻿/*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -16,12 +17,16 @@
 ** along with this program; if not, write to the Free Software
 ** Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 **/
+using System;
+using System.Data;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Windows.Data;
 using jp.co.ftf.jobcontroller.Common;
+using jp.co.ftf.jobcontroller.DAO;
 
 //*******************************************************************
 //                                                                  *
@@ -445,6 +450,66 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             }
         }
 
+        /// <summary>ToolTip表示内容設定</summary>/// 
+        public void SetToolTip(){
+            string cmdName = "";
+            string parameter = "";
+            string memo = "";
+            StringBuilder sb = new StringBuilder();
+            sb.Append(Properties.Resources.job_id_label_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(_jobId);
+            sb.Append("\n");
+            sb.Append(Properties.Resources.job_name_label_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(_jobName);
+            DataRow[] rowExtJob;
+            if (InnerJobId == null) {
+                rowExtJob = _container.IconExtjobTable.Select("job_id='" + _jobId + "'");
+            } else {
+                rowExtJob = _container.IconExtjobTable.Select("inner_job_id=" + InnerJobId);
+            }
+            if (rowExtJob != null && rowExtJob.Length > 0) {
+                DBConnect dbAccess = new DBConnect(LoginSetting.ConnectStr);
+                dbAccess.CreateSqlConnect();
+                DefineExtJobDAO defineExtJobDAO = new DefineExtJobDAO(dbAccess);
+                DataTable dtDefine = defineExtJobDAO.GetEntityByLang(LoginSetting.Lang);
+                dbAccess.CloseSqlConnect();
+                string cmdId = Convert.ToString(rowExtJob[0]["command_id"]);
+                if (!CheckUtil.IsNullOrEmpty(cmdId))
+                {
+                    DataRow[] rowDefine = dtDefine.Select("command_id='" + cmdId + "'");
+                    if (rowDefine != null && rowDefine.Length > 0)
+                    {
+                        cmdName = Convert.ToString(rowDefine[0]["command_name"]);
+                        memo = Convert.ToString(rowDefine[0]["memo"]);
+                    }
+                }
+                parameter = Convert.ToString(rowExtJob[0]["value"]);
+            }
+
+            sb.Append("\n");
+            sb.Append(Properties.Resources.extend_job_label_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(cmdName);
+            sb.Append("\n");
+            sb.Append(Properties.Resources.parameter_label_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(parameter);
+            sb.Append("\n");
+            //added by YAMA 2014/12/04
+            sb.Append(Properties.Resources.memo_col_head_textToolTip);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+
+            sb.Append(memo);
+            picToolTip.ToolTip = sb.ToString();
+        }
+
+        /// <summary>ToolTip表示内容リセット</summary>///
+        public void ResetToolTip(string toolTip)
+        {
+            picToolTip.ToolTip = toolTip;
+        }
         #endregion
     }
 }

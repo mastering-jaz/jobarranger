@@ -1,6 +1,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -18,12 +19,12 @@
 **/
 
 /*
-** $Date:: 2014-04-25 14:25:43 +0900 #$
-** $Revision: 5924 $
+** $Date:: 2014-10-30 13:27:56 +0900 #$
+** $Revision: 6619 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
-#include <json/json.h>
+#include <json.h>
 
 #include "common.h"
 #include "comms.h"
@@ -41,6 +42,8 @@
 #include "jastatus.h"
 #include "jahost.h"
 #include "jauser.h"
+#include "jaself.h"
+#include "jaindex.h"
 #include "jatelegram.h"
 #include "jatrapkind.h"
 #include "jatrapper.h"
@@ -199,7 +202,7 @@ int get_jobnet_info(zbx_uint64_t registrynumber,
          inner_job_id);
     row = DBfetch(result);
     if (row != NULL) {
-        zbx_strlcpy(ji->lastexitcd, row[0], JA_LASTEXIT_LEN);
+        zbx_strlcpy(ji->lastexitcd, row[0], JA_STD_OUT_LEN);
     }
     DBfree_result(result);
 
@@ -211,7 +214,7 @@ int get_jobnet_info(zbx_uint64_t registrynumber,
          inner_job_id);
     row = DBfetch(result);
     if (row != NULL) {
-        zbx_strlcpy(ji->laststdout, row[0], JA_LASTSTDOUT_LEN);
+        zbx_strlcpy(ji->laststdout, row[0], JA_STD_OUT_LEN);
     }
     DBfree_result(result);
 
@@ -223,7 +226,7 @@ int get_jobnet_info(zbx_uint64_t registrynumber,
          inner_job_id);
     row = DBfetch(result);
     if (row != NULL) {
-        zbx_strlcpy(ji->laststderr, row[0], JA_LASTSTDOUT_LEN);
+        zbx_strlcpy(ji->laststderr, row[0], JA_STD_OUT_LEN);
     }
     DBfree_result(result);
 
@@ -397,15 +400,15 @@ int register_db_table(JOBARG_EXEC_REQUEST er,
                     " (inner_jobnet_id, inner_jobnet_main_id,"
                     " update_date, run_type, main_flag, status, scheduled_time,"
                     " public_flag, multiple_start_up,"
-                    " jobnet_id, user_name, jobnet_name, memo, execution_user_name)"
+                    " jobnet_id, user_name, jobnet_name, memo, execution_user_name, initial_scheduled_time)"
                     " values ( " ZBX_FS_UI64 ", " ZBX_FS_UI64 ", "
-                    ZBX_FS_UI64 ", %d, %d, %d, " ZBX_FS_UI64
-                    ", %d, %d,"
-                    " '%s', '%s', '%s', '%s', '%s')",
+                    ZBX_FS_UI64 ", %d, %d, %d, " ZBX_FS_UI64 ", "
+                    " %d, %d,"
+                    " '%s', '%s', '%s', '%s', '%s', " ZBX_FS_UI64 ")",
                     next_id, next_id,
                     update_date, run_type, JA_JOBNET_MAIN_FLAG_MAIN, JA_JOBNET_STATUS_BEGIN, scheduled_time,
                     public_flag, multiple_start_up,
-                    jobnetid, user_name, jobnet_name, memo, er.username);
+                    jobnetid, user_name, jobnet_name, memo, er.username, scheduled_time);
     if (ZBX_DB_OK > res) {
         ja_log("JATRAPPER200016", 0, jobnetid, 0, jobnetid);
         zbx_free(jobnetid);

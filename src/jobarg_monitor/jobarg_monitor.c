@@ -1,6 +1,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -18,8 +19,8 @@
 **/
 
 /*
-** $Date:: 2014-04-28 17:18:10 +0900 #$
-** $Revision: 5941 $
+** $Date:: 2014-10-17 16:00:02 +0900 #$
+** $Revision: 6528 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -170,10 +171,7 @@ static void parse_commandline(int argc, char **argv)
 
     /* parse the command-line */
     CONFIG_FILE = NULL;
-    while ((char) EOF !=
-           (ch =
-            (char) zbx_getopt_long(argc, argv, shortopts, longopts,
-                                   NULL))) {
+    while ((char) EOF != (ch = (char) zbx_getopt_long(argc, argv, shortopts, longopts, NULL))) {
         switch (ch) {
         case 'c':
             CONFIG_FILE = zbx_strdup(CONFIG_FILE, zbx_optarg);
@@ -234,13 +232,15 @@ static void ja_load_config(const char *config_file)
         {NULL}
     };
 
-    parse_cfg_file(config_file, cfg, ZBX_CFG_FILE_REQUIRED,
-                   ZBX_CFG_NOT_STRICT);
-    if (NULL == CONFIG_DBHOST)
+    parse_cfg_file(config_file, cfg, ZBX_CFG_FILE_REQUIRED, ZBX_CFG_NOT_STRICT);
+
+    if (NULL == CONFIG_DBHOST) {
         CONFIG_DBHOST = zbx_strdup(CONFIG_DBHOST, "localhost");
-    if (NULL == CONFIG_PID_FILE)
-        CONFIG_PID_FILE =
-            zbx_strdup(CONFIG_PID_FILE, "/tmp/jobarg_monitor.pid");
+    }
+
+    if (NULL == CONFIG_PID_FILE) {
+        CONFIG_PID_FILE = zbx_strdup(CONFIG_PID_FILE, "/tmp/jobarg_monitor.pid");
+    }
 }
 
 /******************************************************************************
@@ -277,6 +277,7 @@ void zbx_sigusr_handler(zbx_task_t task)
 void zbx_on_exit()
 {
     int i;
+
     zabbix_log(LOG_LEVEL_DEBUG, "zbx_on_exit() called");
 
     if (NULL != threads) {
@@ -288,8 +289,7 @@ void zbx_on_exit()
         }
         zbx_free(threads);
     }
-    zabbix_log(LOG_LEVEL_INFORMATION,
-               "Job Arranger monitor stopped. Job Arranger %s (revision %s).",
+    zabbix_log(LOG_LEVEL_INFORMATION, "Job Arranger monitor stopped. Job Arranger %s (revision %s).",
                JOBARG_VERSION, JOBARG_REVISION);
     zabbix_close_log();
     exit(SUCCEED);
@@ -311,67 +311,79 @@ void zbx_on_exit()
 int ja_sender(const int id, const char *schedule_id, const char *jobnet_id,
               const char *schedule_time, const char *start_time)
 {
-    int ret;
-    char cmd[JA_MAX_DATA_LEN];
-    char calendar_id[33];
-    char user_name[101];
-    char sc_time[17], st_time[20];
-    const char *__function_name = "ja_sender";
+    int          ret, state;
+    char         cmd[JA_MAX_DATA_LEN];
+    char         calendar_id[33];
+    char         user_name[101];
+    char         sc_time[17], st_time[20];
+    const char   *__function_name = "ja_sender";
 
-    if (id < 1 || id > 3 || schedule_id == NULL || jobnet_id == NULL
-        || schedule_time == NULL || start_time == NULL)
+    if (id < 1 || id > 3 || schedule_id == NULL || jobnet_id == NULL || schedule_time == NULL || start_time == NULL) {
         return FAIL;
-    zabbix_log(LOG_LEVEL_DEBUG,
-               "In %s() id: %d, schedule_id: %s, jobnet_id: %s",
+    }
+
+    zabbix_log(LOG_LEVEL_DEBUG, "In %s() id: %d, schedule_id: %s, jobnet_id: %s",
                __function_name, id, schedule_id, jobnet_id);
 
     zbx_snprintf(calendar_id, sizeof(calendar_id), "");
-    zbx_snprintf(user_name, sizeof(user_name), "");
-    zbx_snprintf(sc_time, sizeof(sc_time), "%s", schedule_time);
-    zbx_snprintf(st_time, sizeof(st_time), "%s", start_time);
+    zbx_snprintf(user_name,   sizeof(user_name),   "");
+    zbx_snprintf(sc_time,     sizeof(sc_time), "%s", schedule_time);
+    zbx_snprintf(st_time,     sizeof(st_time), "%s", start_time);
 
-    if (strlen(schedule_id) > 0)
+    if (strlen(schedule_id) > 0) {
         ja_schedule_get_calendar_id(schedule_id, calendar_id);
+    }
+
     ja_jobnet_get_user_name(jobnet_id, user_name);
     ja_format_timestamp(schedule_time, sc_time);
     ja_format_timestamp(start_time, st_time);
+
     switch (id) {
     case 1:
         zabbix_log(LOG_LEVEL_ERR,
                    "[JAMONITOR200001] In %s() jobnet_id '%s' can not be not loaded on schedule_time '%s'. calendar_id: %s, schedule_id: %s, user_name: %s",
-                   __function_name, jobnet_id, schedule_time, calendar_id,
-                   schedule_id, user_name);
+                   __function_name, jobnet_id, schedule_time, calendar_id, schedule_id, user_name);
         break;
+
     case 2:
         zabbix_log(LOG_LEVEL_ERR,
                    "[JAMONITOR200002] In %s() jobnet_id '%s' can not be not run on schedule time '%s'. calendar_id: %s, schedule_id: %s, user_name: %s",
-                   __function_name, jobnet_id, schedule_time, calendar_id,
-                   schedule_id, user_name);
+                   __function_name, jobnet_id, schedule_time, calendar_id, schedule_id, user_name);
         break;
+
     case 3:
         zabbix_log(LOG_LEVEL_ERR,
                    "[JAMONITOR200003] In %s() jobnet_id '%s' start time '%s' is late than schedule time '%s'",
-                   __function_name, jobnet_id, start_time, schedule_time,
-                   calendar_id, schedule_id, user_name);
+                   __function_name, jobnet_id, start_time, schedule_time, calendar_id, schedule_id, user_name);
         break;
+
     default:
         break;
     }
-    if (CONFIG_SENDER_SCRIPT == NULL)
+
+    if (CONFIG_SENDER_SCRIPT == NULL) {
         return SUCCEED;
-    if (strlen(CONFIG_SENDER_SCRIPT) == 0)
+    }
+
+    if (strlen(CONFIG_SENDER_SCRIPT) == 0) {
         return SUCCEED;
+    }
 
     zbx_snprintf(cmd, sizeof(cmd), "%s '%d' '%s' '%s' '%s' '%s' '%s' '%s'",
-                 CONFIG_SENDER_SCRIPT, id, calendar_id, schedule_id,
-                 jobnet_id, user_name, sc_time, st_time);
-    zabbix_log(LOG_LEVEL_INFORMATION, "In %s() cmd: %s", __function_name,
-               cmd);
+                 CONFIG_SENDER_SCRIPT, id, calendar_id, schedule_id, jobnet_id, user_name, sc_time, st_time);
+
+    zabbix_log(LOG_LEVEL_INFORMATION, "In %s() cmd: %s", __function_name, cmd);
+
     ret = system(cmd);
     if (ret != 0) {
-        zabbix_log(LOG_LEVEL_ERR,
-                   "In %s() can not execute the command: %s, ret: %d",
-                   __function_name, cmd, ret);
+        if (WIFEXITED(ret)) {
+            state = WEXITSTATUS(ret);
+        }
+        else {
+            state = ret;
+        }
+        zabbix_log(LOG_LEVEL_ERR, "In %s() can not execute the command: %s, ret: %d",
+                   __function_name, cmd, state);
         return FAIL;
     }
 
@@ -393,62 +405,62 @@ int ja_sender(const int id, const char *schedule_id, const char *jobnet_id,
  ******************************************************************************/
 static void process_monitor()
 {
-    DB_RESULT result;
-    DB_ROW row;
-    DB_RESULT result_load;
-    DB_ROW row_load;
-    char *schedule_id, *jobnet_id, *update_date;
-    char sch_time[13], s_date[9], s_time[5];
-    struct tm *tm;
-    time_t now, t, start_time, schedule_time;
-    const char *__function_name = "process_monitor";
+    DB_RESULT    result;
+    DB_ROW       row;
+    DB_RESULT    result_load;
+    DB_ROW       row_load;
+    char         *schedule_id, *jobnet_id, *update_date;
+    char         sch_time[13], s_date[9], s_time[5];
+    struct tm    *tm;
+    time_t       now, t, start_time, schedule_time;
+    const char   *__function_name = "process_monitor";
 
     now = time(NULL);
-    // check loader
+
+    /* check loader */
     t = now + (CONFIG_SPAN_TIME - CONFIG_LOAD_SHIFT_TIME - 1) * 60;
     tm = localtime(&t);
-    zbx_snprintf(s_date, sizeof(s_date), "%.4d%.2d%.2d",
-                 tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday);
-    zbx_snprintf(s_time, sizeof(s_time), "%.2d%.2d", tm->tm_hour,
-                 tm->tm_min);
-    result =
-        DBselect
-        ("select schedule_id, jobnet_id, update_date from ja_schedule_jobnet_table");
+    zbx_snprintf(s_date, sizeof(s_date), "%.4d%.2d%.2d", tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday);
+    zbx_snprintf(s_time, sizeof(s_time), "%.2d%.2d", tm->tm_hour, tm->tm_min);
+
+    result = DBselect("select schedule_id, jobnet_id, update_date from ja_schedule_jobnet_table");
+
     while (NULL != (row = DBfetch(result))) {
         schedule_id = row[0];
-        jobnet_id = row[1];
+        jobnet_id   = row[1];
         update_date = row[2];
-        if (ja_schedule_check_time
-            (schedule_id, update_date, s_date, s_time) == FAIL)
+
+        if (ja_schedule_check_time(schedule_id, update_date, s_date, s_time) == FAIL) {
             continue;
-        zabbix_log(LOG_LEVEL_DEBUG,
-                   "In %s() schedule_id: %s, jobnet_id: %s, date: %s, time: %s",
-                   __function_name, schedule_id, jobnet_id, s_date,
-                   s_time);
-        result_load =
-            DBselect("select start_time from ja_run_jobnet_summary_table"
-                     " where jobnet_id = '%s' and scheduled_time = '%s%s' and run_type = %d",
-                     jobnet_id, s_date, s_time, JA_JOBNET_RUN_TYPE_NORMAL);
+        }
+
+        zabbix_log(LOG_LEVEL_DEBUG, "In %s() schedule_id: %s, jobnet_id: %s, date: %s, time: %s",
+                   __function_name, schedule_id, jobnet_id, s_date, s_time);
+
+        result_load = DBselect("select start_time from ja_run_jobnet_summary_table"
+                               " where jobnet_id = '%s' and scheduled_time = '%s%s' and run_type = %d",
+                               jobnet_id, s_date, s_time, JA_JOBNET_RUN_TYPE_NORMAL);
+
         if ((row_load = DBfetch(result_load)) == NULL) {
-            zbx_snprintf(sch_time, sizeof(sch_time), "%s%s", s_date,
-                         s_time);
+            zbx_snprintf(sch_time, sizeof(sch_time), "%s%s", s_date, s_time);
             ja_sender(1, schedule_id, jobnet_id, sch_time, "");
         }
         DBfree_result(result_load);
     }
     DBfree_result(result);
 
-    // check jarun
+    /* check jarun */
     t = now - (1 + CONFIG_RUN_SHIFT_TIME) * 60;
-    result =
-        DBselect
-        ("select start_time, scheduled_time, jobnet_id, schedule_id from ja_run_jobnet_summary_table where run_type = %d",
-         JA_JOBNET_RUN_TYPE_NORMAL);
+
+    result = DBselect("select start_time, scheduled_time, jobnet_id, schedule_id from ja_run_jobnet_summary_table"
+                      " where run_type = %d and start_pending_flag = %d",
+                      JA_JOBNET_RUN_TYPE_NORMAL, JA_SUMMARY_START_PENDING_NONE);
+
     while (NULL != (row = DBfetch(result))) {
-        start_time = ja_str2timestamp(row[0]);
+        start_time    = ja_str2timestamp(row[0]);
         schedule_time = ja_str2timestamp(row[1]);
-        jobnet_id = row[2];
-        schedule_id = row[3];
+        jobnet_id     = row[2];
+        schedule_id   = row[3];
         if (t >= schedule_time && t < schedule_time + 60) {
             if (start_time == 0) {
                 ja_sender(2, schedule_id, jobnet_id, row[1], row[0]);
@@ -474,9 +486,7 @@ static void process_monitor()
 ZBX_THREAD_ENTRY(monitor_thread, args)
 {
     assert(args);
-    zabbix_log(LOG_LEVEL_INFORMATION,
-               "jobarg_monitor #%d started [monitor]",
-               ((zbx_thread_args_t *) args)->thread_num);
+    zabbix_log(LOG_LEVEL_INFORMATION, "jobarg_monitor #%d started [monitor]", ((zbx_thread_args_t *) args)->thread_num);
     zbx_free(args);
 
     DBconnect(ZBX_DB_CONNECT_NORMAL);
@@ -507,37 +517,32 @@ ZBX_THREAD_ENTRY(monitor_thread, args)
 int MAIN_ZABBIX_ENTRY()
 {
     zbx_thread_args_t *thread_args;
-    int thread_num = 0;
-    int status;
+    int               thread_num = 0;
+    int               status;
 
     if (NULL == CONFIG_LOG_FILE || '\0' == *CONFIG_LOG_FILE) {
         zabbix_open_log(LOG_TYPE_SYSLOG, CONFIG_LOG_LEVEL, NULL);
-    } else {
+    }
+    else {
         zabbix_open_log(LOG_TYPE_FILE, CONFIG_LOG_LEVEL, CONFIG_LOG_FILE);
     }
 
-    zabbix_log(LOG_LEVEL_INFORMATION,
-               "Starting Job Arranger monitor. Job Arranger %s (revision %s).",
+    zabbix_log(LOG_LEVEL_INFORMATION, "Starting Job Arranger monitor. Job Arranger %s (revision %s).",
                JOBARG_VERSION, JOBARG_REVISION);
 
     /* --- START THREADS --- */
     threads_num = 1;
-    threads =
-        (ZBX_THREAD_HANDLE *) zbx_calloc(threads, threads_num,
-                                         sizeof(ZBX_THREAD_HANDLE));
+    threads     = (ZBX_THREAD_HANDLE *) zbx_calloc(threads, threads_num, sizeof(ZBX_THREAD_HANDLE));
 
     /* start the executive thread */
-    thread_args =
-        (zbx_thread_args_t *) zbx_malloc(NULL, sizeof(zbx_thread_args_t));
+    thread_args             = (zbx_thread_args_t *) zbx_malloc(NULL, sizeof(zbx_thread_args_t));
     thread_args->thread_num = thread_num;
-    thread_args->args = NULL;
-    threads[thread_num++] = zbx_thread_start(monitor_thread, thread_args);
+    thread_args->args       = NULL;
+    threads[thread_num++]   = zbx_thread_start(monitor_thread, thread_args);
 
     while (-1 == wait(&status)) {
         if (EINTR != errno) {
-            zabbix_log(LOG_LEVEL_ERR,
-                       "failed to wait on child processes: %s",
-                       zbx_strerror(errno));
+            zabbix_log(LOG_LEVEL_ERR, "failed to wait on child processes: %s", zbx_strerror(errno));
             break;
         }
     }

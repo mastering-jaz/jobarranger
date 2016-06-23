@@ -1,6 +1,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -18,26 +19,18 @@
 **/
 
 /*
-** $Date:: 2014-07-16 14:51:04 +0900 #$
-** $Revision: 6333 $
+** $Date:: 2014-12-09 13:54:23 +0900 #$
+** $Revision: 6779 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
 #ifndef JOBARG_JACOMMON_H
 #define JOBARG_JACOMMON_H
 
-#ifndef _WINDOWS
-#include "jajoblog.h"
-#include "jalog.h"
-#include "jaself.h"
-#include "jaindex.h"
-#include "jajobid.h"
-#endif
-
 /* version or revsion */
-#define JOBARG_VERSION          "2.0.1"
-#define JOBARG_REVISION         "6308"
-#define JOBARG_REVDATE		"2014-07-16"
+#define JOBARG_VERSION          	"2.1.0"
+#define JOBARG_REVISION         	"6777"
+#define JOBARG_REVDATE			"2014-12-19"
 
 /* treat unknown parameters as error */
 #define JA_CFG_STRICT			0
@@ -46,23 +39,33 @@
 #define JA_DEFAULT_AGENT_PORT		10055
 #define JA_DEFAULT_SERVER_PORT		10061
 
-/* extjob pid */
-#define JA_EXTJOB_PID			"JOBARRANGER_EXTJOB_PID"
-
 /* data size */
 #define JA_MAX_STRING_LEN		1024
 #define JA_MAX_DATA_LEN			4096
+#define JA_STD_OUT_LEN			64000 + 1
 #define JA_JOBNET_ID_LEN		32 + 1
+#define JA_JOB_ID_LEN			32 + 1
+#define JA_CALENDAR_ID_LEN		32 + 1
+#define JA_SCHEDULE_ID_LEN		32 + 1
+#define JA_FILTER_ID_LEN		32 + 1
+#define JA_JOBNET_NAME_LEN		64 + 1
+#define JA_JOB_NAME_LEN			64 + 1
 #define JA_USER_NAME_LEN		100 + 1
 #define JA_VALUE_NAME_LEN		128 + 1
-#define JA_VALUE_LEN			4000 + 1
 #define JA_HOST_NAME_LEN		128 + 1
 #define JA_STOP_CODE_LEN		32 + 1
 #define JA_KIND_LEN			16
 #define JA_SERVERID_LEN			18
+#define JA_COMMAND_ID_LEN		32 + 1
 
 /* extjob command */
+#define JA_CMD_SLEEP			"jacmdsleep"
 #define JA_CMD_TIME			"jacmdtime"
+#define JA_CMD_WEEK			"jacmdweek"
+#define JA_CMD_ZBXSENDER		"zabbix_sender"
+
+/* extjob result file name */
+#define JA_EXTJOB_RESULT_FILE		"extjob_result"
 
 /* transaction instruction */
 #define	JA_TXN_OFF			0
@@ -94,7 +97,6 @@
 #define	JA_JOBNET_MULTIPLE_SKIP		1
 #define	JA_JOBNET_MULTIPLE_DELAY	2
 
-
 /* ja_run_jobnet_summary_table */
 /* jobnet job status */
 #define	JA_SUMMARY_JOB_STATUS_NORMAL	0
@@ -106,6 +108,11 @@
 #define	JA_SUMMARY_LOAD_STATUS_ERROR	1
 #define	JA_SUMMARY_LOAD_STATUS_DELAY	2
 #define	JA_SUMMARY_LOAD_STATUS_SKIP	3
+
+/* start pending flag */
+#define	JA_SUMMARY_START_PENDING_NONE	0
+#define	JA_SUMMARY_START_PENDING_ON	1
+#define	JA_SUMMARY_START_PENDING_OFF	2
 
 
 /* ja_run_job_table */
@@ -160,6 +167,10 @@
 #define	JA_JOB_FORCE_FLAG_OFF		0
 #define	JA_JOB_FORCE_FLAG_ON		1
 
+/* continue flag */
+#define	JA_JOB_CONTINUE_FLAG_OFF	0
+#define	JA_JOB_CONTINUE_FLAG_ON		1
+
 
 /* ja_run_flow_table */
 /* flow type */
@@ -204,6 +215,14 @@
 #define JA_SES_FORCE_STOP_OFF		0
 #define JA_SES_FORCE_STOP_ON		1
 #define JA_SES_FORCE_STOP_KILL		2
+
+
+/* ja_send_message_table */
+/* send status */
+#define JA_SNT_SEND_STATUS_BEGIN	0
+#define JA_SNT_SEND_STATUS_END		1
+#define JA_SNT_SEND_STATUS_RETRY	2
+#define JA_SNT_SEND_STATUS_ERROR	3
 
 
 /* ssh info */
@@ -256,6 +275,8 @@
 #define JA_PROTO_TAG_SCRIPT		"script"
 #define JA_PROTO_VALUE_SCRIPT		"script"
 #define JA_PROTO_VALUE_COMMAND		"command"
+#define JA_PROTO_VALUE_RUNUSR		"run_user"
+#define JA_PROTO_VALUE_RUNUSRPWD	"run_user_password"
 
 /* jobrun response */
 #define JA_PROTO_VALUE_JOBRUN_RES	"jobrun-res"
@@ -313,15 +334,15 @@
     #define JA_DLM '\\'
     #define JA_EXE "bat"
     #define JA_PID DWORD
-    #define JA_JOBARG_COMMAND "jobarg_command.exe"
-    #define JA_JOBARG_REBOOT  "jareboot.bat"
+    #define JA_JOBARG_COMMAND		"jobarg_command.exe"
+    #define JA_JOBARG_REBOOT		"jareboot.bat"
     #define SIGNALNO 137
 #else
     #define JA_DLM '/'
     #define JA_EXE "sh"
     #define JA_PID pid_t
-    #define JA_JOBARG_COMMAND "jobarg_command"
-    #define JA_JOBARG_REBOOT  "jareboot.sh"
+    #define JA_JOBARG_COMMAND		"jobarg_command"
+    #define JA_JOBARG_REBOOT		"jareboot.sh"
     #define O_BINARY 0
 #endif
 
@@ -338,6 +359,7 @@
 #define JA_AGENT_STATUS_END		2
 #define JA_AGENT_STATUS_CLOSE		3
 
+/* job arranger agent interface data */
 typedef struct {
     char		kind[JA_KIND_LEN];
     int			version;
@@ -355,11 +377,13 @@ typedef struct {
     zbx_uint64_t	start_time;
     zbx_uint64_t	end_time;
     char		message[JA_MAX_STRING_LEN];
-    char		std_out[JA_MAX_DATA_LEN];
-    char		std_err[JA_MAX_DATA_LEN];
+    char		std_out[JA_STD_OUT_LEN];
+    char		std_err[JA_STD_OUT_LEN];
     int			return_code;
     int			signal;
     int			send_retry;
+    char		run_user[JA_MAX_STRING_LEN];
+    char		run_user_password[JA_MAX_STRING_LEN];
 } ja_job_object;
 
 #endif  /* JOBARG_JACOMMON_H */

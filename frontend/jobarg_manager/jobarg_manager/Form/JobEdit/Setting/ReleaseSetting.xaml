@@ -2,6 +2,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -25,7 +26,9 @@
         WindowStartupLocation="CenterScreen" ResizeMode="NoResize"
         Title="{x:Static src:Properties.Resources.release_icon_screen_name}" Height="203" Width="397" FontSize="11" FontFamily="Meiryo"
         Closing="Window_Closed">
-    <Grid Background="#FFEEECE1" Name="GridSetting" Width="376" Height="163">
+    <!--  added by YAMA 2014/09/22 設定ダイアログ背景色不備対応 -->
+    <!--  Grid Background="#FFEEECE1" Name="GridSetting" Width="376" Height="163" --> 
+    <Grid Background="#FFEEECE1" Name="GridSetting">
         <Grid.RowDefinitions>
             <RowDefinition Height="30" />
             <RowDefinition Height="30" />

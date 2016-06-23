@@ -13,9 +13,9 @@ using System.Windows;
 [assembly: AssemblyTitle("JobManager")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("FitechForce")]
+[assembly: AssemblyCompany("Daiwa Institute of Research Business Innovation Ltd.")]
 [assembly: AssemblyProduct("JobManager")]
-[assembly: AssemblyCopyright("Copyright ©FitechForce  2012-2013")]
+[assembly: AssemblyCopyright("Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -65,8 +65,8 @@ using System.Windows;
 // すべての値を指定するか、下のように '*' を使ってビルドおよびリビジョン番号を 
 // 既定値にすることができます:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.2.0.0")]
-[assembly: AssemblyFileVersion("1.2.0.0")]
+[assembly: AssemblyVersion("2.2.0.0")]
+[assembly: AssemblyFileVersion("2.2.0.0")]
 [assembly: NeutralResourcesLanguageAttribute("")]
 [assembly: log4net.Config.XmlConfigurator(Watch = true)]
 

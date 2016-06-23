@@ -1,6 +1,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -28,6 +29,7 @@
 #include "db.h"
 
 #include "jacommon.h"
+#include "jalog.h"
 #include "jastatus.h"
 #include "javalue.h"
 #include "jajobnet.h"
@@ -95,7 +97,7 @@ int jarun_icon_release(const zbx_uint64_t inner_job_id,
             ja_log("JARUNICONRELEASE200002", 0, NULL, inner_job_id, __function_name, release_job_id, release_inner_job_id);
             zbx_free(jobnet_id);
             zbx_free(release_job_id);
-            return ja_set_runerr(inner_job_id);
+            return ja_set_runerr(inner_job_id, 2);
         }
     } else {
         /* search release job of external jobnet */
@@ -104,7 +106,7 @@ int jarun_icon_release(const zbx_uint64_t inner_job_id,
             ja_log("JARUNICONRELEASE200003", 0, NULL, inner_job_id, __function_name, release_job_id, inner_job_id);
             zbx_free(jobnet_id);
             zbx_free(release_job_id);
-            return ja_set_runerr(inner_job_id);
+            return ja_set_runerr(inner_job_id, 2);
         }
 
         /* pre-check pending icon */
@@ -127,7 +129,7 @@ int jarun_icon_release(const zbx_uint64_t inner_job_id,
                 zbx_free(jobnet_id);
                 zbx_free(release_job_id);
                 DBfree_result(result);
-                return ja_set_runerr(inner_job_id);
+                return ja_set_runerr(inner_job_id, 2);
             }
 
             result2 =
@@ -141,7 +143,7 @@ int jarun_icon_release(const zbx_uint64_t inner_job_id,
                 zbx_free(release_job_id);
                 DBfree_result(result);
                 DBfree_result(result2);
-                return ja_set_runerr(inner_job_id);
+                return ja_set_runerr(inner_job_id, 2);
             }
             hit_flag = 1;
             DBfree_result(result2);
@@ -152,7 +154,7 @@ int jarun_icon_release(const zbx_uint64_t inner_job_id,
             ja_log("JARUNICONRELEASE200003", 0, NULL, inner_job_id, __function_name, release_job_id, inner_job_id);
             zbx_free(jobnet_id);
             zbx_free(release_job_id);
-            return ja_set_runerr(inner_job_id);
+            return ja_set_runerr(inner_job_id, 2);
         }
 
         /* pending release of the icon */
@@ -183,6 +185,6 @@ int jarun_icon_release(const zbx_uint64_t inner_job_id,
 
     zbx_free(jobnet_id);
     zbx_free(release_job_id);
-    return ja_flow(inner_job_id, JA_FLOW_TYPE_NORMAL);
+    return ja_flow(inner_job_id, JA_FLOW_TYPE_NORMAL, 1);
 
 }

@@ -1,6 +1,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -18,8 +19,8 @@
 **/
 
 /*
-** $Date:: 2014-05-01 16:37:08 +0900 #$
-** $Revision: 5945 $
+** $Date:: 2014-10-17 16:00:02 +0900 #$
+** $Revision: 6528 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -36,8 +37,9 @@
 #define JA_PROCESS_TYPE_JAJOBNET	3
 #define JA_PROCESS_TYPE_JALOADER	4
 #define JA_PROCESS_TYPE_JABOOT		5
-#define JA_PROCESS_TYPE_SELFMON		6
-#define JA_PROCESS_TYPE_COUNT		7	/* number of process types */
+#define JA_PROCESS_TYPE_JASNDMSG	6
+#define JA_PROCESS_TYPE_SELFMON		7
+#define JA_PROCESS_TYPE_COUNT		8	/* number of process types */
 #define JA_PROCESS_TYPE_UNKNOWN		255
 
 

@@ -1,6 +1,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -18,8 +19,8 @@
 **/
 
 /*
-** $Date:: 2014-04-25 14:25:43 +0900 #$
-** $Revision: 5924 $
+** $Date:: 2014-10-17 16:00:02 +0900 #$
+** $Revision: 6528 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -833,4 +834,33 @@ char *ja_md5(const char *str)
     }
 
     return hash_text;
+}
+
+/******************************************************************************
+ *                                                                            *
+ * Function: ja_check_number                                                  *
+ *                                                                            *
+ * Purpose: check that it is a number                                         *
+ *                                                                            *
+ * Parameters: data (in) - string to be checked                               *
+ *                                                                            *
+ * Return value:  SUCCEED - processed successfully                            *
+ *                FAIL - detect incorrect data                                *
+ *                                                                            *
+ * Comments:                                                                  *
+ *                                                                            *
+ ******************************************************************************/
+int ja_check_number(char *data)
+{
+    const char *__function_name = "ja_check_number";
+
+    zabbix_log(LOG_LEVEL_DEBUG, "In %s(%s)", __function_name, data);
+
+    while ('\0' != *data) {
+        if (0 == isdigit(*data)) {
+            return FAIL;
+        }
+        data++;
+    }
+    return SUCCEED;
 }

@@ -1,6 +1,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -18,8 +19,8 @@
 **/
 
 /*
-** $Date:: 2013-10-17 13:54:27 +0900 #$
-** $Revision: 5278 $
+** $Date:: 2014-10-17 16:00:02 +0900 #$
+** $Revision: 6528 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -62,7 +63,8 @@ int jajobnet_ready(const zbx_uint64_t inner_jobnet_id)
     // set jobnet before value
     result =
         DBselect
-        ("select jobnet_id, jobnet_name, user_name, inner_jobnet_id from ja_run_jobnet_table"
+        ("select jobnet_id, jobnet_name, user_name, inner_jobnet_id, main_flag, scheduled_time"
+         " from ja_run_jobnet_table"
          " where inner_jobnet_id = " ZBX_FS_UI64, inner_jobnet_id);
 
     if (NULL != (row = DBfetch(result))) {
@@ -76,11 +78,20 @@ int jajobnet_ready(const zbx_uint64_t inner_jobnet_id)
         DBfree_result(result);
         return ja_set_enderr_jobnet(inner_jobnet_id);
     }
-    DBfree_result(result);
-    zbx_snprintf(time_str, sizeof(time_str), "%s",
-                 ja_timestamp2str(time(NULL)));
-    ja_set_value_jobnet_before(inner_jobnet_id, "JOBNET_BOOT_TIME", time_str);
 
+    if (atoi(row[4]) == JA_JOBNET_MAIN_FLAG_MAIN) {
+        zbx_snprintf(time_str, sizeof(time_str), "%s", ja_timestamp2str(time(NULL)));
+        ja_set_value_jobnet_before(inner_jobnet_id, "JOBNET_BOOT_TIME", time_str);
+
+        if (atoi(row[5]) == 0) {
+            ja_set_value_jobnet_before(inner_jobnet_id, "JOBNET_SCHEDULED_TIME", "");
+        }
+        else {
+            ja_set_value_jobnet_before(inner_jobnet_id, "JOBNET_SCHEDULED_TIME", row[5]);
+        }
+    }
+
+    DBfree_result(result);
 
     // set jobnet status
     if (ja_set_run_jobnet(inner_jobnet_id) == FAIL)

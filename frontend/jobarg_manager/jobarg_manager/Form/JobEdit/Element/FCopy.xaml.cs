@@ -1,6 +1,7 @@
 ﻿/*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -16,6 +17,9 @@
 ** along with this program; if not, write to the Free Software
 ** Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 **/
+using System;
+using System.Data;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -448,6 +452,139 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
 
                 this._state = IElementState.Selected;
             }
+        }
+
+        /// <summary>ToolTip表示内容設定</summary>/// 
+        public void SetToolTip(){
+            StringBuilder sbSourceHost = new StringBuilder();
+            StringBuilder sbSourceFile = new StringBuilder();
+            StringBuilder sbDestHost = new StringBuilder();
+            StringBuilder sbDestFile = new StringBuilder();
+            StringBuilder sbForce = new StringBuilder();
+            string forceStr = Properties.Resources.tooltip_flag_off;
+            StringBuilder sb = new StringBuilder();
+            sb.Append(Properties.Resources.job_id_label_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(_jobId);
+            sb.Append("\n");
+            sb.Append(Properties.Resources.job_name_label_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(_jobName);
+
+            DataRow[] rowIconFcopy;
+            if (InnerJobId == null) {
+                rowIconFcopy = _container.IconFcopyTable.Select("job_id='" + _jobId + "'");
+            } else {
+                rowIconFcopy = _container.IconFcopyTable.Select("inner_job_id=" + InnerJobId);
+            }
+            if (rowIconFcopy != null && rowIconFcopy.Length > 0) {
+                // 転送元ホスト 
+                string hostFlag = Convert.ToString(rowIconFcopy[0]["from_host_flag"]);
+                string hostName = Convert.ToString(rowIconFcopy[0]["from_host_name"]);
+                if ("1".Equals(hostFlag))
+                {
+                    sbSourceHost.Append("\n");
+                    sbSourceHost.Append("  ");
+                    sbSourceHost.Append(Properties.Resources.value_name_label_text);
+                    if (!LoginSetting.Lang.StartsWith("ja_")) sbSourceHost.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+                    sbSourceHost.Append(hostName);
+                } else {
+                    sbSourceHost.Append("\n");
+                    sbSourceHost.Append("  ");
+                    sbSourceHost.Append(Properties.Resources.host_name_label_text);
+                    if (!LoginSetting.Lang.StartsWith("ja_")) sbSourceHost.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+                    sbSourceHost.Append(hostName);
+                }
+
+                // 転送先ホスト 
+                string toHostFlag = Convert.ToString(rowIconFcopy[0]["to_host_flag"]);
+                string toHostName = Convert.ToString(rowIconFcopy[0]["to_host_name"]);
+                if ("1".Equals(toHostFlag))
+                {
+                    sbDestHost.Append("\n");
+                    sbDestHost.Append("  ");
+                    sbDestHost.Append(Properties.Resources.value_name_label_text);
+                    if (!LoginSetting.Lang.StartsWith("ja_")) sbDestHost.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+                    sbDestHost.Append(toHostName);
+                }
+                else
+                {
+                    sbDestHost.Append("\n");
+                    sbDestHost.Append("  ");
+                    sbDestHost.Append(Properties.Resources.host_name_label_text);
+                    if (!LoginSetting.Lang.StartsWith("ja_")) sbDestHost.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+                    sbDestHost.Append(toHostName);
+                }
+                //転送元ディレクトリー
+                sbSourceFile.Append("\n");
+                sbSourceFile.Append("  ");
+                sbSourceFile.Append(Properties.Resources.directory_label_text);
+                if (!LoginSetting.Lang.StartsWith("ja_")) sbSourceFile.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+                sbSourceFile.Append(Convert.ToString(rowIconFcopy[0]["from_directory"]));
+                //転送元ファイル名
+                sbSourceFile.Append("\n");
+                sbSourceFile.Append("  ");
+                sbSourceFile.Append(Properties.Resources.file_name_label_text);
+                if (!LoginSetting.Lang.StartsWith("ja_")) sbSourceFile.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+                sbSourceFile.Append(Convert.ToString(rowIconFcopy[0]["from_file_name"]));
+                //転送先ディレクトリー
+                sbDestFile.Append("\n");
+                sbDestFile.Append("  ");
+                sbDestFile.Append(Properties.Resources.directory_label_text);
+                if (!LoginSetting.Lang.StartsWith("ja_")) sbDestFile.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+                sbDestFile.Append(Convert.ToString(rowIconFcopy[0]["to_directory"]));
+                // 上書きフラグ 
+                string overwriteFlag = Convert.ToString(rowIconFcopy[0]["overwrite_flag"]);
+                if ("1".Equals(overwriteFlag)) {
+                    sbDestFile.Append("\n");
+                    sbDestFile.Append("  ");
+                    sbDestFile.Append(Properties.Resources.import_overwrite_duplicate_checkbox_text);
+                    if (!LoginSetting.Lang.StartsWith("ja_")) sbDestFile.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+                    sbDestFile.Append(Properties.Resources.tooltip_flag_on);
+                }else{
+                    sbDestFile.Append("\n");
+                    sbDestFile.Append("  ");
+                    sbDestFile.Append(Properties.Resources.import_overwrite_duplicate_checkbox_text);
+                    if (!LoginSetting.Lang.StartsWith("ja_")) sbDestFile.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+                    sbDestFile.Append(Properties.Resources.tooltip_flag_off);
+                }
+
+                DataRow[] rowJob = _container.JobControlTable.Select("job_id='" + _jobId + "'");
+                string forceFlag = Convert.ToString(rowJob[0]["force_flag"]);
+                if ("1".Equals(forceFlag)) {
+                    forceStr = Properties.Resources.tooltip_flag_on;
+                }
+            }
+
+            sb.Append("\n");
+            sb.Append(Properties.Resources.source_host_label_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(sbSourceHost.ToString());
+            sb.Append("\n");
+            sb.Append(Properties.Resources.source_file_label_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(sbSourceFile.ToString());
+            sb.Append("\n");
+            sb.Append(Properties.Resources.destination_host_label_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(sbDestHost.ToString());
+            sb.Append("\n");
+            sb.Append(Properties.Resources.destination_directory_label_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(sbDestFile.ToString());
+            sb.Append("\n");
+            sb.Append(Properties.Resources.tooltip_force_label_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(forceStr);
+
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            picToolTip.ToolTip = sb.ToString();
+        }
+
+        /// <summary>ToolTip表示内容リセット</summary>///
+        public void ResetToolTip(string toolTip)
+        {
+            picToolTip.ToolTip = toolTip;
         }
 
         #endregion

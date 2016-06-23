@@ -1,6 +1,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -18,18 +19,19 @@
 **/
 
 /*
-** $Date:: 2014-06-26 11:15:45 +0900 #$
-** $Revision: 6086 $
+** $Date:: 2014-10-17 16:00:02 +0900 #$
+** $Revision: 6528 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
-#include <json/json.h>
+#include <json.h>
 #include "common.h"
 #include "comms.h"
 #include "log.h"
 #include "db.h"
 
 #include "jacommon.h"
+#include "jalog.h"
 #include "jastatus.h"
 #include "javalue.h"
 #include "jaflow.h"
@@ -81,7 +83,7 @@ int jarun_icon_fwait(const zbx_uint64_t inner_job_id, const int method)
             ja_log("JARUNICONFWAIT200002", 0, NULL, inner_job_id,
                    __function_name, row[6], inner_job_id);
             DBfree_result(result);
-            return ja_set_runerr(inner_job_id);
+            return ja_set_runerr(inner_job_id, 2);
         }
 
         jp_arg = json_object_new_array();
@@ -95,7 +97,7 @@ int jarun_icon_fwait(const zbx_uint64_t inner_job_id, const int method)
         ja_log("JARUNICONFWAIT200001", 0, NULL, inner_job_id,
                __function_name, inner_job_id);
         DBfree_result(result);
-        return ja_set_runerr(inner_job_id);
+        return ja_set_runerr(inner_job_id, 2);
     }
     DBfree_result(result);
 

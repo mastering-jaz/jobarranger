@@ -2,6 +2,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -54,6 +55,19 @@
         <CommandBinding    
                 Command="{x:Static src:JobArrangerCommands.RunningDelayed}"    
                 Executed="RunningDelayedCommandBinding_Executed"    
+                CanExecute="CommandBinding_CanExecute" />
+        <!-- added by YAMA 2014/10/14    実行予定リスト起動時刻変更 -->
+        <CommandBinding    
+                Command="{x:Static src:JobArrangerCommands.Updt}"    
+                Executed="UpdtCommandBinding_Executed"    
+                CanExecute="CommandBinding_CanExecute" />
+        <CommandBinding    
+                Command="{x:Static src:JobArrangerCommands.Reserve}"    
+                Executed="ReserveCommandBinding_Executed"    
+                CanExecute="CommandBinding_CanExecute" />
+        <CommandBinding    
+                Command="{x:Static src:JobArrangerCommands.Release}"    
+                Executed="ReleaseCommandBinding_Executed"    
                 CanExecute="CommandBinding_CanExecute" />
     </src:BaseUserControl.CommandBindings>
     <Grid Name="jobnetExecControlGrid">

@@ -1,6 +1,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -18,8 +19,8 @@
 **/
 
 /*
-** $Date:: 2014-06-30 17:14:08 +0900 #$
-** $Revision: 6107 $
+** $Date:: 2014-10-17 16:00:02 +0900 #$
+** $Revision: 6528 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -30,9 +31,11 @@
 #include "jacommon.h"
 #include "jalog.h"
 #include "jajob.h"
+#include "jaself.h"
 #include "jajobiconjob.h"
 #include "jajobiconextjob.h"
 #include "jajobiconless.h"
+#include "jajobiconreboot.h"
 #include "../jarun/jaruniconreboot.h"
 #include "../jarun/jaruniconfwait.h"
 
@@ -114,6 +117,9 @@ static void process_jajob()
         case JA_JOB_TYPE_REBOOT:
             if (method_flag == JA_JOB_METHOD_ABORT) {
                 jarun_icon_reboot(inner_job_id, JA_AGENT_METHOD_KILL);
+            }
+            if (timeout_flag == 0 && timeout_cnt == 0) {
+                jajob_icon_reboot_timeout(inner_job_id, start_time);
             }
             break;
 

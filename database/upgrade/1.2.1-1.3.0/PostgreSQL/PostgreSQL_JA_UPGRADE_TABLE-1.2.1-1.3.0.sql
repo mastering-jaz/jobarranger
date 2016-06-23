@@ -2,6 +2,7 @@
 -- Job Arranger upgrade table SQL for PostgreSQL (Ver 1.2.1 -> 1.3.0)  - 2013/05/24 -
 
 -- Copyright (C) 2012-2013 FitechForce, Inc. All Rights Reserved.
+-- Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 
 -- Caution
 -- There is the possibility that this upgrade, net job scheduled for execution is registered double.

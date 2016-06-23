@@ -1,6 +1,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -44,6 +45,7 @@ int   jarun_icon_zabbixlink_set_host_status(const zbx_uint64_t inner_job_id, con
 char *jarun_icon_zabbixlink_create_csv_string(const zbx_uint64_t inner_job_id, DB_RESULT result, const char* log_id);
 int   jarun_icon_zabbixlink_set_host_group_status(const zbx_uint64_t inner_job_id, const char* set_group_id, const int set_status);
 int   jarun_icon_zabbixlink(const zbx_uint64_t inner_job_id, const int test_flag);
+int   jarun_icon_zabbixlink_check_access_permission(const zbx_uint64_t inner_jobnet_id, const zbx_uint64_t inner_job_id, const char *group_id);
 
 #endif
 

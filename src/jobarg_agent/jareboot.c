@@ -1,6 +1,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -18,12 +19,12 @@
 **/
 
 /*
-** $Date:: 2013-06-18 10:17:19 +0900 #$
-** $Revision: 4925 $
-** $Author: ossinfra@FITECHLABS.CO.JP $
+** $Date:: 2014-11-07 17:13:13 +0900 #$
+** $Revision: 6638 $
+** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
-#include <json/json.h>
+#include <json.h>
 #include "common.h"
 #include "log.h"
 #include "threads.h"
@@ -148,48 +149,60 @@ int ja_reboot_load_arg(ja_job_object * job, ja_reboot_arg * arg)
 int ja_reboot_chkend(ja_job_object * job)
 {
     ja_reboot_arg arg;
-    int num, i;
+    int num, i, loop;
     zbx_uint64_t sec;
     char reboot_flag_file[JA_MAX_STRING_LEN];
     const char *__function_name = "ja_reboot_chkend";
 
-    if (job == NULL)
+    if (job == NULL) {
         return FAIL;
-    zabbix_log(LOG_LEVEL_DEBUG, "In %s() jobid: " ZBX_FS_UI64,
-               __function_name, job->jobid);
+    }
+
+    zabbix_log(LOG_LEVEL_DEBUG, "In %s() jobid: " ZBX_FS_UI64, __function_name, job->jobid);
 
     zbx_snprintf(reboot_flag_file, sizeof(reboot_flag_file),
                  "%s-" ZBX_FS_UI64, CONFIG_REBOOT_FLAG, job->jobid);
 
-    if (ja_file_getsize(reboot_flag_file) < 0)
+    if (ja_file_getsize(reboot_flag_file) < 0) {
         return SUCCEED;
+    }
 
     sec = time(NULL) - job->start_time;
-    if (ja_reboot_load_arg(job, &arg) == FAIL)
+    if (ja_reboot_load_arg(job, &arg) == FAIL) {
         arg.reboot_mode_flag = 0;
+    }
 
     num = ja_jobdb_get_jobs();
-    zabbix_log(LOG_LEVEL_INFORMATION,
+    zabbix_log(LOG_LEVEL_DEBUG,
                "In %s() reboot_flag_file: %s, job num: %d, reboot_mode_flag: %d, reboot_wait_time: %d, sec: %d, jobid: "
                ZBX_FS_UI64, __function_name, reboot_flag_file, num,
-               arg.reboot_mode_flag, arg.reboot_wait_time, sec,
-               job->jobid);
+               arg.reboot_mode_flag, arg.reboot_wait_time, sec, job->jobid);
 
-    if (num == 0 || arg.reboot_mode_flag == 0
-        || (sec >= arg.reboot_wait_time && arg.reboot_wait_time > 0)) {
-        if (num != 0)
+    if (num == 0 || arg.reboot_mode_flag == 0 ||
+       (sec >= arg.reboot_wait_time && arg.reboot_wait_time > 0)) {
+        if (num != 0) {
             ja_reboot_killall();
+        }
 
         if (ja_file_remove(reboot_flag_file) == SUCCEED) {
             while (1) {
-                zabbix_log(LOG_LEVEL_INFORMATION,
-                           "In %s() reboot now. jobid: " ZBX_FS_UI64,
-                           __function_name, job->jobid);
+                zabbix_log(LOG_LEVEL_INFORMATION, "In %s() reboot now. jobid: " ZBX_FS_UI64, __function_name, job->jobid);
                 zbx_sleep(1);
-                if (ja_process_check(job->pid) == SUCCEED)
+
+                if (ja_process_check(job->pid) == SUCCEED) {
                     continue;
-                for (i = 0; i < 120; i++)
+                }
+
+                if (job->method == JA_AGENT_METHOD_TEST) {
+                    loop = 3;
+                }
+                else {
+                    loop = 120;
+                }
+
+                for (i = 0; i < loop; i++) {
                     zbx_sleep(1);
+                }
                 return SUCCEED;
             }
         }

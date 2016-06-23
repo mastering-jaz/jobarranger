@@ -1,6 +1,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -18,12 +19,12 @@
 **/
 
 /*
-** $Date:: 2013-05-30 10:59:54 +0900 #$
-** $Revision: 4684 $
-** $Author: ossinfra@FITECHLABS.CO.JP $
+** $Date:: 2014-10-17 16:00:02 +0900 #$
+** $Revision: 6528 $
+** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
-#include <json/json.h>
+#include <json.h>
 #include "common.h"
 #include "comms.h"
 #include "threads.h"

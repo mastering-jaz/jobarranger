@@ -194,7 +194,7 @@
             "InstallAction" = "3:1"
             "Arguments" = "8:--install --config \"[TARGETDIR]\\conf\\jobarg_agentd.conf\""
             "EntryPoint" = "8:"
-            "Sequence" = "3:1"
+            "Sequence" = "3:2"
             "Identifier" = "8:_567264D3_407D_4017_A38E_9A505D7EE9C8"
             "InstallerClass" = "11:FALSE"
             "CustomActionData" = "8:"
@@ -210,6 +210,20 @@
             "EntryPoint" = "8:"
             "Sequence" = "3:2"
             "Identifier" = "8:_87DE2C8C_C2B5_482D_8F80_0229EB6EA19F"
+            "InstallerClass" = "11:FALSE"
+            "CustomActionData" = "8:"
+            }
+            "{4AA51A2D-7D85-4A59-BA75-B0809FC8B380}:_FB878CA2B1864291B6EF08601219E583"
+            {
+            "Name" = "8:jobarg_agentd.exe"
+            "Condition" = "8:FILEEXISTS1<>\"\""
+            "Object" = "8:_1960453A463D4C10B8A4F1B1B5BAC076"
+            "FileType" = "3:2"
+            "InstallAction" = "3:1"
+            "Arguments" = "8:--uninstall --config \"[TARGETDIR]\\conf\\jobarg_agentd.conf\""
+            "EntryPoint" = "8:"
+            "Sequence" = "3:1"
+            "Identifier" = "8:_2B4F3946_6798_4455_9F52_0A3506042BF6"
             "InstallerClass" = "11:FALSE"
             "CustomActionData" = "8:"
             }
@@ -364,7 +378,7 @@
             "SharedLegacy" = "11:FALSE"
             "PackageAs" = "3:1"
             "Register" = "3:1"
-            "Exclude" = "11:TRUE"
+            "Exclude" = "11:FALSE"
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
@@ -449,7 +463,7 @@
             }
             "{3C67513D-01DD-4637-8A68-80971EB9504F}:_34EF4A35D6F849A095C6FDB9B64C94DD"
             {
-            "DefaultLocation" = "8:[ProgramFiles64Folder][Manufacturer]\\[ProductName]"
+            "DefaultLocation" = "8:C:\\Program Files\\FitechForce\\Job Arranger Agent"
             "Name" = "8:#1925"
             "AlwaysCreate" = "11:FALSE"
             "Condition" = "8:"
@@ -549,6 +563,21 @@
         }
         "Locator"
         {
+            "{39E1837C-0DB9-45A2-89C8-438377A77565}:_3E2F7C26EDD540A289C369E7FF1E706C"
+            {
+            "Name" = "8:ファイル 1 の検索"
+            "Folder" = "8:C:\\Program Files\\FitechForce\\Job Arranger Agent\\conf"
+            "Depth" = "2:0"
+            "FileName" = "8:jobarg_agentd.conf"
+            "MinVesion" = "8:"
+            "MaxVersion" = "8:"
+            "MinSize" = "8:"
+            "MaxSize" = "8:"
+            "MinDate" = "8:"
+            "MaxDate" = "8:"
+            "Languages" = "8:"
+            "Property" = "8:FILEEXISTS1"
+            }
         }
         "MsiBootstrapper"
         {
@@ -559,21 +588,21 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Job Arranger Agent"
-        "ProductCode" = "8:{BD2E9665-C5D3-4A6D-BE9E-FA551DA7F158}"
-        "PackageCode" = "8:{494254A6-8252-4CE5-B826-1840ABF0B5F7}"
+        "ProductCode" = "8:{D060AE88-0425-4995-BE05-8BCEC2A5527F}"
+        "PackageCode" = "8:{D302D334-E559-44E9-B75E-FC164B6F53BA}"
         "UpgradeCode" = "8:{3D9752F0-9CB2-4023-9737-249CF23D1F08}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
-        "RemovePreviousVersions" = "11:FALSE"
-        "DetectNewerInstalledVersion" = "11:TRUE"
+        "RemovePreviousVersions" = "11:TRUE"
+        "DetectNewerInstalledVersion" = "11:FALSE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:1.0.4"
-        "Manufacturer" = "8:FitechForce"
+        "ProductVersion" = "8:2.1.0"
+        "Manufacturer" = "8:Daiwa Institute of Research Business Innovation Ltd."
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
         "Title" = "8:Job Arranger Agent"
         "Subject" = "8:"
-        "ARPCONTACT" = "8:FitechForce"
+        "ARPCONTACT" = "8:Daiwa Institute of Research Business Innovation Ltd."
         "Keywords" = "8:"
         "ARPCOMMENTS" = "8:"
         "ARPURLINFOABOUT" = "8:"

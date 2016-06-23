@@ -51,6 +51,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DAO\BaseDAO.cs" />
+    <Compile Include="DAO\FilterControlDAO.cs" />
     <Compile Include="DAO\IconCooperationDAO.cs" />
     <Compile Include="DAO\IconFcopyDAO.cs" />
     <Compile Include="DAO\IconFwaitDAO.cs" />
@@ -67,6 +68,7 @@
     <Compile Include="DAO\IconJobnetDAO.cs" />
     <Compile Include="DAO\IconJobDAO.cs" />
     <Compile Include="DAO\JobCommandDAO.cs" />
+    <Compile Include="DAO\ParameterTableDAO.cs" />
     <Compile Include="DAO\RunFlowDAO.cs" />
     <Compile Include="DAO\RunIconCaclDAO.cs" />
     <Compile Include="DAO\RunIconCooperationDAO.cs" />

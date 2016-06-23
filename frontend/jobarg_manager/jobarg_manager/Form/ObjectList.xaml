@@ -2,6 +2,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -166,7 +167,14 @@
                     <Separator></Separator>
                     <MenuItem Header="{x:Static src:Properties.Resources.del_menu_text}"  Name="menuitemDel" Click="MenuitemDel_Click"></MenuItem>
                     <Separator></Separator>
+                    <!--  added by YAMA 2014/11/10    JAMのGUIの名称の変更
                     <MenuItem Header="{x:Static src:Properties.Resources.export_menu_text}"  Name="menuitemExport" Click="MenuitemExport_Click"></MenuItem>
+                    -->
+                    <MenuItem Header="{x:Static src:Properties.Resources.export_menu_list_text}"  Name="menuitemExport" Click="MenuitemExport_Click"></MenuItem>
+                    <Separator></Separator>
+                    <MenuItem Header="{x:Static src:Properties.Resources.immediate_run_menu_text}" Name="menuItemImmediateRun" Click="MenuitemImmediateRun_Click"/>
+                    <MenuItem Header="{x:Static src:Properties.Resources.reservation_run_menu_text}" Name="menuItemReserveRun"  Click="MenuitemReserveRun_Click"/>
+                    <MenuItem Header="{x:Static src:Properties.Resources.test_run_menu_text}" Name="menuItemTestRun"  Click="MenuitemTestRun_Click"/>
                 </ContextMenu>
             </DataGrid.ContextMenu>
         </DataGrid>

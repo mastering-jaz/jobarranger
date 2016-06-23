@@ -1,6 +1,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -18,8 +19,8 @@
 **/
 
 /*
-** $Date:: 2014-07-09 10:58:41 +0900 #$
-** $Rev: 6258 $
+** $Date:: 2014-10-17 16:00:02 +0900 #$
+** $Rev: 6528 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -34,13 +35,16 @@
 #include "../events.h"
 
 #include "jacommon.h"
+#include "jalog.h"
+#include "jajoblog.h"
+#include "jaself.h"
 #include "jaboot.h"
 
 #define JOBNET_KEEP_SPAN		"JOBNET_KEEP_SPAN"
 #define JOBLOG_KEEP_SPAN		"JOBLOG_KEEP_SPAN"
 
 #define DEFAULT_JOBNET_KEEP_SPAN	60
-#define DEFAULT_JOBLOG_KEEP_SPAN	1440
+#define DEFAULT_JOBLOG_KEEP_SPAN	129600
 
 extern unsigned char	process_type;
 extern int		process_num;
@@ -53,7 +57,7 @@ static char		msgwork[2048];
  *                                                                            *
  * Purpose: gets the date of the information can be deleted jobnet            *
  *                                                                            *
- * Parameters: span (in) - retention period of net job information            *
+ * Parameters: span (in) - retention period of jobnet information             *
  *             purge_date (out) - purge start time (YYYYMMDDHHMM)             *
  *                                                                            *
  * Return value:                                                              *
@@ -61,7 +65,7 @@ static char		msgwork[2048];
  * Comments:                                                                  *
  *                                                                            *
  ******************************************************************************/
-void		get_purge_date(int span, char **purge_date)
+static void		get_purge_date(int span, char **purge_date)
 {
 	struct tm	*tm;
 	time_t		now;
@@ -111,7 +115,13 @@ static int	get_jobnet_keep_span()
 
 	if (NULL != (row = DBfetch(result)))
 	{
-		span = atoi(row[0]);
+		if (strlen(row[0]) <= 10) {
+			span = atoi(row[0]);
+		}
+		if (span < 0)
+		{
+			span = DEFAULT_JOBNET_KEEP_SPAN;
+		}
 	}
 	DBfree_result(result);
 
@@ -144,7 +154,13 @@ static int	get_joblog_keep_span()
 
 	if (NULL != (row = DBfetch(result)))
 	{
-		span = atoi(row[0]);
+		if (strlen(row[0]) <= 10) {
+			span = atoi(row[0]);
+		}
+		if (span < 0)
+		{
+			span = DEFAULT_JOBLOG_KEEP_SPAN;
+		}
 	}
 	DBfree_result(result);
 
@@ -421,34 +437,37 @@ static int	jobnet_boot(char *now_date)
 {
 	DB_RESULT	result;
 	DB_ROW		row;
-	int		run_type, multiple_start_up, load_status, rc;
+	int		run_type, multiple_start_up, load_status, start_pending_flag, rc;
 	const char	*__function_name = "jobnet_boot";
 
 	zabbix_log(LOG_LEVEL_DEBUG, "In %s(%s)", __function_name, now_date);
 
 	result = DBselect("select inner_jobnet_id, run_type, scheduled_time, jobnet_id,"
-			" update_date, multiple_start_up, load_status"
+			" update_date, multiple_start_up, load_status, start_pending_flag"
 			" from ja_run_jobnet_summary_table"
-			" where status = %d and (scheduled_time <= %s or scheduled_time = 0)"
+			" where status = %d and start_pending_flag != %d and (scheduled_time <= %s or scheduled_time = 0)"
 			" order by scheduled_time, inner_jobnet_id",
-			JA_JOBNET_STATUS_BEGIN, now_date);
+			JA_JOBNET_STATUS_BEGIN, JA_SUMMARY_START_PENDING_ON, now_date);
 
 	while (NULL != (row = DBfetch(result)))
 	{
 		DBbegin();
 
 		zabbix_log(LOG_LEVEL_DEBUG, "-DEBUG- get ja_run_jobnet_summary_table data:"
-			" run_type[%s] scheduled_time[%s] now_date[%s] multiple_start_up[%s] load_status[%s]",
-			row[1], row[2], now_date, row[5], row[6]);
+			" run_type[%s] scheduled_time[%s] now_date[%s] multiple_start_up[%s] load_status[%s] start_pending_flag[%s]",
+			row[1], row[2], now_date, row[5], row[6], row[7]);
 
-		run_type          = atoi(row[1]);
-		multiple_start_up = atoi(row[5]);
-		load_status       = atoi(row[6]);
+		run_type           = atoi(row[1]);
+		multiple_start_up  = atoi(row[5]);
+		load_status        = atoi(row[6]);
+		start_pending_flag = atoi(row[7]);
 		if (run_type == JA_JOBNET_RUN_TYPE_NORMAL ||
 		    run_type == JA_JOBNET_RUN_TYPE_SCHEDULED)
 		{
 			/* delay start-up check */
-			if (strcmp(row[2], now_date) < 0 && load_status != JA_SUMMARY_LOAD_STATUS_DELAY)
+			if (strcmp(row[2], now_date) < 0 &&
+			    load_status != JA_SUMMARY_LOAD_STATUS_DELAY &&
+			    start_pending_flag == JA_SUMMARY_START_PENDING_NONE)
 			{
 				rc = error_state_jobnet(row[0], row[3], row[4], row[2]);
 				if (rc != SUCCEED)
@@ -634,9 +653,9 @@ static int	jobnet_purge(char *jobnet_purge_date)
 				" where inner_jobnet_main_id = %s", row[0]);
 		if (rc <= ZBX_DB_OK)
 		{
+			DBrollback();
 			ZBX_STR2UINT64(i_inner_jobnet_id, row[0]);
 			ja_log("JABOOT200004", i_inner_jobnet_id, NULL, 0, row[0], row[1], row[2]);
-			DBrollback();
 			continue;
 		}
 
@@ -688,9 +707,9 @@ static int	joblog_purge(char *joblog_purge_date)
 				" where inner_jobnet_main_id = %s", row[0]);
 		if (rc <= ZBX_DB_OK)
 		{
+			DBrollback();
 			ZBX_STR2UINT64(i_inner_jobnet_id, row[0]);
 			ja_log("JABOOT200005", i_inner_jobnet_id, NULL, 0, row[0]);
-			DBrollback();
 			continue;
 		}
 

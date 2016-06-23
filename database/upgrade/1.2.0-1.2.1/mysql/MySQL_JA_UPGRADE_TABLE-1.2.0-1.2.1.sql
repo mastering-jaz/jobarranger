@@ -2,6 +2,7 @@
 -- Job Arranger upgrade table SQL for MySQL (Ver 1.2.0 -> 1.2.1)  - 2013/04/22 -
 
 -- Copyright (C) 2012-2013 FitechForce, Inc. All Rights Reserved.
+-- Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 
 
 ALTER TABLE `ja_run_value_before_table` DROP FOREIGN KEY `ja_run_value_before_fk1`;

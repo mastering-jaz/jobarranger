@@ -1,6 +1,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -18,15 +19,13 @@
 **/
 
 /*
-** $Date:: 2013-05-16 16:03:58 +0900 #$
-** $Revision: 4633 $
-** $Author: ossinfra@FITECHLABS.CO.JP $
+** $Date:: 2014-11-11 13:34:20 +0900 #$
+** $Revision: 6643 $
+** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
 #ifndef JOBARG_JAKILL_H
 #define JOBARG_JAKILL_H
-
-#include "jacommon.h"
 
 typedef struct {
     JA_PID pid;

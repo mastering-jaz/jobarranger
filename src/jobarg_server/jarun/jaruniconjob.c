@@ -1,6 +1,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -18,12 +19,12 @@
 **/
 
 /*
-** $Date:: 2014-02-20 16:52:27 +0900 #$
-** $Revision: 5809 $
+** $Date:: 2014-11-12 13:08:49 +0900 #$
+** $Revision: 6650 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
-#include <json/json.h>
+#include <json.h>
 #include "common.h"
 #include "comms.h"
 #include "log.h"
@@ -56,47 +57,50 @@
  ******************************************************************************/
 int jarun_icon_job_getenv(zbx_uint64_t inner_job_id, ja_job_object * job)
 {
-    json_object *jp_env;
-    DB_RESULT result;
-    DB_ROW row;
-    char *p;
-    char value[JA_MAX_DATA_LEN];
-    const char *__function_name = "jarun_icon_job_getenv";
+    json_object  *jp_env;
+    DB_RESULT    result;
+    DB_ROW       row;
+    char         *p;
+    char         value[JA_MAX_DATA_LEN];
+    const char   *__function_name = "jarun_icon_job_getenv";
 
-    zabbix_log(LOG_LEVEL_DEBUG, "In %s() inner_job_id: " ZBX_FS_UI64,
-               __function_name, inner_job_id);
+    zabbix_log(LOG_LEVEL_DEBUG, "In %s() inner_job_id: " ZBX_FS_UI64, __function_name, inner_job_id);
 
     jp_env = json_object_new_object();
-    result =
-        DBselect("select value_name from ja_run_value_jobcon_table"
-                 " where inner_job_id = " ZBX_FS_UI64, inner_job_id);
+    result = DBselect("select value_name from ja_run_value_jobcon_table"
+                      " where inner_job_id = " ZBX_FS_UI64, inner_job_id);
+
     while (NULL != (row = DBfetch(result))) {
         zbx_snprintf(value, sizeof(value), "");
         ja_get_value_before(inner_job_id, row[0], value);
-        json_object_object_add(jp_env, row[0],
-                               json_object_new_string(value));
+        json_object_object_add(jp_env, row[0], json_object_new_string(value));
     }
     DBfree_result(result);
 
-    result =
-        DBselect("select value_name, value from ja_run_value_job_table"
-                 " where inner_job_id = " ZBX_FS_UI64, inner_job_id);
+    result = DBselect("select value_name, value from ja_run_value_job_table"
+                      " where inner_job_id = " ZBX_FS_UI64, inner_job_id);
+
     while (NULL != (row = DBfetch(result))) {
         zbx_snprintf(value, sizeof(value), "");
         p = row[1];
-        if (*p == '$') {
-            ja_get_value_before(inner_job_id, p + 1, value);
+        if (strlen(p) > 1) {
+            if (*p == '$' && *(p + 1) != '$') {
+                ja_get_value_before(inner_job_id, p + 1, value);
+            } else {
+                if (*p == '$' && *(p + 1) == '$') {
+                    zbx_strlcpy(value, (row[1] + 1), sizeof(value));
+                } else {
+                    zbx_strlcpy(value, row[1], sizeof(value));
+                }
+            }
         } else {
             zbx_strlcpy(value, row[1], sizeof(value));
         }
-        
-        json_object_object_add(jp_env, row[0],
-                               json_object_new_string(value));
+        json_object_object_add(jp_env, row[0], json_object_new_string(value));
     }
     DBfree_result(result);
 
-    zbx_snprintf(job->env, sizeof(job->env), "%s",
-                 json_object_to_json_string(jp_env));
+    zbx_snprintf(job->env, sizeof(job->env), "%s", json_object_to_json_string(jp_env));
     json_object_put(jp_env);
     return SUCCEED;
 }
@@ -145,20 +149,22 @@ int jarun_icon_job(zbx_uint64_t inner_job_id, int flag)
     } else {
         ja_log("JARUNICONJOB200017", inner_jobnet_id, NULL, inner_job_id, inner_job_id);
         DBfree_result(result);
-        return ja_set_runerr(inner_job_id);
+        return ja_set_runerr(inner_job_id, 2);
     }
     DBfree_result(result);
 
     if (ja_host_getname(inner_job_id, host_flag, host_name, host) == FAIL) {
         ja_log("JARUNICONJOB200028", inner_jobnet_id, NULL, inner_job_id, host_name, host_flag, inner_job_id);
-        return ja_set_runerr(inner_job_id);
+        return ja_set_runerr(inner_job_id, 2);
     }
 
-    if (ja_host_lockinfo(host) == SUCCEED) {
-        zabbix_log(LOG_LEVEL_DEBUG,
-                   "In %s() host '%s' is locked. inner_job_id: "
-                   ZBX_FS_UI64, __function_name, host, inner_job_id);
-        return FAIL;
+    if (flag == JA_AGENT_METHOD_NORMAL || flag == JA_AGENT_METHOD_TEST) {
+        if (ja_host_lockinfo(host) == SUCCEED) {
+            zabbix_log(LOG_LEVEL_DEBUG,
+                       "In %s() host '%s' is locked. inner_job_id: "
+                       ZBX_FS_UI64, __function_name, host, inner_job_id);
+            return FAIL;
+        }
     }
 
     zbx_snprintf(job.kind, sizeof(job.kind), "%s", JA_PROTO_VALUE_JOBRUN);
@@ -183,7 +189,7 @@ int jarun_icon_job(zbx_uint64_t inner_job_id, int flag)
         if (row == NULL) {
             ja_log("JARUNICONJOB200024", inner_jobnet_id, NULL, inner_job_id, inner_job_id);
             DBfree_result(result);
-            return ja_set_runerr(inner_job_id);
+            return ja_set_runerr(inner_job_id, 2);
         }
         ZBX_STR2UINT64(job.jobid, row[0]);
         DBfree_result(result);
@@ -201,17 +207,34 @@ int jarun_icon_job(zbx_uint64_t inner_job_id, int flag)
         if (row == NULL) {
             ja_log("JARUNICONJOB200024", inner_jobnet_id, NULL, inner_job_id, inner_job_id);
             DBfree_result(result);
-            return ja_set_runerr(inner_job_id);
+            return ja_set_runerr(inner_job_id, 2);
         }
         zbx_snprintf(job.script, sizeof(job.script), "%s", row[0]);
         DBfree_result(result);
-        jarun_icon_job_getenv(inner_job_id, &job);
+
+        result = 
+            DBselect("select run_user,run_user_password from ja_run_job_table"
+                     " where inner_job_id = " ZBX_FS_UI64, inner_job_id);
+
+        row = DBfetch(result);
+        if (row == NULL) {
+            ja_log("JARUNICONJOB200024", inner_jobnet_id, NULL, inner_job_id, inner_job_id);
+            DBfree_result(result);
+            return ja_set_runerr(inner_job_id, 2);
+        }
+
+        zbx_snprintf(job.run_user, sizeof(job.run_user), "%s", row[0]);
+        zbx_snprintf(job.run_user_password, sizeof(job.run_user_password), "%s", row[1]);
+
+        DBfree_result(result);
+
+    	jarun_icon_job_getenv(inner_job_id, &job);
     }
 
     pid = ja_fork();
     if (pid == -1) {
         ja_log("JARUNICONJOB200027", inner_jobnet_id, NULL, inner_job_id, inner_job_id);
-        return ja_set_runerr(inner_job_id);
+        return ja_set_runerr(inner_job_id, 2);
     } else if (pid != 0) {
         waitpid(pid, NULL, WNOHANG);
         return SUCCEED;
@@ -221,7 +244,7 @@ int jarun_icon_job(zbx_uint64_t inner_job_id, int flag)
     ja_job_object_init(&job_res);
     DBconnect(ZBX_DB_CONNECT_ONCE);
     if (ja_connect(&sock, host, inner_job_id) == FAIL) {
-        ja_set_runerr(inner_job_id);
+        ja_set_runerr(inner_job_id, 2);
         DBclose();
         exit(1);
     }
@@ -245,7 +268,7 @@ int jarun_icon_job(zbx_uint64_t inner_job_id, int flag)
     } else {
         DBconnect(ZBX_DB_CONNECT_ONCE);
         ja_log("JARUNICONJOB200012", inner_jobnet_id, NULL, inner_job_id, inner_job_id, job_res.message);
-        ja_set_runerr(inner_job_id);
+        ja_set_runerr(inner_job_id, 2);
         DBclose();
         exit(1);
     }

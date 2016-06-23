@@ -1,6 +1,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -18,8 +19,8 @@
 **/
 
 /*
-** $Date:: 2014-06-24 10:44:33 +0900 #$
-** $Revision: 6083 $
+** $Date:: 2014-10-17 16:00:02 +0900 #$
+** $Revision: 6528 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -29,6 +30,8 @@
 #include "dbcache.h"
 
 #include "jacommon.h"
+#include "jalog.h"
+#include "jajoblog.h"
 
 static char	msgwork[2048];
 
@@ -152,8 +155,8 @@ int	ja_joblog(char *message_id, zbx_uint64_t inner_jobnet_id, zbx_uint64_t inner
 				}
 			}
 
-			/* check abnormal termination of job icon */
-			if (sql_flag == 2 && strcmp(message_id, JC_JOB_ERR_END) == 0)
+			/* check standard output of job icon or agent less icon */
+			if (sql_flag == 2)
 			{
 				result = DBselect("select count(*) from ja_run_value_after_table"
 						" where inner_job_id = " ZBX_FS_UI64

@@ -1,6 +1,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -18,8 +19,8 @@
 **/
 
 /*
-** $Date:: 2014-05-16 11:07:27 +0900 #$
-** $Revision: 5967 $
+** $Date:: 2014-11-11 13:54:54 +0900 #$
+** $Revision: 6644 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -34,12 +35,15 @@
 #include "db.h"
 
 #include "jacommon.h"
+#include "jalog.h"
+#include "jaself.h"
 #include "jarun/jarun.h"
 #include "jajob/jajob.h"
 #include "jajobnet/jajobnet.h"
 #include "jatrapper/jatrapper.h"
 #include "jaboot/jaboot.h"
 #include "jaloader/jaloader.h"
+#include "jamsgsnd/jamsgsnd.h"
 #include "jaselfmon/jaselfmon.h"
 
 #define INIT_SERVER(type, count)								\
@@ -112,6 +116,10 @@ int	CONFIG_ZABBIX_VERSION		= 1;
 int	CONFIG_JALAUNCH_INTERVAL	= 1;
 char	*CONFIG_JA_ZBX_MESSAGE_FILE	= NULL;
 char	*CONFIG_JA_EXECUTION_USER	= NULL;
+int	CONFIG_JAMSGSND_INTERVAL	= 1;
+int	CONFIG_JAMSGSND_FORKS		= 1;
+int	CONFIG_EXTJOB_WAITTIME		= 300;
+char	*CONFIG_JA_PS_COMMAND		= "ps -ef | awk '{ print $2,$3 }'";
 
 /* for Zabbix */
 int	CONFIG_ALERTER_FORKS		= 1;
@@ -299,6 +307,8 @@ static void zbx_load_config()
 		{"JaLaunchInterval",	&CONFIG_JALAUNCH_INTERVAL,	TYPE_INT,		PARM_OPT,	1,	9999999},
 		{"JaZabbixMessageFile",	&CONFIG_JA_ZBX_MESSAGE_FILE,	TYPE_STRING,		PARM_MAND,	0,	0},
 		{"JaExecutionUser",	&CONFIG_JA_EXECUTION_USER,	TYPE_STRING,		PARM_OPT,	0,	0},
+		{"JaMsgsndInterval",	&CONFIG_JAMSGSND_INTERVAL,	TYPE_INT,		PARM_OPT,	1,	9999999},
+		{"JaExtjobWaitTime",	&CONFIG_EXTJOB_WAITTIME,	TYPE_INT,		PARM_OPT,	0,	9999999},
 		{NULL}
 	};
 
@@ -418,7 +428,7 @@ int MAIN_ZABBIX_ENTRY()
 	ja_init_selfmon_collector();
 	threads_num = CONFIG_JARUN_FORKS + CONFIG_JATRAPPER_FORKS + CONFIG_JAJOB_FORKS
 			+ CONFIG_JAJOBNET_FORKS + CONFIG_JALOADER_FORKS + CONFIG_JABOOT_FORKS
-			+ CONFIG_JASELFMON_FORKS;
+			+ CONFIG_JAMSGSND_FORKS + CONFIG_JASELFMON_FORKS;
 	threads = zbx_calloc(threads, threads_num, sizeof(pid_t));
 
 	if (FAIL == zbx_tcp_listen(&listen_sock, CONFIG_LISTEN_IP, (unsigned short) CONFIG_LISTEN_PORT)) {
@@ -464,6 +474,9 @@ int MAIN_ZABBIX_ENTRY()
 	} else if (server_num <= (server_count += CONFIG_JABOOT_FORKS)) {
 		INIT_SERVER(JA_PROCESS_TYPE_JABOOT, CONFIG_JABOOT_FORKS);
 		main_jaboot_loop();
+	} else if (server_num <= (server_count += CONFIG_JAMSGSND_FORKS)) {
+		INIT_SERVER(JA_PROCESS_TYPE_JASNDMSG, CONFIG_JAMSGSND_FORKS);
+		main_jamsgsnd_loop();
 	} else if (server_num <= (server_count += CONFIG_JASELFMON_FORKS)) {
 		INIT_SERVER(JA_PROCESS_TYPE_SELFMON, CONFIG_JASELFMON_FORKS);
 		main_jaselfmon_loop();
@@ -519,9 +532,6 @@ void zbx_on_exit()
 	/* kill the external command */
 	rc = system("pkill -SIGTERM jobarg_session");
 	rc = system("pkill -SIGTERM jobarg_command");
-	rc = system("pkill -SIGTERM jacmdsleep");
-	rc = system("pkill -SIGTERM jacmdtime");
-	rc = system("pkill -SIGTERM jacmdweek");
 
 	ja_log("JASERVER000002", 0, NULL, 0, JOBARG_VERSION, JOBARG_REVISION);
 	zabbix_close_log();

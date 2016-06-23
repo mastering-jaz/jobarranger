@@ -1,6 +1,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -18,9 +19,9 @@
 **/
 
 /*
-** $Date:: 2013-04-22 16:38:33 +0900 #$
-** $Revision: 4446 $
-** $Author: ossinfra@FITECHLABS.CO.JP $
+** $Date:: 2014-10-17 16:00:02 +0900 #$
+** $Revision: 6528 $
+** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
 #include "common.h"
@@ -70,6 +71,9 @@ int ja_job_object_init(ja_job_object * job)
     job->return_code = -1;
     job->signal = 0;
     job->send_retry = 0;
+
+    memset(job->run_user, 0, sizeof(job->run_user));
+    memset(job->run_user_password, 0, sizeof(job->run_user_password));
 
     return SUCCEED;
 }

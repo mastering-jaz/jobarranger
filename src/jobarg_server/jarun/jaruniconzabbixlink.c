@@ -1,6 +1,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -28,12 +29,14 @@
 #include "db.h"
 
 #include "jacommon.h"
+#include "jalog.h"
 #include "jastr.h"
 #include "jastatus.h"
 #include "javalue.h"
 #include "jaflow.h"
 #include "jaruniconzabbixlink.h"
 #include "jazbxmsg.h"
+#include "jajobid.h"
 
 #define SUCCEED                             0
 #define FAIL                                -1
@@ -1304,6 +1307,8 @@ int jarun_icon_zabbixlink_set_host_status(const zbx_uint64_t inner_job_id, const
                                                " where triggerid in(%s)",
                                                ZBXLINK_TRIGGER_VALUE_FLAG_UNKNOWN, p_message, p_triggerid_sql);
 
+                            zbx_free(p_message);
+
                             if (db_ret < ZBX_DB_OK) {
                                 /* trigger state update failure */
                                 DBfree_result(result);
@@ -1514,6 +1519,89 @@ int jarun_icon_zabbixlink_set_host_group_status(const zbx_uint64_t inner_job_id,
 
 /******************************************************************************
  *                                                                            *
+ * Function: jarun_icon_zabbixlink_check_access_permission                    *
+ *                                                                            *
+ * Purpose: check the write permission to the host group                      *
+ *                                                                            *
+ * Parameters: inner_jobnet_id (in) - inner jobnet id                         *
+ *             inner_job_id    (in) - inner job id                            *
+ *             group_id        (in) - host group id                           *
+ *                                                                            *
+ * Return value:  SUCCEED - accessible                                        *
+ *                FAIL    - inaccessible or an error occurred                 *
+ *                                                                            *
+ * Comments:                                                                  *
+ *                                                                            *
+ ******************************************************************************/
+int jarun_icon_zabbixlink_check_access_permission(const zbx_uint64_t inner_jobnet_id, const zbx_uint64_t inner_job_id, const char *group_id)
+{
+    DB_RESULT result;
+    DB_ROW row;
+    ja_icon_info_t icon;
+    int res;
+    int permission;
+    char *host_group_name;
+    char *execution_user_name_esc = NULL;
+    const char *__function_name = "jarun_icon_zabbixlink_check_access_permission";
+
+    zabbix_log(LOG_LEVEL_DEBUG, "In %s() host_group_id: %s", __function_name, group_id);
+
+    /* get the execution user name */
+    result = DBselect("select execution_user_name from ja_run_jobnet_table"
+                      " where inner_jobnet_id = " ZBX_FS_UI64,
+                      inner_jobnet_id);
+
+    while (NULL == (row = DBfetch(result))) {
+        ja_log("JARUNICONZABBIXLINK200033", inner_jobnet_id, NULL, inner_job_id, __function_name, inner_jobnet_id);
+        DBfree_result(result);
+        return FAIL;
+    }
+
+    execution_user_name_esc = DBdyn_escape_string(row[0]);
+    DBfree_result(result);
+
+    res = 0;
+
+    /* get access privileges on the host group */
+    result = DBselect("select c.permission from users a, users_groups b, rights c"
+                      " where c.id = %s and b.usrgrpid = c.groupid and a.userid = b.userid and a.alias = '%s'",
+                      group_id, execution_user_name_esc);
+
+    while (NULL != (row = DBfetch(result))) {
+        permission = atoi(row[0]);
+        /* deny ? */
+        if (permission == 0) {
+            res = 0;
+            break;
+        }
+        /* read-write ? */
+        if (permission == 3) {
+            res = 1;
+        }
+    }
+
+    DBfree_result(result);
+    zbx_free(execution_user_name_esc);
+
+    /* inaccessible ? */
+    if (res == 0) {
+        host_group_name = "";
+        result = DBselect("select name from groups where groupid = %s", group_id);
+        if (NULL != (row = DBfetch(result))) {
+            host_group_name = row[0];
+        }
+        ja_get_icon_info(inner_job_id, &icon);
+        ja_log("JARUNICONZABBIXLINK200034", inner_jobnet_id, NULL, inner_job_id, __function_name, inner_job_id,
+               host_group_name, icon.main_jobnet_id, icon.job_id, icon.execution_user_name);
+        DBfree_result(result);
+        return FAIL;
+    }
+
+    return SUCCEED;
+}
+
+/******************************************************************************
+ *                                                                            *
  * Function:                                                                  *
  *                                                                            *
  * Purpose:                                                                   *
@@ -1569,7 +1657,10 @@ int jarun_icon_zabbixlink(const zbx_uint64_t inner_job_id, const int test_flag)
                             func_ret = SUCCEED;
                         }
                         else {
-                            func_ret = jarun_icon_zabbixlink_set_host_group_status(inner_job_id, group_id, link_operation);
+                            func_ret = jarun_icon_zabbixlink_check_access_permission(inner_jobnet_id, inner_job_id, group_id);
+                            if (func_ret == SUCCEED) {
+                                func_ret = jarun_icon_zabbixlink_set_host_group_status(inner_job_id, group_id, link_operation);
+                            }
                         }
                         break;
 
@@ -1587,7 +1678,10 @@ int jarun_icon_zabbixlink(const zbx_uint64_t inner_job_id, const int test_flag)
                             func_ret = SUCCEED;
                         }
                         else {
-                            func_ret = jarun_icon_zabbixlink_set_host_status(inner_job_id, host_id, link_operation, ZBXLINK_HOST_GROUP_FLAG_OFF);
+                            func_ret = jarun_icon_zabbixlink_check_access_permission(inner_jobnet_id, inner_job_id, group_id);
+                            if (func_ret == SUCCEED) {
+                                func_ret = jarun_icon_zabbixlink_set_host_status(inner_job_id, host_id, link_operation, ZBXLINK_HOST_GROUP_FLAG_OFF);
+                            }
                         }
                         break;
 
@@ -1614,7 +1708,10 @@ int jarun_icon_zabbixlink(const zbx_uint64_t inner_job_id, const int test_flag)
                             func_ret = SUCCEED;
                         }
                         else {
-                            func_ret = jarun_icon_zabbixlink_set_item_status(inner_job_id, item_id, link_operation);
+                            func_ret = jarun_icon_zabbixlink_check_access_permission(inner_jobnet_id, inner_job_id, group_id);
+                            if (func_ret == SUCCEED) {
+                                func_ret = jarun_icon_zabbixlink_set_item_status(inner_job_id, item_id, link_operation);
+                            }
                         }
                         break;
 
@@ -1645,7 +1742,10 @@ int jarun_icon_zabbixlink(const zbx_uint64_t inner_job_id, const int test_flag)
                             func_ret = SUCCEED;
                         }
                         else {
-                            func_ret = jarun_icon_zabbixlink_set_trigger_status(inner_job_id, trigger_id, link_operation);
+                            func_ret = jarun_icon_zabbixlink_check_access_permission(inner_jobnet_id, inner_job_id, group_id);
+                            if (func_ret == SUCCEED) {
+                                func_ret = jarun_icon_zabbixlink_set_trigger_status(inner_job_id, trigger_id, link_operation);
+                            }
                         }
                         break;
 
@@ -1676,10 +1776,10 @@ int jarun_icon_zabbixlink(const zbx_uint64_t inner_job_id, const int test_flag)
     DBfree_result(result);
 
     if (func_ret < SUCCEED) {
-        return ja_set_runerr(inner_job_id);
+        return ja_set_runerr(inner_job_id, 2);
     }
 
     /* Set the status to start the next job */
-    return ja_flow(inner_job_id, JA_FLOW_TYPE_NORMAL);
+    return ja_flow(inner_job_id, JA_FLOW_TYPE_NORMAL, 1);
 }
 

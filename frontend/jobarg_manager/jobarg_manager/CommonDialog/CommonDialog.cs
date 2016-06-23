@@ -1,6 +1,7 @@
 ﻿/*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -77,6 +78,15 @@ namespace jp.co.ftf.jobcontroller.JobController
 
         /// <summary>キャンセル確認ダイアログのメッセージ</summary>
         private static String cancelMessage = Properties.Resources.MSG_COMMON_008;
+
+        //added by YAMA 2014/10/17
+        /// <summary>強制実行確認ダイアログのタイトル</summary>
+        private static String ForceRunDialogTitle = Properties.Resources.Title_Msgbox_ForceRun;
+
+        //added by YAMA 2014/10/17
+        /// <summary>強制実行確認ダイアログのメッセージ</summary>
+        private static String ForceRunMessage = Properties.Resources.ForceRun_dialog_text;
+
 
         #endregion
 
@@ -168,6 +178,20 @@ namespace jp.co.ftf.jobcontroller.JobController
                                    System.Windows.MessageBoxButton.YesNo,
                                    System.Windows.MessageBoxImage.None, MessageBoxResult.No);
         }
+
+        //added by YAMA 2014/10/17
+        /// <summary>
+        /// 強制実行確認ダイアログ
+        /// </summary>
+        public static MessageBoxResult ForceRunDialog()
+        {
+            return System.Windows.MessageBox.Show(ForceRunMessage, ForceRunDialogTitle,
+                                   System.Windows.MessageBoxButton.YesNo,
+                                  System.Windows.MessageBoxImage.None, MessageBoxResult.No);
+        }
+
+
+
         #endregion
 
         #region コンストラクタ

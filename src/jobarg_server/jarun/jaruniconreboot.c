@@ -1,6 +1,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -18,17 +19,18 @@
 **/
 
 /*
-** $Date:: 2014-02-20 16:52:27 +0900 #$
-** $Revision: 5809 $
+** $Date:: 2014-10-17 16:00:02 +0900 #$
+** $Revision: 6528 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
-#include <json/json.h>
+#include <json.h>
 #include "common.h"
 #include "log.h"
 #include "db.h"
 
 #include "jacommon.h"
+#include "jalog.h"
 #include "javalue.h"
 #include "jastatus.h"
 #include "jaflow.h"
@@ -84,14 +86,14 @@ int jarun_icon_reboot(const zbx_uint64_t inner_job_id, const int method)
         ja_log("JARUNICONREBOOT200001", 0, NULL, inner_job_id,
                __function_name, inner_job_id);
         DBfree_result(result);
-        return ja_set_runerr(inner_job_id);
+        return ja_set_runerr(inner_job_id, 2);
     }
     DBfree_result(result);
 
     if (ja_host_getname(inner_job_id, host_flag, host_name, host) == FAIL) {
         ja_log("JARUNICONREBOOT200002", 0, NULL, inner_job_id,
                __function_name, host_name, host_flag, inner_job_id);
-        return ja_set_runerr(inner_job_id);
+        return ja_set_runerr(inner_job_id, 2);
     }
 
     if (method == JA_JOB_METHOD_ABORT) {
@@ -108,7 +110,7 @@ int jarun_icon_reboot(const zbx_uint64_t inner_job_id, const int method)
         }
 
         if (ja_host_lock(host, inner_job_id) == FAIL) {
-            return ja_set_runerr(inner_job_id);
+            return ja_set_runerr(inner_job_id, 2);
         }
     }
 
@@ -118,7 +120,7 @@ int jarun_icon_reboot(const zbx_uint64_t inner_job_id, const int method)
                __function_name, inner_job_id);
         if (method != JA_JOB_METHOD_ABORT) {
             ja_host_unlock(host);
-            return ja_set_runerr(inner_job_id);
+            return ja_set_runerr(inner_job_id, 2);
         } else {
             return FAIL;
         }
@@ -133,7 +135,7 @@ int jarun_icon_reboot(const zbx_uint64_t inner_job_id, const int method)
     if (ja_connect(&sock, host, inner_job_id) == FAIL) {
         if (method != JA_JOB_METHOD_ABORT) {
             ja_host_unlock(host);
-            ja_set_runerr(inner_job_id);
+            ja_set_runerr(inner_job_id, 2);
         }
         DBclose();
         exit(1);
@@ -180,7 +182,7 @@ int jarun_icon_reboot(const zbx_uint64_t inner_job_id, const int method)
         DBconnect(ZBX_DB_CONNECT_ONCE);
         if (method != JA_JOB_METHOD_ABORT) {
             ja_host_unlock(job.hostname);
-            ja_set_runerr(inner_job_id);
+            ja_set_runerr(inner_job_id, 2);
         }
         DBclose();
         exit(1);

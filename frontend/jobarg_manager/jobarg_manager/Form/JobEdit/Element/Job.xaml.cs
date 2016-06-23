@@ -1,6 +1,7 @@
 ﻿/*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -23,6 +24,9 @@ using System.Windows.Shapes;
 using System.Windows.Data;
 using jp.co.ftf.jobcontroller.Common;
 using System;
+using System.Data;
+using System.Text;
+using System.Security.Cryptography;
 //*******************************************************************
 //                                                                  *
 //                                                                  *
@@ -286,6 +290,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                 IsTextTrimmed = true;
             }
             TextBlockService.SetIsTextTrimmed(textBlock, IsTextTrimmed);
+
         }
 
         //*******************************************************************
@@ -303,6 +308,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                 IsTextTrimmed = true;
             }
             TextBlockService.SetIsTextTrimmed(textBlock, IsTextTrimmed);
+
         }
 
         #endregion
@@ -332,6 +338,23 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
         private int GetJobNameTrimLimitLength()
         {
             return SystemConst.LEN_JOBNAME_JOB - 3;
+        }
+
+        /// <summary>パスワードの復号化</summary>       
+        private string Decryption(string str)
+        {
+            string key = "199907";
+            string dec = "";
+            int j;
+
+            j = 0;
+            for (int i = 0; i < str.Length; i++)
+            {
+                dec = dec + (char)(str[i] ^ key[j]);
+                j++;
+                if (j == key.Length) j = 0;
+            }
+            return dec;
         }
 
         #endregion
@@ -446,6 +469,215 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
 
                 this._state = IElementState.Selected;
             }
+        }
+
+        /// <summary>ToolTip表示内容設定</summary>/// 
+        public void SetToolTip(){
+            StringBuilder sbHost = new StringBuilder();
+            StringBuilder sbStopCommand = new StringBuilder();
+            StringBuilder sbExec = new StringBuilder();
+            StringBuilder sbJobValue = new StringBuilder();
+            StringBuilder sbJobConValue = new StringBuilder();
+            StringBuilder sbContinue = new StringBuilder();
+            string timeOut = "";
+            string stopCode = "";
+            string forceStr = Properties.Resources.tooltip_flag_off;
+            string continueStr = Properties.Resources.tooltip_flag_off;
+            string user = "";
+            string password = "";
+            StringBuilder sb = new StringBuilder();
+
+            sb.Append(Properties.Resources.job_id_label_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(_jobId);
+            sb.Append("\n");
+            sb.Append(Properties.Resources.job_name_label_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(_jobName);
+
+            DataRow[] rowIconJob;
+            if (InnerJobId == null) {
+                rowIconJob = _container.IconJobTable.Select("job_id='" + _jobId + "'");
+            } else {
+                rowIconJob = _container.IconJobTable.Select("inner_job_id=" + InnerJobId);
+            }
+            if (rowIconJob != null && rowIconJob.Length > 0) {
+                string hostFlag = Convert.ToString(rowIconJob[0]["host_flag"]);
+                string hostName = Convert.ToString(rowIconJob[0]["host_name"]);
+                if ("1".Equals(hostFlag)) {
+                    sbHost.Append("\n");
+                    sbHost.Append("  ");
+                    sbHost.Append(Properties.Resources.value_name_label_text);
+                    if (!LoginSetting.Lang.StartsWith("ja_")) sbHost.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+                    sbHost.Append(hostName);
+                } else {
+                    sbHost.Append("\n");
+                    sbHost.Append("  ");
+                    sbHost.Append(Properties.Resources.host_name_label_text);
+                    if (!LoginSetting.Lang.StartsWith("ja_")) sbHost.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+                    sbHost.Append(hostName);
+                }
+
+                string stopFlag = Convert.ToString(rowIconJob[0]["stop_flag"]);
+                if ("1".Equals(stopFlag)) {
+                    sbStopCommand.Append("\n");
+                    sbStopCommand.Append(Properties.Resources.stop_command_label_text);
+                    // 停止コマンドの取得 
+                    DataRow[] rowCmd;
+                    if (InnerJobId == null) {
+                        rowCmd = _container.JobCommandTable.Select("job_id='" + _jobId + "'" + " and command_cls='2'");
+                    } else {
+                        rowCmd = _container.JobCommandTable.Select("inner_job_id=" + InnerJobId + " and command_cls='2'");
+                    }
+
+                    if (rowCmd != null && rowCmd.Length > 0) {
+                        if (!LoginSetting.Lang.StartsWith("ja_")) sbStopCommand.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+                        sbStopCommand.Append(Convert.ToString(rowCmd[0]["command"]));
+                    }
+                }else{
+                    sbStopCommand.Append("\n");
+                    sbStopCommand.Append(Properties.Resources.stop_command_label_text);
+                    if (!LoginSetting.Lang.StartsWith("ja_")) sbStopCommand.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+                    sbStopCommand.Append(Properties.Resources.tooltip_flag_off);
+                }
+
+                // 実行 
+                // コマンドの取得 
+                DataRow[] rowCommand;
+                if (InnerJobId == null) {
+                    rowCommand = _container.JobCommandTable.Select("job_id='" + _jobId + "'" + " and command_cls='0'");
+                } else {
+                    rowCommand = _container.JobCommandTable.Select("inner_job_id=" + InnerJobId + " and command_cls='0'");
+                }
+                if (rowCommand != null && rowCommand.Length > 0)
+                {
+                    string command = Convert.ToString(rowCommand[0]["command"]);
+                    foreach (string line in command.Split(new Char[] {'\n'})){
+                        sbExec.Append("\n");
+                        sbExec.Append("  ");
+                        sbExec.Append(line);
+                    }
+                }
+
+                DataRow[] rowValue;
+                if (InnerJobId == null) {
+                    rowValue = _container.ValueJobTable.Select("job_id='" + _jobId + "'");
+                } else {
+                    rowValue = _container.ValueJobTable.Select("inner_job_id=" + InnerJobId);
+                }
+                if (rowValue != null && rowValue.Length > 0) {
+                    foreach (DataRow row in rowValue){
+                        sbJobValue.Append("\n");
+                        sbJobValue.Append("  ");
+                        sbJobValue.Append(row["value_name"]);
+                        sbJobValue.Append("=");
+                        sbJobValue.Append(row["value"]);
+                    }
+                }
+                // ジョブコントローラ変数設定テーブルのデータを取得 
+                DataRow[] rowValueJobCon;
+                if (InnerJobId == null) {
+                    rowValueJobCon = _container.ValueJobConTable.Select("job_id='" + _jobId + "'");
+                } else {
+                    rowValueJobCon = _container.ValueJobConTable.Select("inner_job_id=" + InnerJobId);
+                }
+                // ジョブコントローラ変数名 
+                string valueName = "";
+                if (rowValueJobCon != null && rowValueJobCon.Length > 0)
+                {
+                    DataView dvSort = rowValueJobCon.CopyToDataTable().DefaultView;
+                    dvSort.Sort = "value_name ASC";
+                    DataTable dtSort = dvSort.ToTable();
+
+                    foreach (DataRow row in dtSort.Rows){
+                        sbJobConValue.Append("\n");
+                        sbJobConValue.Append("  ");
+                        sbJobConValue.Append(row["value_name"]);
+                    }
+                }
+
+                // タイムアウト警告 
+                timeOut = Convert.ToString(rowIconJob[0]["timeout"]);
+
+                // 強制実行
+                DataRow[] rowJob = _container.JobControlTable.Select("job_id='" + _jobId + "'");
+                string forceFlag = Convert.ToString(rowJob[0]["force_flag"]);
+                if ("1".Equals(forceFlag)) {
+                    forceStr = Properties.Resources.tooltip_flag_on;
+                }
+                string continueFlag = Convert.ToString(rowJob[0]["continue_flag"]);
+                if ("1".Equals(continueFlag))
+                {
+                    continueStr = Properties.Resources.tooltip_flag_on;
+                }
+
+                // ジョブ停止コード 
+                stopCode = Convert.ToString(rowIconJob[0]["stop_code"]);
+
+                // 実行ユーザー
+                user = Convert.ToString(rowJob[0]["run_user"]);
+                // 実行ユーザーのパスワード
+                if ((Convert.ToString(rowJob[0]["run_user_password"]).Equals(""))) {
+                    password = Convert.ToString(rowJob[0]["run_user_password"]);
+                } else {
+                    password = Decryption(Convert.ToString(rowJob[0]["run_user_password"]));
+                }
+
+            }
+
+            sb.Append("\n");
+            sb.Append(Properties.Resources.host_label_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(sbHost.ToString());
+
+            sb.Append(sbStopCommand.ToString());
+
+            sb.Append("\n");
+            //added by YAMA 2014/12/04
+            sb.Append(Properties.Resources.exec_label_textToolTip);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            
+            sb.Append(sbExec.ToString());
+            sb.Append("\n");
+            sb.Append(Properties.Resources.job_value_label_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(sbJobValue.ToString());
+            sb.Append("\n");
+            sb.Append(Properties.Resources.jobcon_value_label_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(sbJobConValue.ToString());
+            sb.Append("\n");
+            sb.Append(Properties.Resources.timeout_label_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(timeOut);
+            sb.Append("\n");
+            sb.Append(Properties.Resources.tooltip_force_label_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(forceStr);
+            sb.Append("\n");
+            sb.Append(Properties.Resources.tooltip_continue_label_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(continueStr);
+            sb.Append("\n");
+            sb.Append(Properties.Resources.stop_code_label_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(stopCode);
+            sb.Append("\n");
+            sb.Append(Properties.Resources.run_user_label_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(user);
+            sb.Append("\n");
+            sb.Append(Properties.Resources.run_user_password_label_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(password);
+
+            picToolTip.ToolTip = sb.ToString();
+        }
+
+        /// <summary>ToolTip表示内容リセット</summary>///
+        public void ResetToolTip(string toolTip)
+        {
+            picToolTip.ToolTip = toolTip;
         }
 
         #endregion

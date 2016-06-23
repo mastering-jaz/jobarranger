@@ -1,6 +1,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -18,9 +19,9 @@
 **/
 
 /*
-** $Date:: 2013-04-22 16:38:33 +0900 #$
-** $Revision: 4446 $
-** $Author: ossinfra@FITECHLABS.CO.JP $
+** $Date:: 2014-10-17 16:00:02 +0900 #$
+** $Revision: 6528 $
+** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
 #ifndef JOBARG_JAAGENT_H
@@ -38,6 +39,8 @@ extern int CONFIG_SERVER_PORT;
 extern int CONFIG_TIMEOUT;
 extern char *CONFIG_REBOOT_FLAG;
 extern char *CONFIG_REBOOT_FILE;
+extern char *CONFIG_JA_COMMAND_USER;
+extern char *CONFIG_JA_COMMAND_PASSWORD;
 
 int ja_agent_setenv(ja_job_object * job, char *env_string);
 int ja_agent_kill(ja_job_object * job);

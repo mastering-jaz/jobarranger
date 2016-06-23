@@ -1,6 +1,7 @@
 ﻿/*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -101,6 +102,11 @@ namespace jp.co.ftf.jobcontroller.DAO
                 try
                 {
                     tran.Rollback();
+
+                }
+                catch (InvalidOperationException ex)
+                {
+                    // DO nothing here
                 }
                 catch (Exception ex)
                 {
@@ -364,6 +370,31 @@ namespace jp.co.ftf.jobcontroller.DAO
                 throw new DBException(Consts.SYSERR_001, ex);
             }
         }
+
+        /* added by YAMA 2014/12/09    V2.1.0 No23 対応 */
+        /// <summary>ヘルスチェック処理</summary>
+        public DBException exExecuteHealthCheck()
+        {
+            DataTable dt = new DataTable();
+            try
+            {
+                using (OdbcDataAdapter sqlDataAdapter = new OdbcDataAdapter())
+                {
+                    _sqlCommand.CommandText = ConnectConfirmSql;
+                    _sqlCommand.Transaction = tran;
+                    sqlDataAdapter.SelectCommand = _sqlCommand;
+                    sqlDataAdapter.Fill(dt);
+                }
+                return new DBException("", null);
+                //return null;
+            }
+            catch (Exception ex)
+            {
+                this.CloseSqlConnect();
+                return new DBException(Consts.SYSERR_001, ex);
+            }
+        }
+
 
         /// <summary>データの検索処理</summary>
         /// <param name="strSql">SQL文</param>

@@ -1,6 +1,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -18,8 +19,8 @@
 **/
 
 /*
-** $Date:: 2013-12-16 16:39:52 +0900 #$
-** $Revision: 5627 $
+** $Date:: 2014-10-17 16:00:02 +0900 #$
+** $Revision: 6528 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -28,6 +29,7 @@
 #include "db.h"
 
 #include "jacommon.h"
+#include "jalog.h"
 #include "jastatus.h"
 #include "jaflow.h"
 #include "javalue.h"
@@ -51,7 +53,7 @@ int jarun_icon_value(const zbx_uint64_t inner_job_id)
     DB_ROW row;
     int db_ret;
     char *after_value_esc;
-    char after_value[4000+1];
+    char after_value[JA_STD_OUT_LEN];
     const char *__function_name = "jarun_icon_value";
 
     zabbix_log(LOG_LEVEL_DEBUG, "In %s() inner_job_id: " ZBX_FS_UI64,
@@ -67,7 +69,7 @@ int jarun_icon_value(const zbx_uint64_t inner_job_id)
             ja_log("JARUNICONVALUE200002", 0, NULL, inner_job_id,
                    __function_name, row[3], inner_job_id);
             DBfree_result(result);
-            return ja_set_runerr(inner_job_id);
+            return ja_set_runerr(inner_job_id, 2);
         }
 
         after_value_esc = DBdyn_escape_string(after_value);
@@ -80,11 +82,11 @@ int jarun_icon_value(const zbx_uint64_t inner_job_id)
                    __function_name, "ja_run_value_after_table", row[2], inner_job_id);
             zbx_free(after_value_esc);
             DBfree_result(result);
-            return ja_set_runerr(inner_job_id);
+            return ja_set_runerr(inner_job_id, 2);
         }
         zbx_free(after_value_esc);
     }
     DBfree_result(result);
 
-    return ja_flow(inner_job_id, JA_FLOW_TYPE_NORMAL);
+    return ja_flow(inner_job_id, JA_FLOW_TYPE_NORMAL, 1);
 }

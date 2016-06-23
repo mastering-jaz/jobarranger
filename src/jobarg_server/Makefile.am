@@ -7,6 +7,7 @@ SUBDIRS = \
 	jarun \
 	jajob \
 	jatrapper \
+	jamsgsnd \
 	jaselfmon
 
 sbin_PROGRAMS = jobarg_server
@@ -23,6 +24,7 @@ jobarg_server_LDADD = \
 	jajob/libjajob.a \
 	jatrapper/libjatrapper.a \
 	jaselfmon/libjaselfmon.a \
+	jamsgsnd/libjamsgsnd.a \
 	$(top_srcdir)/src/jalibs/libjacommon.a \
 	$(top_srcdir)/src/jalibs/libjaserver.a \
 	$(top_srcdir)/src/libs/zbxdbhigh/libzbxdbhigh.a \

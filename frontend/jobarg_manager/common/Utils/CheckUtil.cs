@@ -1,6 +1,7 @@
 ﻿/*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -74,6 +75,36 @@ namespace jp.co.ftf.jobcontroller.Common
         /// <summary>半角数字とコロン</summary>
         private const string MATCH_HANKAKU_COLON = "^[0-9\\:]*$";
 
+        //added by YAMA 2014/08/15
+        /// <summary>実行ユーザー禁止文字 「" / \ [ ] : ; | = , + * ?< >」</summary>
+        private const string PROHIBITED_CHARACTER_USER_NAME = "[\"/\\\\[\\];:|<>+=,?*]";
+
+        //added by YAMA 2014/08/15
+        /// <summary>実行ユーザーのパスワード禁止文字 「" / \ [ ] : ; | = , + * ?< >」</summary>
+        private const string PROHIBITED_CHARACTER_USER_PW = "[\"/\\\\[\\];:|<>+=,?*]";
+
+        //added by YAMA 2014/08/15
+        static Encoding sjisEnc = Encoding.GetEncoding("Shift_JIS");
+
+        //added by YAMA 2014/08/18
+        /// <summary>半角英数字と半角空白、アンダーバー、ハイフン、ピリオド</summary>
+        private const string MATCH_HANKAKU_SPACE_UNDERBAR_HYPHEN_PERIOD = "^[0-9a-zA-Z _\\-\\.]*$";
+
+        //added by YAMA 2014/08/18
+        /// <summary>半角英数字とアンダーバー、ハイフン、ピリオド</summary>
+        private const string MATCH_HANKAKU_UNDERBAR_HYPHEN_PERIOD = "^[0-9a-zA-Z_\\-\\.]*$";
+
+        //added by YAMA 2014/09/30
+        /// <summary>半角英数字とドル記号、アンダーバー</summary>
+        private const string MATCH_HANKAKU_DOLLAR_UNDERBAR = "^[0-9a-zA-Z$_]*$";
+
+        //added by YAMA 2014/09/30
+        /// <summary>半角英字</summary>
+        private const string MATCH_HANKAKU_LETTER = "^[a-zA-Z]*$";
+
+        //added by YAMA 2014/09/30
+        /// <summary>半角英字とアンダーバー</summary>
+        private const string MATCH_HANKAKU_LETTER_UNDERBAR = "^[a-zA-Z_]*$";
 
         #endregion
 
@@ -420,6 +451,125 @@ namespace jp.co.ftf.jobcontroller.Common
             return false;
         }
 
+        //added by YAMA 2014/08/15
+        /// <summary>実行ユーザーの禁止文字 「" / \ [ ] : ; | = , + * ?< >」チェック処理</summary>
+        /// <param name="str">チェックする文字列</param>
+        /// <return>「True：禁止文字」「False：それ以外」</return>
+        public static bool IsProhibitedCharacterUserName(string str)
+        {
+            if (str == null || str.Length == 0
+                || Regex.IsMatch(str, PROHIBITED_CHARACTER_USER_NAME) == false)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        //added by YAMA 2014/08/15
+        /// <summary>実行ユーザーパスワードの禁止文字 「" / \ [ ] : ; | = , + * ?< >」チェック処理</summary>
+        /// <param name="str">チェックする文字列</param>
+        /// <return>「True：禁止文字」「False：それ以外」</return>
+        public static bool IsProhibitedCharacterUserPW(string str)
+        {
+            if (str == null || str.Length == 0
+                || Regex.IsMatch(str, PROHIBITED_CHARACTER_USER_PW) == false)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        //added by YAMA 2014/08/15
+        /// <summary> 半角文字のみかを判定 </summary>
+        /// <param name="str">チェックする文字列</param>
+        /// <return>「True：半角文字のみ」「False：それ以外」</return>
+        public static bool isHankaku(string str)
+        {
+            int num = sjisEnc.GetByteCount(str);
+            return num == str.Length;
+        }
+
+        //added by YAMA 2014/08/18
+        /// <summary>半角英数字と半角空白、アンダーバー、ピリオドチェック処理</summary>
+        /// <param name="str">チェックする文字列</param>
+        /// <return>「True：半角英数字と半角空白、アンダーバー、ピリオド、ハイフン」「False：それ以外」</return>
+        public static bool IsHankakuStrAndSpaceAndUnderbarAndHyphenAndPeriod(string str)
+        {
+            if (str == null || str.Length == 0
+                || Regex.IsMatch(str, MATCH_HANKAKU_SPACE_UNDERBAR_HYPHEN_PERIOD))
+            {
+                return true;
+            }
+            return false;
+        }
+
+
+        //added by YAMA 2014/08/18
+        /// <summary>半角英数字とアンダーバー、ハイフン、ピリオドチェック処理</summary>
+        /// <param name="str">チェックする文字列</param>
+        /// <return>「True：半角英数字とアンダーバー、ハイフン、ピリオド」「False：それ以外」</return>
+        public static bool IsHankakuStrAndUnderbarAndHyphenAndPeriod(string str)
+        {
+            if (str == null || str.Length == 0
+                || Regex.IsMatch(str, MATCH_HANKAKU_UNDERBAR_HYPHEN_PERIOD))
+            {
+                return true;
+            }
+            return false;
+        }
+
+
+        //added by YAMA 2014/09/30
+        /// <summary>半角英数字とドル記号、アンダーバーチェック処理</summary>
+        /// <param name="str">チェックする文字列</param>
+        /// <return>「True：半角英数字、ドル記号、アンダーバー」「False：それ以外」</return>
+        public static bool IsHankakuStrAndDollarAndUnderbar(string str) {
+            if (str == null || str.Length == 0
+                || Regex.IsMatch(str, MATCH_HANKAKU_DOLLAR_UNDERBAR))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        //added by YAMA 2014/09/30
+        /// <summary>半角英数字とアンダーバーチェック処理</summary>
+        /// <param name="str">チェックする文字列</param>
+        /// <return>「True：半角英数字、アンダーバー」「False：それ以外」</return>
+        public static bool IsHankakuStrAndUnderbar(string str) {
+            if (str == null || str.Length == 0
+                || Regex.IsMatch(str, MATCH_HANKAKU_UNDERBAR))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        //added by YAMA 2014/09/30
+        /// <summary>半角英字処理</summary>
+        /// <param name="str">チェックする文字列</param>
+        /// <return>「True：半角英字」「False：それ以外」</return>
+        public static bool IsHankakuLerrer(string str) {
+            if (str == null || str.Length == 0
+                || Regex.IsMatch(str, MATCH_HANKAKU_LETTER))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        //added by YAMA 2014/09/30
+        /// <summary>半角英字とアンダーバーチェック処理</summary>
+        /// <param name="str">チェックする文字列</param>
+        /// <return>「True：半角英字、アンダーバー」「False：それ以外」</return>
+        public static bool IsHankakuLerrerAndUnderbar(string str) {
+            if (str == null || str.Length == 0
+                || Regex.IsMatch(str, MATCH_HANKAKU_LETTER_UNDERBAR))
+            {
+                return true;
+            }
+            return false;
+        }
 
         #endregion
     }

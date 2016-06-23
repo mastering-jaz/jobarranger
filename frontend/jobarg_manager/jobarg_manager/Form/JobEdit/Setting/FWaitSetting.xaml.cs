@@ -1,6 +1,7 @@
 ﻿/*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -48,9 +49,13 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             "inner join hosts_groups on rights.id = hosts_groups.groupid inner join hosts on " +
             "hosts_groups.hostid = hosts.hostid " +
             "where users.alias = ? and rights.permission <> '0' and (hosts.status=0 or hosts.status=1) " +
-            "order by hosts.hostid ASC";
+            //added by YAMA 2014/08/08    （ホスト名でソート）
+            //"order by hosts.hostid ASC";
+            "order by hosts.host ASC";
 
-        private string _selectForHostSqlSuper = "select hostid, host from hosts where status=0 or status=1 order by hostid ASC";
+        //added by YAMA 2014/08/08    （ホスト名でソート）
+        //private string _selectForHostSqlSuper = "select hostid, host from hosts where status=0 or status=1 order by hostid ASC";
+        private string _selectForHostSqlSuper = "select hostid, host from hosts where status=0 or status=1 order by host ASC";
 
         #endregion
 

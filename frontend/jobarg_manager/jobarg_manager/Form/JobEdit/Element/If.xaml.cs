@@ -1,6 +1,7 @@
 ﻿/*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -16,6 +17,9 @@
 ** along with this program; if not, write to the Free Software
 ** Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 **/
+using System;
+using System.Data;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -419,6 +423,63 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
 
                 this._state = IElementState.Selected;
             }
+        }
+
+        /// <summary>ToolTip表示内容設定</summary>/// 
+        public void SetToolTip(){
+            string valueName = "";
+            string handFlag = "";
+            string comparisonValue = "";
+            StringBuilder sb = new StringBuilder();
+            sb.Append(Properties.Resources.job_id_label_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(_jobId);
+            sb.Append("\n");
+            sb.Append(Properties.Resources.job_name_label_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(_jobName);
+            sb.Append("\n");
+
+            // 条件分岐アイコン設定テーブルのデータを取得 
+            DataRow[] rowIf;
+            if (InnerJobId == null) {
+                rowIf = _container.IconIfTable.Select("job_id='" + _jobId + "'");
+            } else {
+                rowIf = _container.IconIfTable.Select("inner_job_id=" + InnerJobId);
+            }
+            if (rowIf != null && rowIf.Length > 0) {
+                valueName = Convert.ToString(rowIf[0]["value_name"]);
+                if (!Convert.IsDBNull(rowIf[0]["hand_flag"])) {
+                    handFlag = Convert.ToString(rowIf[0]["hand_flag"]);
+                    if (handFlag == "0") {
+                        handFlag = Properties.Resources.numerical_value_text;
+                    } else if(handFlag == "1"){
+                        handFlag = Properties.Resources.character_string_text;
+                    } else {
+                        handFlag = "";
+                    }
+                }
+                comparisonValue = Convert.ToString(rowIf[0]["comparison_value"]);
+            }
+
+            sb.Append(Properties.Resources.value_name_label_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(valueName);
+            sb.Append("\n");
+            sb.Append(Properties.Resources.process_method_label_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(handFlag);
+            sb.Append("\n");
+            sb.Append(Properties.Resources.compare_value_label_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(comparisonValue);
+            picToolTip.ToolTip = sb.ToString();
+        }
+
+        /// <summary>ToolTip表示内容リセット</summary>///
+        public void ResetToolTip(string toolTip)
+        {
+            picToolTip.ToolTip = toolTip;
         }
 
         #endregion

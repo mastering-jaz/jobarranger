@@ -2,6 +2,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -37,11 +38,12 @@
                   ItemsSource="{Binding JobnetExecList}" Grid.Row="1" SelectionMode="Single" SelectionChanged="ListView_SelectionChanged" KeyboardNavigation.TabNavigation="Once">
             <ListView.ItemContainerStyle>
                 <Style TargetType="{x:Type ListViewItem}">
+                    <EventSetter Event="MouseDoubleClick" Handler="list_MouseDoubleClick" />
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
                     <Style.Resources>
                         <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}" Color="{x:Static SystemColors.HighlightColor}"/>
                         <SolidColorBrush x:Key="{x:Static SystemColors.ControlTextBrushKey}" Color="{x:Static SystemColors.HighlightTextColor}"/>
                     </Style.Resources>
-                    <EventSetter Event="MouseDoubleClick" Handler="list_MouseDoubleClick" />
                 </Style>
             </ListView.ItemContainerStyle>
             <ListView.ContextMenu>
@@ -52,6 +54,16 @@
                         CommandTarget="{Binding Path=PlacementTarget,RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItems}" />
                     <MenuItem Name="DelayedContextMenu" Header="{x:Static src:Properties.Resources.delayedStart_context_menu_text}"  Command="{x:Static src:JobArrangerCommands.AllDelayed}" 
                         CommandTarget="{Binding Path=PlacementTarget,RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItems}" />
+                    <!--  added by YAMA 2014/10/14    実行予定リスト起動時刻変更  -->
+                    <!--  
+                    <MenuItem Name="updtContextMenu" Header="{x:Static src:Properties.Resources.updt_context_menu_text}" Command="{x:Static src:JobArrangerCommands.Updt}" 
+                        CommandTarget="{Binding Path=PlacementTarget,RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItems}" />
+                     -->
+                    <MenuItem Name="updtContextMenu" Header="{x:Static src:Properties.Resources.updt_context_menu_text}"  Click="ContextUpdateSchedule_Click" />
+                    <MenuItem Name="reserveContextMenu" Header="{x:Static src:Properties.Resources.reserve_context_menu_text}" Command="{x:Static src:JobArrangerCommands.Reserve}" 
+                        CommandTarget="{Binding Path=PlacementTarget,RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItems}" />
+                    <MenuItem Name="releaseContextMenu" Header="{x:Static src:Properties.Resources.release_context_menu_text}" Command="{x:Static src:JobArrangerCommands.Release}" 
+                        CommandTarget="{Binding Path=PlacementTarget,RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItems}" />
                 </ContextMenu>
             </ListView.ContextMenu>
             <ListView.View>
@@ -61,22 +73,26 @@
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <Grid>
-                                    <TextBlock Text="{Binding inner_jobnet_id}" TextAlignment="Center"/>
+                                    <TextBlock Text="{Binding inner_jobnet_id}" TextAlignment="Left"/>
                                 </Grid>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Width="235">
+                    <!--  added by YAMA 2014/09/22 実行中ジョブID表示 -->
+                    <!--  GridViewColumn Width="235" -->
+                    <GridViewColumn Width="161">
                         <GridViewColumnHeader Content="{x:Static src:Properties.Resources.jobnet_id_col_head_text}" />
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <Grid>
-                                    <TextBlock Text="{Binding jobnet_id}" TextAlignment="Center"/>
+                                    <TextBlock Text="{Binding jobnet_id}" TextAlignment="Left"/>
                                 </Grid>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Width="70">
+                    <!--  added by YAMA 2014/09/22 実行中ジョブID表示 -->
+                    <!--  GridViewColumn Width="70" -->
+                    <GridViewColumn Width="55">
                         <GridViewColumnHeader Content="{x:Static src:Properties.Resources.status_col_head_text}"/>
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
@@ -84,17 +100,40 @@
                                     <!-- added by YAMA 2014/07/01
                                     <TextBlock Text="{Binding display_status}" TextAlignment="Center" Background="{Binding status_color}" />
                                     -->
-                                    <TextBlock Text="{Binding display_status}" TextAlignment="Center" Background="{Binding status_color}" Foreground="{Binding Foreground_color}"/>
+                                    <TextBlock Text="{Binding display_status}" TextAlignment="Left" Background="{Binding status_color}" Foreground="{Binding Foreground_color}"/>
                                     </Grid>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Width="290">
+                    <!--  added by YAMA 2014/09/22 実行中ジョブID表示 -->
+                    <!--  GridViewColumn Width="290" -->
+                    <GridViewColumn Width="188">
                         <GridViewColumnHeader Content="{x:Static src:Properties.Resources.jobnet_name_col_head_text}"/>
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <Grid>
-                                    <TextBlock Text="{Binding jobnet_name}" TextAlignment="Center" />
+                                    <TextBlock Text="{Binding jobnet_name}" TextAlignment="Left" />
+                                </Grid>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <!--  added by YAMA 2014/09/22 実行中ジョブID表示 ジョブID  ジョブ名 -->
+                    <GridViewColumn Width="120">
+                        <GridViewColumnHeader Content="{x:Static src:Properties.Resources.running_job_name_id_col_head_text}"/>
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <TextBlock Text="{Binding running_job_id}" TextAlignment="Left" />
+                                </Grid>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Width="120">
+                        <GridViewColumnHeader Content="{x:Static src:Properties.Resources.running_job_name_col_head_text}"/>
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <TextBlock Text="{Binding running_job_name}" TextAlignment="Left" />
                                 </Grid>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
@@ -104,7 +143,7 @@
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <Grid>
-                                    <TextBlock Text="{Binding scheduled_time}" TextAlignment="Center" />
+                                    <TextBlock Text="{Binding scheduled_time}" TextAlignment="Left" />
                                 </Grid>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
@@ -114,7 +153,7 @@
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <Grid>
-                                    <TextBlock Text="{Binding start_time}" TextAlignment="Center" />
+                                    <TextBlock Text="{Binding start_time}" TextAlignment="Left" />
                                 </Grid>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
@@ -124,7 +163,7 @@
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <Grid>
-                                    <TextBlock Text="{Binding end_time}" TextAlignment="Center" />
+                                    <TextBlock Text="{Binding end_time}" TextAlignment="Left" />
                                 </Grid>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>

@@ -1,6 +1,7 @@
 ﻿/*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -48,19 +49,25 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
         // ホストデータ取得 特権管理者用 ZabbixVer1.8
         private string _selectForHostSqlSuperZabbixVer1_8 = "select groups.groupid, groups.name as group_name, hosts.hostid, hosts.host, '3' as permission " +
             "from groups inner join hosts_groups on groups.groupid = hosts_groups.groupid inner join hosts " +
-            "on hosts_groups.hostid = hosts.hostid where (hosts.status=0 or hosts.status=1) and groups.groupid = ? order by hostid ASC ";
+            //added by YAMA 2014/08/08    （ホスト名でソート）
+            //"on hosts_groups.hostid = hosts.hostid where (hosts.status=0 or hosts.status=1) and groups.groupid = ? order by hostid ASC ";
+            "on hosts_groups.hostid = hosts.hostid where (hosts.status=0 or hosts.status=1) and groups.groupid = ? order by host ASC ";
 
         // ホストデータ取得 特権管理者用 ZabbixVer2.0
         private string _selectForHostSqlSuperZabbixVer2_0 = "select groups.groupid, groups.name as group_name, hosts.hostid, hosts.host, '3' as permission " +
             "from groups inner join hosts_groups on groups.groupid = hosts_groups.groupid " +
             "inner join hosts  on hosts_groups.hostid = hosts.hostid " +
-            "where (hosts.status=0 or hosts.status=1) and groups.groupid = ? order by hostid ASC ";
+            //added by YAMA 2014/08/08    （ホスト名でソート）
+            //"where (hosts.status=0 or hosts.status=1) and groups.groupid = ? order by hostid ASC ";
+            "where (hosts.status=0 or hosts.status=1) and groups.groupid = ? order by host ASC ";
         
         // ホストデータ取得 特権管理者用 ZabbixVer2.2
         private string _selectForHostSqlSuperZabbixVer2_2 = "select groups.groupid, groups.name as group_name, hosts.hostid, hosts.host, '3' as permission " +
             "from groups inner join hosts_groups on groups.groupid = hosts_groups.groupid inner join hosts " +
             "on hosts_groups.hostid = hosts.hostid where (hosts.status=0 or hosts.status=1) and " +
-            "(hosts.flags=0 or hosts.flags=4) and groups.groupid = ? order by hostid ASC";
+            //added by YAMA 2014/08/08    （ホスト名でソート）
+            //"(hosts.flags=0 or hosts.flags=4) and groups.groupid = ? order by hostid ASC";
+            "(hosts.flags=0 or hosts.flags=4) and groups.groupid = ? order by host ASC";
 
         // アイテムデータ取得 ZabbixVer1.8
         private string _selectForItemSqlZabbixVer1_8 = "select hosts.hostid, hosts.host, items.itemid, items.description as item_name, " +
@@ -100,6 +107,26 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             "and (hosts.flags=0 or hosts.flags=4) and items.type <> 9 and (items.flags=0 or items.flags=4) and (triggers.flags=0 or triggers.flags=4) " +
             "order by hosts.hostid, items.itemid, triggers.triggerid ";
 
+        //added by YAMA 2014/07/25
+        // トリガーデータ（条件式表示用）取得 ZabbixVer1.8
+        private string _selectForTriggerExpressionSqlZabbixVer1_8 = "select hosts.host,items.key_,functions.function,functions.parameter " +
+            "from functions " +
+            "inner join items on functions.itemid = items.itemid inner join hosts on items.hostid= hosts.hostid " +
+            "where functions.functionid = ? and (hosts.status=0 or hosts.status=1) and items.type <> 9 ";
+
+        // トリガーデータ（条件式表示用）取得 ZabbixVer2.0
+        private string _selectForTriggerExpressionSqlZabbixVer2_0 = "select hosts.host,items.key_,functions.function,functions.parameter " +
+            "from functions " +
+            "inner join items on functions.itemid = items.itemid inner join hosts on items.hostid= hosts.hostid " +
+            "where functions.functionid = ? " +
+            "and (hosts.status=0 or hosts.status=1) and items.type <> 9 and (items.flags=0 or items.flags=4) ";
+
+        // トリガーデータ（条件式表示用）取得 ZabbixVer2.2
+        private string _selectForTriggerExpressionSqlZabbixVer2_2 = "select hosts.host,items.key_,functions.function,functions.parameter " +
+            "from functions " +
+            "inner join items on functions.itemid = items.itemid inner join hosts on items.hostid= hosts.hostid " +
+            "where functions.functionid = ? " +
+            "and (hosts.status=0 or hosts.status=1) and (hosts.flags=0 or hosts.flags=4) and items.type <> 9 and (items.flags=0 or items.flags=4) ";
 
         // 一般ユーザー用SQL
 
@@ -119,7 +146,9 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             "hosts_groups.hostid, hosts.host, rights.permission from users inner join users_groups on users.userid = users_groups.userid " +
             "inner join rights on users_groups.usrgrpid = rights.groupid inner join groups on rights.id = groups.groupid " +
             "inner join hosts_groups on groups.groupid = hosts_groups.groupid inner join hosts on hosts_groups.hostid = hosts.hostid " +
-            "where users.alias = ? and rights.permission >= 0 and (hosts.status=0 or hosts.status=1) and groups.groupid = ? order by hosts_groups.groupid, hosts.hostid ";
+            //added by YAMA 2014/08/08    （ホスト名でソート）
+            //"where users.alias = ? and rights.permission >= 0 and (hosts.status=0 or hosts.status=1) and groups.groupid = ? order by hosts_groups.groupid, hosts.hostid ";
+            "where users.alias = ? and rights.permission >= 0 and (hosts.status=0 or hosts.status=1) and groups.groupid = ? order by hosts_groups.groupid, hosts.host ";
 
 
         // ホストデータ取得 一般ユーザー用 ZabbixVer2.0
@@ -127,7 +156,9 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
         "hosts_groups.hostid, hosts.host, rights.permission from users inner join users_groups on users.userid = users_groups.userid " +
         "inner join rights on users_groups.usrgrpid = rights.groupid inner join groups on rights.id = groups.groupid " +
         "inner join hosts_groups on groups.groupid = hosts_groups.groupid inner join hosts on hosts_groups.hostid = hosts.hostid " +
-        "where users.alias = ? and rights.permission >= 0 and (hosts.status=0 or hosts.status=1) and groups.groupid = ? order by hosts_groups.groupid, hosts.hostid ";
+            //added by YAMA 2014/08/08    （ホスト名でソート）
+        //"where users.alias = ? and rights.permission >= 0 and (hosts.status=0 or hosts.status=1) and groups.groupid = ? order by hosts_groups.groupid, hosts.hostid ";
+        "where users.alias = ? and rights.permission >= 0 and (hosts.status=0 or hosts.status=1) and groups.groupid = ? order by hosts_groups.groupid, hosts.host ";
 
 
         // ホストデータ取得 一般ユーザー用 ZabbixVer2.2
@@ -136,7 +167,9 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             "inner join rights on users_groups.usrgrpid = rights.groupid inner join groups on rights.id = groups.groupid " +
             "inner join hosts_groups on groups.groupid = hosts_groups.groupid inner join hosts on hosts_groups.hostid = hosts.hostid " +
             "where users.alias = ? and rights.permission >= 0 and (hosts.status=0 or hosts.status=1) and (hosts.flags=0 or hosts.flags=4) and groups.groupid = ? " +
-            "order by hosts_groups.groupid, hosts.hostid ";
+            //added by YAMA 2014/08/08    （ホスト名でソート）
+            //"order by hosts_groups.groupid, hosts.hostid ";
+            "order by hosts_groups.groupid, hosts.host ";
 
 
 
@@ -154,6 +187,12 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
         DataTable dtItemData;
         // ホストのトリガーデータを格納
         DataTable dtTriggerData;
+
+        //added by YAMA 2014/07/25
+        // ホストのトリガーデータ（条件式表示用）を格納
+        DataTable dtTriggerDataExpression;
+        // ホストのトリガーデータの条件式を格納
+        DataTable dtTriggerExpression = new DataTable();
 
         // ホストグループのアクセス権限情報を格納
         Dictionary<string, string> hostGroupPermissionInfo = new Dictionary<string, string>();
@@ -666,6 +705,8 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             dtHostData2.Columns.Add("hostid", Type.GetType("System.String"));
             dtHostData2.Columns.Add("host", Type.GetType("System.String"));
             dtHostData2.Columns.Add("permission", Type.GetType("System.String"));
+            //added by YAMA 2014/07/25
+            dtTriggerExpression.Columns.Add("expression", Type.GetType("System.String"));
 
 
             // ホストグループデータ取得
@@ -874,7 +915,16 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                 {
                     // 有効化
                     case 0:
-                        rbEnabled.IsChecked = true;
+                        //added by YAMA 2014/07/25  (新規作成時は『"有効"にチェック』を外す)
+                        //rbEnabled.IsChecked = true;
+                        if (selectedHostGrpID != "")
+                        {   // 新規作成でない
+                            rbEnabled.IsChecked = true; 
+                        }
+                        else
+                        {   // 新規作成
+                            rbEnabled.IsChecked = false;
+                        }
                         break;
                     // 無効化
                     case 1:
@@ -1056,11 +1106,28 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             {
                 if (rbMode[idx].IsChecked == true && rbMode[idx].IsEnabled == false)
                 {
-                    CommonDialog.ShowErrorDialog(Consts.ERROR_ZABBIX_LINK_003);
+                    CommonDialog.ShowErrorDialog(Consts.ERROR_ZABBIX_LINK_004);
                     return false;
                 }
             }
 
+            //added by YAMA 2014/07/25
+            // 連携動作のチェックボックスが選択されているか否かの確認
+            int num = 0;
+            idx = 0;
+            for (idx = 0; idx < rbMode.Length; idx++)
+            {
+                if (rbMode[idx].IsChecked == true)
+                {
+                    num++;
+                    break;
+                }
+            }
+            if (num == 0)
+            {
+                    CommonDialog.ShowErrorDialog(Consts.ERROR_ZABBIX_LINK_004);
+                    return false;
+            }
 
             return true;
         }
@@ -1374,19 +1441,110 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                 case 1:
                     dtItemData = dbAccess.ExecuteQuery(_selectForItemSqlZabbixVer1_8, sqlParams);
                     dtTriggerData = dbAccess.ExecuteQuery(_selectForTriggerSqlZabbixVer1_8, sqlParams);
+                    //added by YAMA 2014/07/25  [条件式の置き換え]
+                    setConditionalExpression(LoginSetting.JaZabbixVersion, dbAccess);
                     break;
                 // Ver2.0
                 case 2:
                     dtItemData = dbAccess.ExecuteQuery(_selectForItemSqlZabbixVer2_0, sqlParams);
                     dtTriggerData = dbAccess.ExecuteQuery(_selectForTriggerSqlZabbixVer2_0, sqlParams);
+                    //added by YAMA 2014/07/25  [条件式の置き換え]
+                    setConditionalExpression(LoginSetting.JaZabbixVersion, dbAccess);
                     break;
 
                 // Ver2.2
                 case 3:
                     dtItemData = dbAccess.ExecuteQuery(_selectForItemSqlZabbixVer2_2, sqlParams);
                     dtTriggerData = dbAccess.ExecuteQuery(_selectForTriggerSqlZabbixVer2_2, sqlParams);
+                    //added by YAMA 2014/07/25  [条件式の置き換え]
+                    setConditionalExpression(LoginSetting.JaZabbixVersion, dbAccess);
                     break;
             }
+        }
+
+
+        //added by YAMA 2014/07/25
+        private void setConditionalExpression(int zabbixVersion, DBConnect dbAccess)
+        {
+            String strExpression = "";                              // 'expression'を格納
+            String strWk_Expression = "";                           // 'expression'を格納(work)
+            String strFunctionid = "";                              // 'functionid'を格納(work)
+            String strWk_Functionid = "";                           // 'functionid'を格納
+            int foundIndex = 0;                                     // 区切り記号"{"の位置
+            String strHost = "";                                    // ホスト名
+            String strKey = "";                                     // キー
+            String strFunction = "";                                // function
+            String strParameter = "";                               // parameter
+            String strConditionalExpression = "";                   // 条件式
+
+
+            dtTriggerExpression.Clear();
+
+            for (int i = 0; i < dtTriggerData.Rows.Count; i++)
+            {
+                // 'expression'を取得
+                strExpression = dtTriggerData.Rows[i]["expression"].ToString();
+                strWk_Expression = strExpression;
+
+                // 'expression'内の'functionid'を取得
+                foundIndex = strWk_Expression.IndexOf("{");        // 最初の"{"の位置
+                while (0 <= foundIndex)
+                {
+                    // '{ }'を含めた値を取得
+                    strFunctionid = strWk_Expression.Substring(foundIndex, strWk_Expression.IndexOf("}") - foundIndex + 1);
+                    strWk_Functionid = strFunctionid;
+                    if (char.IsNumber(strFunctionid, 1))
+                    {
+                        // 取得した値が、'functionid'の場合(数字)、'functionid'を検索キーとして置き換える値(ホスト名、アイテムキー、パラメータの値)を取得する
+                        strWk_Functionid = strWk_Functionid.Substring(1, strWk_Functionid.Length - 2);
+                        List<ComSqlParam> sqlParams = new List<ComSqlParam>();
+                        sqlParams.Add(new ComSqlParam(DbType.String, "@functions.functionid", strWk_Functionid));
+//                        sqlParams.Add(new ComSqlParam(DbType.String, "@functionid", strFunctionid));
+                        switch (zabbixVersion)
+                        {
+                            // Ver1.8
+                            case 1:
+                                dtTriggerDataExpression = dbAccess.ExecuteQuery(_selectForTriggerExpressionSqlZabbixVer1_8, sqlParams);
+                                break;
+
+                            // Ver2.0
+                            case 2:
+                                dtTriggerDataExpression = dbAccess.ExecuteQuery(_selectForTriggerExpressionSqlZabbixVer2_0, sqlParams);
+                                break;
+
+                            // Ver2.2
+                            case 3:
+                                dtTriggerDataExpression = dbAccess.ExecuteQuery(_selectForTriggerExpressionSqlZabbixVer2_2, sqlParams);
+                                break;
+                        }
+                        strHost = dtTriggerDataExpression.Rows[0]["host"].ToString();
+                        strKey = dtTriggerDataExpression.Rows[0]["key_"].ToString();
+                        strFunction = dtTriggerDataExpression.Rows[0]["function"].ToString();
+                        strParameter = dtTriggerDataExpression.Rows[0]["parameter"].ToString();
+
+                        // 取得した値を組み立て、条件式を作成する
+                        strConditionalExpression = "{" +strHost + ":" + strKey + "." + strFunction + "(" + strParameter + ")" + "}";
+
+                        // 'expression'内の'functionid'を条件式に置き換える
+                        strExpression = strExpression.Replace(strFunctionid, strConditionalExpression);
+                    }
+                    else
+                    {
+                        // 'functionid'でない場合(数字以外)、何もしない
+                    }
+
+                    // strExpression内の'{ }'を含めた値を任意の値に変更する
+                    strWk_Expression = strWk_Expression.Replace(strFunctionid, "AA22");
+                    foundIndex = strWk_Expression.IndexOf("{");    // 次の"{"の位置
+                }
+
+                // 条件式を格納
+                //dtTriggerData.Rows[i]["expression"] = strExpression;
+                DataRow newRow = dtTriggerExpression.NewRow();
+                newRow["expression"] = strExpression;
+                dtTriggerExpression.Rows.Add(newRow);
+            }
+
         }
 
 
@@ -1416,8 +1574,54 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                 {
                     DataRow CombItemRow = CombItemTbl.NewRow();
                     CombItemRow["ID"] = dtItemData.Rows[i]["itemid"].ToString();
-                    CombItemRow["NAME"] = dtItemData.Rows[i]["item_name"].ToString() +
-                                            "(" + dtItemData.Rows[i]["item_key"].ToString() + ")";
+
+                    //added by YAMA 2014/07/25    (アイテム名の表示)
+//                    CombItemRow["NAME"] = dtItemData.Rows[i]["item_name"].ToString() +
+//                                            "(" + dtItemData.Rows[i]["item_key"].ToString() + ")";
+                    String strName = dtItemData.Rows[i]["item_name"].ToString();
+                    if (0 <= strName.IndexOf("$")){
+                        // 名前の編集を行う
+                        /// キーの[]内から置き換える文字列を配列に変換
+                        String str = dtItemData.Rows[i]["item_key"].ToString();
+                        String str2 = str.Substring(str.IndexOf("[") + 1, str.IndexOf("]") - str.IndexOf("[") - 1);
+                        String[] stArrayKey = str2.Split(',');
+
+                        /// 名前内の"$数字"を置き換える
+                        int foundIndex = strName.IndexOf("$");                  // 最初の"$"の位置
+                        int num = 0;
+                        int numOfChar = 0;
+                        int numOfNumber = 0;
+                        while (0 <= foundIndex)
+                        {
+                            str = strName.Substring(foundIndex);                // "$"以降の最後までを取得
+                            int j = 0;
+                            numOfNumber = 0;
+                            for (j = 1; j < str.Length; j++)
+                            {
+                                if (char.IsNumber(str, j))
+                                {
+                                    numOfNumber++;
+                                }else{
+                                    break;
+                                }
+                            }
+                            numOfChar = j;
+
+                            num = int.Parse(str.Substring(1, numOfNumber));     // "$"の次の文字（配列のindexを取得）
+                            String str3 = stArrayKey[num - 1];                  // 置き換える文字列を抽出
+
+                            str2 = str.Substring(0, numOfChar);                 // 置き換えられる文字列($数字)を取得
+
+                            strName = strName.Replace(str2, str3);              // 文字の置き換え
+
+                            foundIndex = strName.IndexOf("$");                  // 次の"$"の位置
+                        }
+                        CombItemRow["NAME"] = strName;
+                    }else{
+                        CombItemRow["NAME"] = dtItemData.Rows[i]["item_name"].ToString();
+                    }
+
+
                     wk_id = dtItemData.Rows[i]["itemid"].ToString();
                     CombItemTbl.Rows.Add(CombItemRow);
                 }
@@ -1428,8 +1632,13 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             {
                 DataRow CombTriggerRow = CombTriggerTbl.NewRow();
                 CombTriggerRow["ID"] = dtTriggerData.Rows[i]["triggerid"].ToString();
+
+                //added by YAMA 2014/07/25
+                //CombTriggerRow["NAME"] = dtTriggerData.Rows[i]["description"].ToString() +
+                //                           "(" + dtTriggerData.Rows[i]["expression"].ToString() + ")";
                 CombTriggerRow["NAME"] = dtTriggerData.Rows[i]["description"].ToString() +
-                                           "(" + dtTriggerData.Rows[i]["expression"].ToString() + ")";
+                                           "(" + dtTriggerExpression.Rows[i]["expression"].ToString() + ")";
+
                 CombTriggerTbl.Rows.Add(CombTriggerRow);
             }
 

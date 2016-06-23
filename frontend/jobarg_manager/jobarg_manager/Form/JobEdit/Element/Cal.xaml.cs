@@ -1,6 +1,7 @@
 ﻿/*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -16,6 +17,9 @@
 ** along with this program; if not, write to the Free Software
 ** Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 **/
+using System;
+using System.Data;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -445,6 +449,73 @@ public partial class Cal : UserControl,IElement
         }
     }
 
+    /// <summary>ToolTip表示内容設定</summary>/// 
+    public void SetToolTip()
+    {
+        StringBuilder sbCalcMethod = new StringBuilder();
+        string formula = "";
+        string valueName = "";
+        StringBuilder sb = new StringBuilder();
+        sb.Append(Properties.Resources.job_id_label_text);
+        if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+        sb.Append(_jobId);
+        sb.Append("\n");
+        sb.Append(Properties.Resources.job_name_label_text);
+        if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+        sb.Append(_jobName);
+
+        // 計算アイコン設定テーブルのデータを取得
+        DataRow[] rowCal;
+        if (InnerJobId == null) {
+            rowCal = _container.IconCalcTable.Select("job_id='" + _jobId + "'");
+        } else {
+            rowCal = _container.IconCalcTable.Select("inner_job_id=" + InnerJobId);
+        }
+        if (rowCal != null && rowCal.Length > 0)
+        {
+            string handFlag = Convert.ToString(rowCal[0]["hand_flag"]);
+            if (CheckUtil.IsNullOrEmpty(handFlag) || "0".Equals(handFlag))
+            {
+                //added by YAMA 2014/12/04
+                //sbCalcMethod.Append("\n");
+                //sbCalcMethod.Append("  ");
+
+                sbCalcMethod.Append(Properties.Resources.integer_calc_label_text);
+            }
+            else
+            {
+                //added by YAMA 2014/12/04
+                //sbCalcMethod.Append("\n");
+                //sbCalcMethod.Append("  ");
+
+                sbCalcMethod.Append(Properties.Resources.time_calc_label_text);
+            }
+            formula = Convert.ToString(rowCal[0]["formula"]);
+            valueName = Convert.ToString(rowCal[0]["value_name"]);
+        }
+        sb.Append("\n");
+
+        //added by YAMA 2014/12/04
+        sb.Append(Properties.Resources.calc_method_label_textToolTip);
+        if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+        sb.Append(sbCalcMethod);        
+
+        sb.Append("\n");
+        sb.Append(Properties.Resources.formula_label_text);
+        if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+        sb.Append(formula);
+        sb.Append("\n");
+        sb.Append(Properties.Resources.value_name_label_text);
+        if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+        sb.Append(valueName);
+
+        picToolTip.ToolTip = sb.ToString();
+    }
+    /// <summary>ToolTip表示内容リセット</summary>///
+    public void ResetToolTip(string toolTip)
+    {
+        picToolTip.ToolTip = toolTip;
+    }
     #endregion
 }
 }

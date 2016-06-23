@@ -1,3 +1,49 @@
+Changes for 2.1.0 (Rev:6777) GA
+
+2014-12-19  Financial System Products Dept.
+
+	* Job Arranger : ジョブの実行ユーザー指定機能を追加。
+	* Job Arranger : オブジェクトの有効化・無効化、および削除時の関連データエラー画面を追加。
+	* Job Arranger : 実行ジョブ管理画面のジョブネット一覧リストに実行中ジョブIDを追加。
+	* Job Arranger : ジョブアイコンに処理継続オプションを追加。
+	* Job Arranger : リブートアイコンにタイムアウト警告オプションを追加。
+	* Job Arranger : 終了アイコンの終了コードにジョブコントローラ変数の指定を追加。
+	* Job Arranger : 稼働日フィルター画面を追加。
+	* Job Arranger : 一般設定画面を追加。
+	* Job Arranger : ジョブサーバ再起動時の拡張ジョブアイコン処理継続に対応。
+	* Job Arranger : Zabbixエラー通知失敗時のリトライ機能を追加。
+	* Job Arranger : 実行待ち（予約状態）ジョブネットの開始予定時刻変更機能を追加。
+	* Job Arranger : 実行待ち（予約状態）ジョブネットの起動保留と起動保留解除機能を追加。
+	* Job Arranger : アイコンのバルーン表示内容を詳細化。
+	* Job Arranger : ジョブマネージャの内部時刻同期機能を追加。
+	* Job Arranger : 新規ファイル作成時のファイル作成ダイアログ表示を廃止。
+	* Job Arranger : 実行ジョブ管理画面の状況欄色を文字単位から項目単位に変更。
+	* Job Arranger : オブジェクト一覧画面のリスト行コンテキストメニューに「即時実行」、
+	「保留実行」、「テスト実行」を追加。
+	* Job Arranger : ジョブネットのコピー新規でコピー元ジョブネットをサブジョブネットとして
+	利用可能に変更。
+	* Job Arranger : ジョブ編集画面での複数アイコン選択時に「フロー削除」、「保留」、
+	「保留解除」、「スキップ」、「スキップ解除」を利用可能に変更。
+	* Job Arranger : アイコン設定画面の背景色の不備に対応。
+	* Job Arranger : ジョブマネージャーにおいてDB復旧後の自動再接続に対応。
+	* Job Arranger : ジョブエージェントの対応OSに Windows Server 2012 R2 を追加。
+	* Job Arranger : AIX 5.3（64bit）版ジョブエージェントを公開。
+	* Job Arranger : HP-UX 11i v2（64bit）版ジョブエージェントを公開。
+	* Job Arranger : json-c のソースバージョン v0.10、v0.11、v0.12 に対応。
+	* Job Arranger : 最新のODBCドライバである、MySQL Connector/ODBC 5.3.4 および
+	PostgreSQL ODBC Driver 9.3.4 に対応。
+	* Job Arranger : ジョブマネージャー、およびWindows版ジョブエージェントのアップデート
+	インストールに対応。
+	* Job Arranger : ジョブアイコンとエージェントレスアイコンで取得可能な標準出力と
+	標準エラーの最大データ長を64000バイトに変更。
+	* Job Arranger : コンフィグファイルのテンポラリディレクトリ（TmpDir）の初期値を
+	「/var/lib/jobarranger/tmp」に変更。
+	* Job Arranger : ジョブサーバとジョブモニターの一括起動シェル（jobarg-all）を追加。
+	* Job Arranger : エージェントレスアイコンのログインID、パスワードで「$」文字の
+	エスケープ処理を追加。
+	* jajobfile.c : ジョブエージェントでファイル書込み遅延発生時にジョブがエラーとなる
+	不具合に対応。
+
 Changes for 2.0.1 (Rev:6308) GA
 
 2014-07-16  Financial System Products Dept.

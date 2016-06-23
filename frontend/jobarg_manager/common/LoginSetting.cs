@@ -1,6 +1,7 @@
 ﻿/*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -124,6 +125,13 @@ namespace jp.co.ftf.jobcontroller.Common
 
         //added by YAMA 2014/03/03
         public static int JaZabbixVersion { get; set; }
+
+        // added by YAMA 2014/10/20    マネージャ内部時刻同期
+        public static int ManagerTimeSync { get; set; }
+
+        // added by YAMA 2014/10/30    グループ所属無しユーザーでのマネージャ動作
+        // false：グループ所属無しユーザー
+        public static bool BelongToUsrgrpFlag { get; set; }
 
     }
 

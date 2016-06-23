@@ -1,6 +1,7 @@
 ﻿/*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -153,20 +154,22 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
         //*******************************************************************
         private void FillTables()
         {
+            //added by YAMA 2014/10/08 add [order by value_name]
+
             string strSqlJobBefore = "(select 'ja_run_value_before_table' as table_name, BV.inner_jobnet_id, BV.value_name, BV.before_value as value from ja_run_value_before_table BV " +
-                                "where BV.inner_job_id = " + _jobId  + " " +
+                                "where BV.inner_job_id = " + _jobId + " " +
                                 "and BV.value_name not in " +
                                 "(select JV1.value_name from ja_run_value_job_table JV1 " +
                                 "where JV1.inner_job_id = " + _jobId + ")) " +
                                 "union " +
                                 "(select 'ja_run_value_job_table' as table_name, JV2.inner_jobnet_id, JV2.value_name, JV2.value from ja_run_value_job_table JV2 " +
-                                "where JV2.inner_job_id = " + _jobId  +")";
-            string strSqlNotJobBefore = "select inner_jobnet_id,value_name,before_value as value from ja_run_value_before_table where inner_job_id = " + _jobId;
+                                "where JV2.inner_job_id = " + _jobId + ") order by value_name";
+            string strSqlNotJobBefore = "select inner_jobnet_id,value_name,before_value as value from ja_run_value_before_table where inner_job_id = " + _jobId + " order by value_name";
             string strSqlBefore = strSqlNotJobBefore;
-            if(_myJob.ElementType == ElementType.JOB)
+            if (_myJob.ElementType == ElementType.JOB)
                 strSqlBefore = strSqlJobBefore;
 
-            string strSqlAfter = "select inner_jobnet_id,value_name,after_value as value from ja_run_value_after_table where inner_job_id = " + _jobId;
+            string strSqlAfter = "select inner_jobnet_id,value_name,after_value as value from ja_run_value_after_table where inner_job_id = " + _jobId + " order by value_name";
 
             _beforeValueTable = _dbAccess.ExecuteQuery(strSqlBefore);
             _afterValueTable = _dbAccess.ExecuteQuery(strSqlAfter);

@@ -1,6 +1,7 @@
 ﻿/*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -54,6 +55,11 @@ namespace jp.co.ftf.jobcontroller.DAO
 
         private string _selectSqlByJobnet = "select * from ja_run_icon_extjob_table " +
                         "where inner_jobnet_id = ? ";
+
+        // added by YAMA 2014/11/05    拡張ジョブアイコンの再実行
+        private string _updateWaitCountSqlByPk = "update ja_run_icon_extjob_table " +
+                                        "set wait_count = ? " +
+                                        "where inner_job_id = ? ";
 
         private DBConnect _db = null;
 
@@ -157,6 +163,28 @@ namespace jp.co.ftf.jobcontroller.DAO
 
             return dt;
         }
+
+        // added by YAMA 2014/11/05    拡張ジョブアイコンの再実行
+        //************************************************************************
+        /// <summary> 
+        /// 待合せ回数(wait_count)を更新.
+        /// </summary>
+        /// <param name="inner_jobnet_id">実行用ジョブネット内部管理ID</param>
+        /// <return>更新件数</return>
+        //************************************************************************
+        public int SetWaitCountByJobnet(int wait_count, object inner_jobnet_id)
+        {
+
+            List<ComSqlParam> sqlParams = new List<ComSqlParam>();
+
+            sqlParams.Add(new ComSqlParam(DbType.Int64,    "@wait_count",      wait_count));
+            sqlParams.Add(new ComSqlParam(DbType.String, "@inner_jobnet_id", inner_jobnet_id));
+
+            int cnt = _db.ExecuteNonQuery(_updateWaitCountSqlByPk, sqlParams);
+
+            return cnt;
+        }
+
 
         #endregion
     }

@@ -1,6 +1,7 @@
 ﻿/*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -16,12 +17,16 @@
 ** along with this program; if not, write to the Free Software
 ** Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 **/
+using System;
+using System.Text;
+using System.Data;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Windows.Data;
 using jp.co.ftf.jobcontroller.Common;
+using jp.co.ftf.jobcontroller.DAO;
 //*******************************************************************
 //                                                                  *
 //                                                                  *
@@ -441,6 +446,104 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             }
         }
 
+        /// <summary>ToolTip表示内容設定</summary>/// 
+        public void SetToolTip(){
+            StringBuilder sbInfoClass = new StringBuilder();
+            StringBuilder sbJobInfo = new StringBuilder();
+            StringBuilder sbCalInfo = new StringBuilder();
+            StringBuilder sb = new StringBuilder();
+
+            sb.Append(Properties.Resources.job_id_label_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(_jobId);
+            sb.Append("\n");
+            sb.Append(Properties.Resources.job_name_label_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(_jobName);
+
+            DataRow[] rowInfo;
+            if (InnerJobId == null) {
+                rowInfo = _container.IconInfoTable.Select("job_id='" + _jobId + "'");
+            } else {
+                rowInfo = _container.IconInfoTable.Select("inner_job_id=" + InnerJobId);
+            }
+            if (rowInfo != null && rowInfo.Length > 0) {
+
+                DataRow[] rowJob = _container.JobControlTable.Select("job_id='" + _jobId + "'");
+
+                if (!Convert.IsDBNull(rowInfo[0]["info_flag"]))
+                {
+                    int infoFlag = Convert.ToInt16(rowInfo[0]["info_flag"]);
+                    if (infoFlag == 0) {
+                        // ジョブ状態
+
+                        //added by YAMA 2014/12/04
+                        //sbInfoClass.Append("\n");
+                        //sbInfoClass.Append("  ");
+
+                        sbInfoClass.Append(Properties.Resources.info_type_job_status_text);
+                        sbJobInfo.Append("\n");
+                        sbJobInfo.Append(Properties.Resources.job_info_text);
+                        sbJobInfo.Append("\n");
+                        sbJobInfo.Append("  ");
+                        sbJobInfo.Append(Properties.Resources.job_id_label_text);
+                        if (!LoginSetting.Lang.StartsWith("ja_")) sbJobInfo.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+                        sbJobInfo.Append(Convert.ToString(rowInfo[0]["get_job_id"]));
+
+                    }
+                    else if (infoFlag == 3)
+                    {
+                        // 稼働日
+                        //added by YAMA 2014/12/04
+                        //sbInfoClass.Append("\n");
+                        //sbInfoClass.Append("  ");
+
+                        sbInfoClass.Append(Properties.Resources.info_type_running_day_text);
+                        if (!LoginSetting.Lang.StartsWith("ja_")) sbInfoClass.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+                        string calendarId = Convert.ToString(rowInfo[0]["get_calendar_id"]);
+                        string calendarName = "";
+
+                        DBConnect dbAccess = new DBConnect(LoginSetting.ConnectStr);
+                        dbAccess.CreateSqlConnect();
+                        CalendarControlDAO calendarControlDAO = new CalendarControlDAO(dbAccess);
+                        DataTable dtCalendar = calendarControlDAO.GetValidORMaxUpdateDateEntityById(calendarId);
+                        dbAccess.CloseSqlConnect();
+
+                        if (dtCalendar != null && dtCalendar.Rows.Count > 0)
+                        {
+                            calendarName = Convert.ToString(dtCalendar.Rows[0]["calendar_name"]);
+                        }
+
+                        sbCalInfo.Append("\n");
+                        sbCalInfo.Append(Properties.Resources.calendar_info_text);
+                        sbCalInfo.Append("\n");
+                        sbCalInfo.Append("  ");
+                        sbCalInfo.Append(Properties.Resources.calendar_id_label_text);
+                        if (!LoginSetting.Lang.StartsWith("ja_")) sbCalInfo.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+                        sbCalInfo.Append(calendarId);
+                        sbCalInfo.Append("\n");
+                        sbCalInfo.Append("  ");
+                        sbCalInfo.Append(Properties.Resources.calendar_name_label_text);
+                        if (!LoginSetting.Lang.StartsWith("ja_")) sbCalInfo.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+                        sbCalInfo.Append(calendarName);
+                    }
+                }
+            }
+
+            sb.Append("\n");
+            sb.Append(Properties.Resources.information_classification_label_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(sbInfoClass.ToString());
+            sb.Append(sbJobInfo.ToString());
+            sb.Append(sbCalInfo.ToString());
+            picToolTip.ToolTip = sb.ToString();
+        }
+
+        /// <summary>ToolTip表示内容リセット</summary>///
+        public void ResetToolTip(string toolTip)
+        {
+            picToolTip.ToolTip = toolTip;
+        }
         #endregion
 
     }

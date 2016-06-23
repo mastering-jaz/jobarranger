@@ -1,6 +1,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -29,6 +30,7 @@
 #include "dbcache.h"
 
 #include "jacommon.h"
+#include "jalog.h"
 #include "jazbxmsg.h"
 
 /******************************************************************************
@@ -50,13 +52,22 @@
 char *ja_zabbix_message(char *message_id, char *lang, zbx_uint64_t inner_job_id)
 {
 	FILE		*fp;
-	int		hit, m, n, cnt;
-	char		*name = NULL, *mlang = NULL, *msg = NULL, *p = NULL;
-	char		line[4096];
+	int		hit, n, cnt;
+	char		*name = NULL, *msg = NULL, *p = NULL;
+	char		fname[1024], line[4096];
+	const char	*__function_name = "ja_zabbix_message";
 
+	zabbix_log(LOG_LEVEL_DEBUG, "In %s([%s] [%s])", __function_name, message_id, lang);
+
+	/* convert all characters to lower case */
+	for (p = lang; *p != '\0'; p++) {
+		*p = tolower(*p);
+	}
 
 	/* zabbix message file open */
-	fp = fopen(CONFIG_JA_ZBX_MESSAGE_FILE, "r");
+	zbx_snprintf(fname, sizeof(fname), "%s/zabbix_message.%s", CONFIG_JA_ZBX_MESSAGE_FILE, lang);
+
+	fp = fopen(fname, "r");
 	if (fp == NULL)
 	{
 		ja_log("JATRGMSG200001", 0, NULL, inner_job_id, CONFIG_JA_ZBX_MESSAGE_FILE);
@@ -92,42 +103,21 @@ char *ja_zabbix_message(char *message_id, char *lang, zbx_uint64_t inner_job_id)
 		}
 
 		n = 0;
-		m = 0;
-		name  = line;
-		mlang = NULL;
-		msg   = NULL;
+		name = line;
+		msg  = NULL;
 		while (line[++n])
 		{
 			if (line[n] == ',')
 			{
-				if (m == 0)
-				{
-					line[n] = '\0';
-					mlang = &line[n + 1];
-					m++;
-				}
-				else if (m == 1)
-				{
-					line[n] = '\0';
-					msg = &line[n + 1];
-					break;
-				}
+				line[n] = '\0';
+				msg     = &line[n + 1];
+				break;
 			}
 		}
 
 		lrtrim_spaces(name);
-		lrtrim_spaces(mlang);
 
-		/* convert all characters to lower case */
-		for (p = mlang; *p != '\0'; p++) {
-			*p = tolower(*p);
-		}
-
-		for (p = lang; *p != '\0'; p++) {
-			*p = tolower(*p);
-		}
-
-		if (strcmp(name, message_id) == 0 && strcmp(mlang, lang) == 0)
+		if (strcmp(name, message_id) == 0)
 		{
 			hit = 1;
 			break;
@@ -143,11 +133,13 @@ char *ja_zabbix_message(char *message_id, char *lang, zbx_uint64_t inner_job_id)
 	}
 
 	/* message get check */
-	if (name == NULL || mlang == NULL || msg == NULL)
+	if (name == NULL || msg == NULL)
 	{
 		ja_log("JATRGMSG200003", 0, NULL, inner_job_id, cnt, message_id, CONFIG_JA_ZBX_MESSAGE_FILE);
 		return NULL;
 	}
+
+	zabbix_log(LOG_LEVEL_DEBUG, "In %s() get message ID:[%s] MESSAGE[%s]", __function_name, message_id, msg);
 
 	return DBdyn_escape_string(msg);
 

@@ -1,6 +1,7 @@
 ﻿/*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -249,24 +250,6 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.ScheduleEdit
             // 終了ログ
             base.WriteEndLog("cancel_Click", Consts.PROCESS_002);
         }
-
-        /// <summary>公開ジョブネットを展開</summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Public_Jobnet_Expended(object sender, RoutedEventArgs e)
-        {
-            SetTreeJobnet(true);
-        }
-
-
-        /// <summary>プライベートジョブネットを展開</summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Private_Jobnet_Expended(object sender, RoutedEventArgs e)
-        {
-            SetTreeJobnet(false);
-        }
-
 
         /// <summary>公開ジョブネットを展開</summary>
         /// <param name="sender"></param>

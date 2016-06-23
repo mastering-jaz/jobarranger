@@ -1,6 +1,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -18,12 +19,12 @@
 **/
 
 /*
-** $Date:: 2013-06-21 10:41:19 +0900 #$
-** $Revision: 4938 $
-** $Author: ossinfra@FITECHLABS.CO.JP $
+** $Date:: 2014-10-17 16:00:02 +0900 #$
+** $Revision: 6528 $
+** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
-#include <json/json.h>
+#include <json.h>
 #include "common.h"
 #include "comms.h"
 #include "log.h"
@@ -534,7 +535,19 @@ int ja_telegram_from_request(json_object * json, ja_job_object * job)
                      json_object_get_string(jp));
     }
 
-    return SUCCEED;
+    jp = json_object_object_get(jp_data, JA_PROTO_VALUE_RUNUSR);
+    if (jp != NULL) {
+        zbx_snprintf(job->run_user, sizeof(job->run_user), "%s",
+                     json_object_get_string(jp));
+    }
+
+    jp = json_object_object_get(jp_data, JA_PROTO_VALUE_RUNUSRPWD);
+    if (jp != NULL) {
+        zbx_snprintf(job->run_user_password, sizeof(job->run_user_password), "%s",
+                     json_object_get_string(jp));
+    }
+
+	return SUCCEED;
 }
 
 /******************************************************************************
@@ -820,7 +833,12 @@ int ja_telegram_to_request(ja_job_object * job, json_object * json)
     }
     json_object_object_add(jp_data, JA_PROTO_TAG_ENV, jp_env);
 
-    return SUCCEED;
+    json_object_object_add(jp_data, JA_PROTO_VALUE_RUNUSR,
+                           json_object_new_string(job->run_user));
+    json_object_object_add(jp_data, JA_PROTO_VALUE_RUNUSRPWD,
+                           json_object_new_string(job->run_user_password));
+
+	return SUCCEED;
 }
 
 /******************************************************************************
@@ -909,7 +927,13 @@ int ja_telegram_to_jobresult(ja_job_object * job, json_object * json)
                                json_object_new_int(job->return_code));
         json_object_object_add(jp_data, JA_PROTO_TAG_SIGNAL,
                                json_object_new_int(job->signal));
-    } else {
+
+        json_object_object_add(jp_data, JA_PROTO_VALUE_RUNUSR,
+                               json_object_new_string(job->run_user));
+        json_object_object_add(jp_data, JA_PROTO_VALUE_RUNUSRPWD,
+                               json_object_new_string(job->run_user_password));
+
+	} else {
         json_object_object_add(jp_data, JA_PROTO_TAG_MESSAGE,
                                json_object_new_string(job->message));
     }

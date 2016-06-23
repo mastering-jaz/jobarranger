@@ -2,6 +2,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -24,10 +25,21 @@
         xmlns:src="clr-namespace:jp.co.ftf.jobcontroller.JobController"
         WindowStartupLocation="CenterScreen" ResizeMode="NoResize"
         Title="{x:Static src:Properties.Resources.agentless_icon_screen_name}" Height="558" Width="420" xmlns:my="clr-namespace:jp.co.ftf.jobcontroller.JobController.Properties" FontSize="11">
-    <Grid Background="#FFEEECE1" Height="515">
-        <TabControl Height="453" HorizontalAlignment="Left" Name="tabControl1" VerticalAlignment="Top" Width="410">
+    <!--  added by YAMA 2014/09/22 設定ダイアログ背景色不備対応 -->
+    <!--  Grid Background="#FFEEECE1" Height="515" -->
+    <Grid Background="#FFEEECE1">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="202*" />
+            <ColumnDefinition Width="14*" />
+            <ColumnDefinition Width="182*" />
+        </Grid.ColumnDefinitions>
+        <!--  added by YAMA 2014/09/22 設定ダイアログ背景色不備対応 -->
+        <!--  TabControl Height="453" HorizontalAlignment="Left" Name="tabControl1" VerticalAlignment="Top" Width="410" -->
+        <TabControl Height="453" HorizontalAlignment="Left" Name="tabControl1" VerticalAlignment="Top" Background="#FFEEECE1" Grid.ColumnSpan="3"  Width="415">
             <TabItem Header="{x:Static src:Properties.Resources.agentless_basicconfig_label_text}" Name="tabConfig" FontSize="11">
-                <Grid Background="#FFEEECE1" Width="410" Height="424" Name="GridSetting">
+                <!--  added by YAMA 2014/09/22 設定ダイアログ背景色不備対応 -->
+                <!--  Grid Background="#FFEEECE1" Width="410" Height="424" Name="GridSetting" -->
+                <Grid Background="#FFEEECE1" Name="GridSetting">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="30" />
                         <RowDefinition Height="30" />
@@ -111,7 +123,9 @@
             </TabItem>
 
             <TabItem Header="{x:Static src:Properties.Resources.agentless_command_label_text}" Name="tabCommand" FontSize="11">
-                <Grid Background="#FFEEECE1" Width="410" Height="424" Name="GridCommandSetting">
+                <!--  added by YAMA 2014/09/22 設定ダイアログ背景色不備対応 -->
+                <!--  Grid Background="#FFEEECE1" Width="410" Height="424" Name="GridCommandSetting" -->
+                <Grid Background="#FFEEECE1" Name="GridCommandSetting">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="270" />
                         <RowDefinition Height="60" />
@@ -119,27 +133,27 @@
                         <RowDefinition Height="30" />
                         <RowDefinition Height="30*" />
                     </Grid.RowDefinitions>
-                    <GroupBox Header="{x:Static src:Properties.Resources.exec_label_text}" Height="264" Width="385" Margin="7,2,0,0" Name="gbExcute" VerticalAlignment="Top" HorizontalAlignment="Left">
-                        <TextBox Grid.Row="0" Name="txtCmd" Height="235" Width="370" Margin="0,4,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" VerticalScrollBarVisibility="Auto" MaxLength="4000" TextWrapping="Wrap" AcceptsReturn="True" Grid.ColumnSpan="2" />
+                    <GroupBox Header="{x:Static src:Properties.Resources.exec_label_text}" Height="264" Width="388" Margin="9,2,0,0" Name="gbExcute" VerticalAlignment="Top" HorizontalAlignment="Left">
+                        <TextBox Grid.Row="0" Name="txtCmd" Height="235" Width="376" Margin="0,4,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" VerticalScrollBarVisibility="Auto" MaxLength="4000" TextWrapping="Wrap" AcceptsReturn="True" Grid.ColumnSpan="2" />
                     </GroupBox>
-                    <GroupBox Grid.Row="1" Header="{x:Static src:Properties.Resources.agentless_prompt_label_text}" Height="58" Width="385" Margin="7,2,0,0" Name="gbPrompt" VerticalAlignment="Top" HorizontalAlignment="Left" Grid.RowSpan="2">
-                        <TextBox Grid.Row="1" Name="txtPromptString" Height="23" Width="370" Margin="0,6,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" VerticalContentAlignment="Center" MaxLength="256" />
+                    <GroupBox Grid.Row="1" Header="{x:Static src:Properties.Resources.agentless_prompt_label_text}" Height="52" Width="388" Margin="7,2,0,0" Name="gbPrompt" VerticalAlignment="Top" HorizontalAlignment="Left" Grid.RowSpan="2">
+                        <TextBox Grid.Row="1" Name="txtPromptString" Height="23" Width="375" Margin="1,4,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" VerticalContentAlignment="Center" MaxLength="256" />
                     </GroupBox>
                     <Label Grid.Row="2" Content="{x:Static src:Properties.Resources.agentless_charcode_label_text}" Height="28" HorizontalAlignment="Left" Margin="8,3,0,0" VerticalAlignment="Top" VerticalContentAlignment="Center" />
                     <ComboBox Grid.Row="2" Name="combCharcode" Height="23" Width="95" Margin="100,3,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" IsEnabled="True" IsEditable="True" >
                     </ComboBox>
                     <Label Grid.Row="2" Content="{x:Static src:Properties.Resources.agentless_linefeedcode_label_text}" Height="28" HorizontalAlignment="Left" Margin="202,3,0,0" VerticalAlignment="Top" VerticalContentAlignment="Center" Grid.RowSpan="2" />
-                    <ComboBox Grid.Row="2" Name="combLinefeedcode" Height="23" Width="57" Margin="326,3,0,0" HorizontalAlignment="Left" VerticalAlignment="Top">
+                    <ComboBox Grid.Row="2" Name="combLinefeedcode" Height="23" Width="57" Margin="332,3,0,0" HorizontalAlignment="Left" VerticalAlignment="Top">
                     </ComboBox>
                     <Label Grid.Row="3" Content="{x:Static src:Properties.Resources.agentless_timeout_label_text}" Height="28" Width="157" HorizontalAlignment="Left" Margin="10,2,0,0" VerticalAlignment="Top" />
                     <TextBox Grid.Row="3" Name="txtTimeOut" Height="23" Width="40" HorizontalAlignment="Left" Margin="155,5,0,0" VerticalAlignment="Top" VerticalContentAlignment="Center" HorizontalContentAlignment="Left" MaxLength="5" />
-                    <Label Grid.Row="3" Content="{x:Static src:Properties.Resources.stop_code_label_text}" Height="25" Width="113" HorizontalAlignment="Right" Margin="0,5,97,0" VerticalAlignment="Top" />
-                    <TextBox Grid.Row="3" Name="txtStopCode" Height="23" HorizontalAlignment="Right" Margin="0,5,27,0" VerticalAlignment="Top" VerticalContentAlignment="Center" Width="74" MaxLength="32" />
+                    <Label Grid.Row="3" Content="{x:Static src:Properties.Resources.stop_code_label_text}" Height="25" Width="113" HorizontalAlignment="Right" Margin="0,5,95,0" VerticalAlignment="Top" />
+                    <TextBox Grid.Row="3" Name="txtStopCode" Height="23" HorizontalAlignment="Right" Margin="0,5,16,0" VerticalAlignment="Top" VerticalContentAlignment="Center" Width="74" MaxLength="32" />
                     <CheckBox Grid.Row="4" Content="{x:Static src:Properties.Resources.force_label_text}" Height="23" Margin="13,5,0,0" Name="cbForce" VerticalAlignment="Top" HorizontalAlignment="Left" Width="128" />
                 </Grid>
             </TabItem>
         </TabControl>
-        <Button Content="{x:Static src:Properties.Resources.regist_button_text}" Height="28" HorizontalAlignment="Left" Margin="219,481,0,0" Name="btnToroku" VerticalAlignment="Top" Width="75" Click="btnToroku_Click" IsDefault="True" FontSize="11" />
-        <Button Content="{x:Static src:Properties.Resources.cancel_button_text}" Height="28" HorizontalAlignment="Left" Margin="314,481,0,0" Name="btnCancel" VerticalAlignment="Top" Width="75" Click="btnCancel_Click" IsCancel="True" FontSize="11" />
+        <Button Content="{x:Static src:Properties.Resources.regist_button_text}" Height="28" HorizontalAlignment="Left" Margin="14,481,0,0" Name="btnToroku" VerticalAlignment="Top" Width="75" Click="btnToroku_Click" IsDefault="True" FontSize="11" Grid.Column="2" />
+        <Button Content="{x:Static src:Properties.Resources.cancel_button_text}" Height="28" HorizontalAlignment="Left" Margin="95,481,0,0" Name="btnCancel" VerticalAlignment="Top" Width="75" Click="btnCancel_Click" IsCancel="True" FontSize="11" Grid.Column="2" />
     </Grid>
 </Window>

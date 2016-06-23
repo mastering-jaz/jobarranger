@@ -1,6 +1,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -18,24 +19,13 @@
 **/
 
 /*
-** $Date:: 2014-04-25 14:25:43 +0900 #$
-** $Revision: 5924 $
+** $Date:: 2014-10-17 16:00:02 +0900 #$
+** $Revision: 6528 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
 #ifndef JOBARG_JALOG_H
 #define JOBARG_JALOG_H
-
-#define	JALOG_TYPE_INFO		0
-#define	JALOG_TYPE_CRIT		1
-#define	JALOG_TYPE_ERR		2
-#define	JALOG_TYPE_WARN		3
-#define	JALOG_TYPE_DEBUG	4
-
-#define	JASENDER_OFF		0
-#define	JASENDER_ON		1
-
-#define	JOBARG_MESSAGE		"JOBARG_MESSAGE"
 
 extern char	*CONFIG_ERROR_CMD_PATH;
 extern char	*CONFIG_JA_LOG_MESSAGE_FILE;

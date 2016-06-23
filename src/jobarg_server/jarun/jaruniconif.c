@@ -1,6 +1,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -18,8 +19,8 @@
 **/
 
 /*
-** $Date:: 2013-12-16 18:11:48 +0900 #$
-** $Revision: 5633 $
+** $Date:: 2014-10-17 16:00:02 +0900 #$
+** $Revision: 6528 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -100,10 +101,6 @@ int jarun_icon_if(const zbx_uint64_t inner_job_id, const int test_flag)
     zabbix_log(LOG_LEVEL_DEBUG, "In %s() inner_job_id: " ZBX_FS_UI64,
                __function_name, inner_job_id);
 
-    if (test_flag == JA_JOB_TEST_FLAG_ON) {
-        return ja_flow(inner_job_id, JA_FLOW_TYPE_NORMAL);
-    }
-
     result =
         DBselect
         ("select ji.hand_flag, ji.comparison_value, jb.before_value"
@@ -132,9 +129,16 @@ int jarun_icon_if(const zbx_uint64_t inner_job_id, const int test_flag)
         ja_log("JARUNICONIF200003", 0, NULL, inner_job_id, __function_name,
                inner_job_id);
     }
-    DBfree_result(result);
-    if (flow_type == -1)
-        return ja_set_runerr(inner_job_id);
 
-    return ja_flow(inner_job_id, flow_type);
+    DBfree_result(result);
+
+    if (flow_type == -1) {
+        return ja_set_runerr(inner_job_id, 2);
+    }
+
+    if (test_flag == JA_JOB_TEST_FLAG_ON) {
+        return ja_flow(inner_job_id, JA_FLOW_TYPE_NORMAL, 1);
+    }
+
+    return ja_flow(inner_job_id, flow_type, 1);
 }

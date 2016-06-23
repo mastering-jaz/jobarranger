@@ -1,6 +1,7 @@
 ﻿/*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -686,7 +687,9 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.CalendarEdit
 
         private void ShowCalendarDetail()
         {
-            int year = DateTime.Now.Year;
+            // added by YAMA 2014/10/20    マネージャ内部時刻同期
+            //int year = DateTime.Now.Year;
+            int year = (DBUtil.GetSysTime()).Year;
             container.SetYearCalendarDetail(year.ToString());
         }
 

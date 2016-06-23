@@ -2,6 +2,7 @@
 -- Job Arranger upgrade table SQL for MySQL (Ver 1.4.2 -> 2.0.0)  - 2014/06/23 -
 
 -- Copyright (C) 2012-2014 FitechForce, Inc. All Rights Reserved.
+-- Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 
 
 CREATE INDEX `ja_run_log_idx3` ON `ja_run_log_table` (`inner_jobnet_id`,`message_id`);

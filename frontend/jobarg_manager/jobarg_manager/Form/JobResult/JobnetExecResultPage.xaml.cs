@@ -1,6 +1,7 @@
 ﻿/*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -303,7 +304,9 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobResult
         //*******************************************************************
         private void InitSearchData()
         {
-            DateTime now = System.DateTime.Now;
+            // added by YAMA 2014/10/20    マネージャ内部時刻同期
+            //DateTime now = System.DateTime.Now;
+            DateTime now = DBUtil.GetSysTime();
 
             tbxFromYear.Text = now.Year.ToString();
             tbxToYear.Text = now.Year.ToString();

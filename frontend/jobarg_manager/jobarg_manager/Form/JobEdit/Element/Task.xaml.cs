@@ -1,6 +1,7 @@
 ﻿/*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -16,12 +17,16 @@
 ** along with this program; if not, write to the Free Software
 ** Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 **/
+using System;
+using System.Data;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Windows.Data;
 using jp.co.ftf.jobcontroller.Common;
+using jp.co.ftf.jobcontroller.DAO;
 //*******************************************************************
 //                                                                  *
 //                                                                  *
@@ -38,6 +43,12 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
     /// </summary>
     public partial class Task : UserControl,IElement
     {
+        #region フィールド
+
+        /// <summary>DBConnect</summary>
+
+        #endregion
+
         #region コンストラクタ
         public Task()
         {
@@ -442,6 +453,52 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
 
                 this._state = IElementState.Selected;
             }
+        }
+
+        /// <summary>ToolTip表示内容設定</summary>/// 
+        public void SetToolTip(){
+            string jobNetId = "";
+            string jobNetName = "";
+            StringBuilder sb = new StringBuilder();
+            sb.Append(Properties.Resources.job_id_label_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(_jobId);
+            sb.Append("\n");
+            sb.Append(Properties.Resources.job_name_label_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(_jobName);
+            DataRow[] rowTask;
+            if (InnerJobId == null) {
+                rowTask = _container.IconTaskTable.Select("job_id='" + _jobId + "'");
+            } else {
+                rowTask = _container.IconTaskTable.Select("inner_job_id=" + InnerJobId);
+            }
+            if (rowTask != null && rowTask.Length > 0) {
+                jobNetId = Convert.ToString(rowTask[0]["submit_jobnet_id"]);
+                DBConnect dbAccess = new DBConnect(LoginSetting.ConnectStr);
+                JobnetControlDAO jobnetControlDAO = new JobnetControlDAO(dbAccess);
+                dbAccess.CreateSqlConnect();
+                DataTable dtJobNet = jobnetControlDAO.GetValidORMaxUpdateDateEntityById(jobNetId);
+                dbAccess.CloseSqlConnect();
+                if (dtJobNet != null && dtJobNet.Rows.Count > 0) {
+                    jobNetName = Convert.ToString(dtJobNet.Rows[0]["jobnet_name"]);
+                }
+            }
+            sb.Append("\n");
+            sb.Append(Properties.Resources.jobnet_id_label_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(jobNetId);
+            sb.Append("\n");
+            sb.Append(Properties.Resources.jobnet_name_label_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(jobNetName);
+            picToolTip.ToolTip = sb.ToString();
+        }
+
+        /// <summary>ToolTip表示内容リセット</summary>///
+        public void ResetToolTip(string toolTip)
+        {
+            picToolTip.ToolTip = toolTip;
         }
 
         #endregion

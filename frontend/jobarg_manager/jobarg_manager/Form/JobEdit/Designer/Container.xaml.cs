@@ -1,6 +1,7 @@
 ﻿/*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -1094,7 +1095,12 @@ public partial class Container : UserControl,IContainer
         CreateHistData();
 
         List<System.Windows.Controls.Control> selectItems = CurrentSelectedControlCollection;
-        SetHold(((IRoom)selectItems[0]).ContentItem);
+        //added by YAMA 2014/10/24
+        for (int i = 0; i < CurrentSelectedControlCollection.Count; i++)
+        {
+            SetHold(((IRoom)selectItems[i]).ContentItem);
+        }
+        //SetHold(((IRoom)selectItems[0]).ContentItem);
 
         // 終了ログ
         ((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)ParantWindow).WriteEndLog("MenuitemHold_Click", Consts.PROCESS_018);
@@ -1114,7 +1120,16 @@ public partial class Container : UserControl,IContainer
         CreateHistData();
 
         List<System.Windows.Controls.Control> selectItems = CurrentSelectedControlCollection;
-        SetUnHoldORUnSkip(((IRoom)selectItems[0]).ContentItem);
+        //added by YAMA 2014/10/24
+        for (int i = 0; i < CurrentSelectedControlCollection.Count; i++)
+        {
+            if (((IRoom)selectItems[i]).ContentItem.MethodType == RunJobMethodType.HOLD)
+            {
+                SetUnHoldORUnSkip(((IRoom)selectItems[i]).ContentItem);
+            }
+        }
+        //SetUnHoldORUnSkip(((IRoom)selectItems[0]).ContentItem);
+
 
         // 終了ログ
         ((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)ParantWindow).WriteEndLog("MenuitemUnHold_Click", Consts.PROCESS_018);
@@ -1133,7 +1148,19 @@ public partial class Container : UserControl,IContainer
         CreateHistData();
 
         List<System.Windows.Controls.Control> selectItems = CurrentSelectedControlCollection;
-        SetSkip(((IRoom)selectItems[0]).ContentItem);
+        //added by YAMA 2014/10/24
+        for (int i = 0; i < CurrentSelectedControlCollection.Count; i++)
+        {
+            IElement item = ((IRoom)selectItems[i]).ContentItem;
+
+            // 開始、終了、条件分岐、並行処理、ループアイコンの場合利用不可 
+            if (item is Start || item is End || item is If || item is Ife || item is Mts || item is Mte || item is Loop)
+            {
+                continue;
+            }
+            SetSkip(((IRoom)selectItems[i]).ContentItem);
+        }
+        //SetSkip(((IRoom)selectItems[0]).ContentItem);
 
         // 終了ログ
         ((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)ParantWindow).WriteEndLog("MenuitemSkip_Click", Consts.PROCESS_018);
@@ -1153,7 +1180,15 @@ public partial class Container : UserControl,IContainer
         CreateHistData();
 
         List<System.Windows.Controls.Control> selectItems = CurrentSelectedControlCollection;
-        SetUnHoldORUnSkip(((IRoom)selectItems[0]).ContentItem);
+        //added by YAMA 2014/10/24
+        for (int i = 0; i < CurrentSelectedControlCollection.Count; i++)
+        {
+            if (((IRoom)selectItems[i]).ContentItem.MethodType == RunJobMethodType.SKIP)
+            {
+                SetUnHoldORUnSkip(((IRoom)selectItems[i]).ContentItem);
+            }
+        }
+        //SetUnHoldORUnSkip(((IRoom)selectItems[0]).ContentItem);
 
         // 終了ログ
         ((jp.co.ftf.jobcontroller.JobController.Form.JobEdit.JobEdit)ParantWindow).WriteEndLog("MenuitemUnSkip_Click", Consts.PROCESS_018);
@@ -1564,7 +1599,7 @@ public partial class Container : UserControl,IContainer
     //*******************************************************************
     /// <summary>選択フローを削除</summary>
     //*******************************************************************
-    public void DeleteSelectedFlow()
+    public void DeleteSelectedFlow_org()    //added by YAMA 2014/10/24
     {
         //if (CurrentSelectedControlCollection == null
         //    || CurrentSelectedControlCollection.Count != 1
@@ -1590,6 +1625,74 @@ public partial class Container : UserControl,IContainer
 
         RemoveFlow(flow);
     }
+
+    //*******************************************************************
+    /// <summary>選択フローを削除</summary>
+    //*******************************************************************
+    //added by YAMA 2014/10/24
+    public void DeleteSelectedFlow()
+    {
+        //if (CurrentSelectedControlCollection == null
+        //    || CurrentSelectedControlCollection.Count != 1
+        //    || !(CurrentSelectedControlCollection[0] is IFlow))
+        //    return;
+
+        if (CurrentSelectedControlCollection == null
+            ///|| CurrentSelectedControlCollection.Count != 1)
+            || CurrentSelectedControlCollection.Count < 1)
+            return;
+
+        //処理前現在データで履歴を作成
+        CreateHistData();
+
+        for (int i = CurrentSelectedControlCollection.Count - 1; i >= 0; i--)
+        {
+            if (CurrentSelectedControlCollection[i] is CommonItem)
+            {
+                // ジョブを取得
+                CommonItem item = (CommonItem)_currentSelectedControlCollection[i];
+                string jobid = item.JobId;
+
+                // フローを削除 
+                DataRow[] rowsFlow = FlowControlTable.Select("start_job_id='" + jobid + "' or end_job_id='" + jobid + "'");
+
+                foreach (DataRow row in rowsFlow)
+                {
+                    row.Delete();
+                }
+                if (item.BeginFlowList != null)
+                {
+                    foreach (IFlow a in item.BeginFlowList)
+                    {
+                        RemoveFlow(a);
+                    }
+                }
+                if (item.EndFlowList != null)
+                {
+                    foreach (IFlow a in item.EndFlowList)
+                    {
+                        RemoveFlow(a);
+                    }
+                }
+                item.ResetInitColor();
+            }
+            if (CurrentSelectedControlCollection[i] is IFlow)
+            {
+                IFlow flow = (IFlow)_currentSelectedControlCollection[0];
+
+                string beginJobId = flow.BeginItem.JobId;
+                string endJobId = flow.EndItem.JobId;
+
+                DataRow[] rows = FlowControlTable.Select("start_job_id='" + beginJobId + "' and end_job_id='" + endJobId + "'");
+
+                if (rows != null && rows.Count() > 0)
+                    rows[0].Delete();
+
+                RemoveFlow(flow);
+            }
+        }
+    }
+
     #endregion
 
     #region privateメッソド
@@ -1713,8 +1816,12 @@ public partial class Container : UserControl,IContainer
 
         String insertRunJobJob = "insert into ja_run_job_table "
                 + "(inner_job_id, inner_jobnet_id, inner_jobnet_main_id, job_type, method_flag, invo_flag,"
-                + "boot_count, start_time, end_time, point_x, point_y, job_id, job_name) "
-                + "VALUES (?,?,?,?,?,1,1,0,0,?,?,?,?)";
+            //added by YAMA 2014/09/26
+                + "boot_count, start_time, end_time, point_x, point_y, job_id, job_name, run_user, run_user_password) "
+                + "VALUES (?,?,?,?,?,1,1,0,0,?,?,?,?,?,?)";
+            // + "boot_count, start_time, end_time, point_x, point_y, job_id, job_name) "
+            // + "VALUES (?,?,?,?,?,1,1,0,0,?,?,?,?)";
+
         List<ComSqlParam> insertRunJobJobSqlParams = new List<ComSqlParam>();
         insertRunJobJobSqlParams.Add(new ComSqlParam(DbType.String, "@inner_job_id", strInnerJobNextIdJob));
         insertRunJobJobSqlParams.Add(new ComSqlParam(DbType.String, "@inner_jobnet_id", strInnerJobnetNextId));
@@ -1725,7 +1832,13 @@ public partial class Container : UserControl,IContainer
         insertRunJobJobSqlParams.Add(new ComSqlParam(DbType.String, "@point_y", jobYPoint));
         insertRunJobJobSqlParams.Add(new ComSqlParam(DbType.String, "@job_id", rowIconJob[0]["job_id"]));
         insertRunJobJobSqlParams.Add(new ComSqlParam(DbType.String, "@job_name", rowJob[0]["job_name"]));
+
+        //added by YAMA 2014/09/26
+        insertRunJobJobSqlParams.Add(new ComSqlParam(DbType.String, "@job_name", rowJob[0]["run_user"]));
+        insertRunJobJobSqlParams.Add(new ComSqlParam(DbType.String, "@job_name", rowJob[0]["run_user_password"]));
+
         dbAccess.ExecuteNonQuery(insertRunJobJob, insertRunJobJobSqlParams);
+
 
         String insertRunJobEnd = "insert into ja_run_job_table "
                 + "(inner_job_id, inner_jobnet_id, inner_jobnet_main_id, job_type, invo_flag,"
@@ -1759,7 +1872,10 @@ public partial class Container : UserControl,IContainer
                 + "(inner_job_id, inner_jobnet_id) "
                 + "VALUES (?,?)";
         List<ComSqlParam> insertRunEndIconSqlParams = new List<ComSqlParam>();
-        insertRunEndIconSqlParams.Add(new ComSqlParam(DbType.String, "@inner_job_id", strInnerJobNextIdJob));
+
+//      insertRunEndIconSqlParams.Add(new ComSqlParam(DbType.String, "@inner_job_id", strInnerJobNextIdJob));
+        insertRunEndIconSqlParams.Add(new ComSqlParam(DbType.String, "@inner_job_id", strInnerJobNextIdEnd));
+
         insertRunEndIconSqlParams.Add(new ComSqlParam(DbType.String, "@inner_jobnet_id", strInnerJobnetNextId));
         dbAccess.ExecuteNonQuery(insertRunEndIcon, insertRunEndIconSqlParams);
 
@@ -3074,10 +3190,17 @@ public partial class Container : UserControl,IContainer
     //*******************************************************************
     private bool IsDelFlowEnable()
     {
+        /*
         // フロー以外が選択された場合 
         if (_currentSelectedControlCollection == null
             || _currentSelectedControlCollection.Count != 1
             || !(_currentSelectedControlCollection[0] is IFlow))
+            return false;
+        */
+        //added by YAMA 2014/10/24
+        if (_currentSelectedControlCollection == null
+            || _currentSelectedControlCollection.Count < 1)
+            //  || !(_currentSelectedControlCollection[0] is IRoom))
             return false;
 
         return true;
@@ -3132,11 +3255,18 @@ public partial class Container : UserControl,IContainer
     //*******************************************************************
     private bool IsHoldEnable()
     {
+        /*
         // 全ての保留、スキップ設定されてないアイコンで可能 
         if (_currentSelectedControlCollection == null
             || _currentSelectedControlCollection.Count != 1
             || !(_currentSelectedControlCollection[0] is IRoom)
             || !(((CommonItem)_currentSelectedControlCollection[0]).ContentItem.MethodType == RunJobMethodType.NORMAL))
+            return false;
+        */
+        //added by YAMA 2014/10/24
+        if (_currentSelectedControlCollection == null
+            || _currentSelectedControlCollection.Count < 1
+            || !(_currentSelectedControlCollection[0] is IRoom))
             return false;
 
         return true;
@@ -3146,10 +3276,17 @@ public partial class Container : UserControl,IContainer
     //*******************************************************************
     private bool IsUnHoldEnable()
     {
+        /*
         if (_currentSelectedControlCollection == null
             || _currentSelectedControlCollection.Count != 1
             || !(_currentSelectedControlCollection[0] is IRoom)
             || !(((CommonItem)_currentSelectedControlCollection[0]).ContentItem.MethodType == RunJobMethodType.HOLD))
+            return false;
+        */
+        //added by YAMA 2014/10/24
+        if (_currentSelectedControlCollection == null
+            || _currentSelectedControlCollection.Count < 1
+            || !(_currentSelectedControlCollection[0] is IRoom))
             return false;
 
         return true;
@@ -3159,15 +3296,23 @@ public partial class Container : UserControl,IContainer
     //*******************************************************************
     private bool IsSkipEnable()
     {
+        /*
         if (_currentSelectedControlCollection == null
             || _currentSelectedControlCollection.Count != 1
             || !(_currentSelectedControlCollection[0] is IRoom)
             || !(((CommonItem)_currentSelectedControlCollection[0]).ContentItem.MethodType == RunJobMethodType.NORMAL))
             return false;
+
         IElement item = ((CommonItem)_currentSelectedControlCollection[0]).ContentItem;
 
         // 開始、終了、条件分岐、並行処理、ループアイコンの場合利用不可 
         if (item is Start || item is End || item is If || item is Ife || item is Mts || item is Mte || item is Loop)
+            return false;
+        */
+        //added by YAMA 2014/10/24
+        if (_currentSelectedControlCollection == null
+            || _currentSelectedControlCollection.Count < 1
+            || !(_currentSelectedControlCollection[0] is IRoom))
             return false;
 
         return true;
@@ -3177,11 +3322,18 @@ public partial class Container : UserControl,IContainer
     //*******************************************************************
     private bool IsUnSkipEnable()
     {
+        /*
         // スキップされたアイコンで可能 
         if (_currentSelectedControlCollection == null
             || _currentSelectedControlCollection.Count != 1
             || !(_currentSelectedControlCollection[0] is IRoom)
             || !(((CommonItem)_currentSelectedControlCollection[0]).ContentItem.MethodType == RunJobMethodType.SKIP))
+            return false;
+        */
+        //added by YAMA 2014/10/24
+        if (_currentSelectedControlCollection == null
+            || _currentSelectedControlCollection.Count < 1
+            || !(_currentSelectedControlCollection[0] is IRoom))
             return false;
 
         return true;

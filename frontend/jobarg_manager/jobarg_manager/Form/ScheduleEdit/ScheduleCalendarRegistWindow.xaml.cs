@@ -1,6 +1,7 @@
 ﻿/*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -56,11 +57,20 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.ScheduleEdit
         /// <summary> カレンダーテーブル（公開フラグ更新用） </summary>
         private DataTable _calendarTbl;
 
+        /// <summary> フィルターテーブル（公開フラグ更新用） </summary>
+        private DataTable _filterTbl;
+
         /// <summary> カレンダー管理テーブル </summary>
         private CalendarControlDAO _calendarControlDAO;
 
+        /// <summary> フィルター管理テーブル </summary>
+        private FilterControlDAO _filterControlDAO;
+
         /// <summary> カレンダー稼働日テーブル </summary>
         private CalendarDetailDAO _calendarDetailDAO;
+
+        /// <summary> オブジェクト種別 </summary>
+        private Consts.ObjectEnum _objectType;
 
         #endregion
 
@@ -93,16 +103,16 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.ScheduleEdit
             }
         }
         /// <summary>カレンダーＩＤ</summary>
-        private string _calendarId;
-        public string CalendarId
+        private string _objectId;
+        public string ObjectId
         {
             get
             {
-                return _calendarId;
+                return _objectId;
             }
             set
             {
-                _calendarId = value;
+                _objectId = value;
             }
         }
         /// <summary>親Container</summary>
@@ -124,38 +134,45 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.ScheduleEdit
         /// <summary>オブジェクトを選択</summary>
         /// <param name="sender">源</param>
         /// <param name="e">イベント</param>
-        private void Calendar_Selected(object sender, RoutedEventArgs e)
+        private void Item_Selected(object sender, RoutedEventArgs e)
         {
             TreeViewItem item = (TreeViewItem)sender;
-            _calendarId = ((TreeViewItem)sender).Header.ToString();
+            _objectId = ((TreeViewItem)sender).Header.ToString();
+
+            _objectType = Consts.ObjectEnum.CALENDAR;
+            if(item.Tag != null){
+                _objectType =(Consts.ObjectEnum)item.Tag;
+            }else{
+                return;
+            }
 
             // 各テーブルのデータをコピー追加 
-            FillTables(_calendarId);
+            FillTables(_objectType, _objectId);
             // 情報エリアの表示 
-            SetInfoArea();
+            SetInfoArea(_objectType);
             // カレンダー稼働日の表示 
-            ShowCalendarDetail();
+            ShowCalendarDetail(_objectType);
             btnRegist.IsEnabled = true;
-            // container.textBox_bootTimeHH.IsEnabled = true;
-            // container.textBox_bootTimeMI.IsEnabled = true;
 
-            //added by YAMA 2014/04/10
             container.rbStartTime.IsEnabled = true;
             container.rbCycleStart.IsEnabled = true;
-            container.textBox_StartTime.IsEnabled = true;
-            container.textBox_CyclePeriodFrom.IsEnabled = true;
-            container.textBox_CyclePeriodTo.IsEnabled = true;
-            container.textBox_CycleInterval.IsEnabled = true;
-
-            //container.rbStartTime.IsChecked = true;
-
+            if (container.rbStartTime.IsChecked == true){
+                container.textBox_StartTime.IsEnabled = true;
+                container.textBox_CyclePeriodFrom.IsEnabled = false;
+                container.textBox_CyclePeriodTo.IsEnabled = false;
+                container.textBox_CycleInterval.IsEnabled = false;
+            }else{
+                container.textBox_StartTime.IsEnabled = false;
+                container.textBox_CyclePeriodFrom.IsEnabled = true;
+                container.textBox_CyclePeriodTo.IsEnabled = true;
+                container.textBox_CycleInterval.IsEnabled = true;
+            }
 
             container.btnLeft.IsEnabled = true;
             container.btnRight.IsEnabled = true;
             e.Handled = true;
 
         }
-
 
         //*******************************************************************
         /// <summary>登録ボタンをクリック</summary>
@@ -192,18 +209,27 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.ScheduleEdit
                 bootTime = TmData[0] + TmData[1];
 
                 if (bootTime.Length == 3) bootTime = "0" + bootTime;
-                DataRow[] rows = ParentContainer.ScheduleDetailTable.Select("calendar_id='" + CalendarId + "' and boot_time='" + bootTime + "'");
+                DataRow[] rows = ParentContainer.ScheduleDetailTable.Select("calendar_id='" + _objectId + "' and boot_time='" + bootTime + "'");
 
                 if (rows.Length < 1)
                 {
                     DataRow row = ParentContainer.ScheduleDetailTable.NewRow();
-                    row["calendar_id"] = CalendarId;
+                    row["calendar_id"] = _objectId;
                     row["boot_time"] = bootTime;
                     row["schedule_id"] = ParentContainer.ScheduleId;
+                    if(Consts.ObjectEnum.FILTER == _objectType){
+                        row["object_flag"] = "1";
+                        FilterControlDAO filterControlDAO = new FilterControlDAO(dbAccess);
+                        DataTable dt = filterControlDAO.GetValidORMaxUpdateDateEntityById(_objectId);
+                        row["object_name"] = dt.Rows[0]["filter_name"];
+                    } else if(Consts.ObjectEnum.CALENDAR == _objectType) {
+                        row["object_flag"] = "0";
+                        CalendarControlDAO calendarControlDAO = new CalendarControlDAO(dbAccess);
+                        DataTable dt = calendarControlDAO.GetValidORMaxUpdateDateEntityById(_objectId);
+                        row["object_name"] = dt.Rows[0]["calendar_name"];
+                    }
                     ParentContainer.ScheduleDetailTable.Rows.Add(row);
-                    CalendarControlDAO calendarControlDAO = new CalendarControlDAO(dbAccess);
-                    DataTable dt = calendarControlDAO.GetValidORMaxUpdateDateEntityById(_calendarId);
-                    row["calendar_name"] = dt.Rows[0]["calendar_name"];
+
                 }
             }
             else
@@ -235,7 +261,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.ScheduleEdit
                 // 開始時刻を取得
                 startTime = TmData[0] + TmData[1];
 
-                DataRow[] rows = ParentContainer.ScheduleDetailTable.Select("calendar_id='" + CalendarId + "' and boot_time='" + startTime + "'");
+                DataRow[] rows = ParentContainer.ScheduleDetailTable.Select("calendar_id='" + _objectId + "' and boot_time='" + startTime + "'");
 
                 if (rows.Length < 1)
                 {
@@ -243,13 +269,21 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.ScheduleEdit
                     {
                         t2 = new TimeSpan(0, interval, 0);
                         DataRow row = ParentContainer.ScheduleDetailTable.NewRow();
-                        row["calendar_id"] = CalendarId;
+                        row["calendar_id"] = _objectId;
                         row["boot_time"] = t1.ToString("hhmm");
                         row["schedule_id"] = ParentContainer.ScheduleId;
+                        if(Consts.ObjectEnum.FILTER == _objectType){
+                            row["object_flag"] = "1";
+                            FilterControlDAO filterControlDAO = new FilterControlDAO(dbAccess);
+                            DataTable dt = filterControlDAO.GetValidORMaxUpdateDateEntityById(_objectId);
+                            row["object_name"] = dt.Rows[0]["filter_name"];
+                        } else if(Consts.ObjectEnum.CALENDAR == _objectType) {
+                            row["object_flag"] = "0";
+                            CalendarControlDAO calendarControlDAO = new CalendarControlDAO(dbAccess);
+                            DataTable dt = calendarControlDAO.GetValidORMaxUpdateDateEntityById(_objectId);
+                            row["object_name"] = dt.Rows[0]["calendar_name"];
+                        }
                         ParentContainer.ScheduleDetailTable.Rows.Add(row);
-                        CalendarControlDAO calendarControlDAO = new CalendarControlDAO(dbAccess);
-                        DataTable dt = calendarControlDAO.GetValidORMaxUpdateDateEntityById(_calendarId);
-                        row["calendar_name"] = dt.Rows[0]["calendar_name"];
                     }
                 }
             }
@@ -275,24 +309,6 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.ScheduleEdit
             base.WriteEndLog("regist_Click", Consts.PROCESS_002);
         }
 
-        /// <summary>公開カレンダーを展開</summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Public_Calendar_Expended(object sender, RoutedEventArgs e)
-        {
-            SetTreeCalendar(true);
-        }
-
-
-        /// <summary>プライベートカレンダーを展開</summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Private_Calendar_Expended(object sender, RoutedEventArgs e)
-        {
-            SetTreeCalendar(false);
-        }
-
-
         /// <summary>公開カレンダーを選択</summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -308,6 +324,22 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.ScheduleEdit
         private void Private_Calendar_Selected(object sender, RoutedEventArgs e)
         {
             SetTreeCalendar(false);
+        }
+
+        /// <summary>公開フィルターを選択</summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Public_Filter_Selected(object sender, RoutedEventArgs e)
+        {
+            SetTreeFilter(true);
+        }
+
+        /// <summary>プライベートフィルターを選択</summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Private_Filter_Selected(object sender, RoutedEventArgs e)
+        {
+            SetTreeFilter(false);
         }
 
         #endregion
@@ -344,8 +376,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.ScheduleEdit
 
             container.rbStartTime.IsChecked = true;
 
-
-            ShowCalendarDetail();
+            ShowCalendarDetail(Consts.ObjectEnum.CALENDAR);
             container.btnLeft.IsEnabled = false;
             container.btnRight.IsEnabled = false;
         }
@@ -357,6 +388,9 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.ScheduleEdit
         {
             // カレンダー管理テーブル 
             _calendarControlDAO = new CalendarControlDAO(dbAccess);
+
+            // フィルター管理テーブル 
+            _filterControlDAO = new FilterControlDAO(dbAccess);
 
             // カレンダー稼働日テーブル 
             _calendarDetailDAO = new CalendarDetailDAO(dbAccess);
@@ -373,6 +407,8 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.ScheduleEdit
 
             // カレンダーテーブル 
             container.CalendarControlTable = _calendarControlDAO.GetEmptyTable();
+            // フィルターテーブル 
+            container.FilterControlTable = _filterControlDAO.GetEmptyTable();
             // カレンダー稼働日テーブル 
             container.CalendarDetailTable = _calendarDetailDAO.GetEmptyTable();
 
@@ -381,31 +417,61 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.ScheduleEdit
 
         //*******************************************************************
         /// <summary> カレンダーデータの検索（編集、コピー新規用）</summary>
-        /// <param name="calendarId">`カレンダーID</param>
+        /// <param name="objectId">`カレンダーID</param>
         /// <param name="updDate">`更新日</param>
         //*******************************************************************
-        private void FillTables(string calendarId)
+        private void FillTables(Consts.ObjectEnum objectType, string objectId)
         {
+            switch (objectType) {
+                case Consts.ObjectEnum.CALENDAR:
+                    // カレンダー管理テーブル 
+                    container.CalendarControlTable = _calendarControlDAO.GetValidORMaxUpdateDateEntityById(objectId);
 
-            // カレンダー管理テーブル 
-            container.CalendarControlTable = _calendarControlDAO.GetValidORMaxUpdateDateEntityById(calendarId);
+                    if (container.CalendarControlTable.Rows.Count > 0){
+                        // カレンダー稼働日テーブル 
+                        container.CalendarDetailTable = _calendarDetailDAO.GetEntityByCalendar(
+                            container.CalendarControlTable.Rows[0]["calendar_id"],
+                            container.CalendarControlTable.Rows[0]["update_date"]);
+                    }
 
+                    break;
+                case Consts.ObjectEnum.FILTER:
+                    // フィルター管理テーブル 
+                    container.FilterControlTable = _filterControlDAO.GetValidORMaxUpdateDateEntityById(objectId);
 
-            // カレンダー稼働日テーブル 
-            container.CalendarDetailTable = _calendarDetailDAO.GetEntityByCalendar(calendarId, container.CalendarControlTable.Rows[0]["update_date"]);
+                    // カレンダー管理テーブル 
+                    container.CalendarControlTable = _calendarControlDAO.GetValidORMaxUpdateDateEntityById(
+                        container.FilterControlTable.Rows[0]["base_calendar_id"]);
+
+                    if (container.CalendarControlTable.Rows.Count > 0){
+                        // カレンダー稼働日テーブル 
+                        container.CalendarDetailTable = _calendarDetailDAO.GetEntityByCalendar(
+                            container.CalendarControlTable.Rows[0]["calendar_id"],
+                            container.CalendarControlTable.Rows[0]["update_date"]);
+                    }
+
+                    break;
+            }
+
         }
 
         //*******************************************************************
         /// <summary>情報エリアをセット（編集、コピー新規用）</summary>
         //*******************************************************************
-        private void SetInfoArea()
+        private void SetInfoArea(Consts.ObjectEnum objectType)
         {
-            DataRow row = container.CalendarControlTable.Select()[0];
-            // カレンダーIDをセット 
-            this.lblCalendarId.Text = Convert.ToString(row["calendar_id"]);
-
-            // カレンダー名をセット 
-            lblCalendarName.Text = Convert.ToString(row["calendar_name"]);
+            DataRow row;
+            if (Consts.ObjectEnum.CALENDAR == objectType){
+                row = container.CalendarControlTable.Select()[0];
+                lblObjectId.Text = Convert.ToString(row["calendar_id"]);
+                lblObjectName.Text = Convert.ToString(row["calendar_name"]);
+            }else if (Consts.ObjectEnum.FILTER == objectType){
+                row = container.FilterControlTable.Select()[0];
+                lblObjectId.Text = Convert.ToString(row["filter_id"]);
+                lblObjectName.Text = Convert.ToString(row["filter_name"]);
+            }else{
+                return ;
+            }
 
             // 公開チェックボックス 
             int openFlg = Convert.ToInt16(row["public_flag"]);
@@ -427,10 +493,16 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.ScheduleEdit
         /// <summary>カレンダー稼働日の表示</summary>
         //*******************************************************************
 
-        private void ShowCalendarDetail()
+        private void ShowCalendarDetail(Consts.ObjectEnum objectType)
         {
-            int year = DateTime.Now.Year;
-            container.SetYearCalendarDetail(year.ToString());
+            if (Consts.ObjectEnum.CALENDAR == objectType){
+                // added by YAMA 2014/10/20    マネージャ内部時刻同期
+                //int year = DateTime.Now.Year;
+                int year = (DBUtil.GetSysTime()).Year;
+                container.SetYearCalendarDetail(year.ToString());
+            }else if (Consts.ObjectEnum.FILTER == objectType){
+                container.SetFilterCalendarDetail();
+            }
         }
 
         /// <summary>カレンダーを展開</summary>
@@ -490,8 +562,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.ScheduleEdit
                 {
                     TreeViewItem item = new TreeViewItem();
                     item.Header = row["calendar_id"].ToString();
-                    item.Tag = Consts.ObjectEnum.JOBNET;
-                    //item.FontFamily = new FontFamily("MS Gothic");
+                    item.Tag = Consts.ObjectEnum.CALENDAR;
                     treeViewItem.Items.Add(item);
                 }
             }
@@ -500,7 +571,79 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.ScheduleEdit
             foreach (object item in treeViewItem.Items)
             {
                 itemCalendar = (TreeViewItem)item;
-                itemCalendar.Selected += Calendar_Selected;
+                itemCalendar.Selected += Item_Selected;
+            }
+
+            dbaccess.CloseSqlConnect();
+        }
+
+        /// <summary>フィルターを展開</summary>
+        /// <param name="public_flg">公開フラグ</param>
+        public void SetTreeFilter(bool public_flg)
+        {
+            DataTable dataTbl;
+            DBConnect dbaccess = new DBConnect(LoginSetting.ConnectStr);
+            dbaccess.CreateSqlConnect();
+
+            int flg;
+            TreeViewItem treeViewItem;
+            if (public_flg)
+            {
+                flg = 1;
+                treeViewItem = publicFilter;
+            }
+            else
+            {
+                flg = 0;
+                treeViewItem = privateFilter;
+            }
+
+
+            string selectSql;
+            if (public_flg)
+            {
+                selectSql = "select filter_id, max(update_date) from ja_filter_control_table where public_flag= " +
+                                flg + " group by filter_id order by filter_id";
+            }
+            else
+            {
+                if (!(LoginSetting.Authority == Consts.AuthorityEnum.SUPER))
+                {
+                    selectSql = "SELECT distinct A.filter_id,A.update_date "
+                                                    + "FROM ja_filter_control_table AS A,users AS U,users_groups AS UG1,users_groups AS UG2 "
+                                                    + "WHERE A.user_name = U.alias and U.userid=UG1.userid and UG2.userid=" + LoginSetting.UserID
+                                                    + " and UG1.usrgrpid = UG2.usrgrpid and "
+                                                    + "A.update_date= "
+                                                    + "( SELECT MAX(B.update_date) FROM ja_filter_control_table AS B "
+                                                    + "WHERE B.filter_id = A.filter_id group by B.filter_id) and A.public_flag=0 order by A.filter_id";
+                }
+                else
+                {
+                    selectSql = "select filter_id, max(update_date) from ja_filter_control_table where public_flag= " +
+                                    flg + " group by filter_id order by filter_id";
+
+                }
+            }
+
+            dataTbl = dbaccess.ExecuteQuery(selectSql);
+
+            if (dataTbl != null)
+            {
+                treeViewItem.Items.Clear();
+                foreach (DataRow row in dataTbl.Rows)
+                {
+                    TreeViewItem item = new TreeViewItem();
+                    item.Header = row["filter_id"].ToString();
+                    item.Tag = Consts.ObjectEnum.FILTER;
+                    treeViewItem.Items.Add(item);
+                }
+            }
+
+            TreeViewItem itemFilter;
+            foreach (object item in treeViewItem.Items)
+            {
+                itemFilter = (TreeViewItem)item;
+                itemFilter.Selected += Item_Selected;
             }
 
             dbaccess.CloseSqlConnect();

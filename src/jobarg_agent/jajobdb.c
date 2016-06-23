@@ -1,6 +1,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -18,9 +19,9 @@
 **/
 
 /*
-** $Date:: 2013-04-25 08:35:48 +0900 #$
-** $Revision: 4472 $
-** $Author: komatsu@FITECHLABS.CO.JP $
+** $Date:: 2014-11-27 17:35:49 +0900 #$
+** $Revision: 6731 $
+** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
 #include "common.h"
@@ -50,10 +51,12 @@ const char *sql_jobs_create =
     "start_time               bigint          DEFAULT '0'               NOT NULL,"
     "end_time                 bigint          DEFAULT '0'               NOT NULL,"
     "message                  varchar(1024)                                     ,"
-    "std_out                  varchar(4096)                                     ,"
-    "std_err                  varchar(4096)                                     ,"
+    "std_out                  varchar(64000)                                    ,"
+    "std_err                  varchar(64000)                                    ,"
     "return_code              integer                                           ,"
     "signal                   integer                                           ,"
+    "run_user                 varchar(1024)    DEFAULT ''                       ,"
+    "run_user_password        varchar(1024)    DEFAULT ''                       ,"
     "PRIMARY KEY (jobid)                                                       );";
 const char *sql_index_1 =
     "CREATE INDEX IF NOT EXISTS jobs_method_index ON jobs (method);";
@@ -75,6 +78,11 @@ const char *sql_index_2 =
  ******************************************************************************/
 int ja_jobdb_init()
 {
+    DB_RESULT result;
+    DB_ROW    row;
+    int       i = 0;
+    int       isAlter;   /* 0: no table change  1: alter table jobs add column run_use and run_user_password */
+
     char dbjournal[JA_MAX_STRING_LEN];
     char dbbackup[JA_MAX_STRING_LEN];
     const char *__function_name = "ja_jobdb_init";
@@ -95,8 +103,47 @@ int ja_jobdb_init()
 
     if (ja_db_begin() != SUCCEED)
         goto restore;
+
+    isAlter = 1;
+    /* check for the presence of column names run_user and run_user_password */
+    result = ja_db_select("pragma table_info(jobs)");
+    if (result != NULL) {
+        row = ja_db_fetch(result);
+        if (row != NULL) {
+            i = 0;
+            while (row[i*6] != '\0') {
+                if (atoi(row[i*6]) >= 18) {
+                    isAlter = 0;
+                    break;
+                }
+                i++;
+            }
+        }
+        else {
+            zabbix_log(LOG_LEVEL_INFORMATION, "In %s() : can not get column", __function_name);
+            isAlter = 0;
+        }
+    }
+    else {
+        zabbix_log(LOG_LEVEL_INFORMATION, "In %s() : can't get column", __function_name);
+        isAlter = 0;
+    }
+
     if (ja_db_execute("%s", sql_jobs_create) != SUCCEED)
         goto restore;
+
+    /* if not exist column names "run_user,run_user_password",add column */
+    if (isAlter == 1) {
+        if (ja_db_execute("%s", "alter table jobs add column run_user                 varchar(1024)    DEFAULT ''") != SUCCEED)
+            goto restore;
+        if (ja_db_execute("%s", "alter table jobs add column run_user_password        varchar(1024)    DEFAULT ''") != SUCCEED)
+            goto restore;
+        zabbix_log(LOG_LEVEL_INFORMATION, "In %s() : alter table jobs add column run_use,run_user_password", __function_name);
+    }
+    else {
+        zabbix_log(LOG_LEVEL_INFORMATION, "In %s() : not alter table jobs add column", __function_name);
+    }
+
     if (ja_db_execute("%s", sql_index_1) != SUCCEED)
         goto restore;
     if (ja_db_execute("%s", sql_index_2) != SUCCEED)
@@ -173,6 +220,10 @@ int ja_jobdb_load(DB_ROW row, ja_job_object * job)
         job->return_code = atoi(row[16]);
     if (row[17] != NULL)
         job->signal = atoi(row[17]);
+    if (row[18] != NULL)
+        zbx_snprintf(job->run_user, sizeof(job->run_user), "%s", row[18]);
+    if (row[19] != NULL)
+        zbx_snprintf(job->run_user_password, sizeof(job->run_user_password), "%s", row[19]);
 
     return SUCCEED;
 }
@@ -319,6 +370,7 @@ int ja_jobdb_replace(ja_job_object * job)
     char *argument_esc, *script_esc, *env_esc;
     char *message_esc, *std_out_esc, *std_err_esc;
     const char *__function_name = "ja_jobdb_replace";
+    char *run_user_esc, *run_user_password_esc;
 
     if (job == NULL)
         return FAIL;
@@ -334,15 +386,20 @@ int ja_jobdb_replace(ja_job_object * job)
     std_out_esc = ja_db_dyn_escape_string(job->std_out);
     std_err_esc = ja_db_dyn_escape_string(job->std_err);
 
+    run_user_esc = ja_db_dyn_escape_string(job->run_user);
+    run_user_password_esc = ja_db_dyn_escape_string(job->run_user_password);
+
     ret = ja_db_execute
         ("replace into jobs values ("
          ZBX_FS_UI64
          ", %d, '%s' , %d, '%s', '%s', '%s', '%s', %d, %d, %d, "
-         ZBX_FS_UI64 ", " ZBX_FS_UI64 ", '%s', '%s', '%s', %d, %d)",
+         // ZBX_FS_UI64 ", " ZBX_FS_UI64 ", '%s', '%s', '%s', %d, %d)",
+         ZBX_FS_UI64 ", " ZBX_FS_UI64 ", '%s', '%s', '%s', %d, %d, '%s', '%s')",
          job->jobid, job->version, serverid_esc, job->method, type_esc,
          argument_esc, script_esc, env_esc, job->result, job->status,
          job->pid, job->start_time, job->end_time, message_esc,
-         std_out_esc, std_err_esc, job->return_code, job->signal);
+         // std_out_esc, std_err_esc, job->return_code, job->signal);
+         std_out_esc, std_err_esc, job->return_code, job->signal, job->run_user, job->run_user_password);
 
     zbx_free(serverid_esc);
     zbx_free(type_esc);
@@ -352,6 +409,8 @@ int ja_jobdb_replace(ja_job_object * job)
     zbx_free(message_esc);
     zbx_free(std_out_esc);
     zbx_free(std_err_esc);
+    zbx_free(run_user_esc);
+    zbx_free(run_user_password_esc);
 
     return ret;
 }

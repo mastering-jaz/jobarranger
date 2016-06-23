@@ -1,6 +1,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -29,10 +30,12 @@
 #include "db.h"
 
 #include "jacommon.h"
+#include "jalog.h"
 #include "jastr.h"
 #include "jaenv.h"
 #include "javalue.h"
 #include "jastatus.h"
+#include "jajobid.h"
 #include "jaruniconless.h"
 
 extern char *CONFIG_EXTJOB_PATH;
@@ -56,7 +59,7 @@ int jarun_icon_less(const zbx_uint64_t inner_job_id, const int test_flag)
 {
     DB_RESULT    result;
     DB_ROW       row;
-    int          session_flag, operation_flag, status, rc, count;
+    int          session_flag, operation_flag, status, rc, count, state;
     zbx_uint64_t inner_jobnet_id, inner_jobnet_main_id;
     char         session_id[JA_MAX_STRING_LEN];
     char         cmd[JA_MAX_STRING_LEN];
@@ -72,7 +75,7 @@ int jarun_icon_less(const zbx_uint64_t inner_job_id, const int test_flag)
     if (NULL == (row = DBfetch(result))) {
         ja_log("JARUNICONLESS200001", 0, NULL, inner_job_id, __function_name, inner_job_id);
         DBfree_result(result);
-        return ja_set_runerr(inner_job_id);
+        return ja_set_runerr(inner_job_id, 2);
     }
 
     ZBX_STR2UINT64(inner_jobnet_id, row[0]);
@@ -87,7 +90,7 @@ int jarun_icon_less(const zbx_uint64_t inner_job_id, const int test_flag)
     if (NULL == (row = DBfetch(result))) {
         ja_log("JARUNICONLESS200002", 0, NULL, inner_job_id, __function_name, inner_jobnet_id);
         DBfree_result(result);
-        return ja_set_runerr(inner_job_id);
+        return ja_set_runerr(inner_job_id, 2);
     }
 
     ZBX_STR2UINT64(inner_jobnet_main_id, row[0]);
@@ -113,7 +116,7 @@ int jarun_icon_less(const zbx_uint64_t inner_job_id, const int test_flag)
              if (NULL == (row = DBfetch(result))) {
                  ja_log("JARUNICONLESS200008", 0, NULL, inner_job_id, __function_name, session_id, inner_jobnet_main_id);
                  DBfree_result(result);
-                 return ja_set_runerr(inner_job_id);
+                 return ja_set_runerr(inner_job_id, 2);
              }
              count = atoi(row[0]);
              DBfree_result(result);
@@ -121,7 +124,7 @@ int jarun_icon_less(const zbx_uint64_t inner_job_id, const int test_flag)
              /* session id double registration check */
              if (count != 0) {
                  ja_log("JARUNICONLESS200004", 0, NULL, inner_job_id, __function_name, inner_jobnet_main_id, session_id, ja_get_jobid(inner_job_id));
-                 return ja_set_runerr(inner_job_id);
+                 return ja_set_runerr(inner_job_id, 2);
              }
 
              /* session management data registration */
@@ -132,7 +135,7 @@ int jarun_icon_less(const zbx_uint64_t inner_job_id, const int test_flag)
 
              if (rc <= ZBX_DB_OK) {
                  ja_log("JARUNICONLESS200009", 0, NULL, inner_job_id, __function_name, session_id, inner_jobnet_main_id);
-                 return ja_set_runerr(inner_job_id);
+                 return ja_set_runerr(inner_job_id, 2);
              }
 
              /* session management data commit */
@@ -145,8 +148,14 @@ int jarun_icon_less(const zbx_uint64_t inner_job_id, const int test_flag)
              rc = system(cmd);
              zabbix_log(LOG_LEVEL_DEBUG, "jobarg_session execution [%s] (%d)", cmd, rc);
              if (rc != EXIT_SUCCESS) {
-                 ja_log("JARUNICONLESS200003", 0, NULL, inner_job_id, __function_name, cmd);
-                 return ja_set_runerr(inner_job_id);
+                 if (WIFEXITED(rc)) {
+                     state = WEXITSTATUS(rc);
+                 }
+                 else {
+                     state = rc;
+                 }
+                 ja_log("JARUNICONLESS200003", 0, NULL, inner_job_id, __function_name, state, cmd);
+                 return ja_set_runerr(inner_job_id, 2);
              }
              break;
 
@@ -161,7 +170,7 @@ int jarun_icon_less(const zbx_uint64_t inner_job_id, const int test_flag)
              if (NULL == (row = DBfetch(result))) {
                  ja_log("JARUNICONLESS200005", 0, NULL, inner_job_id, __function_name, inner_jobnet_main_id, session_id, ja_get_jobid(inner_job_id));
                  DBfree_result(result);
-                 return ja_set_runerr(inner_job_id);
+                 return ja_set_runerr(inner_job_id, 2);
              }
              status = atoi(row[0]);
              DBfree_result(result);
@@ -170,7 +179,7 @@ int jarun_icon_less(const zbx_uint64_t inner_job_id, const int test_flag)
              if (status != JA_SES_STATUS_END) {
                  /* other agentless icons use a session */
                  ja_log("JARUNICONLESS200010", 0, NULL, inner_job_id, __function_name, inner_jobnet_main_id, session_id, ja_get_jobid(inner_job_id));
-                 return ja_set_runerr(inner_job_id);
+                 return ja_set_runerr(inner_job_id, 2);
              }
 
              if (session_flag == JA_SESSION_FLAG_CONTINUE) {
@@ -191,13 +200,13 @@ int jarun_icon_less(const zbx_uint64_t inner_job_id, const int test_flag)
 
              if (rc <= ZBX_DB_OK) {
                  ja_log("JARUNICONLESS200006", 0, NULL, inner_job_id, __function_name, inner_job_id, session_id, inner_job_id);
-                 return ja_set_runerr(inner_job_id);
+                 return ja_set_runerr(inner_job_id, 2);
              }
              break;
 
         default:
              ja_log("JARUNICONLESS200007", 0, NULL, inner_job_id, __function_name, inner_job_id, session_id, inner_job_id, session_flag);
-             return ja_set_runerr(inner_job_id);
+             return ja_set_runerr(inner_job_id, 2);
     }
 
     return SUCCEED;

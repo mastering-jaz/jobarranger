@@ -1,6 +1,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -18,8 +19,8 @@
 **/
 
 /*
-** $Date:: 2014-03-05 09:13:15 +0900 #$
-** $Revision: 5855 $
+** $Date:: 2014-10-17 16:00:02 +0900 #$
+** $Revision: 6528 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -27,9 +28,6 @@
 #define JOBARG_JATRAPPER_H
 
 #include "comms.h"
-
-#define JA_LASTEXIT_LEN          10
-#define JA_LASTSTDOUT_LEN        4096
 
 extern int CONFIG_TIMEOUT;
 extern int CONFIG_TRAPPER_TIMEOUT;
@@ -56,9 +54,9 @@ JOBARG_JOBNET_INFO {
     zbx_uint64_t scheduled_time;
     zbx_uint64_t start_time;
     zbx_uint64_t end_time;
-    char lastexitcd[JA_LASTEXIT_LEN];
-    char laststdout[JA_LASTSTDOUT_LEN];
-    char laststderr[JA_LASTSTDOUT_LEN];
+    char lastexitcd[JA_STD_OUT_LEN];
+    char laststdout[JA_STD_OUT_LEN];
+    char laststderr[JA_STD_OUT_LEN];
 };
 
 void main_jatrapper_loop(zbx_sock_t * s);

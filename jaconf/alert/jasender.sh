@@ -15,7 +15,7 @@
 # Please specify the parameter information of Zabbix Sender.
 # Specify the host name of the default HOST variable.
 
-ZABBIX_SERVER="127.0.0.1"
+ZABBIX_SERVER=""
 ZABBIX_PORT="10051"
 ZABBIX_SENDER="zabbix_sender"
 KEY=""

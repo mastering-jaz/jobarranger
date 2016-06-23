@@ -1,6 +1,7 @@
 ﻿/*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -22,6 +23,7 @@ using jp.co.ftf.jobcontroller.Common;
 using jp.co.ftf.jobcontroller.JobController;
 using System.Windows.Input;
 using jp.co.ftf.jobcontroller.JobController.Form.CalendarEdit;
+using jp.co.ftf.jobcontroller.JobController.Form.FilterEdit;
 using jp.co.ftf.jobcontroller.JobController.Form.ScheduleEdit;
 using jp.co.ftf.jobcontroller.JobController.Form.JobEdit;
 using jp.co.ftf.jobcontroller.JobController.Form.JobManager;
@@ -34,6 +36,9 @@ using System.Windows.Media;
 using System.Windows.Data;
 using System.Collections;
 using System.Collections.Generic;
+//added by YAMA 2014/08/18
+using jp.co.ftf.jobcontroller.JobController.Form.SetParameter;
+
 
 //*******************************************************************
 //                                                                  *
@@ -64,6 +69,10 @@ namespace jp.co.ftf.jobcontroller.JobController
 
         /// <summary>実行結果画面</summary>
         private JobnetExecResultPage _execResult = null;
+
+        //added by YAMA 2014/08/18
+        /// <summary>一般設定画面</summary>
+        private SetParameterPage _setParameter = null;
 
         /// <summary>Tab1のタイトル</summary>
         private String tab1Title = null;
@@ -199,7 +208,22 @@ namespace jp.co.ftf.jobcontroller.JobController
                             _execControl.Stop();
                             _execControl.DB.CloseSqlConnect();
                         }
-                        if (tab1Title != null) this.Title = tab1Title;
+
+                        //added by YAMA 2014/08/06    （ｼﾞｮﾌﾞﾏﾈｰｼﾞｬのﾒｲﾝ画面に表示する画面名不備の対応）
+                        // 表示中の画面が「オブジェクト一覧画面 or ジョブ編集画面」を判断して、this.Titleを更新する
+                        //if (tab1Title != null) this.Title = tab1Title;
+                        if (_objectEdit == null || !JobNetGrid.Children.Contains(_objectEdit))
+                        {   // オブジェクト一覧画面の場合
+                            if (_objList != null)
+                            {   // _objListがnewされている場合は_objListからタイトルを取得、newされていない場合は画面ロードでタイトルを設定
+                                this.Title = MessageUtil.GetMsgById(_objList.GamenId) + " - " + LoginSetting.JobconName;
+                            }
+                        }
+                        else
+                        {   // ジョブ編集画面の場合
+                            this.Title = MessageUtil.GetMsgById(_objectEdit.GamenId) + " - " + LoginSetting.JobconName;
+                        }
+
                         tabItemObjectList.IsTabStop = true;
                         tabItemJobManager.IsTabStop = false;
                         tabItemJobResult.IsTabStop = false;
@@ -235,6 +259,26 @@ namespace jp.co.ftf.jobcontroller.JobController
                         tabItemJobManager.IsTabStop = false;
                         tabItemObjectList.IsTabStop = false;
                         break;
+                    //added by YAMA 2014/08/18
+                    case 3: /* tabPage4 */
+                        if (_execControl != null)
+                        {
+                            _execControl.Stop();
+                            _execControl.DB.CloseSqlConnect();
+                        }
+                        if (_setParameter == null)
+                        {
+                            _setParameter = new SetParameterPage(this);
+                            tabItemSetParameter.Content = _setParameter;
+                        }
+                        tab1Title = this.Title;
+                        this.Title = MessageUtil.GetMsgById(_setParameter.GamenId) + " - " + LoginSetting.JobconName;
+                        tabItemSetParameter.IsTabStop = true;
+                        tabItemJobManager.IsTabStop = false;
+                        tabItemObjectList.IsTabStop = false;
+                        tabItemJobResult.IsTabStop = false;
+                        break;
+
                     default:
                         break;
                 }
@@ -541,6 +585,31 @@ namespace jp.co.ftf.jobcontroller.JobController
             if (_objList.ObjectId == null)
                 _objList.ObjectType = Consts.ObjectEnum.CALENDAR;
         }
+        
+        //*******************************************************************
+        /// <summary>公開フィルターを展開</summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        //*******************************************************************
+        private void Public_Filter_Selected(object sender, RoutedEventArgs e)
+        {
+            SetTreeFilter(true, null);
+            if (_objList.ObjectId == null)
+                _objList.ObjectType = Consts.ObjectEnum.FILTER;
+        }
+
+
+        //*******************************************************************
+        /// <summary>プライベートフィルターを展開</summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        //*******************************************************************
+        private void Private_Filter_Selected(object sender, RoutedEventArgs e)
+        {
+            SetTreeFilter(false, null);
+            if (_objList.ObjectId == null)
+                _objList.ObjectType = Consts.ObjectEnum.FILTER;
+        }
 
         //*******************************************************************
         /// <summary>スケジュールを展開</summary>
@@ -822,8 +891,10 @@ namespace jp.co.ftf.jobcontroller.JobController
                 if (e.ClickCount == 1)
                 {
                     String jobnetId = ((TreeViewItem)sender).Header.ToString();
-                    if (!((JobEdit)_objectEdit).JobnetId.Equals(jobnetId))
-                    {
+                    JobEdit jobEdit = ((JobEdit)_objectEdit);
+                    if (!jobEdit.JobnetId.Equals(jobnetId)
+                        || jobEdit.FlowEditType == Consts.EditType.CopyNew)
+					{
                         JobData jobData = new JobData();
                         jobData.JobType = ElementType.JOBNET;
                         jobData.Data = jobnetId;
@@ -956,6 +1027,28 @@ namespace jp.co.ftf.jobcontroller.JobController
                 else
                 {
                     SetTreeObject(false, Consts.ObjectEnum.CALENDAR, null);
+                }
+            }
+            if (publicFilter.IsExpanded)
+            {
+                if (objectType == Consts.ObjectEnum.FILTER)
+                {
+                    SetTreeObject(true, Consts.ObjectEnum.FILTER, objectId);
+                }
+                else
+                {
+                    SetTreeObject(true, Consts.ObjectEnum.FILTER, null);
+                }
+            }
+            if (privateFilter.IsExpanded)
+            {
+                if (objectType == Consts.ObjectEnum.FILTER)
+                {
+                    SetTreeObject(false, Consts.ObjectEnum.FILTER, objectId);
+                }
+                else
+                {
+                    SetTreeObject(false, Consts.ObjectEnum.FILTER, null);
                 }
             }
 
@@ -1111,6 +1204,21 @@ namespace jp.co.ftf.jobcontroller.JobController
                         privateCalendar.IsExpanded = true;
                     }
                     break;
+                case Consts.ObjectEnum.FILTER:
+                    if (publicFlag)
+                    {
+                        publicFilter.IsExpanded = false;
+                        SetTreeFilter(publicFlag, objectID);
+                        publicFilter.IsExpanded = true;
+
+                    }
+                    if (!publicFlag)
+                    {
+                        privateFilter.IsExpanded = false;
+                        SetTreeFilter(publicFlag, objectID);
+                        privateFilter.IsExpanded = true;
+                    }
+                    break;
                 case Consts.ObjectEnum.SCHEDULE:
                     if (publicFlag)
                     {
@@ -1193,6 +1301,12 @@ namespace jp.co.ftf.jobcontroller.JobController
                 _objectEdit = new CalendarEdit(this);
                 return;
             }
+            if (treeView1.SelectedItem.Equals(publicFilter)
+                || treeView1.SelectedItem.Equals(privateFilter))
+            {
+                _objectEdit = new FilterEdit(this);
+                return;
+            }
 
             if (treeView1.SelectedItem.Equals(treeViewSchedule)
                 || treeView1.SelectedItem.Equals(publicSchedule)
@@ -1213,6 +1327,11 @@ namespace jp.co.ftf.jobcontroller.JobController
             if ((Consts.ObjectEnum)(((TreeViewItem)(treeView1.SelectedItem)).Tag) == Consts.ObjectEnum.CALENDAR)
             {
                 _objectEdit = new CalendarEdit(this);
+                return;
+            }
+            if ((Consts.ObjectEnum)(((TreeViewItem)(treeView1.SelectedItem)).Tag) == Consts.ObjectEnum.FILTER)
+            {
+                _objectEdit = new FilterEdit(this);
                 return;
             }
             if ((Consts.ObjectEnum)(((TreeViewItem)(treeView1.SelectedItem)).Tag) == Consts.ObjectEnum.SCHEDULE)
@@ -1241,6 +1360,11 @@ namespace jp.co.ftf.jobcontroller.JobController
             {
                 return Consts.ObjectEnum.CALENDAR;
             }
+            if (treeView1.SelectedItem.Equals(publicFilter)
+                || treeView1.SelectedItem.Equals(privateFilter))
+            {
+                return Consts.ObjectEnum.FILTER;
+            }
 
             if (treeView1.SelectedItem.Equals(treeViewSchedule)
                 || treeView1.SelectedItem.Equals(publicSchedule)
@@ -1268,10 +1392,12 @@ namespace jp.co.ftf.jobcontroller.JobController
                 case Consts.ObjectEnum.CALENDAR:
                     _objectEdit = new CalendarEdit(this);
                     break;
+                case Consts.ObjectEnum.FILTER:
+                    _objectEdit = new FilterEdit(this);
+                    break;
                 case Consts.ObjectEnum.SCHEDULE:
                     _objectEdit = new ScheduleEdit(this);
                     break;
-
                 case Consts.ObjectEnum.JOBNET:
                     _objectEdit = new JobEdit(this);
                     break;
@@ -1286,6 +1412,9 @@ namespace jp.co.ftf.jobcontroller.JobController
             {
                 case Consts.ObjectEnum.CALENDAR:
                     _objectEdit = new CalendarEdit(this, objectId, updDate, editType);
+                    break;
+                case Consts.ObjectEnum.FILTER:
+                    _objectEdit = new FilterEdit(this, objectId, updDate, editType);
                     break;
                 case Consts.ObjectEnum.SCHEDULE:
                     _objectEdit = new ScheduleEdit(this, objectId, updDate, editType);
@@ -1354,6 +1483,8 @@ namespace jp.co.ftf.jobcontroller.JobController
                 if (!(treeView1.SelectedItem.Equals(treeViewCalendar) ||
                     treeView1.SelectedItem.Equals(publicCalendar) ||
                     treeView1.SelectedItem.Equals(privateCalendar) ||
+                    treeView1.SelectedItem.Equals(publicFilter) ||
+                    treeView1.SelectedItem.Equals(privateFilter) ||
                     treeView1.SelectedItem.Equals(treeViewSchedule) ||
                     treeView1.SelectedItem.Equals(publicSchedule) ||
                     treeView1.SelectedItem.Equals(privateSchedule) ||
@@ -1426,6 +1557,9 @@ namespace jp.co.ftf.jobcontroller.JobController
             DBConnect dbaccess = new DBConnect(LoginSetting.ConnectStr);
             dbaccess.CreateSqlConnect();
 
+            // added by YAMA 2014/10/30    グループ所属無しユーザーでのマネージャ動作
+            bool isBelongToUSRGRP = LoginSetting.BelongToUsrgrpFlag;
+
             int flg;
             TreeViewItem treeViewItem;
             if (public_flg)
@@ -1452,13 +1586,35 @@ namespace jp.co.ftf.jobcontroller.JobController
             {
                 if (!(LoginSetting.Authority == Consts.AuthorityEnum.SUPER))
                 {
-                    selectSql = "SELECT distinct A.calendar_id,A.update_date "
-                                                    + "FROM ja_calendar_control_table AS A,users AS U,users_groups AS UG1,users_groups AS UG2 "
-                                                    + "WHERE A.user_name = U.alias and U.userid=UG1.userid and UG2.userid="+LoginSetting.UserID
-                                                    +" and UG1.usrgrpid = UG2.usrgrpid and "
-                                                    + "A.update_date= "
-                                                    + "( SELECT MAX(B.update_date) FROM ja_calendar_control_table AS B "
-                                                    + "WHERE B.calendar_id = A.calendar_id group by B.calendar_id) and A.public_flag=0 order by A.calendar_id";
+                    // added by YAMA 2014/10/30    グループ所属無しユーザーでのマネージャ動作
+                    //selectSql = "SELECT distinct A.calendar_id,A.update_date "
+                    //                                + "FROM ja_calendar_control_table AS A,users AS U,users_groups AS UG1,users_groups AS UG2 "
+                    //                                + "WHERE A.user_name = U.alias and U.userid=UG1.userid and UG2.userid="+LoginSetting.UserID
+                    //                                +" and UG1.usrgrpid = UG2.usrgrpid and "
+                    //                                + "A.update_date= "
+                    //                                + "( SELECT MAX(B.update_date) FROM ja_calendar_control_table AS B "
+                    //                                + "WHERE B.calendar_id = A.calendar_id group by B.calendar_id) and A.public_flag=0 order by A.calendar_id";
+                    if (isBelongToUSRGRP)
+                    {
+                        selectSql = "SELECT distinct A.calendar_id,A.update_date "
+                                                        + "FROM ja_calendar_control_table AS A,users AS U,users_groups AS UG1,users_groups AS UG2 "
+                                                        + "WHERE A.user_name = U.alias and U.userid=UG1.userid and UG2.userid=" + LoginSetting.UserID
+                                                        + " and UG1.usrgrpid = UG2.usrgrpid and "
+                                                        + "A.update_date= "
+                                                        + "( SELECT MAX(B.update_date) FROM ja_calendar_control_table AS B "
+                                                        + "WHERE B.calendar_id = A.calendar_id group by B.calendar_id) and A.public_flag=0 order by A.calendar_id";
+                    }
+                    else
+                    {
+                        selectSql = "SELECT distinct A.calendar_id,A.update_date "
+                                                        + "FROM ja_calendar_control_table AS A,users AS U "
+                                                        + "WHERE A.user_name = U.alias "
+                                                        + " and "
+                                                        + "A.update_date= "
+                                                        + "( SELECT MAX(B.update_date) FROM ja_calendar_control_table AS B "
+                                                        + "WHERE B.calendar_id = A.calendar_id group by B.calendar_id) and A.public_flag=0 order by A.calendar_id";
+                    }
+
                 }
                 else
                 {
@@ -1505,6 +1661,119 @@ namespace jp.co.ftf.jobcontroller.JobController
             }
             dbaccess.CloseSqlConnect();
         }
+        /// <summary>フィルターTree展開</summary>
+        /// <param name="publicFlag">公開フラグ</param>
+        /// <param name="filterID">フィルターＩＤ</param>
+        private void SetTreeFilter(bool public_flg, String filterID)
+        {
+            DataTable dataTbl;
+            DBConnect dbaccess = new DBConnect(LoginSetting.ConnectStr);
+            dbaccess.CreateSqlConnect();
+
+            // added by YAMA 2014/10/30    グループ所属無しユーザーでのマネージャ動作
+            bool isBelongToUSRGRP = LoginSetting.BelongToUsrgrpFlag;
+
+            int flg;
+            TreeViewItem treeViewItem;
+            if (public_flg)
+            {
+                flg = 1;
+                treeViewItem = publicFilter;
+                publicFilter.Selected -= Public_Filter_Selected;
+            }
+            else
+            {
+                flg = 0;
+                treeViewItem = privateFilter;
+                privateFilter.Selected -= Private_Filter_Selected;
+            }
+            treeViewItem.Items.Clear();
+
+            string selectSql;
+            if (public_flg)
+           {
+                selectSql = "select filter_id, max(update_date) from ja_filter_control_table where public_flag= " +
+                                flg + " group by filter_id order by filter_id";
+            }
+            else
+            {
+                if (!(LoginSetting.Authority == Consts.AuthorityEnum.SUPER))
+                {
+                    // added by YAMA 2014/10/30    グループ所属無しユーザーでのマネージャ動作
+                    //selectSql = "SELECT distinct A.filter_id,A.update_date "
+                    //                                + "FROM ja_filter_control_table AS A,users AS U,users_groups AS UG1,users_groups AS UG2 "
+                    //                                + "WHERE A.user_name = U.alias and U.userid=UG1.userid and UG2.userid="+LoginSetting.UserID
+                    //                                +" and UG1.usrgrpid = UG2.usrgrpid and "
+                    //                                + "A.update_date= "
+                    //                                + "( SELECT MAX(B.update_date) FROM ja_filter_control_table AS B "
+                    //                                + "WHERE B.filter_id = A.filter_id group by B.filter_id) and A.public_flag=0 order by A.filter_id";
+                    if (isBelongToUSRGRP)
+                    {
+                        selectSql = "SELECT distinct A.filter_id,A.update_date "
+                                                        + "FROM ja_filter_control_table AS A,users AS U,users_groups AS UG1,users_groups AS UG2 "
+                                                        + "WHERE A.user_name = U.alias and U.userid=UG1.userid and UG2.userid=" + LoginSetting.UserID
+                                                        + " and UG1.usrgrpid = UG2.usrgrpid and "
+                                                        + "A.update_date= "
+                                                        + "( SELECT MAX(B.update_date) FROM ja_filter_control_table AS B "
+                                                        + "WHERE B.filter_id = A.filter_id group by B.filter_id) and A.public_flag=0 order by A.filter_id";
+                    }
+                    else
+                    {
+                        selectSql = "SELECT distinct A.filter_id,A.update_date "
+                                                        + "FROM ja_filter_control_table AS A,users AS U "
+                                                        + "WHERE A.user_name = U.alias"
+                                                        + " and "
+                                                        + "A.update_date= "
+                                                        + "( SELECT MAX(B.update_date) FROM ja_filter_control_table AS B "
+                                                        + "WHERE B.filter_id = A.filter_id group by B.filter_id) and A.public_flag=0 order by A.filter_id";
+                    }
+
+                }
+                else
+                {
+                    selectSql = "select filter_id, max(update_date) from ja_filter_control_table where public_flag= " +
+                                    flg + " group by filter_id order by filter_id";
+
+                }
+            }
+
+            dataTbl = dbaccess.ExecuteQuery(selectSql);
+
+            if (dataTbl != null)
+            {
+
+                foreach (DataRow row in dataTbl.Rows)
+                {
+                    TreeViewItem item = new TreeViewItem();
+                    item.Header = row["filter_id"].ToString();
+                    item.Tag = Consts.ObjectEnum.FILTER;
+                    treeViewItem.Items.Add(item);
+                    if (filterID != null && item.Header.Equals(filterID))
+                    {
+                        item.IsSelected = true;
+                    }
+
+                }
+            }
+
+            TreeViewItem itemFilter;
+            foreach (object item in treeViewItem.Items)
+            {
+                itemFilter = (TreeViewItem)item;
+                itemFilter.Selected += Object_Click;
+            }
+            if (public_flg)
+            {
+                treeViewItem = publicFilter;
+                publicFilter.Selected += Public_Filter_Selected;
+            }
+            else
+            {
+                treeViewItem = privateFilter;
+                privateFilter.Selected += Private_Filter_Selected;
+            }
+            dbaccess.CloseSqlConnect();
+        }
 
         /// <summary>スケジュールTree展開</summary>
         /// <param name="publicFlag">公開フラグ</param>
@@ -1514,6 +1783,9 @@ namespace jp.co.ftf.jobcontroller.JobController
             DataTable dataTbl;
             DBConnect dbaccess = new DBConnect(LoginSetting.ConnectStr);
             dbaccess.CreateSqlConnect();
+
+            // added by YAMA 2014/10/30    グループ所属無しユーザーでのマネージャ動作
+            bool isBelongToUSRGRP = LoginSetting.BelongToUsrgrpFlag;
 
             int flg;
             TreeViewItem treeViewItem;
@@ -1542,13 +1814,35 @@ namespace jp.co.ftf.jobcontroller.JobController
             {
                 if (!(LoginSetting.Authority == Consts.AuthorityEnum.SUPER))
                 {
-                    selectSql = "SELECT distinct A.schedule_id,A.update_date "
-                                                + "FROM ja_schedule_control_table AS A,users AS U,users_groups AS UG1,users_groups AS UG2 "
-                                                + "WHERE A.user_name = U.alias and U.userid=UG1.userid and UG2.userid=" + LoginSetting.UserID
-                                                + " and UG1.usrgrpid = UG2.usrgrpid and "
-                                                + "A.update_date= "
-                                                + "( SELECT MAX(B.update_date) FROM ja_schedule_control_table AS B "
-                                                + "WHERE B.schedule_id = A.schedule_id group by B.schedule_id) and A.public_flag=0 order by A.schedule_id";
+                    // added by YAMA 2014/10/30    グループ所属無しユーザーでのマネージャ動作
+                    //selectSql = "SELECT distinct A.schedule_id,A.update_date "
+                    //                            + "FROM ja_schedule_control_table AS A,users AS U,users_groups AS UG1,users_groups AS UG2 "
+                    //                            + "WHERE A.user_name = U.alias and U.userid=UG1.userid and UG2.userid=" + LoginSetting.UserID
+                    //                            + " and UG1.usrgrpid = UG2.usrgrpid and "
+                    //                            + "A.update_date= "
+                    //                            + "( SELECT MAX(B.update_date) FROM ja_schedule_control_table AS B "
+                    //                            + "WHERE B.schedule_id = A.schedule_id group by B.schedule_id) and A.public_flag=0 order by A.schedule_id";
+                    if (isBelongToUSRGRP)
+                    {
+                        selectSql = "SELECT distinct A.schedule_id,A.update_date "
+                                                    + "FROM ja_schedule_control_table AS A,users AS U,users_groups AS UG1,users_groups AS UG2 "
+                                                    + "WHERE A.user_name = U.alias and U.userid=UG1.userid and UG2.userid=" + LoginSetting.UserID
+                                                    + " and UG1.usrgrpid = UG2.usrgrpid and "
+                                                    + "A.update_date= "
+                                                    + "( SELECT MAX(B.update_date) FROM ja_schedule_control_table AS B "
+                                                    + "WHERE B.schedule_id = A.schedule_id group by B.schedule_id) and A.public_flag=0 order by A.schedule_id";
+                    }
+                    else
+                    {
+                        selectSql = "SELECT distinct A.schedule_id,A.update_date "
+                                                    + "FROM ja_schedule_control_table AS A,users AS U "
+                                                    + "WHERE A.user_name = U.alias "
+                                                    + " and "
+                                                    + "A.update_date= "
+                                                    + "( SELECT MAX(B.update_date) FROM ja_schedule_control_table AS B "
+                                                    + "WHERE B.schedule_id = A.schedule_id group by B.schedule_id) and A.public_flag=0 order by A.schedule_id";
+                    }
+
                 }
                 else
                 {
@@ -1607,6 +1901,9 @@ namespace jp.co.ftf.jobcontroller.JobController
             DBConnect dbaccess = new DBConnect(LoginSetting.ConnectStr);
             dbaccess.CreateSqlConnect();
 
+            // added by YAMA 2014/10/30    グループ所属無しユーザーでのマネージャ動作
+            bool isBelongToUSRGRP = LoginSetting.BelongToUsrgrpFlag;
+
             int flg;
             TreeViewItem treeViewItem;
             if (public_flg)
@@ -1633,13 +1930,34 @@ namespace jp.co.ftf.jobcontroller.JobController
             {
                 if (!(LoginSetting.Authority == Consts.AuthorityEnum.SUPER))
                 {
-                    selectSql = "SELECT distinct A.jobnet_id,A.update_date "
-                                                    + "FROM ja_jobnet_control_table AS A,users AS U,users_groups AS UG1,users_groups AS UG2 "
-                                                    + "WHERE A.user_name = U.alias and U.userid=UG1.userid and UG2.userid=" + LoginSetting.UserID
-                                                    + " and UG1.usrgrpid = UG2.usrgrpid and "
-                                                    + "A.update_date= "
-                                                    + "( SELECT MAX(B.update_date) FROM ja_jobnet_control_table AS B "
-                                                    + "WHERE B.jobnet_id = A.jobnet_id group by B.jobnet_id) and A.public_flag=0 order by A.jobnet_id";
+                    // added by YAMA 2014/10/30    グループ所属無しユーザーでのマネージャ動作
+                    //selectSql = "SELECT distinct A.jobnet_id,A.update_date "
+                    //                                + "FROM ja_jobnet_control_table AS A,users AS U,users_groups AS UG1,users_groups AS UG2 "
+                    //                                + "WHERE A.user_name = U.alias and U.userid=UG1.userid and UG2.userid=" + LoginSetting.UserID
+                    //                                + " and UG1.usrgrpid = UG2.usrgrpid and "
+                    //                                + "A.update_date= "
+                    //                                + "( SELECT MAX(B.update_date) FROM ja_jobnet_control_table AS B "
+                    //                                + "WHERE B.jobnet_id = A.jobnet_id group by B.jobnet_id) and A.public_flag=0 order by A.jobnet_id";
+                    if (isBelongToUSRGRP)
+                    {
+                        selectSql = "SELECT distinct A.jobnet_id,A.update_date "
+                                                        + "FROM ja_jobnet_control_table AS A,users AS U,users_groups AS UG1,users_groups AS UG2 "
+                                                        + "WHERE A.user_name = U.alias and U.userid=UG1.userid and UG2.userid=" + LoginSetting.UserID
+                                                        + " and UG1.usrgrpid = UG2.usrgrpid and "
+                                                        + "A.update_date= "
+                                                        + "( SELECT MAX(B.update_date) FROM ja_jobnet_control_table AS B "
+                                                        + "WHERE B.jobnet_id = A.jobnet_id group by B.jobnet_id) and A.public_flag=0 order by A.jobnet_id";
+                    }
+                    else
+                    {
+                        selectSql = "SELECT distinct A.jobnet_id,A.update_date "
+                                  + "FROM ja_jobnet_control_table AS A,users AS U "
+                                  + "WHERE A.user_name = U.alias and "
+                                  + "A.update_date= "
+                                  + "( SELECT MAX(B.update_date) FROM ja_jobnet_control_table AS B "
+                                  + "WHERE B.jobnet_id = A.jobnet_id group by B.jobnet_id) and A.public_flag=0 order by A.jobnet_id";
+                    }
+
                 }
                 else
                 {

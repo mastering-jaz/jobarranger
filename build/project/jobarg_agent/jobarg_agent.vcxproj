@@ -177,7 +177,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;ZABBIX_SERVICE;_WINDOWS;WITH_COMMON_METRICS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\..\tools;$(SolutionDir)..\..\tools\sqlite3;$(SolutionDir)..\..\tools\libtar\libtar\lib;$(SolutionDir)..\..\tools\libtar\libtar\listhash;$(SolutionDir)..\..\tools\libtar\libtar\win32;$(SolutionDir)..\win32\include;$(SolutionDir)..\..\include;$(SolutionDir)..\..\jainclude;$(SolutionDir)..\..\src\jobarg_agent;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\..\tools;$(SolutionDir)..\..\tools\sqlite3;$(SolutionDir)..\..\tools\libtar\libtar\lib;$(SolutionDir)..\..\tools\libtar\libtar\listhash;$(SolutionDir)..\..\tools\libtar\libtar\win32;$(SolutionDir)..\win32\include;$(SolutionDir)..\..\include;$(SolutionDir)..\..\jainclude;$(SolutionDir)..\..\src\jobarg_agent;$(SolutionDir)..\..\tools\json;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ObjectFileName>%(Directory)</ObjectFileName>
     </ClCompile>
     <Link>
@@ -213,7 +213,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;ZABBIX_SERVICE;_WINDOWS;WITH_COMMON_METRICS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\..\tools;$(SolutionDir)..\..\tools\sqlite3;$(SolutionDir)..\..\tools\libtar\libtar\lib;$(SolutionDir)..\..\tools\libtar\libtar\listhash;$(SolutionDir)..\..\tools\libtar\libtar\win32;$(SolutionDir)..\win32\include;$(SolutionDir)..\..\include;$(SolutionDir)..\..\jainclude;$(SolutionDir)..\..\src\jobarg_agent;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\..\tools;$(SolutionDir)..\..\tools\sqlite3;$(SolutionDir)..\..\tools\libtar\libtar\lib;$(SolutionDir)..\..\tools\libtar\libtar\listhash;$(SolutionDir)..\..\tools\libtar\libtar\win32;$(SolutionDir)..\win32\include;$(SolutionDir)..\..\include;$(SolutionDir)..\..\jainclude;$(SolutionDir)..\..\src\jobarg_agent;$(SolutionDir)..\..\tools\json;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ObjectFileName>%(Directory)</ObjectFileName>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
@@ -236,7 +236,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;ZABBIX_SERVICE;_WINDOWS;WITH_COMMON_METRICS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\..\tools;$(SolutionDir)..\..\tools\sqlite3;$(SolutionDir)..\..\tools\libtar\libtar\lib;$(SolutionDir)..\..\tools\libtar\libtar\listhash;$(SolutionDir)..\..\tools\libtar\libtar\win32;$(SolutionDir)..\win32\include;$(SolutionDir)..\..\include;$(SolutionDir)..\..\jainclude;$(SolutionDir)..\..\src\jobarg_agent;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\..\tools;$(SolutionDir)..\..\tools\sqlite3;$(SolutionDir)..\..\tools\libtar\libtar\lib;$(SolutionDir)..\..\tools\libtar\libtar\listhash;$(SolutionDir)..\..\tools\libtar\libtar\win32;$(SolutionDir)..\win32\include;$(SolutionDir)..\..\include;$(SolutionDir)..\..\jainclude;$(SolutionDir)..\..\src\jobarg_agent;$(SolutionDir)..\..\tools\json;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ObjectFileName>%(Directory)</ObjectFileName>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>

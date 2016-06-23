@@ -1,6 +1,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -23,7 +24,7 @@
 ** $Author: ossinfra@FITECHLABS.CO.JP $
 **/
 
-#include <json/json.h>
+#include <json.h>
 
 #include "common.h"
 #include "comms.h"
@@ -111,6 +112,8 @@ int jatrap_jobresult_load(ja_jobresult_object * job,
     job->result = json_object_get_int(jp);
 
     if (job->result == JA_JOBRESULT_FAIL) {
+        // return code
+        job->return_code = -1;
         // message
         jp = json_object_object_get(jp_data, JA_PROTO_TAG_MESSAGE);
         if (jp == NULL) {
@@ -293,7 +296,7 @@ int jatrap_jobresult(ja_telegram_object * obj)
     ja_jobresult_object job;
     json_object *jp_data;
     zbx_uint64_t inner_jobnet_id;
-    int job_type, status;
+    int job_type, status, icon_status;
     char *err;
     int run_err, cmp;
     char *msg, value[24];
@@ -304,6 +307,7 @@ int jatrap_jobresult(ja_telegram_object * obj)
     inner_jobnet_id = 0;
     err = NULL;
     msg = NULL;
+    icon_status = 2;
 
 
     if (ja_telegram_check(obj) == FAIL)
@@ -370,6 +374,7 @@ int jatrap_jobresult(ja_telegram_object * obj)
             if (cmp == 0)
                 run_err = 0;
             else
+                icon_status = 1;
                 msg =
                     zbx_dsprintf(NULL,
                                  "The job return code '%d' is range of the stop code '%s'",
@@ -394,7 +399,8 @@ int jatrap_jobresult(ja_telegram_object * obj)
         }
     }
     if (run_err == 0) {
-        ja_flow(job.jobid, JA_FLOW_TYPE_NORMAL);
+        ja_set_value_after(job.jobid, inner_jobnet_id, "ICON_STATUS", "0");
+        ja_flow(job.jobid, JA_FLOW_TYPE_NORMAL, 1);
     } else {
         if (msg != NULL) {
             if (ja_set_value_after
@@ -408,7 +414,7 @@ int jatrap_jobresult(ja_telegram_object * obj)
                 goto error;
             }
         }
-        ja_set_runerr(job.jobid);
+        ja_set_runerr(job.jobid, icon_status);
     }
 
     ret = SUCCEED;

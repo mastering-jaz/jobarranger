@@ -1,6 +1,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -18,8 +19,8 @@
 **/
 
 /*
-** $Date:: 2014-05-12 10:26:50 +0900 #$
-** $Revision: 5955 $
+** $Date:: 2014-11-11 13:25:08 +0900 #$
+** $Revision: 6642 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -270,30 +271,33 @@ static void set_defaults()
 static void jobarg_load_config(int requirement)
 {
     struct cfg_line cfg[] = {
-        /* PARAMETER,       VAR,                       TYPE,        MANDATORY, MIN, MAX */
+        /* PARAMETER,         VAR,                         TYPE,        MANDATORY, MIN, MAX */
 #ifdef USE_PID_FILE
-        {"JaPidFile",       &CONFIG_PID_FILE,          TYPE_STRING, PARM_OPT,  0,   0},
+        {"JaPidFile",         &CONFIG_PID_FILE,            TYPE_STRING, PARM_OPT,  0,   0},
 #endif
-        {"TmpDir",          &CONFIG_TMPDIR,            TYPE_STRING, PARM_MAND, 0,   0},
-        {"Server",          &CONFIG_HOSTS_ALLOWED,     TYPE_STRING, PARM_OPT,  0,   0},
-        {"Hostname",        &CONFIG_HOSTNAME,          TYPE_STRING, PARM_OPT,  0,   0},
-        {"AllowRoot",       &CONFIG_ALLOW_ROOT,        TYPE_INT,    PARM_OPT,  0,   1},
-        {"ListenIP",        &CONFIG_LISTEN_IP,         TYPE_STRING, PARM_OPT,  0,   0},
-        {"ListenIP",        &CONFIG_SOURCE_IP,         TYPE_STRING, PARM_OPT,  0,   0},
-        {"Timeout",         &CONFIG_TIMEOUT,           TYPE_INT,    PARM_OPT,  1,   300},
-        {"DebugLevel",      &CONFIG_LOG_LEVEL,         TYPE_INT,    PARM_OPT,  0,   4},
-        {"LogFileSize",     &CONFIG_LOG_FILE_SIZE,     TYPE_INT,    PARM_OPT,  0,   1024},
-        {"JaLogFile",       &CONFIG_LOG_FILE,          TYPE_STRING, PARM_OPT,  0,   0},
-        {"JaServerPort",    &CONFIG_SERVER_PORT,       TYPE_INT,    PARM_OPT,  1,   65535},
-        {"JaListenPort",    &CONFIG_LISTEN_PORT,       TYPE_INT,    PARM_OPT,  1,   65535},
-        {"JaSendRetry",     &CONFIG_SEND_RETRY,        TYPE_INT,    PARM_OPT,  0,   3600},
-        {"JaDatabaseFile",  &CONFIG_DATABASE_FILE,     TYPE_STRING, PARM_MAND, 0,   0},
-        {"JaJobHistory",    &CONFIG_JOB_HISTORY,       TYPE_INT,    PARM_OPT,  1,   365},
-        {"JaBackupTime",    &CONFIG_BACKUP_TIME,       TYPE_INT,    PARM_OPT,  1,   24},
-        {"JaExtjobPath",    &CONFIG_EXTJOB_PATH,       TYPE_STRING, PARM_MAND, 0,   0},
-        {"JaFcopyTimeout",  &CONFIG_FCOPY_TIMEOUT,     TYPE_INT,    PARM_OPT,  1,   3600},
-        {"JaListenRetry",   &CONFIG_LISTEN_RETRY,      TYPE_INT,    PARM_OPT,  0,   3600},
-        {"JaExecutionUser", &CONFIG_JA_EXECUTION_USER, TYPE_STRING, PARM_OPT,  0,   0},
+        {"TmpDir",            &CONFIG_TMPDIR,              TYPE_STRING, PARM_MAND, 0,   0},
+        {"Server",            &CONFIG_HOSTS_ALLOWED,       TYPE_STRING, PARM_OPT,  0,   0},
+        {"Hostname",          &CONFIG_HOSTNAME,            TYPE_STRING, PARM_OPT,  0,   0},
+        {"AllowRoot",         &CONFIG_ALLOW_ROOT,          TYPE_INT,    PARM_OPT,  0,   1},
+        {"ListenIP",          &CONFIG_LISTEN_IP,           TYPE_STRING, PARM_OPT,  0,   0},
+        {"ListenIP",          &CONFIG_SOURCE_IP,           TYPE_STRING, PARM_OPT,  0,   0},
+        {"Timeout",           &CONFIG_TIMEOUT,             TYPE_INT,    PARM_OPT,  1,   300},
+        {"DebugLevel",        &CONFIG_LOG_LEVEL,           TYPE_INT,    PARM_OPT,  0,   4},
+        {"LogFileSize",       &CONFIG_LOG_FILE_SIZE,       TYPE_INT,    PARM_OPT,  0,   1024},
+        {"JaLogFile",         &CONFIG_LOG_FILE,            TYPE_STRING, PARM_OPT,  0,   0},
+        {"JaServerPort",      &CONFIG_SERVER_PORT,         TYPE_INT,    PARM_OPT,  1,   65535},
+        {"JaListenPort",      &CONFIG_LISTEN_PORT,         TYPE_INT,    PARM_OPT,  1,   65535},
+        {"JaSendRetry",       &CONFIG_SEND_RETRY,          TYPE_INT,    PARM_OPT,  0,   3600},
+        {"JaDatabaseFile",    &CONFIG_DATABASE_FILE,       TYPE_STRING, PARM_MAND, 0,   0},
+        {"JaJobHistory",      &CONFIG_JOB_HISTORY,         TYPE_INT,    PARM_OPT,  1,   365},
+        {"JaBackupTime",      &CONFIG_BACKUP_TIME,         TYPE_INT,    PARM_OPT,  1,   24},
+        {"JaExtjobPath",      &CONFIG_EXTJOB_PATH,         TYPE_STRING, PARM_MAND, 0,   0},
+        {"JaFcopyTimeout",    &CONFIG_FCOPY_TIMEOUT,       TYPE_INT,    PARM_OPT,  1,   3600},
+        {"JaListenRetry",     &CONFIG_LISTEN_RETRY,        TYPE_INT,    PARM_OPT,  0,   3600},
+        {"JaExecutionUser",   &CONFIG_JA_EXECUTION_USER,   TYPE_STRING, PARM_OPT,  0,   0},
+        {"JaCommandUser",     &CONFIG_JA_COMMAND_USER,     TYPE_STRING, PARM_OPT,  0,   0},
+        {"JaCommandPassword", &CONFIG_JA_COMMAND_PASSWORD, TYPE_STRING, PARM_OPT,  0,   0},
+        {"JaPsCommand",       &CONFIG_JA_PS_COMMAND,       TYPE_STRING, PARM_OPT,  0,   0},
         {NULL}
     };
 

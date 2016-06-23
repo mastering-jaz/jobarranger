@@ -2,6 +2,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -24,7 +25,9 @@
         xmlns:src="clr-namespace:jp.co.ftf.jobcontroller.JobController" 
         WindowStartupLocation="CenterScreen" ResizeMode="NoResize" Closing="Window_Closed"
         Title="{x:Static src:Properties.Resources.task_icon_screen_name}" Height="252" Width="390" FontSize="11" FontFamily="Meiryo">
-    <Grid Background="#FFEEECE1" Name="GridSetting" Height="212">
+    <!--  added by YAMA 2014/09/22 設定ダイアログ背景色不備対応 -->
+    <!--  Grid Background="#FFEEECE1" Name="GridSetting" Height="212" -->
+    <Grid Background="#FFEEECE1" Name="GridSetting">
         <Grid.RowDefinitions>
             <RowDefinition Height="30" />
             <RowDefinition Height="30" />
@@ -50,7 +53,7 @@
         <Border Grid.Row="3" Height="40" Width="251" BorderBrush="{x:Null}" Margin="110,4,3,15">
             <TextBlock Name="tbJobNetName" Text="" TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Center"/>
         </Border>
-        <Button Grid.Row="4" Content="{x:Static src:Properties.Resources.regist_button_text}" Height="28" HorizontalAlignment="Left" Margin="193,22,0,0" 
+        <Button Grid.Row="4" Content="{x:Static src:Properties.Resources.regist_button_text}" Height="28" HorizontalAlignment="Left" Margin="210,22,0,0" 
                 Name="btnToroku" VerticalAlignment="Top" Width="75" Click="btnToroku_Click" IsDefault="True" />
         <Button Grid.Row="4" Content="{x:Static src:Properties.Resources.cancel_button_text}" Height="28" HorizontalAlignment="Right" Margin="0,22,20,0" 
                 Name="btnCancel" VerticalAlignment="Top" Width="75" Click="btnCancel_Click" IsCancel="True"/>

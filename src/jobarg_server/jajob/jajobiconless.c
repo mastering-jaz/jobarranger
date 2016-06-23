@@ -1,6 +1,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -29,9 +30,12 @@
 
 #include "jacommon.h"
 #include "jastr.h"
+#include "jalog.h"
+#include "jajoblog.h"
 #include "jatimeout.h"
 #include "jastatus.h"
 #include "jakill.h"
+#include "jajobid.h"
 #include "jajobiconless.h"
 
 /******************************************************************************
@@ -67,7 +71,7 @@ int jajob_icon_less_abort(zbx_uint64_t inner_job_id, int force_stop)
     if (NULL == (row = DBfetch(result))) {
         ja_log("JAJOBICONLESS200001", 0, NULL, inner_job_id, __function_name, inner_job_id);
         DBfree_result(result);
-        return ja_set_runerr(inner_job_id);
+        return ja_set_runerr(inner_job_id, 2);
     }
 
     ZBX_STR2UINT64(inner_jobnet_id, row[0]);
@@ -81,7 +85,7 @@ int jajob_icon_less_abort(zbx_uint64_t inner_job_id, int force_stop)
     if (NULL == (row = DBfetch(result))) {
         ja_log("JAJOBICONLESS200002", 0, NULL, inner_job_id, __function_name, inner_jobnet_id);
         DBfree_result(result);
-        return ja_set_runerr(inner_job_id);
+        return ja_set_runerr(inner_job_id, 2);
     }
 
     ZBX_STR2UINT64(inner_jobnet_main_id, row[0]);
@@ -106,7 +110,7 @@ int jajob_icon_less_abort(zbx_uint64_t inner_job_id, int force_stop)
         DBexecute("delete from ja_session_table"
                   " where session_id = '%s' and inner_jobnet_main_id = " ZBX_FS_UI64,
                   session_id, inner_jobnet_main_id);
-        return ja_set_runerr(inner_job_id);
+        return ja_set_runerr(inner_job_id, 2);
     }
 
     if (ja_process_check(smpid) == FAIL) {
@@ -114,7 +118,7 @@ int jajob_icon_less_abort(zbx_uint64_t inner_job_id, int force_stop)
         DBexecute("delete from ja_session_table"
                   " where session_id = '%s' and inner_jobnet_main_id = " ZBX_FS_UI64,
                   session_id, inner_jobnet_main_id);
-        return ja_set_runerr(inner_job_id);
+        return ja_set_runerr(inner_job_id, 2);
     }
 
     if (force_stop != JA_SES_FORCE_STOP_ON) {
@@ -129,7 +133,7 @@ int jajob_icon_less_abort(zbx_uint64_t inner_job_id, int force_stop)
 
     if (rc <= ZBX_DB_OK) {
         ja_log("JAJOBICONLESS200003", 0, NULL, inner_job_id, __function_name, inner_jobnet_main_id, session_id, inner_job_id);
-        return ja_set_runerr(inner_job_id);
+        return ja_set_runerr(inner_job_id, 2);
     }
 
     return SUCCEED;
@@ -156,12 +160,10 @@ int jajob_icon_less_timeout(zbx_uint64_t inner_job_id, char *start_time)
     DB_ROW       row;
     DB_ROW       row2;
     zbx_uint64_t inner_jobnet_id;
-    zbx_uint64_t w_inner_job_id;
-    int          rc, exit_flag, idx, len;
+    int          rc;
     char         timeout[64];
-    char         w_main_jobnet_id[70];
+    char         w_main_jobnet_id[64];
     char         w_execution_user_name[110];
-    char         w_job_id[3000];
     const char   *__function_name = "jajob_icon_less_timeout";
 
     zabbix_log(LOG_LEVEL_DEBUG, "In %s() inner_job_id: " ZBX_FS_UI64 " start_time: %s", __function_name, inner_job_id, start_time);
@@ -173,7 +175,7 @@ int jajob_icon_less_timeout(zbx_uint64_t inner_job_id, char *start_time)
     if (NULL == (row = DBfetch(result))) {
         ja_log("JAJOBICONLESS200001", 0, NULL, inner_job_id, __function_name, inner_job_id);
         DBfree_result(result);
-        return ja_set_runerr(inner_job_id);
+        return ja_set_runerr(inner_job_id, 2);
     }
 
     ZBX_STR2UINT64(inner_jobnet_id, row[0]);
@@ -204,73 +206,15 @@ int jajob_icon_less_timeout(zbx_uint64_t inner_job_id, char *start_time)
     }
     DBfree_result(result);
 
-    /* job id get */
-    idx            = sizeof(w_job_id) - 1;
-    w_job_id[idx]  = '\0';
-    w_inner_job_id = inner_job_id;
-
-    /* sub jobnet search */
-    exit_flag = 0;
-    while (exit_flag == 0) {
-        result = DBselect("select inner_jobnet_id, inner_jobnet_main_id, job_id from ja_run_job_table"
-                          " where inner_job_id = " ZBX_FS_UI64, w_inner_job_id);
-
-        if (NULL == (row = DBfetch(result))) {
-            DBfree_result(result);
-            exit_flag = 1;
-            continue;
-        }
-
-        len = strlen(row[2]);
-        if (((idx - 1) - len) < 0) {
-            DBfree_result(result);
-            exit_flag = 1;
-            continue;
-        }
-        else {
-            idx = idx - len;
-            memcpy(&w_job_id[idx], row[2], len);
-            idx = idx - 1;
-            memcpy(&w_job_id[idx], "/", 1);
-        }
-
-        if (strcmp(row[0], row[1]) == 0) {
-            DBfree_result(result);
-            exit_flag = 1;
-            continue;
-        }
-
-        /* get the job id of the jobnet icon */
-        result2 = DBselect("select inner_job_id from ja_run_icon_jobnet_table"
-                           " where link_inner_jobnet_id = %s", row[0]);
-
-        if (NULL == (row2 = DBfetch(result2))) {
-            DBfree_result(result);
-            DBfree_result(result2);
-            exit_flag = 1;
-            continue;
-        }
-        ZBX_STR2UINT64(w_inner_job_id, row2[0]);
-        DBfree_result(result);
-        DBfree_result(result2);
-    }
-
-    /* jobnet id set */
-    len = strlen(w_main_jobnet_id);
-    if ((idx - len) >= 0 && len > 0) {
-        idx = idx - len;
-        memcpy(&w_job_id[idx], w_main_jobnet_id, len);
-    }
-
     ja_log("JAJOBICONLESS300001", inner_jobnet_id, NULL, inner_job_id, __function_name, inner_job_id,
-           timeout, start_time, w_main_jobnet_id, &w_job_id[idx], w_execution_user_name);
+           timeout, start_time, w_main_jobnet_id, ja_get_jobid(inner_job_id), w_execution_user_name);
 
     rc = DBexecute("update ja_run_job_table set timeout_flag = 1"
                    " where inner_job_id = " ZBX_FS_UI64, inner_job_id);
 
     if (rc < ZBX_DB_OK) {
         ja_log("JAJOBICONLESS200004", 0, NULL, inner_job_id, __function_name, inner_job_id);
-        return ja_set_runerr(inner_job_id);
+        return ja_set_runerr(inner_job_id, 2);
     }
 
     ja_joblog(JC_JOB_TIMEOUT, inner_jobnet_id, inner_job_id);

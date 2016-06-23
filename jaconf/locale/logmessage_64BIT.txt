@@ -1,7 +1,8 @@
 
-# Job Arranger application log message  - 2014/04/25 -
+# Job Arranger application log message  - 2014/09/12 -
 
 # Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+# Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 
 # Format: Message id, Log type, Notice flag, Message body
 # Log Type: (0:information  1:critical  2:error  3:warning)
@@ -15,6 +16,7 @@ JAJOB300001,3,0,In %s() can not update inner_job_id: %lu job_type: %d
 
 JAJOBICONJOB200001,2,1,In %s() can not insert an abort icon. inner_job_id: %lu, inner_job_id_fs_link: %lu
 JAJOBICONJOB200002,2,1,In %s() can not match inner_job_id: %lu
+JAJOBICONJOB200003,2,1,In %s() failed to update the job information. inner_job_id: %lu
 JAJOBICONJOB300001,3,0,In %s() timeout occurrence. inner_job_id: %lu, timeout: %s, start_time: %s, jobnet_id: %s, job_id: %s, user_name: %s
 
 JAJOBNET000001,0,0,In %s() jobnet was forced to stop. inner_jobnet_id: %lu, jobnet_id: %s, user_name: %s
@@ -23,7 +25,7 @@ JAJOBNET000002,0,0,In %s() inner_jobnet_id: %lu, ready_cnt: %d, run_cnt: %d
 JAJOBNETREADY200001,2,1,In %s() can not find inner_jobnet_id: %lu
 JAJOBNETREADY200002,2,1,In %s() the number of start icons %d is wrong. inner_jobnet_id: %lu
 
-JAJOBNETRUN000001,0,0,In %s() job execution error. inner_job_id: %lu status is RUNERR jobnet_id: %s, job_id: %s, user_name: %s
+JAJOBNETRUN000001,0,1,In %s() job execution error. inner_job_id: %lu status is RUNERR jobnet_id: %s, job_id: %s, user_name: %s, job_exit_cd: %s, icon_status: %s
 JAJOBNETRUN200001,2,1,In %s() job abnormal termination. inner_job_id: %lu status is ENDERR jobnet_id: %s, job_id: %s, user_name: %s
 JAJOBNETRUN200002,2,1,In %s() multiple end icons are executed. inner_jobnet_id: %lu
 JAJOBNETRUN200003,2,1,In %s() the number of start icons (%d) is not 1. inner_jobnet_id: %lu
@@ -45,8 +47,8 @@ JARUNICONCALC200003,2,1,In %s() popen() failed
 JARUNICONCALC200004,2,1,In %s() can not get value. command: %s
 JARUNICONCALC200005,2,1,In %s() exit_code: %d
 
-JARUNICONEND200001,2,1,In %s() can not find 'JOB_EXIT_CD' from ja_run_icon_end_table. inner_job_id: %lu
-JARUNICONEND200002,2,1,In %s() can not find inner_job_id: %lu
+JARUNICONEND200001,2,1,In %s() end icon information is not found. inner_job_id: %lu
+JARUNICONEND200002,2,1,In %s() Job Controller variable is not found. variable_name: %s inner_job_id: %lu
 
 JARUNICONEXTJOB200001,2,1,In %s() first fork() failed
 JARUNICONEXTJOB200002,2,1,In %s() second fork() failed
@@ -55,6 +57,16 @@ JARUNICONEXTJOB200004,2,1,In %s() can not match inner_job_id: %lu
 JARUNICONEXTJOB200005,2,1,In %s() can not get start_time. inner_jobnet_id: %lu
 JARUNICONEXTJOB200006,2,1,In %s() can not save the pid: %d, inner_job_id: %lu
 JARUNICONEXTJOB200007,2,1,In %s() can not match inner_jobnet_id: %lu
+JARUNICONEXTJOB200008,2,1,In %s() detected an invalid command id. command_id: %s inner_jobnet_id: %lu job_id: %s
+JARUNICONEXTJOB200009,2,1,In %s() sleep time is invalid. value: %s inner_job_id: %lu job_id: %s
+JARUNICONEXTJOB200010,2,1,In %s() failed to update the sleep time. sleep_time: %s inner_job_id: %lu
+JARUNICONEXTJOB200011,2,1,In %s() wait time format is invalid. value: %s inner_job_id: %lu job_id: %s
+JARUNICONEXTJOB200012,2,1,In %s() failed to update the waiting time. wait_time: %s inner_job_id: %lu
+JARUNICONEXTJOB200013,2,1,In %s() day of the week is invalid. value: %s inner_job_id: %lu job_id: %s
+JARUNICONEXTJOB200014,2,1,In %s() failed to get zabbix_sender command path. parameter_name: %s inner_job_id: %lu job_id: %s
+JARUNICONEXTJOB200015,2,1,In %s() failed to run the zabbix_sender. inner_job_id: %lu job_id: %s command: (%d) [%s]
+JARUNICONEXTJOB200016,2,1,In %s() failed to convert the waiting time. value: %s start_time: %s inner_job_id: %lu job_id: %s
+JARUNICONEXTJOB200017,2,1,In %s() day of the week is overlapping. value: %s inner_job_id: %lu job_id: %s
 
 JARUNICONIF200001,2,1,In %s() unsupport hand_flag: %d
 JARUNICONIF200002,2,1,In %s() hand_flag or comparison_value or before_value is NULL. inner_job_id: %lu
@@ -104,17 +116,17 @@ JARUNICONTASK200004,2,1,In %s() jobnet_id is not found, or not valid jobnet_id: 
 JARUNICONTASK200005,2,1,In %s() can not find inner_jobnet_id: %s
 
 JARUNICONVALUE200001,2,1,In %s() failed to insert the %s: value_name:%s inner_job_id: %lu
-JARUNICONVALUE200002,2,1,In %s() cat not find the value [%s]. inner_job_id: %lu
+JARUNICONVALUE200002,2,1,In %s() can not find the value [%s]. inner_job_id: %lu
 
 JARUNICONFCOPY200001,2,1,In %s() can not find inner_job_id: %lu
 JARUNICONFCOPY200002,2,1,In %s() can not fork(). inner_job_id: %lu
 JARUNICONFCOPY200003,2,1,In %s() error message: %s, inner_job_id: %lu
-JARUNICONFCOPY200004,2,1,In %s() cat not find the value [%s]. inner_job_id: %lu
+JARUNICONFCOPY200004,2,1,In %s() can not find the value [%s]. inner_job_id: %lu
 JARUNICONFCOPY200005,2,1,In %s() host name (FROM) can not be found %s. from_host_flag: %d, inner_job_id: %lu
 JARUNICONFCOPY200006,2,1,In %s() host name (TO) can not be found %s. to_host_flag: %d, inner_job_id: %lu
 
 JARUNICONFWAIT200001,2,1,In %s() can not find inner_job_id: %lu
-JARUNICONFWAIT200002,2,1,In %s() cat not find the value [%s]. inner_job_id: %lu
+JARUNICONFWAIT200002,2,1,In %s() can not find the value [%s]. inner_job_id: %lu
 
 JARUNICONREBOOT200001,2,1,In %s() can not find inner_job_id from ja_run_icon_reboot_table. inner_job_id: %lu
 JARUNICONREBOOT200002,2,1,In %s() host name can not be found [%s]. host_flag: %d, inner_job_id: %lu
@@ -129,7 +141,7 @@ JARUNICONRELEASE200003,2,1,In %s() can not get the release job id. release_job_i
 
 JARUNNORMAL200001,2,1,In %s() Unsupported job_type: %d,inner_job_id: %lu
 
-JARUNSKIP200001,2,1,In %s() cat not skip this job_type: %d, inner_job_id: %lu
+JARUNSKIP200001,2,1,In %s() can not skip this job_type: %d, inner_job_id: %lu
 
 JARUNVALUE300001,3,0,In %s() can not find inner_job_id: %lu
 JARUNVALUE300002,3,0,In %s() can not find inner_jobnet_id: %lu
@@ -199,6 +211,7 @@ JALOADER200004,2,1,can not find a valid jobnet: jobnet id[%s] schedule id[%s]
 JALOADER200005,2,1,can not find a valid sub jobnet: sub jobnet id[%s] jobnet id[%s] schedule id[%s]
 JALOADER200006,2,1,can not find a valid calendar: calendar id[%s] schedule id[%s]
 JALOADER200007,2,1,single starting job id is NULL: jobnet id[%s] update date[%s]
+JALOADER200008,2,1,can not find a valid filter: filter id[%s] schedule id[%s]
 
 JABOOT000001,0,0,skipped the start of jobnet: inner jobnet id[%s] jobnet id[%s] scheduled time[%s]
 JABOOT200001,2,1,failed to read the %s: key[%s]
@@ -239,6 +252,7 @@ JAFLOW200001,2,1,In %s() can not find inner_job_id: %lu
 JAFLOW200002,2,1,In %s() end_inner_job_id: %lu status %d is wrong
 JAFLOW200003,2,1,In %s() undesigned the flows of inner_job_id: %lu
 JAFLOW200004,2,1,In %s() can not find inner_job_id: %lu from ja_run_icon_jobnet_table
+JAFLOW200005,2,1,In %s() jobnet is stopped. jobnet_status: %d, inner_jobnet_id: %lu
 JAFLOW300001,3,0,In %s() end icon inner_job_id: %lu was runed already
 JAFLOW300002,3,0,In %s() jobnet_status %d is not run or runerr. inner_jobnet_id: %lu
 
@@ -252,6 +266,8 @@ JAGETAGENT200007,2,1,Cannot get ip or dns from hosts: inner_job_id [%lu]
 JAGETAGENT200008,2,1,JaZabbixVersion range error: JaZabbixVersion [%d]
 
 JASTATUS200001,2,1,In %s() can not update jobnet status by inner_job_id: %lu
+JASTATUS200002,2,1,In %s() can not get job information: inner_job_id: %lu
+JASTATUS200003,2,1,In %s() can not update run job id  for %s: inner_jobnet_id: %s
 
 JAVALUE200001,2,1,In %s() detected a NULL pointer to the parameter. inner_job_id: %lu
 JAVALUE200002,2,1,In %s() the length of the string area of the parameter is incorrect. length: %d, inner_job_id: %lu
@@ -310,6 +326,8 @@ JARUNICONZABBIXLINK200029,2,1,In %s() link_operation range error from ja_run_ico
 JARUNICONZABBIXLINK200030,2,1,In %s() link_target range error from ja_run_icon_zabbix_link_table. inner_job_id: %lu, link_target: %d
 JARUNICONZABBIXLINK200031,2,1,In %s() Cannot find from ja_run_icon_zabbix_link_table. inner_job_id: %lu
 JARUNICONZABBIXLINK200032,2,1,In %s() Cannot get lang. inner_job_id: %lu
+JARUNICONZABBIXLINK200033,2,1,In %s() Cannot get execution user name. inner_jobnet_id: %lu
+JARUNICONZABBIXLINK200034,2,1,In %s() Do not have write permission for the host group. inner_job_id: %lu, host_group: %s, jobnet_id: %s, job_id: %s, user_name: %s
 
 JATRGMSG200001,2,1,failed to open the zabbix message file: [%s]
 JATRGMSG200002,2,1,could not find an zabbix message: id[%s] lang[%s]
@@ -317,7 +335,7 @@ JATRGMSG200003,2,1,line data in the zabbix message file is invalid: line(%d) id[
 
 JARUNICONLESS200001,2,1,In %s() agentless icon information is not found. inner_job_id: %lu
 JARUNICONLESS200002,2,1,In %s() jobnet information is not found. inner_jobnet_id: %lu
-JARUNICONLESS200003,2,1,In %s() failed to run the session management process. [%s]
+JARUNICONLESS200003,2,1,In %s() failed to run the session management process. (%d) [%s]
 JARUNICONLESS200004,2,1,In %s() session id is already in use. inner_jobnet_main_id: %lu session_id: %s job_id: %s
 JARUNICONLESS200005,2,1,In %s() session is not established. inner_jobnet_main_id: %lu session_id: %s job_id: %s
 JARUNICONLESS200006,2,1,In %s() failed to update the session information. inner_jobnet_main_id: %lu session_id: %s inner_job_id: %lu
@@ -360,3 +378,13 @@ JASESSION300001,3,0,In %s() cannot close generic session channel. [(%d) %s] inne
 JASESSION300002,3,0,In %s() kill the session management process. inner_jobnet_main_id: %s session_id: %s
 JASESSION300003,3,0,In %s() interrupt the session processing. inner_jobnet_main_id: %s session_id: %s
 JASESSION300004,3,0,The job return code '%s' is range of the stop code '%s' inner_job_id: %lu
+
+JAJOBICONREBOOT200001,2,1,In %s() reboot icon information is not found. inner_job_id: %lu
+JAJOBICONREBOOT200002,2,1,In %s() failed to update the job information. inner_job_id: %lu
+JAJOBICONREBOOT300001,3,0,In %s() timeout occurrence. inner_job_id: %lu, timeout: %s, start_time: %s, jobnet_id: %s, job_id: %s, user_name: %s
+
+JAJOBICONEXTJOB200001,2,1,In %s() failed to expanded job icon information. inner_job_id: %lu
+JAJOBICONEXTJOB200002,2,1,In %s() timeout occurred in the completion waiting of the zabbix_sender command. (%s) inner_job_id: %lu job_id: %s
+JAJOBICONEXTJOB200003,2,1,In %s() failed to update the wait count. wait_count: %d inner_job_id: %lu
+JAJOBICONEXTJOB200004,2,1,In %s() failed to open the zabbix_sender command result file. [%s] (%s) inner_job_id: %lu job_id: %s
+JAJOBICONEXTJOB200005,2,1,In %s() zabbix_sender command execution error. (%s) inner_job_id: %lu job_id: %s

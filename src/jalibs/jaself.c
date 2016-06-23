@@ -1,6 +1,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -18,8 +19,8 @@
 **/
 
 /*
-** $Date:: 2014-05-01 16:37:08 +0900 #$
-** $Revision: 5945 $
+** $Date:: 2014-10-17 16:00:02 +0900 #$
+** $Revision: 6528 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -29,6 +30,7 @@
 #include "ipc.h"
 #include "log.h"
 
+#include "jacommon.h"
 #include "jaself.h"
 #include "jalog.h"
 
@@ -68,6 +70,7 @@ extern int	CONFIG_JAJOB_FORKS;
 extern int	CONFIG_JAJOBNET_FORKS;
 extern int	CONFIG_JALOADER_FORKS;
 extern int	CONFIG_JABOOT_FORKS;
+extern int	CONFIG_JAMSGSND_FORKS;
 
 /******************************************************************************
  *                                                                            *
@@ -98,6 +101,8 @@ int	ja_get_process_type_forks(unsigned char process_type)
 			return CONFIG_JALOADER_FORKS;
 		case JA_PROCESS_TYPE_JABOOT:
 			return CONFIG_JABOOT_FORKS;
+		case JA_PROCESS_TYPE_JASNDMSG:
+			return CONFIG_JAMSGSND_FORKS;
 		case JA_PROCESS_TYPE_SELFMON:
 			return CONFIG_JASELFMON_FORKS;
 	}
@@ -135,6 +140,8 @@ const char	*ja_get_process_type_string(unsigned char process_type)
 			return "job loader";
 		case JA_PROCESS_TYPE_JABOOT:
 			return "jobnet boot";
+		case JA_PROCESS_TYPE_JASNDMSG:
+			return "message send";
 		case JA_PROCESS_TYPE_SELFMON:
 			return "self-monitoring";
 	}

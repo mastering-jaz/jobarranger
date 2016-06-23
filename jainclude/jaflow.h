@@ -1,6 +1,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -18,9 +19,9 @@
 **/
 
 /*
-** $Date:: 2012-11-26 13:25:18 +0900 #$
-** $Revision: 2727 $
-** $Author: ossinfra@FITECHLABS.CO.JP $
+** $Date:: 2014-10-17 16:00:02 +0900 #$
+** $Revision: 6528 $
+** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
 #ifndef JOBARG_JAFLOW_H
@@ -28,6 +29,6 @@
 
 int ja_flow_set_status(const zbx_uint64_t start_inner_job_id,
                        const zbx_uint64_t end_inner_job_id);
-int ja_flow(const zbx_uint64_t inner_job_id, const int type);
+int ja_flow(const zbx_uint64_t inner_job_id, const int type, int msg_flag);
 
 #endif

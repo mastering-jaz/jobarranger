@@ -1,6 +1,7 @@
 ﻿/*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -48,9 +49,13 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             "inner join hosts_groups on rights.id = hosts_groups.groupid inner join hosts on " +
             "hosts_groups.hostid = hosts.hostid " +
             "where users.alias = ? and rights.permission <> '0' and (hosts.status=0 or hosts.status=1) " +
-            "order by hosts.hostid ASC";
+            //added by YAMA 2014/08/08    （ホスト名でソート）
+            //"order by hosts.hostid ASC";
+            "order by hosts.host ASC";
 
-        private string _selectForHostSqlSuper = "select hostid, host from hosts where status=0 or status=1 order by hostid ASC";
+        //added by YAMA 2014/08/08    （ホスト名でソート）
+        //private string _selectForHostSqlSuper = "select hostid, host from hosts where status=0 or status=1 order by hostid ASC";
+        private string _selectForHostSqlSuper = "select hostid, host from hosts where status=0 or status=1 order by host ASC";
 
         #endregion
 
@@ -180,6 +185,18 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                     // 待ち合わせ時間  
                     rowIconReboot[0]["reboot_wait_time"] = txtWaitTime.Text;
                 }
+
+                //added by YAMA 2014/09/22
+                // タイムアウト警告 
+                if (!CheckUtil.IsNullOrEmpty(txtTimeOut.Text))
+                {
+                    rowIconReboot[0]["timeout"] = txtTimeOut.Text;
+                }
+                else
+                {
+                    rowIconReboot[0]["timeout"] = Convert.DBNull;
+                }
+
 
                 //added by YAMA 2014/02/19	
                 // 強制実行フラグ	
@@ -368,6 +385,10 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                     txtWaitTime.IsEnabled = false;
                 }
 
+                //added by YAMA 2014/09/22
+                // タイムアウト警告 
+                txtTimeOut.Text = Convert.ToString(rowIconReboot[0]["timeout"]);
+
                 //added by YAMA 2014/02/19		
                 // 強制実行		
                 string forceFlag = Convert.ToString(rowJob[0]["force_flag"]);
@@ -513,6 +534,33 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                     return false;
                 }
             }
+
+            //added by YAMA 2014/09/22
+            // タイムアウト警告 
+            string timeOutForChange = Properties.Resources.err_message_timeout;
+            string timeOut = Convert.ToString(txtTimeOut.Text);
+            // 未入力の場合 
+            if (CheckUtil.IsNullOrEmpty(timeOut))
+            {
+                CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_001,
+                    new string[] { timeOutForChange });
+                return false;
+            }
+            // 半角数字チェック 
+            if (!CheckUtil.IsHankakuNum(timeOut))
+            {
+                CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_007,
+                    new string[] { timeOutForChange });
+                return false;
+            }
+            // 桁数チェック 
+            if (CheckUtil.IsLenOver(timeOut, 5))
+            {
+                CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_003,
+                    new string[] { timeOutForChange, "5" });
+                return false;
+            }
+
 
             return true;
         }

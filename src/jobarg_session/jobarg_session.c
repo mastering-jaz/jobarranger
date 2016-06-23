@@ -1,6 +1,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -34,6 +35,7 @@
 #include "threads.h"
 
 #include "jacommon.h"
+#include "jalog.h"
 #include "jastr.h"
 #include "jastatus.h"
 #include "jaflow.h"
@@ -153,6 +155,9 @@ int  CONFIG_SERVER_STARTUP_TIME    = 0;
 int  CONFIG_LOG_SLOW_QUERIES       = 0;
 int  CONFIG_PROXYCONFIG_FREQUENCY  = 0;
 int  CONFIG_PROXYDATA_FREQUENCY    = 0;
+
+/* other items */
+static int  icon_status;
 
 /******************************************************************************
  *                                                                            *
@@ -632,7 +637,7 @@ static int ssh_read(const zbx_uint64_t inner_job_id, char **std_out)
     size_t          sz;
     int             rc, count;
     char            *ssherr;
-    char            buffer[JA_VALUE_LEN], buf[2048];
+    char            buffer[JA_STD_OUT_LEN], buf[2048];
     const char      *__function_name = "ssh_read";
 
     zabbix_log(LOG_LEVEL_DEBUG, "In %s() inner_job_id: " ZBX_FS_UI64, __function_name, inner_job_id);
@@ -644,8 +649,8 @@ static int ssh_read(const zbx_uint64_t inner_job_id, char **std_out)
         do {
             if (0 < (rc = libssh2_channel_read(channel, buf, sizeof(buf)))) {
                 sz = (size_t)rc;
-                if (sz > JA_VALUE_LEN - (count + 1)) {
-                    sz = JA_VALUE_LEN - (count + 1);
+                if (sz > JA_STD_OUT_LEN - (count + 1)) {
+                    sz = JA_STD_OUT_LEN - (count + 1);
                 }
                 if (0 == sz) {
                     continue;
@@ -722,7 +727,7 @@ static int ssh_read_stderr(const zbx_uint64_t inner_job_id, char **std_err)
     size_t          sz;
     int             rc, count;
     char            *ssherr;
-    char            buffer[JA_VALUE_LEN], buf[2048];
+    char            buffer[JA_STD_OUT_LEN], buf[2048];
     const char      *__function_name = "ssh_read_stderr";
 
     zabbix_log(LOG_LEVEL_DEBUG, "In %s() inner_job_id: " ZBX_FS_UI64, __function_name, inner_job_id);
@@ -734,8 +739,8 @@ static int ssh_read_stderr(const zbx_uint64_t inner_job_id, char **std_err)
         do {
             if (0 < (rc = libssh2_channel_read_stderr(channel, buf, sizeof(buf)))) {
                 sz = (size_t)rc;
-                if (sz > JA_VALUE_LEN - (count + 1)) {
-                    sz = JA_VALUE_LEN - (count + 1);
+                if (sz > JA_STD_OUT_LEN - (count + 1)) {
+                    sz = JA_STD_OUT_LEN - (count + 1);
                 }
                 memcpy(buffer + count, buf, sz);
                 count = count + sz;
@@ -1175,6 +1180,7 @@ static int ssh_exec(const zbx_uint64_t inner_job_id)
 
         /* check of match the job stop code */
         if (0 != ja_number_match(return_code, stop_code)) {
+            icon_status = 1;
             ja_log("JASESSION300004", 0, NULL, inner_job_id, return_code, stop_code, inner_job_id);
             zbx_free(return_code);
             return FAIL;
@@ -1536,6 +1542,8 @@ static int process_session(void)
         return LOOP_CONTINUE;
     }
 
+    icon_status = 2;
+
     switch (operation_flag) {
         case JA_SES_OPERATION_FLAG_ONETIME:
              rtn = session_onetime(inner_job_id);
@@ -1556,7 +1564,7 @@ static int process_session(void)
         default:
              ja_log("JASESSION200002", 0, NULL, inner_job_id, __function_name, JOBARG_REGISTRY_NUMBER, JOBARG_SESSION_ID, inner_job_id, operation_flag);
              ssh_close(3, inner_job_id);
-             ja_set_runerr(inner_job_id);
+             ja_set_runerr(inner_job_id, 2);
              return LOOP_EXIT;
     }
 
@@ -1591,7 +1599,7 @@ static int process_session(void)
             if (rc <= ZBX_DB_OK) {
                 ja_log("JASESSION200001", 0, NULL, inner_job_id, __function_name, JOBARG_REGISTRY_NUMBER, JOBARG_SESSION_ID);
                 ssh_close(3, inner_job_id);
-                ja_set_runerr(inner_job_id);
+                ja_set_runerr(inner_job_id, 2);
                 DBfree_result(result);
                 DBcommit();
                 return LOOP_EXIT;
@@ -1609,11 +1617,11 @@ static int process_session(void)
 
     if (rtn == SUCCEED) {
         /* icon normal end */
-        ja_flow(inner_job_id, JA_FLOW_TYPE_NORMAL);
+        ja_flow(inner_job_id, JA_FLOW_TYPE_NORMAL, 1);
     }
     else {
         /* icon error stop */
-        ja_set_runerr(inner_job_id);
+        ja_set_runerr(inner_job_id, icon_status);
     }
 
     DBcommit();

@@ -1,6 +1,7 @@
 ﻿/*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -27,6 +28,7 @@ using System.Windows.Controls;
 using jp.co.ftf.jobcontroller.JobController.Form.JobEdit;
 using jp.co.ftf.jobcontroller.Common;
 using jp.co.ftf.jobcontroller.JobController.Form.CalendarEdit;
+using jp.co.ftf.jobcontroller.JobController.Form.FilterEdit;
 using jp.co.ftf.jobcontroller.JobController.Form.ScheduleEdit;
 using jp.co.ftf.jobcontroller.JobController.Form.JobEdit;
 
@@ -380,6 +382,10 @@ namespace jp.co.ftf.jobcontroller.JobController
                         DadWindow.ObjectEdit = new CalendarEdit(DadWindow);
                         break;
 
+                    case Consts.ObjectEnum.FILTER:
+                        DadWindow.ObjectEdit = new FilterEdit(DadWindow);
+                        break;
+
                     case Consts.ObjectEnum.SCHEDULE:
                         DadWindow.ObjectEdit = new ScheduleEdit(DadWindow);
                         break;
@@ -483,6 +489,7 @@ namespace jp.co.ftf.jobcontroller.JobController
 
                 if (!ConformJobnetCheck(dtJob, dtFlow))
                 {
+
                     return;
                 }
             }
@@ -501,10 +508,30 @@ namespace jp.co.ftf.jobcontroller.JobController
                     return;
                 }
             }
-
             try
             {
-                DBUtil.SetObjectValid(_objectId, updDate, _objectType);
+                //added by YAMA 2014/10/17
+                DataTable ChkValidData = new DataTable();
+                ChkValidData.Columns.Add("RelatedObject", typeof(string));
+                ChkValidData.Columns.Add("ErrMessage", typeof(string));
+                ChkValidData.Columns.Add("ObjectType", typeof(string));
+                DBUtil.SetObjectValid(_objectId, updDate, _objectType, ref ChkValidData);
+
+                if (ChkValidData.Rows.Count != 0)
+                {
+                    ChkValidData.Rows[0]["ErrMessage"] = Properties.Resources.relatedObject_valid_message;
+                    relatedObjectList ObjectList = new relatedObjectList(ChkValidData, "Valid");
+
+                    ObjectList.Owner = DadWindow;
+                    ObjectList.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
+
+                    ObjectList.ShowDialog();
+
+                    if (ObjectList.ForceRun == false) return;
+
+                    // オブジェクトの有効化を強制実行する
+                    DBUtil.SetObjectValidForceRun(_objectId, updDate, _objectType);
+                }
             }
             catch (DBException ex)
             {
@@ -533,7 +560,29 @@ namespace jp.co.ftf.jobcontroller.JobController
             base.WriteStartLog("MenuitemInValid_Click", Consts.PROCESS_008);
             try
             {
-                DBUtil.SetObjectsInValid(_objectId, _objectType, GetSelectedRows());
+                //added by YAMA 2014/10/17
+                //DBUtil.SetObjectsInValid_org(_objectId, _objectType, GetSelectedRows());
+                DataTable ChkValidData = new DataTable();
+                ChkValidData.Columns.Add("RelatedObject", typeof(string));
+                ChkValidData.Columns.Add("ErrMessage", typeof(string));
+                ChkValidData.Columns.Add("ObjectType", typeof(string));
+                DBUtil.SetObjectsInValid(_objectId, _objectType, GetSelectedRows(), ref ChkValidData);
+
+                if (ChkValidData.Rows.Count != 0)
+                {
+                    ChkValidData.Rows[0]["ErrMessage"] = Properties.Resources.relatedObject_invalid_message;
+                    relatedObjectList ObjectList = new relatedObjectList(ChkValidData, "InValid");
+
+                    ObjectList.Owner = DadWindow;
+                    ObjectList.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
+
+                    ObjectList.ShowDialog();
+
+                    if (ObjectList.ForceRun == false) return;
+
+                    // オブジェクトの無効化を強制実行する
+                    DBUtil.SetObjectsInValidForceRun(_objectId, _objectType, GetSelectedRows());
+                }
             }
             catch (DBException ex)
             {
@@ -583,6 +632,54 @@ namespace jp.co.ftf.jobcontroller.JobController
             base.WriteEndLog("MenuitemExport_Click", Consts.PROCESS_012);
         }
 
+        //*******************************************************************
+        /// <summary>即時実行メニュークリック</summary>
+        /// <param name="sender">源</param>
+        /// <param name="e">イベント</param>
+        //*******************************************************************
+        private void MenuitemImmediateRun_Click(object sender, RoutedEventArgs e)
+        {
+            // 開始ログ
+            base.WriteStartLog("MenuitemImmediateRun_Click", Consts.PROCESS_009);
+
+            RunJobnet(Consts.RunTypeEnum.Immediate);
+
+            // 終了ログ
+            base.WriteEndLog("MenuitemImmediateRun_Click", Consts.PROCESS_009);
+        }
+
+        //*******************************************************************
+        /// <summary>保留実行メニュークリック</summary>
+        /// <param name="sender">源</param>
+        /// <param name="e">イベント</param>
+        //*******************************************************************
+        private void MenuitemReserveRun_Click(object sender, RoutedEventArgs e)
+        {
+            // 開始ログ
+            base.WriteStartLog("MenuitemReserveRun_Click", Consts.PROCESS_009);
+
+            RunJobnet(Consts.RunTypeEnum.Reservation);
+
+            // 終了ログ
+            base.WriteEndLog("MenuitemReserveRun_Click", Consts.PROCESS_009);
+        }
+
+        //*******************************************************************
+        /// <summary>テスト実行メニュークリック</summary>
+        /// <param name="sender">源</param>
+        /// <param name="e">イベント</param>
+        //*******************************************************************
+        private void MenuitemTestRun_Click(object sender, RoutedEventArgs e)
+        {
+            // 開始ログ
+            base.WriteStartLog("MenuitemTestRun_Click", Consts.PROCESS_009);
+
+            RunJobnet(Consts.RunTypeEnum.Test);
+
+            // 終了ログ
+            base.WriteEndLog("MenuitemTestRun_Click", Consts.PROCESS_009);
+        }
+
         #endregion
 
         #region public メソッド
@@ -592,9 +689,26 @@ namespace jp.co.ftf.jobcontroller.JobController
         /// <param name="rows">選択されたオブジェクトデータ</param>
         public void DelObject(String objectId, Consts.ObjectEnum objectType, DataRow[] rows)
         {
+            //added by YAMA 2014/10/17
+            /*
             if (!DBUtil.CheckForRelation4Del(objectId, objectType, rows))
             {
                 CommonDialog.ShowErrorDialog(Consts.MSG_COMMON_007);
+                return;
+            }
+            */
+            DataTable ChkValidData = new DataTable();
+            ChkValidData.Columns.Add("RelatedObject", typeof(string));
+            ChkValidData.Columns.Add("ErrMessage", typeof(string));
+            ChkValidData.Columns.Add("ObjectType", typeof(string));
+            if (!DBUtil.CheckForRelation4Del(objectId, objectType, rows, ref ChkValidData))
+            {
+                ChkValidData.Rows[0]["ErrMessage"] = Properties.Resources.relatedObject_del_message;
+                relatedObjectList ObjectList = new relatedObjectList(ChkValidData, "DelObject");
+
+                ObjectList.Owner = DadWindow;
+                ObjectList.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
+                ObjectList.ShowDialog();
                 return;
             }
             MessageBoxResult result = CommonDialog.ShowDeleteDialog();
@@ -689,6 +803,9 @@ namespace jp.co.ftf.jobcontroller.JobController
             {
                 case Consts.ObjectEnum.CALENDAR:
                     break;
+                case Consts.ObjectEnum.FILTER:
+                    objectDao = new FilterControlDAO(_db);
+                    break;
                 case Consts.ObjectEnum.SCHEDULE:
                     objectDao = new ScheduleControlDAO(_db);
                     break;
@@ -709,6 +826,9 @@ namespace jp.co.ftf.jobcontroller.JobController
             menuitemInValid.IsEnabled = true;
             menuitemDel.IsEnabled = true;
             menuitemExport.IsEnabled = true;
+            menuItemImmediateRun.IsEnabled = true;
+            menuItemReserveRun.IsEnabled = true;
+            menuItemTestRun.IsEnabled = true;
 
             if (LoginSetting.Mode == Consts.ActionMode.USE)
             {
@@ -757,6 +877,12 @@ namespace jp.co.ftf.jobcontroller.JobController
                 {
                     menuitemEdit.IsEnabled = false;
                 }
+            }
+            if (_objectType != Consts.ObjectEnum.JOBNET)
+            {
+                menuItemImmediateRun.IsEnabled = false;
+                menuItemReserveRun.IsEnabled = false;
+                menuItemTestRun.IsEnabled = false;
             }
 
         }
@@ -952,6 +1078,37 @@ namespace jp.co.ftf.jobcontroller.JobController
                 return result;
             }
             return result;
+        }
+
+        /// <summary>ジョブネット実行</summary>
+        /// <param name="runType">実行種別 1:即時実行、2:保留実行、3:テスト実行</param>
+        private void RunJobnet(Consts.RunTypeEnum runType)
+        {
+            String innerJobnetId = null;
+
+            DataTable dtJobnet = DBUtil.GetValidJobnetVer(_objectId);
+            if (dtJobnet.Rows.Count > 0)
+            {
+                MessageBoxResult result = CommonDialog.ShowJobnetStartDialog();
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    innerJobnetId = DBUtil.InsertRunJobnet(dtJobnet.Rows[0], runType);
+                    if (innerJobnetId != null)
+                    {
+                        DuringStartupJobnetWindow duringStartupJobnetWindow = new DuringStartupJobnetWindow(innerJobnetId, _dadWindow);
+                        duringStartupJobnetWindow.startCheck();
+                        duringStartupJobnetWindow.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
+                        duringStartupJobnetWindow.Show();
+                    }
+                    return;
+                }
+            }
+            else
+            {
+                CommonDialog.ShowErrorDialog(Consts.ERROR_RUN_JOBNET_001);
+                return;
+            }
         }
 
         #endregion

@@ -1,75 +1,52 @@
-﻿2014/07/08 11:37:04 にビルドを開始しました。
-     1>ノード 2 上のプロジェクト "C:\work\00.作業\svn\0708_com\build\project\json2\json2.vcxproj" (rebuild ターゲット)。
-     1>InitializeBuildStatus:
-         "AlwaysCreate" が指定されたため "Release\json2.unsuccessfulbuild" を作成しています。
-       ClCompile:
-         c:\Program Files\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /O2 /Oi /Oy- /GL /D WIN32 /D NDEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm- /EHsc /MT /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc100.pdb" /Gd /TC /analyze- /errorReport:prompt ..\..\..\tools\json\arraylist.c ..\..\..\tools\json\debug.c ..\..\..\tools\json\json_object.c ..\..\..\tools\json\json_tokener.c ..\..\..\tools\json\json_util.c ..\..\..\tools\json\linkhash.c ..\..\..\tools\json\printbuf.c ..\..\..\tools\json\test1.c
-         arraylist.c
-         debug.c
-         json_object.c
-     1>..\..\..\tools\json\json_object.c(267): warning C4996: 'strdup': The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name: _strdup. See online help for details.
-                 c:\Program Files\Microsoft Visual Studio 10.0\VC\include\string.h(238) : 'strdup' の宣言を確認してください。
-     1>..\..\..\tools\json\json_object.c(347): warning C4996: 'sscanf': This function or variable may be unsafe. Consider using sscanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-                 c:\Program Files\Microsoft Visual Studio 10.0\VC\include\stdio.h(325) : 'sscanf' の宣言を確認してください。
-     1>..\..\..\tools\json\json_object.c(384): warning C4996: 'sscanf': This function or variable may be unsafe. Consider using sscanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-                 c:\Program Files\Microsoft Visual Studio 10.0\VC\include\stdio.h(325) : 'sscanf' の宣言を確認してください。
-     1>..\..\..\tools\json\json_object.c(414): warning C4996: 'strdup': The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name: _strdup. See online help for details.
-                 c:\Program Files\Microsoft Visual Studio 10.0\VC\include\string.h(238) : 'strdup' の宣言を確認してください。
-         json_tokener.c
-     1>..\..\..\tools\json\json_tokener.c(279): warning C4018: '<' : signed と unsigned の数値を比較しようとしました。
-     1>..\..\..\tools\json\json_tokener.c(442): warning C4018: '<' : signed と unsigned の数値を比較しようとしました。
-     1>..\..\..\tools\json\json_tokener.c(450): warning C4018: '<' : signed と unsigned の数値を比較しようとしました。
-     1>..\..\..\tools\json\json_tokener.c(483): warning C4996: 'sscanf': This function or variable may be unsafe. Consider using sscanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-                 c:\Program Files\Microsoft Visual Studio 10.0\VC\include\stdio.h(325) : 'sscanf' の宣言を確認してください。
-     1>..\..\..\tools\json\json_tokener.c(485): warning C4996: 'sscanf': This function or variable may be unsafe. Consider using sscanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-                 c:\Program Files\Microsoft Visual Studio 10.0\VC\include\stdio.h(325) : 'sscanf' の宣言を確認してください。
-     1>..\..\..\tools\json\json_tokener.c(553): warning C4996: 'strdup': The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name: _strdup. See online help for details.
-                 c:\Program Files\Microsoft Visual Studio 10.0\VC\include\string.h(238) : 'strdup' の宣言を確認してください。
-         json_util.c
-     1>..\..\..\tools\json\json_util.c(62): warning C4996: '_open': This function or variable may be unsafe. Consider using _sopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-                 c:\Program Files\Microsoft Visual Studio 10.0\VC\include\io.h(235) : '_open' の宣言を確認してください。
-     1>..\..\..\tools\json\json_util.c(64): warning C4996: 'strerror': This function or variable may be unsafe. Consider using strerror_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-                 c:\Program Files\Microsoft Visual Studio 10.0\VC\include\string.h(157) : 'strerror' の宣言を確認してください。
-     1>..\..\..\tools\json\json_util.c(71): warning C4996: 'read': The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name: _read. See online help for details.
-                 c:\Program Files\Microsoft Visual Studio 10.0\VC\include\io.h(313) : 'read' の宣言を確認してください。
-     1>..\..\..\tools\json\json_util.c(74): warning C4996: 'close': The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name: _close. See online help for details.
-                 c:\Program Files\Microsoft Visual Studio 10.0\VC\include\io.h(302) : 'close' の宣言を確認してください。
-     1>..\..\..\tools\json\json_util.c(77): warning C4996: 'strerror': This function or variable may be unsafe. Consider using strerror_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-                 c:\Program Files\Microsoft Visual Studio 10.0\VC\include\string.h(157) : 'strerror' の宣言を確認してください。
-     1>..\..\..\tools\json\json_util.c(97): warning C4996: '_open': This function or variable may be unsafe. Consider using _sopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-                 c:\Program Files\Microsoft Visual Studio 10.0\VC\include\io.h(235) : '_open' の宣言を確認してください。
-     1>..\..\..\tools\json\json_util.c(99): warning C4996: 'strerror': This function or variable may be unsafe. Consider using strerror_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-                 c:\Program Files\Microsoft Visual Studio 10.0\VC\include\string.h(157) : 'strerror' の宣言を確認してください。
-     1>..\..\..\tools\json\json_util.c(109): warning C4996: 'write': The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name: _write. See online help for details.
-                 c:\Program Files\Microsoft Visual Studio 10.0\VC\include\io.h(318) : 'write' の宣言を確認してください。
-     1>..\..\..\tools\json\json_util.c(110): warning C4996: 'close': The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name: _close. See online help for details.
-                 c:\Program Files\Microsoft Visual Studio 10.0\VC\include\io.h(302) : 'close' の宣言を確認してください。
-     1>..\..\..\tools\json\json_util.c(112): warning C4996: 'strerror': This function or variable may be unsafe. Consider using strerror_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-                 c:\Program Files\Microsoft Visual Studio 10.0\VC\include\string.h(157) : 'strerror' の宣言を確認してください。
-     1>..\..\..\tools\json\json_util.c(120): warning C4996: 'close': The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name: _close. See online help for details.
-                 c:\Program Files\Microsoft Visual Studio 10.0\VC\include\io.h(302) : 'close' の宣言を確認してください。
-         linkhash.c
-         printbuf.c
-     1>..\..\..\tools\json\printbuf.c(98): warning C4996: 'vsprintf': This function or variable may be unsafe. Consider using vsprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-                 c:\Program Files\Microsoft Visual Studio 10.0\VC\include\stdio.h(371) : 'vsprintf' の宣言を確認してください。
-     1>..\..\..\tools\json\printbuf.c(118): warning C4996: '_vsnprintf': This function or variable may be unsafe. Consider using _vsnprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-                 c:\Program Files\Microsoft Visual Studio 10.0\VC\include\stdio.h(363) : '_vsnprintf' の宣言を確認してください。
-         test1.c
-       Lib:
-         c:\Program Files\Microsoft Visual Studio 10.0\VC\bin\Lib.exe /OUT:"C:\work\00.作業\svn\0708_com\build\project\..\..\bin\json\Win32\json2.lib" /NOLOGO /LTCG Release\arraylist.obj
-         Release\debug.obj
-         Release\json_object.obj
-         Release\json_tokener.obj
-         Release\json_util.obj
-         Release\linkhash.obj
-         Release\printbuf.obj
-         Release\test1.obj
-         json2.vcxproj -> C:\work\00.作業\svn\0708_com\build\project\..\..\bin\json\Win32\json2.lib
-       FinalizeBuildStatus:
-         ファイル "Release\json2.unsuccessfulbuild" を削除しています。
-         "Release\json2.lastbuildstate" のタッチ タスクを実行しています。
-     1>プロジェクト "C:\work\00.作業\svn\0708_com\build\project\json2\json2.vcxproj" (rebuild ターゲット) のビルドが完了しました。
-
-ビルドに成功しました。
-
-経過時間 00:00:02.28
+﻿  arraylist.c
+  debug.c
+  json_object.c
+..\..\..\tools\json\json_object.c(267): warning C4996: 'strdup': The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name: _strdup. See online help for details.
+          c:\Program Files\Microsoft Visual Studio 10.0\VC\include\string.h(238) : 'strdup' の宣言を確認してください。
+..\..\..\tools\json\json_object.c(347): warning C4996: 'sscanf': This function or variable may be unsafe. Consider using sscanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+          c:\Program Files\Microsoft Visual Studio 10.0\VC\include\stdio.h(325) : 'sscanf' の宣言を確認してください。
+..\..\..\tools\json\json_object.c(384): warning C4996: 'sscanf': This function or variable may be unsafe. Consider using sscanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+          c:\Program Files\Microsoft Visual Studio 10.0\VC\include\stdio.h(325) : 'sscanf' の宣言を確認してください。
+..\..\..\tools\json\json_object.c(414): warning C4996: 'strdup': The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name: _strdup. See online help for details.
+          c:\Program Files\Microsoft Visual Studio 10.0\VC\include\string.h(238) : 'strdup' の宣言を確認してください。
+  json_tokener.c
+..\..\..\tools\json\json_tokener.c(279): warning C4018: '<' : signed と unsigned の数値を比較しようとしました。
+..\..\..\tools\json\json_tokener.c(442): warning C4018: '<' : signed と unsigned の数値を比較しようとしました。
+..\..\..\tools\json\json_tokener.c(450): warning C4018: '<' : signed と unsigned の数値を比較しようとしました。
+..\..\..\tools\json\json_tokener.c(483): warning C4996: 'sscanf': This function or variable may be unsafe. Consider using sscanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+          c:\Program Files\Microsoft Visual Studio 10.0\VC\include\stdio.h(325) : 'sscanf' の宣言を確認してください。
+..\..\..\tools\json\json_tokener.c(485): warning C4996: 'sscanf': This function or variable may be unsafe. Consider using sscanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+          c:\Program Files\Microsoft Visual Studio 10.0\VC\include\stdio.h(325) : 'sscanf' の宣言を確認してください。
+..\..\..\tools\json\json_tokener.c(553): warning C4996: 'strdup': The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name: _strdup. See online help for details.
+          c:\Program Files\Microsoft Visual Studio 10.0\VC\include\string.h(238) : 'strdup' の宣言を確認してください。
+  json_util.c
+..\..\..\tools\json\json_util.c(62): warning C4996: '_open': This function or variable may be unsafe. Consider using _sopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+          c:\Program Files\Microsoft Visual Studio 10.0\VC\include\io.h(235) : '_open' の宣言を確認してください。
+..\..\..\tools\json\json_util.c(64): warning C4996: 'strerror': This function or variable may be unsafe. Consider using strerror_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+          c:\Program Files\Microsoft Visual Studio 10.0\VC\include\string.h(157) : 'strerror' の宣言を確認してください。
+..\..\..\tools\json\json_util.c(71): warning C4996: 'read': The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name: _read. See online help for details.
+          c:\Program Files\Microsoft Visual Studio 10.0\VC\include\io.h(313) : 'read' の宣言を確認してください。
+..\..\..\tools\json\json_util.c(74): warning C4996: 'close': The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name: _close. See online help for details.
+          c:\Program Files\Microsoft Visual Studio 10.0\VC\include\io.h(302) : 'close' の宣言を確認してください。
+..\..\..\tools\json\json_util.c(77): warning C4996: 'strerror': This function or variable may be unsafe. Consider using strerror_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+          c:\Program Files\Microsoft Visual Studio 10.0\VC\include\string.h(157) : 'strerror' の宣言を確認してください。
+..\..\..\tools\json\json_util.c(97): warning C4996: '_open': This function or variable may be unsafe. Consider using _sopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+          c:\Program Files\Microsoft Visual Studio 10.0\VC\include\io.h(235) : '_open' の宣言を確認してください。
+..\..\..\tools\json\json_util.c(99): warning C4996: 'strerror': This function or variable may be unsafe. Consider using strerror_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+          c:\Program Files\Microsoft Visual Studio 10.0\VC\include\string.h(157) : 'strerror' の宣言を確認してください。
+..\..\..\tools\json\json_util.c(109): warning C4996: 'write': The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name: _write. See online help for details.
+          c:\Program Files\Microsoft Visual Studio 10.0\VC\include\io.h(318) : 'write' の宣言を確認してください。
+..\..\..\tools\json\json_util.c(110): warning C4996: 'close': The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name: _close. See online help for details.
+          c:\Program Files\Microsoft Visual Studio 10.0\VC\include\io.h(302) : 'close' の宣言を確認してください。
+..\..\..\tools\json\json_util.c(112): warning C4996: 'strerror': This function or variable may be unsafe. Consider using strerror_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+          c:\Program Files\Microsoft Visual Studio 10.0\VC\include\string.h(157) : 'strerror' の宣言を確認してください。
+..\..\..\tools\json\json_util.c(120): warning C4996: 'close': The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name: _close. See online help for details.
+          c:\Program Files\Microsoft Visual Studio 10.0\VC\include\io.h(302) : 'close' の宣言を確認してください。
+  linkhash.c
+  printbuf.c
+..\..\..\tools\json\printbuf.c(98): warning C4996: 'vsprintf': This function or variable may be unsafe. Consider using vsprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+          c:\Program Files\Microsoft Visual Studio 10.0\VC\include\stdio.h(371) : 'vsprintf' の宣言を確認してください。
+..\..\..\tools\json\printbuf.c(118): warning C4996: '_vsnprintf': This function or variable may be unsafe. Consider using _vsnprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+          c:\Program Files\Microsoft Visual Studio 10.0\VC\include\stdio.h(363) : '_vsnprintf' の宣言を確認してください。
+  test1.c
+  json2.vcxproj -> C:\work\00.作業\svn\1216_02\build\project\..\..\bin\json\Win32\json2.lib

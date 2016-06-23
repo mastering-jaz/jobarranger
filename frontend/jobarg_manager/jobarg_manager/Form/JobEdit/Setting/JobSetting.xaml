@@ -2,6 +2,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -23,8 +24,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
         xmlns:src="clr-namespace:jp.co.ftf.jobcontroller.JobController" 
         Title="{x:Static src:Properties.Resources.job_icon_screen_name}" FontSize="11" FontFamily="Meiryo"
-        WindowStartupLocation="CenterScreen" ResizeMode="NoResize" MouseUp="Window_MouseUp" Closing="Window_Closed" mc:Ignorable="d" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" d:DesignHeight="705" d:DesignWidth="414" SizeToContent="WidthAndHeight">
-    <Grid Background="#FFEEECE1" Width="394" Name="GridSetting" Height="670">
+        WindowStartupLocation="CenterScreen" ResizeMode="NoResize" MouseUp="Window_MouseUp" Closing="Window_Closed" mc:Ignorable="d" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" d:DesignHeight="750" d:DesignWidth="414" SizeToContent="WidthAndHeight">
+    <Grid Background="#FFEEECE1" Width="394" Name="GridSetting" Height="715">
         <Grid.RowDefinitions>
             <RowDefinition Height="30" />
             <RowDefinition Height="30" />
@@ -64,11 +65,11 @@
                          VerticalAlignment="Top" VerticalContentAlignment="Center" Width="270" MaxLength="128"/>
             </Grid>
         </GroupBox>
-        <CheckBox Grid.Row="3" Content="{x:Static src:Properties.Resources.stop_command_label_text}" Height="16" HorizontalAlignment="Left" Margin="17,24,0,0" 
+        <CheckBox Grid.Row="3" Content="{x:Static src:Properties.Resources.stop_command_label_text}" Height="16" HorizontalAlignment="Left" Margin="17,16,0,0" 
                   Name="cbStop" VerticalAlignment="Top" Click="cbStop_Click" Grid.RowSpan="2" />
-        <TextBox Height="23" HorizontalAlignment="Left" Margin="123,18,0,0" Name="txtStopCmd" VerticalAlignment="Top" 
+        <TextBox Height="23" HorizontalAlignment="Left" Margin="123,10,0,0" Name="txtStopCmd" VerticalAlignment="Top" 
                  VerticalContentAlignment="Center" Width="264" Grid.Row="3" MaxLength="4000" Grid.RowSpan="2" />
-        <GroupBox Header="{x:Static src:Properties.Resources.exec_label_text}" Height="115" HorizontalAlignment="Left" Margin="7,16,0,0" Name="gbExcute" 
+        <GroupBox Header="{x:Static src:Properties.Resources.exec_label_text}" Height="115" HorizontalAlignment="Left" Margin="7,8,0,0" Name="gbExcute" 
                   VerticalAlignment="Top" Width="390" Grid.Row="4" Grid.RowSpan="2">
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -83,10 +84,10 @@
                          Margin="0,4,0,0" VerticalAlignment="Top" VerticalScrollBarVisibility="Auto" MaxLength="4000" AcceptsReturn="True" Grid.ColumnSpan="2" />
             </Grid>
         </GroupBox>
-        <Label Grid.Row="5" Content="{x:Static src:Properties.Resources.job_value_label_text}" Height="23" HorizontalAlignment="Left" Margin="9,11,0,0" 
+        <Label Grid.Row="5" Content="{x:Static src:Properties.Resources.job_value_label_text}" Height="23" HorizontalAlignment="Left" Margin="9,3,0,0" 
                VerticalAlignment="Top" />
         <DataGrid Grid.Row="5" Name="dgJobValue" Height="89" Width="374" AutoGenerateColumns="False" 
-                  HorizontalAlignment="Left" Margin="13,31,0,0" VerticalAlignment="Top" Background="White" 
+                  HorizontalAlignment="Left" Margin="13,23,0,0" VerticalAlignment="Top" Background="White" 
                   BorderBrush="Black" GridLinesVisibility="None" RowHeight="18" CanUserAddRows="False"
                   SelectionMode="Single" RowHeaderWidth="0" IsReadOnly="True" KeyUp="dgJobValue_KeyUp" SelectionChanged="dgJobValue_SelectionChanged"
                   VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Auto"
@@ -95,7 +96,7 @@
                 VirtualizingStackPanel.VirtualizationMode= "Standard"
                 EnableColumnVirtualization="True" GotFocus="DataGrid_GotFocus" LostFocus="DataGrid_LostFocus"
                 RowDetailsVisibilityMode="Visible" SnapsToDevicePixels="True"
-                KeyboardNavigation.TabNavigation="Once" Grid.RowSpan="2">
+                KeyboardNavigation.TabNavigation="Once">
             <DataGrid.Resources>
                 <SolidColorBrush x:Key="SelectionColorKey" Color="#FF316AC5"/>
                 <Style TargetType="DataGridRow">
@@ -126,20 +127,20 @@
                 </DataGridTextColumn>
             </DataGrid.Columns>
         </DataGrid>
-        <Label Grid.Row="6" Content="{x:Static src:Properties.Resources.value_name_label_text}" Height="23" HorizontalAlignment="Left" Margin="9,12,0,0" 
+        <Label Grid.Row="6" Content="{x:Static src:Properties.Resources.value_name_label_text}" Height="23" HorizontalAlignment="Left" Margin="9,4,0,0" 
                VerticalAlignment="Top" />
         <TextBox Grid.Row="6" Name="txtJobValueName" Height="23" Width="130" HorizontalAlignment="Left"
-                 Margin="13,34,0,0" VerticalAlignment="Top" VerticalContentAlignment="Center" MaxLength="128" Grid.RowSpan="2" />
-        <Label Grid.Row="6" Content="{x:Static src:Properties.Resources.value_label_text}" Height="23" HorizontalAlignment="Left" Margin="146,12,0,0" 
+                 Margin="13,26,0,0" VerticalAlignment="Top" VerticalContentAlignment="Center" MaxLength="128" Grid.RowSpan="2" />
+        <Label Grid.Row="6" Content="{x:Static src:Properties.Resources.value_label_text}" Height="23" HorizontalAlignment="Left" Margin="146,4,0,0" 
                VerticalAlignment="Top" />
         <TextBox Grid.Row="6" Name="txtJobValue" Height="23" Width="139" HorizontalAlignment="Left" 
-                 Margin="146,34,0,0" VerticalAlignment="Top" VerticalContentAlignment="Center" MaxLength="4000" Grid.RowSpan="2" />
-        <Button Grid.Row="6" Content="{x:Static src:Properties.Resources.del_button_text}" Height="23" HorizontalAlignment="Left" Margin="290,34,0,0" 
+                 Margin="146,26,0,0" VerticalAlignment="Top" VerticalContentAlignment="Center" MaxLength="4000" Grid.RowSpan="2" />
+        <Button Grid.Row="6" Content="{x:Static src:Properties.Resources.del_button_text}" Height="23" HorizontalAlignment="Left" Margin="290,26,0,0" 
                 Name="btnDel" VerticalAlignment="Top" Width="45" Click ="btnDel_Click" Grid.RowSpan="2" />
-        <Button Grid.Row="6" Content="{x:Static src:Properties.Resources.add_button_text}" Height="23" HorizontalAlignment="Left" Margin="337,34,0,0" Name="btnAdd" 
+        <Button Grid.Row="6" Content="{x:Static src:Properties.Resources.add_button_text}" Height="23" HorizontalAlignment="Left" Margin="337,26,0,0" Name="btnAdd" 
                 VerticalAlignment="Top" Width="45" Click="btnAdd_Click" Grid.RowSpan="2" />
-        <Label Content="{x:Static src:Properties.Resources.jobcon_value_label_text}" Height="23" HorizontalAlignment="Left" Margin="9,15,0,0" VerticalAlignment="Top" Grid.Row="7" Width="149" />
-        <ListBox Grid.Row="7" Height="86" HorizontalAlignment="Left" Margin="13,36,0,0" Name="lstbJobCon" Padding="2"
+        <Label Content="{x:Static src:Properties.Resources.jobcon_value_label_text}" Height="23" HorizontalAlignment="Left" Margin="9,7,0,0" VerticalAlignment="Top" Grid.Row="7" Width="149" />
+        <ListBox Grid.Row="7" Height="86" HorizontalAlignment="Left" Margin="13,28,0,0" Name="lstbJobCon" Padding="2"
                  VerticalAlignment="Top" Width="374" BorderBrush="Black" Background="#FFEEECE1" KeyboardNavigation.TabNavigation="Once"  GotFocus="ListBox_GotFocus" Grid.RowSpan="2">
             <ListBox.Resources>
                 <Style TargetType="ListBoxItem">
@@ -151,17 +152,24 @@
             </ListBox.Resources>
         </ListBox>
         <Label Grid.Row="8" Content="{x:Static src:Properties.Resources.timeout_label_text}" Height="23" Width="157" HorizontalAlignment="Left" 
-               Margin="9,15,0,0" VerticalAlignment="Top" Grid.RowSpan="2" />
-        <TextBox Grid.Row="8" Name="txtTimeOut" Height="23" Width="40" HorizontalAlignment="Left" Margin="162,14,0,0" 
-                 VerticalAlignment="Top" VerticalContentAlignment="Center" HorizontalContentAlignment="Left" MaxLength="5" Grid.RowSpan="2" />
-        <Label Grid.Row="8" Content="{x:Static src:Properties.Resources.stop_code_label_text}" Height="23" Width="105" HorizontalAlignment="Right" 
-               Margin="0,14,81,0" VerticalAlignment="Top" Grid.RowSpan="2" />
-        <TextBox Grid.Row="8" Name="txtStopCode" Height="23" HorizontalAlignment="Right" Margin="0,15,9,0" 
-                 VerticalAlignment="Top" VerticalContentAlignment="Center" Width="72" MaxLength="32" Grid.RowSpan="2" />
-        <Button Grid.Row="9" Content="{x:Static src:Properties.Resources.regist_button_text}" Height="28" HorizontalAlignment="Left" Margin="231,45,0,0" 
+               Margin="9,4,0,0" VerticalAlignment="Top" />
+        <TextBox Grid.Row="8" Name="txtTimeOut" Height="23" Width="40" HorizontalAlignment="Left" Margin="162,7,0,0" 
+                 VerticalAlignment="Top" VerticalContentAlignment="Center" HorizontalContentAlignment="Left" MaxLength="5" />
+        <Label Grid.Row="9" Content="{x:Static src:Properties.Resources.stop_code_label_text}" Height="23" Width="105" HorizontalAlignment="Left" 
+               Margin="9,5,0,0" VerticalAlignment="Top" />
+        <TextBox Grid.Row="9" Name="txtStopCode" Height="23" Width="72" HorizontalAlignment="Left" Margin="130,6,0,0" 
+                 VerticalAlignment="Top" VerticalContentAlignment="Center" HorizontalContentAlignment="Left" MaxLength="32" />
+        <CheckBox Grid.Row="8" Content="{x:Static src:Properties.Resources.force_label_text}" Height="13" HorizontalAlignment="Left" Margin="212,9,0,0" VerticalAlignment="Top" Name="cbForce" Width="79" />
+        <CheckBox Grid.Row="8" Content="{x:Static src:Properties.Resources.continue_label_text}" Height="13" HorizontalAlignment="Left" Margin="306,9,0,0" VerticalAlignment="Top" Name="cbContinue" Width="79" />
+        <Label Grid.Row="9" Content="{x:Static src:Properties.Resources.run_user_label_text}" Height="23" Width="82" HorizontalAlignment="Left" 
+               Margin="9,34,0,0" VerticalAlignment="Top" />
+        <Label Grid.Row="9" Content="{x:Static src:Properties.Resources.run_user_password_label_text}" Height="23" Width="82" HorizontalAlignment="Left" 
+               Margin="9,64,0,0" VerticalAlignment="Top" />
+        <TextBox Grid.Row="9" Height="24" HorizontalAlignment="Left" Margin="95,35,0,0" Name="txtRunUser" VerticalAlignment="Top" Width="291" />
+        <TextBox Grid.Row="9" Height="24" HorizontalAlignment="Left" Margin="95,65,0,0" Name="txtRunUserPW" VerticalAlignment="Top" Width="291" />
+        <Button Grid.Row="9" Content="{x:Static src:Properties.Resources.regist_button_text}" Height="28" HorizontalAlignment="Left" Margin="231,98,0,0" 
                 Name="btnToroku" VerticalAlignment="Top" Width="75" Click="btnToroku_Click" IsDefault="True"/>
-        <Button Grid.Row="9" Content="{x:Static src:Properties.Resources.cancel_button_text}" Height="28" HorizontalAlignment="Left" Margin="311,45,0,0" 
+        <Button Grid.Row="9" Content="{x:Static src:Properties.Resources.cancel_button_text}" Height="28" HorizontalAlignment="Left" Margin="311,98,0,0" 
                 Name="btnCancel" VerticalAlignment="Top" Width="75" Click="btnCancel_Click" IsCancel="True"/>
-        <CheckBox Content="{x:Static src:Properties.Resources.force_label_text}" Grid.Row="9" Height="13" HorizontalAlignment="Left" Margin="13,20,0,0" VerticalAlignment="Top" Name="cbForce" Width="145" />
     </Grid>
 </Window>

@@ -1,7 +1,8 @@
 
--- Job Arranger create table SQL for PostgreSQL  - 2014/06/23 -
+-- Job Arranger create table SQL for PostgreSQL  - 2014/10/30 -
 
 -- Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+-- Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 
 
 CREATE TABLE ja_calendar_control_table (
@@ -22,6 +23,23 @@ CREATE TABLE ja_calendar_detail_table (
         update_date                     bigint                   DEFAULT '0'     NOT NULL,
         operating_date                  integer                  DEFAULT '0'     NOT NULL,
 CONSTRAINT ja_calendar_detail_pk PRIMARY KEY (calendar_id, update_date, operating_date)
+);
+
+
+CREATE TABLE ja_filter_control_table (
+        filter_id                       varchar(32)              DEFAULT ''      NOT NULL,
+        update_date                     bigint                   DEFAULT '0'     NOT NULL,
+        created_date                    timestamp                DEFAULT CURRENT_TIMESTAMP  NOT NULL,
+        valid_flag                      integer                  DEFAULT '0'     NOT NULL,
+        public_flag                     integer                  DEFAULT '0'     NOT NULL,
+        base_date_flag                  integer                  DEFAULT '0'     NOT NULL,
+        designated_day                  integer                  DEFAULT '0'     NOT NULL,
+        shift_day                       integer                  DEFAULT '0'     NOT NULL,
+        base_calendar_id                varchar(32)              DEFAULT ''      NOT NULL,
+        user_name                       varchar(100)             DEFAULT ''      NOT NULL,
+        filter_name                     varchar(64)              DEFAULT ''      NOT NULL,
+        memo                            varchar(100)                             NULL,
+CONSTRAINT ja_filter_control_pk PRIMARY KEY (filter_id, update_date)
 );
 
 
@@ -46,7 +64,8 @@ CREATE TABLE ja_schedule_detail_table (
         update_date                     bigint                   DEFAULT '0'     NOT NULL,
         boot_time                       char(4)                  DEFAULT ''      NOT NULL,
         created_date                    timestamp                DEFAULT CURRENT_TIMESTAMP  NOT NULL,
-CONSTRAINT ja_schedule_detail_pk PRIMARY KEY (schedule_id, calendar_id, update_date, boot_time)
+        object_flag                     integer                  DEFAULT '0'     NOT NULL,
+CONSTRAINT ja_schedule_detail_pk PRIMARY KEY (schedule_id, calendar_id, update_date, boot_time, object_flag)
 );
 
 
@@ -84,6 +103,9 @@ CREATE TABLE ja_job_control_table (
         job_name                        varchar(64)                              NULL,
         method_flag                     integer                  DEFAULT '0'     NOT NULL,
         force_flag                      integer                  DEFAULT '0'     NOT NULL,
+        continue_flag                   integer                  DEFAULT '0'     NOT NULL,
+        run_user                        varchar(256)                             NULL,
+        run_user_password               varchar(256)                             NULL,
 CONSTRAINT ja_job_control_pk PRIMARY KEY (jobnet_id, job_id, update_date)
 );
 
@@ -146,7 +168,7 @@ CREATE TABLE ja_icon_end_table (
         update_date                     bigint                   DEFAULT '0'     NOT NULL,
         created_date                    timestamp                DEFAULT CURRENT_TIMESTAMP  NOT NULL,
         jobnet_stop_flag                integer                  DEFAULT '0'     NOT NULL,
-        jobnet_stop_code                integer                  DEFAULT '0'     NOT NULL,
+        jobnet_stop_code                varchar(256)             DEFAULT '0'     NOT NULL,
 CONSTRAINT ja_icon_end_pk PRIMARY KEY (jobnet_id, job_id, update_date)
 );
 
@@ -288,6 +310,7 @@ CREATE TABLE ja_icon_reboot_table (
         reboot_mode_flag                integer                  DEFAULT '0'     NOT NULL,
         reboot_wait_time                integer                  DEFAULT '0'     NOT NULL,
         host_name                       varchar(128)             DEFAULT ''      NOT NULL,
+        timeout                         integer                  DEFAULT '0'     NOT NULL,
 CONSTRAINT ja_icon_reboot_pk PRIMARY KEY (jobnet_id, job_id, update_date)
 );
 
@@ -378,6 +401,13 @@ CREATE TABLE ja_run_jobnet_summary_table (
         calendar_id                     varchar(32)                              NULL,
         boot_time                       char(4)                                  NULL,
         execution_user_name             varchar(100)             DEFAULT ''      NOT NULL,
+        running_job_id                  varchar(1024)                            NULL,
+        running_job_name                varchar(64)                              NULL,
+        virtual_time                    bigint                   DEFAULT '0'     NOT NULL,
+        virtual_start_time              bigint                   DEFAULT '0'     NOT NULL,
+        virtual_end_time                bigint                   DEFAULT '0'     NOT NULL,
+        start_pending_flag              integer                  DEFAULT '0'     NOT NULL,
+        initial_scheduled_time          bigint                   DEFAULT '0'     NOT NULL,
 CONSTRAINT ja_run_jobnet_summary_pk PRIMARY KEY (inner_jobnet_id)
 );
 
@@ -409,6 +439,12 @@ CREATE TABLE ja_run_jobnet_table (
         calendar_id                     varchar(32)                              NULL,
         boot_time                       char(4)                                  NULL,
         execution_user_name             varchar(100)             DEFAULT ''      NOT NULL,
+        running_job_id                  varchar(1024)                            NULL,
+        running_job_name                varchar(64)                              NULL,
+        virtual_time                    bigint                   DEFAULT '0'     NOT NULL,
+        virtual_start_time              bigint                   DEFAULT '0'     NOT NULL,
+        virtual_end_time                bigint                   DEFAULT '0'     NOT NULL,
+        initial_scheduled_time          bigint                   DEFAULT '0'     NOT NULL,
 CONSTRAINT ja_run_jobnet_pk PRIMARY KEY (inner_jobnet_id)
 );
 
@@ -439,6 +475,9 @@ CREATE TABLE ja_run_job_table (
         point_y                         integer                  DEFAULT '0'     NOT NULL,
         job_id                          varchar(32)              DEFAULT ''      NOT NULL,
         job_name                        varchar(64)                              NULL,
+        continue_flag                   integer                  DEFAULT '0'     NOT NULL,
+        run_user                        varchar(256)                             NULL,
+        run_user_password               varchar(256)                             NULL,
 CONSTRAINT ja_run_job_pk PRIMARY KEY (inner_job_id)
 );
 
@@ -497,7 +536,7 @@ CREATE TABLE ja_run_icon_end_table (
         inner_job_id                    bigint                   DEFAULT '0'     NOT NULL,
         inner_jobnet_id                 bigint                   DEFAULT '0'     NOT NULL,
         jobnet_stop_flag                integer                  DEFAULT '0'     NOT NULL,
-        jobnet_stop_code                integer                  DEFAULT '0'     NOT NULL,
+        jobnet_stop_code                varchar(256)             DEFAULT '0'     NOT NULL,
 CONSTRAINT ja_run_icon_end_pk PRIMARY KEY (inner_job_id)
 );
 
@@ -508,6 +547,8 @@ CREATE TABLE ja_run_icon_extjob_table (
         command_id                      varchar(32)              DEFAULT ''      NOT NULL,
         value                           text                                     NULL,
         pid                             integer                  DEFAULT '0'     NOT NULL,
+        wait_count                      integer                  DEFAULT '0'     NOT NULL,
+        wait_time                       varchar(14)                              NULL,
 CONSTRAINT ja_run_icon_extjob_pk PRIMARY KEY (inner_job_id)
 );
 
@@ -619,6 +660,7 @@ CREATE TABLE ja_run_icon_reboot_table (
         reboot_mode_flag                integer                  DEFAULT '0'     NOT NULL,
         reboot_wait_time                integer                  DEFAULT '0'     NOT NULL,
         host_name                       varchar(128)             DEFAULT ''      NOT NULL,
+        timeout                         integer                  DEFAULT '0'     NOT NULL,
 CONSTRAINT ja_run_icon_reboot_pk PRIMARY KEY (inner_job_id)
 );
 
@@ -747,6 +789,32 @@ CREATE TABLE ja_define_run_log_message_table (
         created_date                    timestamp                DEFAULT CURRENT_TIMESTAMP  NOT NULL,
 CONSTRAINT ja_define_run_log_message_pk PRIMARY KEY (message_id, lang)
 );
+
+
+CREATE TABLE ja_send_message_table (
+        send_no                         bigserial                                NOT NULL,
+        message_date                    bigint                   DEFAULT '0'     NOT NULL,
+        inner_jobnet_id                 bigint                   DEFAULT '0'     NOT NULL,
+        inner_jobnet_main_id            bigint                   DEFAULT '0'     NOT NULL,
+        send_status                     integer                  DEFAULT '0'     NOT NULL,
+        retry_count                     integer                  DEFAULT '0'     NOT NULL,
+        retry_date                      bigint                   DEFAULT '0'     NOT NULL,
+        send_date                       bigint                   DEFAULT '0'     NOT NULL,
+        send_error_date                 bigint                   DEFAULT '0'     NOT NULL,
+        message_type                    integer                  DEFAULT '0'     NOT NULL,
+        user_name                       varchar(100)                             NULL,
+        host_name                       varchar(128)                             NULL,
+        jobnet_id                       varchar(32)                              NULL,
+        jobnet_name                     varchar(64)                              NULL,
+        job_id                          varchar(32)                              NULL,
+        job_id_full                     text                                     NULL,
+        job_name                        varchar(64)                              NULL,
+        log_message_id                  varchar(128)                             NULL,
+        log_message                     text                                     NULL,
+CONSTRAINT ja_send_message_pk PRIMARY KEY (send_no)
+);
+
+CREATE INDEX ja_send_message_idx1 ON ja_send_message_table (send_status);
 
 
 CREATE TABLE ja_index_table (

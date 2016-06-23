@@ -2,6 +2,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -74,9 +75,9 @@
                     <ColumnDefinition Width="18*" />
                 </Grid.ColumnDefinitions>
                 <RadioButton GroupName="modeGroup" Content="{x:Static src:Properties.Resources.file_wait_label_text}" Name="rbFileWait" Height="16"
-                             HorizontalAlignment="Left" Margin="4,7,0,0" VerticalAlignment="Top" Width="111" Grid.ColumnSpan="2" Checked="wait_Checked" />
+                             HorizontalAlignment="Left" Margin="4,7,0,0" VerticalAlignment="Top" Width="128" Grid.ColumnSpan="2" Checked="wait_Checked" />
                 <RadioButton Grid.Column="1" GroupName="modeGroup" Content="{x:Static src:Properties.Resources.file_check_label_text}" Name="rbFileCheck" Height="16"
-                             HorizontalAlignment="Left" Margin="31,7,0,0" VerticalAlignment="Top" Width="180" Grid.ColumnSpan="2" Checked="existCheck_Checked"/>
+                             HorizontalAlignment="Left" Margin="50,7,0,0" VerticalAlignment="Top" Width="180" Grid.ColumnSpan="2" Checked="existCheck_Checked"/>
             </Grid>
         </GroupBox>
         <CheckBox Content="{x:Static src:Properties.Resources.file_delete_checkbox_text}" Grid.Row="5" Height="16" HorizontalAlignment="Left" Margin="17,13,0,0" Name="CheckBoxDelete" VerticalAlignment="Top" />

@@ -8,7 +8,6 @@ DIST_SUBDIRS = \
 	jobarg_release \
 	jobarg_joblogput \
 	jobarg_session \
-	jobarg_extjob \
 	jobarg_monitor \
 	jobarg_command \
 	jobarg_agent \
@@ -23,7 +22,7 @@ endif
 if SERVER
 SERVER_SUBDIRS = \
 	jobarg_command \
-	jobarg_extjob \
+	jobarg_session \
 	jobarg_monitor \
 	jobarg_server 
 endif
@@ -35,6 +34,5 @@ SUBDIRS = \
 	jobarg_get \
 	jobarg_release \
 	jobarg_joblogput \
-	jobarg_session \
 	$(AGENT_SUBDIRS) \
 	$(SERVER_SUBDIRS)

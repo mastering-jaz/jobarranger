@@ -1,6 +1,7 @@
 ﻿/*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -49,6 +50,9 @@ namespace jp.co.ftf.jobcontroller.Common
         /// <summary>2-1-2．カレンダー初期登録画面</summary>
         public static readonly String WINDOW_212 = "WINDOW_NAME_212";
 
+        /// <summary>2-1-3 稼働日フィルター画面</summary>
+        public static readonly String WINDOW_213 = "WINDOW_NAME_213";
+
         /// <summary>2-2．スケジュール編集画面</summary>
         public static readonly String WINDOW_220 = "WINDOW_NAME_220";
 
@@ -94,11 +98,19 @@ namespace jp.co.ftf.jobcontroller.Common
         /// <summary>2-5．インポート画面<summary>
         public static readonly String WINDOW_250 = "WINDOW_NAME_250";
 
+        //added by YAMA 2014/10/17
+        /// <summary>2-6．関連データエラー画面<summary>
+        public static readonly String WINDOW_260 = "WINDOW_NAME_260";
+
         /// <summary>3．実行ジョブ管理画面<summary>
         public static readonly String WINDOW_300 = "WINDOW_NAME_300";
 
         /// <summary>3-１．実行ジョブ詳細画面<summary>
         public static readonly String WINDOW_310 = "WINDOW_NAME_310";
+
+        // added by YAMA 2014/10/14    実行予定リスト起動時刻変更
+        /// <summary>3-2．開始予定時刻変更画面<summary>
+        public static readonly String WINDOW_320 = "WINDOW_NAME_320";
 
         /// <summary> 4- 0．ジョブネット起動中画面 </summary>
         public static readonly String WINDOW_400 = "WINDOW_NAME_400";
@@ -111,6 +123,11 @@ namespace jp.co.ftf.jobcontroller.Common
 
         /// <summary> 5-2．実行結果詳細画面<summary>
         public static readonly String WINDOW_520 = "WINDOW_NAME_520";
+
+        //added by YAMA 2014/08/18
+        /// <summary> 6- 0．一般設定画面 </summary>
+        public static readonly String WINDOW_600 = "WINDOW_NAME_600";
+
         #endregion
 
         #region メッセージID
@@ -310,6 +327,18 @@ namespace jp.co.ftf.jobcontroller.Common
         /// <summary>ERROR_SCHEDULE_004<summary>
         public static readonly String ERROR_SCHEDULE_004 = "ERROR_SCHEDULE_004";
 
+        // added by YAMA 2014/10/14    実行予定リスト起動時刻変更
+        /// <summary>ERROR_SCHEDULE_005<summary>
+        public static readonly String ERROR_SCHEDULE_005 = "ERROR_SCHEDULE_005";
+
+        // added by YAMA 2014/10/14    実行予定リスト起動時刻変更
+        /// <summary>ERROR_SCHEDULE_006<summary>
+        public static readonly String ERROR_SCHEDULE_006 = "ERROR_SCHEDULE_006";
+
+        // added by YAMA 2014/10/14    実行予定リスト起動時刻変更
+        /// <summary>ERROR_SCHEDULE_007<summary>
+        public static readonly String ERROR_SCHEDULE_007 = "ERROR_SCHEDULE_007";
+
         /// <summary> ERROR_IMPORT_001 </summary>
         public static readonly String ERROR_IMPORT_001 = "ERROR_IMPORT_001";
 
@@ -347,6 +376,10 @@ namespace jp.co.ftf.jobcontroller.Common
         /// <summary> ERROR_COMMON_027 </summary>
         public static readonly String ERROR_COMMON_027 = "ERROR_COMMON_027";
 
+        //added by YAMA 2014/08/18
+        /// <summary> ERROR_COMMON_028 </summary>
+        public static readonly String ERROR_COMMON_028 = "ERROR_COMMON_028";
+
         //added by YAMA 2014/04/11
         /// <summary> ERROR_BOOT_TIME_005 </summary>
         public static readonly String ERROR_BOOT_TIME_005 = "ERROR_BOOT_TIME_005";
@@ -363,6 +396,10 @@ namespace jp.co.ftf.jobcontroller.Common
         /// <summary> ERROR_ZABBIX_LINK_003 </summary>
         public static readonly String ERROR_ZABBIX_LINK_003 = "ERROR_ZABBIX_LINK_003";
 
+        //added by YAMA 2014/07/25
+        /// <summary> ERROR_ZABBIX_LINK_004 </summary>
+        public static readonly String ERROR_ZABBIX_LINK_004 = "ERROR_ZABBIX_LINK_004";
+
         //added by YAMA 2014/06/23
         /// <summary> ERROR_BOOT_TIME_006 </summary>
         public static readonly String ERROR_BOOT_TIME_006 = "ERROR_BOOT_TIME_006";
@@ -375,6 +412,28 @@ namespace jp.co.ftf.jobcontroller.Common
         /// <summary> ERROR_JOBNET_LOAD_003 </summary>
         public static readonly String ERROR_JOBNET_LOAD_003 = "ERROR_JOBNET_LOAD_003";
 
+        //added by YAMA 2014/08/15
+        /// <summary> ERROR_JOBEDIT_014 </summary>
+        public static readonly String ERROR_JOBEDIT_014 = "ERROR_JOBEDIT_014";
+
+        //added by YAMA 2014/08/15
+        /// <summary> ERROR_JOBEDIT_015 </summary>
+        public static readonly String ERROR_JOBEDIT_015 = "ERROR_JOBEDIT_015";
+
+
+        //added by YAMA 2014/08/18
+        /// <summary> ERROR_SETTING_001 </summary>
+        public static readonly String ERROR_SETTING_001 = "ERROR_SETTING_001";
+
+        //added by YAMA 2014/08/18
+        /// <summary> ERROR_SETTING_002 </summary>
+        public static readonly String ERROR_SETTING_002 = "ERROR_SETTING_002";
+
+        //added by YAMA 2014/09/30
+        /// <summary> ERROR_END_SETTING_001 </summary>
+        public static readonly String ERROR_END_SETTING_001 = "ERROR_END_SETTING_001";
+
+        
         #endregion
 
         #region 処理ID
@@ -453,6 +512,10 @@ namespace jp.co.ftf.jobcontroller.Common
         /// <summary>PROCESS_025<summary>
         public static readonly String PROCESS_025 = "PROCESS_025";
 
+        // added by YAMA 2014/10/14    実行予定リスト起動時刻変更
+        /// <summary>PROCESS_026<summary>
+        public static readonly String PROCESS_026 = "PROCESS_026";
+
         /// <summary>IMPORT_PATH<summary>
         public static String IMPORT_PATH = "";
 
@@ -474,6 +537,7 @@ namespace jp.co.ftf.jobcontroller.Common
         public enum ObjectEnum
         {
             CALENDAR = 0,
+            FILTER,
             SCHEDULE,
             JOBNET
         }

@@ -1,6 +1,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -18,9 +19,9 @@
 **/
 
 /*
-** $Date:: 2013-05-17 16:53:37 +0900 #$
-** $Revision: 4641 $
-** $Author: ossinfra@FITECHLABS.CO.JP $
+** $Date:: 2014-10-17 16:00:02 +0900 #$
+** $Revision: 6528 $
+** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
 #include "common.h"
@@ -29,6 +30,7 @@
 #include "db.h"
 
 #include "jacommon.h"
+#include "jalog.h"
 #include "jastr.h"
 #include "jaenv.h"
 #include "javalue.h"
@@ -75,7 +77,7 @@ int jarun_icon_calc(const zbx_uint64_t inner_job_id)
         ja_log("JARUNICONCALC200001", inner_jobnet_id, NULL, inner_job_id,
                __function_name, inner_job_id);
         DBfree_result(result);
-        return ja_set_runerr(inner_job_id);
+        return ja_set_runerr(inner_job_id, 2);
     }
 
     chk = FAIL;
@@ -89,7 +91,7 @@ int jarun_icon_calc(const zbx_uint64_t inner_job_id)
     DBfree_result(result);
 
     if (chk != SUCCEED)
-        return ja_set_runerr(inner_job_id);
+        return ja_set_runerr(inner_job_id, 2);
 
     zabbix_log(LOG_LEVEL_DEBUG, "In %s() command: [%s]",
                __function_name, cmd);
@@ -100,7 +102,7 @@ int jarun_icon_calc(const zbx_uint64_t inner_job_id)
     if (pid == -1) {
         ja_log("JARUNICONCALC200002", inner_jobnet_id, NULL, inner_job_id,
                __function_name);
-        return ja_set_runerr(inner_job_id);
+        return ja_set_runerr(inner_job_id, 2);
     } else if (pid == 0) {
         if (ja_setenv(inner_job_id) == FAIL)
             exit(-2);
@@ -131,8 +133,8 @@ int jarun_icon_calc(const zbx_uint64_t inner_job_id)
     if (exit_code != 0) {
         ja_log("JARUNICONCALC200005", inner_jobnet_id, NULL, inner_job_id,
                __function_name, exit_code);
-        return ja_set_runerr(inner_job_id);
+        return ja_set_runerr(inner_job_id, 2);
     }
 
-    return ja_flow(inner_job_id, JA_FLOW_TYPE_NORMAL);
+    return ja_flow(inner_job_id, JA_FLOW_TYPE_NORMAL, 1);
 }

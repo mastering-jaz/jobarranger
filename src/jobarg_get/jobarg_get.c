@@ -1,6 +1,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -18,9 +19,9 @@
 **/
 
 /*
-** $Date:: 2014-06-17 18:49:59 +0900 #$
-** $Revision: 6065 $
-** $Author: kazuyoshi.yamagiwa@FITECHLABS.CO.JP $
+** $Date:: 2014-10-17 16:00:02 +0900 #$
+** $Revision: 6528 $
+** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
 #include "common.h"
@@ -135,7 +136,7 @@ int reginum_check(const char *str)
 static int check_response(char *response)
 {
     struct zbx_json_parse jp, jp_row;
-    char value[MAX_STRING_LEN];
+    char value[JA_STD_OUT_LEN];
     char *message;
     const char *p;
     int ret = FAIL;
@@ -394,22 +395,22 @@ static int check_response(char *response)
                         }
 
                         if (JOBARG_VARIABLE_FORMAT == 0) {
-                            zabbix_log(LOG_LEVEL_INFORMATION,
-                                       "\n\n"
-                                       "jobnetid                 : %s\n"
-                                       "jobnetname               : %s\n"
-                                       "Time of a schedule       : " ZBX_FS_UI64 "\n"
-                                       "Time of a start          : " ZBX_FS_UI64 "\n"
-                                       "Time of a end            : " ZBX_FS_UI64 "\n"
-                                       "The run type of a jobnet : %s\n"
-                                       "Status of a jobnet       : %s\n"
-                                       "Status of a job          : %s\n"
-                                       "Last job return value    : %s\n"
-                                       "Last job standard output : %s\n"
-                                       "Last job standard error  : %s\n",
-                                       jobnetid, jobnetname, scheduled_time,
-                                       start_time, end_time, jobnetruntype,
-                                       jobnetstatus, jobstatus, lastexitcd, laststdout, laststderr);
+                            fprintf(stderr,
+                                    "\n\n"
+                                    "jobnetid                 : %s\n"
+                                    "jobnetname               : %s\n"
+                                    "Time of a schedule       : " ZBX_FS_UI64 "\n"
+                                    "Time of a start          : " ZBX_FS_UI64 "\n"
+                                    "Time of a end            : " ZBX_FS_UI64 "\n"
+                                    "The run type of a jobnet : %s\n"
+                                    "Status of a jobnet       : %s\n"
+                                    "Status of a job          : %s\n"
+                                    "Last job return value    : %s\n"
+                                    "Last job standard output : %s\n"
+                                    "Last job standard error  : %s\n",
+                                    jobnetid, jobnetname, scheduled_time,
+                                    start_time, end_time, jobnetruntype,
+                                    jobnetstatus, jobstatus, lastexitcd, laststdout, laststderr);
                         } else {
                             fprintf(stdout,
                                     "export JA_JOBNETID=\"%s\"\n"

@@ -1,6 +1,7 @@
 ﻿/*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -17,6 +18,8 @@
 ** Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 **/
 using System;
+using System.Data;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -434,6 +437,43 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             }
         }
 
+        /// <summary>ToolTip表示内容設定</summary>/// 
+        public void SetToolTip(){
+            StringBuilder sbValue = new StringBuilder();
+            StringBuilder sb = new StringBuilder();
+            sb.Append(Properties.Resources.job_id_label_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(_jobId);
+            sb.Append("\n");
+            sb.Append(Properties.Resources.job_name_label_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(_jobName);
+            DataRow[] rowValue;
+            if (InnerJobId == null) {
+                rowValue = _container.IconValueTable.Select("job_id='" + _jobId + "'");
+            } else {
+                rowValue = _container.IconValueTable.Select("inner_job_id=" + InnerJobId);
+            }
+            if (rowValue != null && rowValue.Length > 0){
+                foreach (DataRow row in rowValue){
+                    sbValue.Append("\n");
+                    sbValue.Append("  ");
+                    sbValue.Append(row["value_name"]);
+                    sbValue.Append("=");
+                    sbValue.Append(row["value"]);
+                }
+            }
+            sb.Append("\n");
+            sb.Append(Properties.Resources.jobcon_value_label_text);
+            sb.Append(sbValue.ToString());
+            picToolTip.ToolTip = sb.ToString();
+        }
+
+        /// <summary>ToolTip表示内容リセット</summary>///
+        public void ResetToolTip(string toolTip)
+        {
+            picToolTip.ToolTip = toolTip;
+        }
         #endregion
     }
 

@@ -8,4 +8,5 @@ libjajob_a_SOURCES = \
 	jajobiconextjob.c jajobiconextjob.h \
 	jajobiconjob.c jajobiconjob.h \
 	jajobiconless.c jajobiconless.h \
+	jajobiconreboot.c jajobiconreboot.h \
 	jajob.c jajob.h

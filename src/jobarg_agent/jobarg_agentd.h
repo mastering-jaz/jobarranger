@@ -1,6 +1,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -18,8 +19,8 @@
 **/
 
 /*
-** $Date:: 2014-04-25 14:25:43 +0900 #$
-** $Revision: 5924 $
+** $Date:: 2014-11-11 13:25:08 +0900 #$
+** $Revision: 6642 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -55,5 +56,10 @@ int   CONFIG_LOG_REMOTE_COMMANDS    = 1;
 int   CONFIG_FCOPY_TIMEOUT          = 180;
 int   CONFIG_LISTEN_RETRY           = 30;
 char *CONFIG_JA_EXECUTION_USER      = NULL;
+
+char *CONFIG_JA_COMMAND_USER        = NULL;
+char *CONFIG_JA_COMMAND_PASSWORD    = NULL;
+
+char *CONFIG_JA_PS_COMMAND          = "ps -ef | awk '{ print $2,$3 }'";
 
 #endif

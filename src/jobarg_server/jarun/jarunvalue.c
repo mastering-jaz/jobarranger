@@ -1,6 +1,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -18,8 +19,8 @@
 **/
 
 /*
-** $Date:: 2014-04-28 17:37:12 +0900 #$
-** $Revision: 5942 $
+** $Date:: 2014-10-17 16:00:02 +0900 #$
+** $Revision: 6528 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -31,6 +32,7 @@
 #include "jastr.h"
 #include "javalue.h"
 #include "jalog.h"
+#include "jajobid.h"
 
 /******************************************************************************
  *                                                                            *
@@ -83,6 +85,10 @@ int jarun_value_before(const zbx_uint64_t inner_job_id)
                __function_name, inner_job_id);
     }
     DBfree_result(result);
+
+    if (ja_set_value_before(inner_job_id, inner_jobnet_id, "JOB_ID_FULL", ja_get_jobid(inner_job_id)) == FAIL) {
+        return FAIL;
+    }
 
     if (ja_remove_value_before(inner_job_id, "JOBARG_MESSAGE") == FAIL)
         return FAIL;

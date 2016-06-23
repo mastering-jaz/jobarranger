@@ -41,7 +41,8 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/ax_lib_mysql.m4 \
 	$(top_srcdir)/m4/ax_lib_postgresql.m4 \
 	$(top_srcdir)/m4/iconv.m4 $(top_srcdir)/m4/libjson.m4 \
 	$(top_srcdir)/m4/libsqlite3.m4 $(top_srcdir)/m4/libssh2.m4 \
-	$(top_srcdir)/m4/resolv.m4 $(top_srcdir)/configure.in
+	$(top_srcdir)/m4/libtar.m4 $(top_srcdir)/m4/resolv.m4 \
+	$(top_srcdir)/configure.in
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
@@ -85,7 +86,7 @@ AUTOMAKE = ${SHELL} /cus/jobarranger/infra/branches/missing --run automake-1.11
 AWK = gawk
 CC = gcc
 CCDEPMODE = depmode=gcc3
-CFLAGS = -g -O2  -I/usr/local/include
+CFLAGS = -g -O2  -I/usr/local/include/json -I/usr/local/include
 CPP = gcc -E
 CPPFLAGS = 
 CYGPATH_W = echo
@@ -107,12 +108,15 @@ INSTALL_DATA = ${INSTALL} -m 644
 INSTALL_PROGRAM = ${INSTALL}
 INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
-JSON_CPPFLAGS = -I/usr/local/include
+JSON_CPPFLAGS = -I/usr/local/include/json
 JSON_LDFLAGS = -L/usr/local/lib
 JSON_LIBS = /usr/local/lib/libjson.a
-LDFLAGS = -rdynamic   -L/usr/local/lib
+LDFLAGS = -rdynamic   -L/usr/local/lib -L/usr/local/lib
 LIBOBJS = 
-LIBS = -lm -lrt  -lresolv  /usr/local/lib/libtar.a /usr/local/lib/libjson.a
+LIBS = -lm -lrt  -lresolv  /usr/local/lib/libjson.a /usr/local/lib/libtar.a
+LIBTAR_CPPFLAGS = -I/usr/local/include
+LIBTAR_LDFLAGS = -L/usr/local/lib
+LIBTAR_LIBS = /usr/local/lib/libtar.a
 LTLIBOBJS = 
 MAKEINFO = ${SHELL} /cus/jobarranger/infra/branches/missing --run makeinfo
 MKDIR_P = /bin/mkdir -p
@@ -125,9 +129,9 @@ OBJEXT = o
 PACKAGE = jobarranger
 PACKAGE_BUGREPORT = 
 PACKAGE_NAME = jobarranger
-PACKAGE_STRING = jobarranger 2.0.1
+PACKAGE_STRING = jobarranger 2.1.0
 PACKAGE_TARNAME = jobarranger
-PACKAGE_VERSION = 2.0.1
+PACKAGE_VERSION = 2.1.0
 PATH_SEPARATOR = :
 PG_CONFIG = 
 POSTGRESQL_CPPFLAGS = 
@@ -148,7 +152,7 @@ SSH2_CFLAGS =
 SSH2_LDFLAGS = 
 SSH2_LIBS = 
 STRIP = 
-VERSION = 2.0.1
+VERSION = 2.1.0
 abs_builddir = /cus/jobarranger/infra/branches/jaconf/alert
 abs_srcdir = /cus/jobarranger/infra/branches/jaconf/alert
 abs_top_builddir = /cus/jobarranger/infra/branches

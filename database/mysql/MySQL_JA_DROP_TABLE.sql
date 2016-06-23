@@ -1,7 +1,8 @@
 
--- Job Arranger drop table SQL for MySQL  - 2014/06/23 -
+-- Job Arranger drop table SQL for MySQL  - 2014/09/17 -
 
 -- Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+-- Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 
 
 -- DROP FOREIGN KEY
@@ -72,12 +73,14 @@ ALTER TABLE `ja_run_job_table` DROP INDEX `ja_run_job_idx2`;
 ALTER TABLE `ja_run_log_table` DROP INDEX `ja_run_log_idx1`;
 ALTER TABLE `ja_run_log_table` DROP INDEX `ja_run_log_idx2`;
 ALTER TABLE `ja_run_log_table` DROP INDEX `ja_run_log_idx3`;
+ALTER TABLE `ja_send_message_table` DROP INDEX `ja_send_message_idx1`;
 
 
 -- DROP TABLE
 
 DROP TABLE `ja_calendar_control_table`;
 DROP TABLE `ja_calendar_detail_table`;
+DROP TABLE `ja_filter_control_table`;
 DROP TABLE `ja_schedule_control_table`;
 DROP TABLE `ja_schedule_detail_table`;
 DROP TABLE `ja_schedule_jobnet_table`;
@@ -133,6 +136,7 @@ DROP TABLE `ja_value_after_jobnet_table`;
 DROP TABLE `ja_session_table`;
 DROP TABLE `ja_run_log_table`;
 DROP TABLE `ja_define_run_log_message_table`;
+DROP TABLE `ja_send_message_table`;
 DROP TABLE `ja_index_table`;
 DROP TABLE `ja_parameter_table`;
 DROP TABLE `ja_host_lock_table`;

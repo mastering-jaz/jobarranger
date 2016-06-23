@@ -2,6 +2,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -47,8 +48,8 @@
                   VerticalAlignment="Top" />
         <TextBlock Grid.Row="3" Text="{x:Static src:Properties.Resources.end_code_label_text}" Height="23" HorizontalAlignment="Left" Margin="17,8,0,0" 
                VerticalAlignment="Top" />
-        <TextBox Grid.Row="3" Name="txtEndCode" Height="23" Width="38" HorizontalAlignment="Left" Margin="180,2,0,0"
-                 VerticalAlignment="Top" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" MaxLength="3" />
+        <TextBox Grid.Row="3" Name="txtEndCode" Height="23" Width="182" HorizontalAlignment="Left" Margin="180,2,0,0"
+                 VerticalAlignment="Top" VerticalContentAlignment="Center" HorizontalContentAlignment="Left" MaxLength="256" />
         <Button Grid.Row="4" Content="{x:Static src:Properties.Resources.regist_button_text}" Height="28" Width="75" HorizontalAlignment="Left" Margin="203,9,0,0" 
                 Name="btnToroku" VerticalAlignment="Top" Click="btnToroku_Click" IsDefault="True"/>
         <Button Grid.Row="4" Content="{x:Static src:Properties.Resources.cancel_button_text}" Height="28" Width="75" HorizontalAlignment="Left" Margin="283,9,0,0" 

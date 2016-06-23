@@ -1,6 +1,7 @@
 ﻿/*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -25,6 +26,11 @@ using jp.co.ftf.jobcontroller.DAO;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Collections.Generic;
+
+//added by YAMA 2014/08/15
+using System.Security.Cryptography;
+using System.Text;
+
 //*******************************************************************
 //                                                                  *
 //                                                                  *
@@ -41,17 +47,21 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
     /// </summary>
     public partial class JobSetting : Window
     {
-        #region フィールド 
+        #region フィールド
 
-        private string _selectForHostSql = "select distinct(hosts.hostid), hosts.host from users " + 
+        private string _selectForHostSql = "select distinct(hosts.hostid), hosts.host from users " +
             "inner join users_groups on users.userid = users_groups.userid inner join usrgrp " +
             "on users_groups.usrgrpid = usrgrp.usrgrpid inner join rights on usrgrp.usrgrpid = rights.groupid " +
             "inner join hosts_groups on rights.id = hosts_groups.groupid inner join hosts on " +
             "hosts_groups.hostid = hosts.hostid " +
             "where users.alias = ? and rights.permission <> '0' and (hosts.status=0 or hosts.status=1) " +
-            "order by hosts.hostid ASC";
+            //added by YAMA 2014/08/08    （ホスト名でソート）
+            //"order by hosts.hostid ASC";
+            "order by hosts.host ASC";
 
-        private string _selectForHostSqlSuper = "select hostid, host from hosts where status=0 or status=1 order by hostid ASC";
+        //added by YAMA 2014/08/08    （ホスト名でソート）
+        // private string _selectForHostSqlSuper = "select hostid, host from hosts where status=0 or status=1 order by hostid ASC";
+        private string _selectForHostSqlSuper = "select hostid, host from hosts where status=0 or status=1 order by host ASC";
 
         /// <summary>Tabキーかのフラグ</summary>
         private bool _isTabKey;
@@ -166,7 +176,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
 
         #endregion
 
-        #region イベント 
+        #region イベント
 
         /// <summary>登録処理</summary>
         /// <param name="sender">源</param>
@@ -388,7 +398,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             textVariableName.IsEnabled = false;
             cbStop.IsEnabled = false;
             txtStopCmd.IsEnabled = false;
-            txtCmd.IsReadOnly= true;
+            txtCmd.IsReadOnly = true;
             txtJobValueName.IsEnabled = false;
             txtJobValue.IsEnabled = false;
             btnAdd.IsEnabled = false;
@@ -406,6 +416,14 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             KeyboardNavigation.SetTabNavigation(lstbJobCon, KeyboardNavigationMode.None);
             KeyboardNavigation.SetTabNavigation(dgJobValue, KeyboardNavigationMode.None);
             lstbJobCon.ItemContainerStyle = Application.Current.Resources["UnFocusableControlStyle"] as Style;
+
+            //added by YAMA 2014/08/14
+            cbContinue.IsEnabled = false;
+            txtRunUser.IsEnabled = false;
+            txtRunUserPW.IsEnabled = false;
+
+            //added by YAMA 2014/09/24  (ジョブエラー継続)
+            cbContinue.IsEnabled = false;
         }
         #endregion
 
@@ -426,7 +444,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
         }
         #endregion
 
-        #region privateメッソド 
+        #region privateメッソド
 
         /// <summary> 値のセットと表示処理</summary>
         /// <param name="sender">源</param>
@@ -438,6 +456,20 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             {
                 txtJobId.Text = jobId;
                 txtJobName.Text = Convert.ToString(rowJob[0]["job_name"]);
+
+                //added by YAMA 2014/08/15
+                // 実行ユーザー
+                txtRunUser.Text = Convert.ToString(rowJob[0]["run_user"]);
+                // 実行ユーザーのパスワード
+                //                txtRunUserPW.Text = Convert.ToString(rowJob[0]["run_user_password"]);
+                if ((Convert.ToString(rowJob[0]["run_user_password"]).Equals("")))
+                {
+                    txtRunUserPW.Text = Convert.ToString(rowJob[0]["run_user_password"]);
+                }
+                else
+                {
+                    txtRunUserPW.Text = Decryption(Convert.ToString(rowJob[0]["run_user_password"]));
+                }
             }
 
             DBConnect dbAccess = new DBConnect(LoginSetting.ConnectStr);
@@ -498,12 +530,31 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                     combHostName.SelectedValue = hostName;
                 }
 
+                //added by YAMA 2014/11/12
+                // 停止コマンドの取得 
+                DataRow[] rowCmd;
+                if (_myJob.ContentItem.InnerJobId == null)
+                {
+                    rowCmd = _myJob.Container.JobCommandTable.Select("job_id='" + jobId + "'"
+                            + " and command_cls='2'");
+                }
+                else
+                {
+                    rowCmd = _myJob.Container.JobCommandTable.Select("inner_job_id=" + _myJob.ContentItem.InnerJobId + " and command_cls='2'");
+                }
+
+                if (rowCmd != null && rowCmd.Length > 0)
+                {
+                    txtStopCmd.Text = Convert.ToString(rowCmd[0]["command"]);
+                }
                 // 停止コマンド 
                 string stopFlag = Convert.ToString(rowIconJob[0]["stop_flag"]);
                 if ("1".Equals(stopFlag))
                 {
                     cbStop.IsChecked = true;
                     txtStopCmd.IsEnabled = true;
+                    //added by YAMA 2014/11/12
+                    /*
                     // 停止コマンドの取得 
                     DataRow[] rowCmd;
                     if (_myJob.ContentItem.InnerJobId == null)
@@ -520,6 +571,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                     {
                         txtStopCmd.Text = Convert.ToString(rowCmd[0]["command"]);
                     }
+                    */
                 }
                 else
                 {
@@ -558,6 +610,14 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
 
                 // ジョブ停止コード 
                 txtStopCode.Text = Convert.ToString(rowIconJob[0]["stop_code"]);
+
+                //added by YAMA 2014/09/24  (ジョブエラー継続)
+                // 処理継続
+                string ContinueFlag = Convert.ToString(rowJob[0]["continue_flag"]);
+                if ("1".Equals(ContinueFlag))
+                {
+                    cbContinue.IsChecked = true;
+                }
             }
 
             // ジョブコントローラ変数定義テーブルのデータを取得 
@@ -847,7 +907,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             string scriptCmd = "";
             scriptCmd = txtCmd.Text;
             // 未入力の場合 
-                if (CheckUtil.IsNullOrEmpty(scriptCmd))
+            if (CheckUtil.IsNullOrEmpty(scriptCmd))
             {
                 CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_001,
                     new string[] { scriptCmdForChange });
@@ -911,6 +971,77 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                 return false;
             }
 
+            //added by YAMA 2014/08/15
+            // 実行ユーザー（日本語入力可、省略可）
+            string runUserForChange = Properties.Resources.err_message_run_user;
+            String runUser = txtRunUser.Text;
+            bool runUserFlg = false;
+
+            // 入力時は以下をチェック
+            if (CheckUtil.IsNullOrEmpty(runUser) == false)
+            {
+                // バイト数チェック 
+                if (CheckUtil.IsLenOver(runUser, 256))
+                {
+                    CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_003,
+                        new string[] { runUserForChange, "256" });
+                    return false;
+                }
+
+                // 禁則文字チェック
+                if (!CheckUtil.IsProhibitedCharacterUserName(runUser))
+                {
+                    CommonDialog.ShowErrorDialog(Consts.ERROR_JOBEDIT_014,
+                        new string[] { runUserForChange });
+                    return false;
+                }
+
+                runUserFlg = true;
+
+            }
+
+            // パスワード（省略可、パスワードのみは不可）
+            string runUserPWForChange = Properties.Resources.err_message_run_user_pw;
+            String runUserPW = txtRunUserPW.Text;
+
+            // 入力時は以下をチェック
+            if (CheckUtil.IsNullOrEmpty(runUserPW) == false)
+            {
+                // 実行ユーザーが未設定
+                if (runUserFlg == false)
+                {
+                    CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_001,
+                        new string[] { runUserForChange });
+                    return false;
+                }
+
+                // 全角文字チェック
+                if (CheckUtil.isHankaku(runUserPW) == false)
+                {
+                    CommonDialog.ShowErrorDialog(Consts.ERROR_JOBEDIT_015,
+                        new string[] { runUserForChange });
+                    return false;
+                }
+
+                // バイト数チェック 
+                if (CheckUtil.IsLenOver(runUserPW, 256))
+                {
+                    CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_003,
+                        new string[] { runUserPWForChange, "256" });
+                    return false;
+                }
+
+                // 禁則文字チェック
+                if (!CheckUtil.IsProhibitedCharacterUserPW(runUserPW))
+                {
+                    CommonDialog.ShowErrorDialog(Consts.ERROR_JOBEDIT_015,
+                        new string[] { runUserForChange });
+                    return false;
+                }
+
+            }
+
+
             return true;
         }
 
@@ -940,12 +1071,37 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             // 入力されたジョブ名 
             string newJobNm = txtJobName.Text;
 
+            //added by YAMA 2014/08/15
+            // 実行ユーザー
+            string newRunUser = txtRunUser.Text;
+            // 実行ユーザーのパスワード
+            string newRunUserPW = txtRunUserPW.Text;
+
             // ジョブ管理テーブルの更新 
             DataRow[] rowJobCon = _myJob.Container.JobControlTable.Select("job_id='" + _oldJobId + "'");
             if (rowJobCon != null && rowJobCon.Length > 0)
             {
                 rowJobCon[0]["job_id"] = newJobId;
                 rowJobCon[0]["job_name"] = newJobNm;
+
+                if (newRunUser.Equals(""))
+                {
+                    rowJobCon[0]["run_user"] = null;
+                    rowJobCon[0]["run_user_password"] = null;
+                }
+                else if (newRunUserPW.Equals(""))
+                {
+                    //added by YAMA 2014/09/26
+                    rowJobCon[0]["run_user"] = newRunUser;
+
+                    rowJobCon[0]["run_user_password"] = null;
+                }
+                else
+                {
+                    rowJobCon[0]["run_user"] = newRunUser;
+                    rowJobCon[0]["run_user_password"] = Encryption(newRunUserPW);
+                }
+
             }
 
             // ジョブアイコン設定テーブルの更新 
@@ -1002,6 +1158,16 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                     rowJobCon[0]["force_flag"] = "1";
                 }
 
+                //added by YAMA 2014/09/24  (ジョブエラー継続)
+                // 処理継続
+                if (cbContinue.IsChecked == false)
+                {
+                    rowJobCon[0]["continue_flag"] = "0";    // アイコン停止（初期値）
+                }
+                else
+                {
+                    rowJobCon[0]["continue_flag"] = "1";    // 処理継続
+                }
             }
 
             // ジョブコマンド設定テーブルの削除 
@@ -1016,7 +1182,10 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
 
             // ジョブコマンド設定テーブルの登録 
             // 停止コマンド 
-            if (cbStop.IsChecked == true)
+            //added by YAMA 2014/11/12
+            //if (cbStop.IsChecked == true)
+            string stopCmd = Convert.ToString(txtStopCmd.Text);
+            if (!CheckUtil.IsNullOrEmpty(stopCmd))
             {
                 // 停止コマンドの登録 
                 DataRow rowAdd = _myJob.Container.JobCommandTable.NewRow();
@@ -1095,6 +1264,44 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             _myJob.Container.SetedJobIds[_myJob.JobId] = "1";
             this.Close();
         }
+
+        //added by YAMA 2014/08/15
+        /// <summary>パスワードの暗号化</summary>       
+        private string Encryption(string str)
+        {
+            string key = "199907";
+            string enc = "";
+            int j;
+
+            j = 0;
+            for (int i = 0; i < str.Length; i++)
+            {
+                enc = enc + (char)(str[i] ^ key[j]);
+                j++;
+                if (j == key.Length) j = 0;
+            }
+            return enc;
+
+        }
+
+        //added by YAMA 2014/08/15
+        /// <summary>パスワードの復号化</summary>       
+        private string Decryption(string str)
+        {
+            string key = "199907";
+            string dec = "";
+            int j;
+
+            j = 0;
+            for (int i = 0; i < str.Length; i++)
+            {
+                dec = dec + (char)(str[i] ^ key[j]);
+                j++;
+                if (j == key.Length) j = 0;
+            }
+            return dec;
+        }
+
         #endregion
     }
 }

@@ -1,6 +1,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -18,8 +19,8 @@
 **/
 
 /*
-** $Date:: 2014-02-03 14:11:01 +0900 #$
-** $Revision: 5757 $
+** $Date:: 2014-10-17 16:00:02 +0900 #$
+** $Revision: 6528 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -28,6 +29,7 @@
 #include "db.h"
 
 #include "jacommon.h"
+#include "jalog.h"
 #include "javalue.h"
 #include "jastatus.h"
 
@@ -66,19 +68,19 @@ int jarun_icon_jobnet(const zbx_uint64_t inner_job_id)
         ja_log("JARUNICONJOBNET200001", inner_jobnet_id, NULL,
                inner_job_id, __function_name, inner_job_id);
         DBfree_result(result);
-        return ja_set_runerr(inner_job_id);
+        return ja_set_runerr(inner_job_id, 2);
     }
     DBfree_result(result);
 
     if (ja_set_status_jobnet(inner_jobnet_id, JA_JOBNET_STATUS_READY, -1, -1)
         == FAIL)
-        return ja_set_runerr(inner_job_id);
+        return ja_set_runerr(inner_job_id, 2);
 
     if (ja_value_before_jobnet_in(inner_job_id, inner_jobnet_id) == FAIL)
-        return ja_set_runerr(inner_job_id);
+        return ja_set_runerr(inner_job_id, 2);
 
     if (ja_get_status_jobnet(inner_jobnet_id) != JA_JOB_STATUS_READY)
-        return ja_set_runerr(inner_job_id);
+        return ja_set_runerr(inner_job_id, 2);
 
     return SUCCEED;
 }

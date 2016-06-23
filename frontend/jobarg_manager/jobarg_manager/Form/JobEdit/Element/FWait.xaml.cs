@@ -1,6 +1,7 @@
 ﻿/*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -16,6 +17,9 @@
 ** along with this program; if not, write to the Free Software
 ** Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 **/
+using System;
+using System.Data;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -448,6 +452,124 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
 
                 this._state = IElementState.Selected;
             }
+        }
+
+        /// <summary>ToolTip表示内容設定</summary>/// 
+        public void SetToolTip(){
+
+            StringBuilder sbHost = new StringBuilder();
+            StringBuilder sbProcessMode = new StringBuilder();
+            StringBuilder sbWaitTime = new StringBuilder();
+            string deleteStr = Properties.Resources.tooltip_flag_off;
+            string forceStr = Properties.Resources.tooltip_flag_off;
+            string fileName = "";
+            StringBuilder sb = new StringBuilder();
+
+            sb.Append(Properties.Resources.job_id_label_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(_jobId);
+            sb.Append("\n");
+            sb.Append(Properties.Resources.job_name_label_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(_jobName);
+
+            // ファイル待ち合わせアイコン設定テーブルのデータを取得 
+            DataRow[] rowIconFwait;
+            if (InnerJobId == null) {
+                rowIconFwait = _container.IconFwaitTable.Select("job_id='" + _jobId + "'");
+            } else {
+                rowIconFwait = _container.IconFwaitTable.Select("inner_job_id=" + InnerJobId);
+            }
+            if (rowIconFwait != null && rowIconFwait.Length > 0) {
+                // ホスト
+                string hostFlag = Convert.ToString(rowIconFwait[0]["host_flag"]);
+                string hostName = Convert.ToString(rowIconFwait[0]["host_name"]);
+                if ("1".Equals(hostFlag)) {
+                    sbHost.Append("\n");
+                    sbHost.Append("  ");
+                    sbHost.Append(Properties.Resources.value_name_label_text);
+                    if (!LoginSetting.Lang.StartsWith("ja_")) sbHost.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+                    sbHost.Append(hostName);
+                } else {
+                    sbHost.Append("\n");
+                    sbHost.Append("  ");
+                    sbHost.Append(Properties.Resources.host_name_label_text);
+                    if (!LoginSetting.Lang.StartsWith("ja_")) sbHost.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+                    sbHost.Append(hostName);
+                }
+
+                //ファイル名
+                fileName = Convert.ToString(rowIconFwait[0]["file_name"]);
+
+                // モード 
+                string waitMode = Convert.ToString(rowIconFwait[0]["fwait_mode_flag"]);
+                string waitTime = Convert.ToString(rowIconFwait[0]["file_wait_time"]);
+                if ("0".Equals(waitMode))
+                {
+                    //added by YAMA 2014/12/04
+                    //sbProcessMode.Append("\n");
+                    //sbProcessMode.Append("  ");
+
+                    sbProcessMode.Append(Properties.Resources.file_wait_label_text);
+                    sbWaitTime.Append("\n");
+                    sbWaitTime.Append(Properties.Resources.wait_time_label_text);
+                    if (!LoginSetting.Lang.StartsWith("ja_")) sbWaitTime.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+                    sbWaitTime.Append(waitTime);
+                }
+                else
+                {
+                    //added by YAMA 2014/12/04
+                    //sbProcessMode.Append("\n");
+                    //sbProcessMode.Append("  ");
+
+                    sbProcessMode.Append(Properties.Resources.file_check_label_text);
+                }
+
+                // ファイル削除 
+                string deleteFile = Convert.ToString(rowIconFwait[0]["file_delete_flag"]);
+                if (!"0".Equals(deleteFile)) {
+                    deleteStr = Properties.Resources.tooltip_flag_on;
+                }
+
+                // 強制実行
+                DataRow[] rowJob = _container.JobControlTable.Select("job_id='" + _jobId + "'");
+                string forceFlag = Convert.ToString(rowJob[0]["force_flag"]);
+                if ("1".Equals(forceFlag)) {
+                    forceStr = Properties.Resources.tooltip_flag_on;
+                }
+            }
+            sb.Append("\n");
+            sb.Append(Properties.Resources.host_label_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(sbHost.ToString());
+            sb.Append("\n");
+            sb.Append(Properties.Resources.file_name_label_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(fileName);
+            sb.Append("\n");
+
+            //added by YAMA 2014/12/04
+            sb.Append(Properties.Resources.process_mode_label_textToolTip);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(sbProcessMode);
+
+            sb.Append("\n");
+            sb.Append(Properties.Resources.file_delete_checkbox_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(deleteStr.ToString());
+            sb.Append(sbWaitTime.ToString());
+            sb.Append("\n");
+            sb.Append(Properties.Resources.tooltip_force_label_text);
+            if (!LoginSetting.Lang.StartsWith("ja_")) sb.Append(" ");    /* added by YAMA 2014/12/15    V2.1.0 No32 対応 */
+            sb.Append(forceStr);
+
+            picToolTip.ToolTip = sb.ToString();
+        }
+
+        /// <summary>ToolTip表示内容リセット</summary>///
+        public void ResetToolTip(string toolTip)
+        {
+            picToolTip.ToolTip = toolTip;
         }
 
         #endregion

@@ -1,6 +1,7 @@
 /*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -18,8 +19,8 @@
 **/
 
 /*
-** $Date:: 2014-05-23 17:29:44 +0900 #$
-** $Revision: 6010 $
+** $Date:: 2014-10-17 16:00:02 +0900 #$
+** $Revision: 6528 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -29,6 +30,7 @@
 
 #include "jacommon.h"
 #include "jadb.h"
+#include "jalog.h"
 #include "javalue.h"
 
 /******************************************************************************
@@ -261,13 +263,22 @@ int ja_cpy_value(const zbx_uint64_t inner_job_id, const char *value_src,
                "In %s() inner_job_id: " ZBX_FS_UI64, __function_name,
                inner_job_id);
 
-    if (value_src == NULL)
+    if (value_src == NULL || value_dest == NULL) {
         return FAIL;
-
-    if (*value_src == '$') {
-        return ja_get_value_before(inner_job_id, value_src + 1,
-                                   value_dest);
     }
+
+    if (strlen(value_src) > 1) {
+        if (*value_src == '$' && *(value_src + 1) != '$') {
+            return ja_get_value_before(inner_job_id, value_src + 1, value_dest);
+        }
+
+        /* escape the $ character ($$ -> $) */
+        if (*value_src == '$' && *(value_src + 1) == '$') {
+             zbx_snprintf(value_dest, strlen(value_src), "%s", (value_src + 1));
+             return SUCCEED;
+        }
+    }
+
     zbx_snprintf(value_dest, strlen(value_src) + 1, "%s", value_src);
 
     return SUCCEED;

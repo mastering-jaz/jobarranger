@@ -1,6 +1,7 @@
 ﻿/*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -141,6 +142,11 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
             //added by YAMA 2014/04/25
             DelayedContextMenu.IsEnabled = false;
 
+            // added by YAMA 2014/10/14    実行予定リスト起動時刻変更
+            updtContextMenu.IsEnabled = false;
+            reserveContextMenu.IsEnabled = false;
+            releaseContextMenu.IsEnabled = false;
+
             // 何らかのアイテムを選択した状態のとき
             if (listView1.SelectedItems.Count > 0)
             {
@@ -159,6 +165,44 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
                 DelayedContextMenu.IsEnabled = true;
                 DelayedContextMenu.Tag = jobnetExecInfo;
             }
+
+                // added by YAMA 2014/10/14    実行予定リスト起動時刻変更
+                // 「開始予定時刻変更」「起動保留」「起動保留解除」の選択可否を制御
+                if (jobnetExecInfo.status == 0)
+                {
+                    // ステータスが「0：未実行」の場合、「開始予定時刻変更」「起動保留」を選択可能
+                    updtContextMenu.IsEnabled = true;
+                    updtContextMenu.Tag = jobnetExecInfo;
+                    reserveContextMenu.IsEnabled = true;
+                    reserveContextMenu.Tag = jobnetExecInfo;
+                }
+                else
+                {
+                    updtContextMenu.IsEnabled = false;
+                    reserveContextMenu.IsEnabled = false;
+                }
+                if (jobnetExecInfo.start_pending_flag == 1)
+                {
+                    // 起動保留フラグが「1：起動保留」の場合、「起動保留解除」を選択可能
+                    // added by YAMA 2014/12/03    (V2.1.0 No22)
+                    // 「開始予定時刻変更」「起動保留」を選択不可  → 「起動保留」を選択不可
+                    /* added by YAMA 2014/12/18    (ステータスが「0：未実行」の場合、「起動保留解除」選択可能) */
+                    //releaseContextMenu.IsEnabled = true;
+                    //releaseContextMenu.Tag = jobnetExecInfo;
+                    if (jobnetExecInfo.status == 0)
+                    {
+                        releaseContextMenu.IsEnabled = true;
+                        releaseContextMenu.Tag = jobnetExecInfo;
+                    }
+
+                    // added by YAMA 2014/12/03    (V2.1.0 No22)
+                    //updtContextMenu.IsEnabled = false;
+                    reserveContextMenu.IsEnabled = false;
+                }
+                else
+                {
+                    releaseContextMenu.IsEnabled = false;
+                }
 
             }
             #if VIEWER
@@ -246,6 +290,50 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
             }
             return child as T;
         }
+
+
+        // added by YAMA 2014/10/14    実行予定リスト起動時刻変更
+        //*******************************************************************
+        /// <summary>開始予定時刻変更</summary>
+        /// <param name="sender"></param>
+        /// <param name="e">イベント</param>
+        //*******************************************************************
+        private void ContextUpdateSchedule_Click(object sender, RoutedEventArgs e)
+        {
+//            int intNum = 0;
+            int intNum = 1;
+
+            // 開始ログ
+            base.WriteStartLog("ContextUpdateSchedule_Click", Consts.PROCESS_026);
+
+//            // 起動保留 に設定
+            JobnetExecInfo jobnetExecInfo = (JobnetExecInfo)listView1.SelectedItems[0];
+//            intNum = DBUtil.Set_Reserve_Jobnet(jobnetExecInfo.inner_jobnet_id);
+
+            // ステータスが「未実行」以外の場合、エラーダイアログを表示
+            if (intNum == 1)
+            {
+                // 開始予定時刻変更画面 を表示
+                decimal innerJobnetId = jobnetExecInfo.inner_jobnet_id;
+                String jobnetId = jobnetExecInfo.jobnet_id;
+                String scheduledTime = jobnetExecInfo.scheduled_time;
+                scheduledTime = scheduledTime.Substring(0, 16);
+                UpdateScheduleWindow updateWindow = new UpdateScheduleWindow(innerJobnetId, jobnetId, scheduledTime);
+                //            updateWindow.Owner = this.Parent;
+                updateWindow.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
+                updateWindow.ShowDialog();
+
+//                // 起動保留 を解除
+//                DBUtil.SetReleaseJobnet(jobnetExecInfo.inner_jobnet_id);
+            }
+            else
+            {
+                CommonDialog.ShowErrorDialog(Consts.ERROR_SCHEDULE_005);
+            }
+            // 終了ログ
+            base.WriteEndLog("ContextUpdateSchedule_Click", Consts.PROCESS_026);
+        }
+
         #endregion
     }
 }

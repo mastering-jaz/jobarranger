@@ -1,6 +1,7 @@
 ﻿/*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -21,6 +22,8 @@ using System.Windows;
 using System.Windows.Controls;
 using jp.co.ftf.jobcontroller.Common;
 using System.Data;
+using System.Text;
+using System.Collections.Generic;
 using jp.co.ftf.jobcontroller.DAO;
 using System.Windows.Threading;
 using System.Windows.Media;
@@ -134,6 +137,13 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
         /// <summary> フォーカス強制処理 </summary>
         private bool _needFocus;
 
+        /// <summary>エラーが発生したアイコン</summary>
+        private HashSet<CommonItem> errorItems = new HashSet<CommonItem>();
+
+        /* added by YAMA 2014/12/09    V2.1.0 No23 対応 */
+        /// <summary> エラーダイアログを表示するか </summary>
+        private bool _isDb;    // true：表示する
+
         #endregion
 
         #region コンストラクタ
@@ -152,6 +162,9 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
                 _successFlg = false;
 
             _needFocus = needFocus;
+
+            /* added by YAMA 2014/12/09    V2.1.0 No23 対応 */
+            _isDb = true;
 
         }
 
@@ -253,8 +266,27 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
 
         public void refresh(object sender, EventArgs e)
         {
-            FillTables(_innerJobnetId);
-            ResetColor();
+            /* added by YAMA 2014/12/09    V2.1.0 No23 対応 */
+            DBException dbEx = _dbAccess.exExecuteHealthCheck();
+
+            if (dbEx.MessageID.Equals(""))
+            {
+                FillTables(_innerJobnetId);
+                ResetColor();
+                ResetToolTip();
+            }
+            else
+            {
+                if (_isDb)
+                {
+                    _isDb = false;
+                    LogInfo.WriteErrorLog(Consts.SYSERR_001, dbEx.InnerException);
+                    CommonDialog.ShowErrorDialog(Consts.SYSERR_001);
+                }
+            }
+            //FillTables(_innerJobnetId);
+            //ResetColor();
+            //ResetToolTip();
         }
 
         private void jobnetItem_MouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -436,6 +468,349 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
         //*******************************************************************
         private void FillTables(string innerJobnetId)
         {
+            /* added by YAMA 2014/12/09    V2.1.0 No23 対応 */
+            DBException dbEx = _dbAccess.exExecuteHealthCheck();
+
+            if (dbEx.MessageID.Equals(""))
+            {
+                RunJobnetSummaryTable = _runJobnetSummaryDAO.GetEntityByPk(innerJobnetId);
+                if (RunJobnetSummaryTable.Rows.Count > 0) JobnetRunStatus = (RunJobStatusType)RunJobnetSummaryTable.Rows[0]["status"];
+                // 実行ジョブネット管理テーブル 
+                container.JobnetControlTable = _runJobnetDAO.GetEntityByPk(innerJobnetId);
+            }
+            else
+            {
+                if (_isDb)
+                {
+                    _isDb = false;
+                    LogInfo.WriteErrorLog(Consts.SYSERR_001, dbEx.InnerException);
+                    CommonDialog.ShowErrorDialog(Consts.SYSERR_001);
+                }
+            }
+
+            dbEx = _dbAccess.exExecuteHealthCheck();
+            if (dbEx.MessageID.Equals(""))
+            {
+                // 実行ジョブ管理テーブル 
+                container.JobControlTable = null;
+                container.JobControlTable = _runJobControlDAO.GetEntityByJobnet(innerJobnetId);
+            }
+            else
+            {
+                if (_isDb)
+                {
+                    _isDb = false;
+                    LogInfo.WriteErrorLog(Consts.SYSERR_001, dbEx.InnerException);
+                    CommonDialog.ShowErrorDialog(Consts.SYSERR_001);
+                }
+            }
+
+            dbEx = _dbAccess.exExecuteHealthCheck();
+            if (dbEx.MessageID.Equals(""))
+            {
+                // フロー管理テーブル 
+                container.FlowControlTable = _runFlowControlDAO.GetEntityByJobnet(innerJobnetId);
+            }
+            else
+            {
+                if (_isDb)
+                {
+                    _isDb = false;
+                    LogInfo.WriteErrorLog(Consts.SYSERR_001, dbEx.InnerException);
+                    CommonDialog.ShowErrorDialog(Consts.SYSERR_001);
+                }
+            }
+
+            dbEx = _dbAccess.exExecuteHealthCheck();
+            if (dbEx.MessageID.Equals(""))
+            {
+                // 計算アイコン設定テーブル 
+                container.IconCalcTable = _runIconCalcDAO.GetEntityByJobnet(innerJobnetId);
+            }
+            else
+            {
+                if (_isDb)
+                {
+                    _isDb = false;
+                    LogInfo.WriteErrorLog(Consts.SYSERR_001, dbEx.InnerException);
+                    CommonDialog.ShowErrorDialog(Consts.SYSERR_001);
+                }
+            }
+
+            dbEx = _dbAccess.exExecuteHealthCheck();
+            if (dbEx.MessageID.Equals(""))
+            {
+                // 終了アイコン設定テーブル 
+                container.IconEndTable = _runIconEndDAO.GetEntityByJobnet(innerJobnetId);
+            }
+            else
+            {
+                if (_isDb)
+                {
+                    _isDb = false;
+                    LogInfo.WriteErrorLog(Consts.SYSERR_001, dbEx.InnerException);
+                    CommonDialog.ShowErrorDialog(Consts.SYSERR_001);
+                }
+            }
+
+            dbEx = _dbAccess.exExecuteHealthCheck();
+            if (dbEx.MessageID.Equals(""))
+            {
+                // 拡張実行ジョブアイコン設定テーブル 
+                container.IconExtjobTable = _runIconExtJobDAO.GetEntityByJobnet(innerJobnetId);
+            }
+            else
+            {
+                if (_isDb)
+                {
+                    _isDb = false;
+                    LogInfo.WriteErrorLog(Consts.SYSERR_001, dbEx.InnerException);
+                    CommonDialog.ShowErrorDialog(Consts.SYSERR_001);
+                }
+            }
+
+            dbEx = _dbAccess.exExecuteHealthCheck();
+            if (dbEx.MessageID.Equals(""))
+            {
+                // 条件分岐アイコン設定テーブル 
+                container.IconIfTable = _runIconIfDAO.GetEntityByJobnet(innerJobnetId);
+            }
+            else
+            {
+                if (_isDb)
+                {
+                    _isDb = false;
+                    LogInfo.WriteErrorLog(Consts.SYSERR_001, dbEx.InnerException);
+                    CommonDialog.ShowErrorDialog(Consts.SYSERR_001);
+                }
+            }
+
+            dbEx = _dbAccess.exExecuteHealthCheck();
+            if (dbEx.MessageID.Equals(""))
+            {
+                // 情報取得アイコン設定テーブル 
+                container.IconInfoTable = _runIconInfoDAO.GetEntityByJobnet(innerJobnetId);
+            }
+            else
+            {
+                if (_isDb)
+                {
+                    _isDb = false;
+                    LogInfo.WriteErrorLog(Consts.SYSERR_001, dbEx.InnerException);
+                    CommonDialog.ShowErrorDialog(Consts.SYSERR_001);
+                }
+            }
+
+            dbEx = _dbAccess.exExecuteHealthCheck();
+            if (dbEx.MessageID.Equals(""))
+            {
+                // 実行ジョブネットアイコン設定テーブル 
+                container.IconJobnetTable = _runIconJobnetDAO.GetEntityByJobnet(innerJobnetId);
+            }
+            else
+            {
+                if (_isDb)
+                {
+                    _isDb = false;
+                    LogInfo.WriteErrorLog(Consts.SYSERR_001, dbEx.InnerException);
+                    CommonDialog.ShowErrorDialog(Consts.SYSERR_001);
+                }
+            }
+
+            dbEx = _dbAccess.exExecuteHealthCheck();
+            if (dbEx.MessageID.Equals(""))
+            {
+                // 実行ジョブアイコン設定テーブル 
+                container.IconJobTable = _runIconJobDAO.GetEntityByJobnet(innerJobnetId);
+            }
+            else
+            {
+                if (_isDb)
+                {
+                    _isDb = false;
+                    LogInfo.WriteErrorLog(Consts.SYSERR_001, dbEx.InnerException);
+                    CommonDialog.ShowErrorDialog(Consts.SYSERR_001);
+                }
+            }
+
+            dbEx = _dbAccess.exExecuteHealthCheck();
+            if (dbEx.MessageID.Equals(""))
+            {
+                // 実行ジョブコマンド設定テーブル 
+                container.JobCommandTable = _jobCommandDAO.GetEntityByJobnet(innerJobnetId);
+            }
+            else
+            {
+                if (_isDb)
+                {
+                    _isDb = false;
+                    LogInfo.WriteErrorLog(Consts.SYSERR_001, dbEx.InnerException);
+                    CommonDialog.ShowErrorDialog(Consts.SYSERR_001);
+                }
+            }
+
+            dbEx = _dbAccess.exExecuteHealthCheck();
+            if (dbEx.MessageID.Equals(""))
+            {
+                // 実行ジョブ変数設定テーブル 
+                container.ValueJobTable = _valueJobDAO.GetEntityByJobnet(innerJobnetId);
+            }
+            else
+            {
+                if (_isDb)
+                {
+                    _isDb = false;
+                    LogInfo.WriteErrorLog(Consts.SYSERR_001, dbEx.InnerException);
+                    CommonDialog.ShowErrorDialog(Consts.SYSERR_001);
+                }
+            }
+
+            dbEx = _dbAccess.exExecuteHealthCheck();
+            if (dbEx.MessageID.Equals(""))
+            {
+                // 実行ジョブコントローラ変数設定テーブル 
+                container.ValueJobConTable = _valueJobConDAO.GetEntityByJobnet(innerJobnetId);
+            }
+            else
+            {
+                if (_isDb)
+                {
+                    _isDb = false;
+                    LogInfo.WriteErrorLog(Consts.SYSERR_001, dbEx.InnerException);
+                    CommonDialog.ShowErrorDialog(Consts.SYSERR_001);
+                }
+            }
+
+            dbEx = _dbAccess.exExecuteHealthCheck();
+            if (dbEx.MessageID.Equals(""))
+            {
+                // タスクアイコン設定テーブル 
+                container.IconTaskTable = _runIconTaskDAO.GetEntityByJobnet(innerJobnetId);
+            }
+            else
+            {
+                if (_isDb)
+                {
+                    _isDb = false;
+                    LogInfo.WriteErrorLog(Consts.SYSERR_001, dbEx.InnerException);
+                    CommonDialog.ShowErrorDialog(Consts.SYSERR_001);
+                }
+            }
+
+            dbEx = _dbAccess.exExecuteHealthCheck();
+            if (dbEx.MessageID.Equals(""))
+            {
+                // 実行ジョブコントローラ変数アイコン設定テーブル  
+                container.IconValueTable = _runIconValueDAO.GetEntityByJobnet(innerJobnetId);
+            }
+            else
+            {
+                if (_isDb)
+                {
+                    _isDb = false;
+                    LogInfo.WriteErrorLog(Consts.SYSERR_001, dbEx.InnerException);
+                    CommonDialog.ShowErrorDialog(Consts.SYSERR_001);
+                }
+            }
+
+            dbEx = _dbAccess.exExecuteHealthCheck();
+            if (dbEx.MessageID.Equals(""))
+            {
+                // 実行ファイル転送アイコン設定テーブル 
+                container.IconFcopyTable = _runIconFcopyDAO.GetEntityByJobnet(innerJobnetId);
+            }
+            else
+            {
+                if (_isDb)
+                {
+                    _isDb = false;
+                    LogInfo.WriteErrorLog(Consts.SYSERR_001, dbEx.InnerException);
+                    CommonDialog.ShowErrorDialog(Consts.SYSERR_001);
+                }
+            }
+
+            dbEx = _dbAccess.exExecuteHealthCheck();
+            if (dbEx.MessageID.Equals(""))
+            {
+                // 実行ファイル待ち合わせアイコン設定テーブル 
+                container.IconFwaitTable = _runIconFwaitDAO.GetEntityByJobnet(innerJobnetId);
+            }
+            else
+            {
+                if (_isDb)
+                {
+                    _isDb = false;
+                    LogInfo.WriteErrorLog(Consts.SYSERR_001, dbEx.InnerException);
+                    CommonDialog.ShowErrorDialog(Consts.SYSERR_001);
+                }
+            }
+
+            dbEx = _dbAccess.exExecuteHealthCheck();
+            if (dbEx.MessageID.Equals(""))
+            {
+                // 実行リブートアイコン設定テーブル 
+                container.IconRebootTable = _runIconRebootDAO.GetEntityByJobnet(innerJobnetId);
+            }
+            else
+            {
+                if (_isDb)
+                {
+                    _isDb = false;
+                    LogInfo.WriteErrorLog(Consts.SYSERR_001, dbEx.InnerException);
+                    CommonDialog.ShowErrorDialog(Consts.SYSERR_001);
+                }
+            }
+
+            dbEx = _dbAccess.exExecuteHealthCheck();
+            if (dbEx.MessageID.Equals(""))
+            {
+                // 実行保留解除アイコン設定テーブル 
+                container.IconReleaseTable = _runIconReleaseDAO.GetEntityByJobnet(innerJobnetId);
+            }
+            else
+            {
+                if (_isDb)
+                {
+                    _isDb = false;
+                    LogInfo.WriteErrorLog(Consts.SYSERR_001, dbEx.InnerException);
+                    CommonDialog.ShowErrorDialog(Consts.SYSERR_001);
+                }
+            }
+
+            dbEx = _dbAccess.exExecuteHealthCheck();
+            if (dbEx.MessageID.Equals(""))
+            {
+                //added by YAMA 2014/02/06
+                // 実行Zabbix連携アイコン設定テーブル 
+                container.IconCooperationTable = _runIconCooperationDAO.GetEntityByJobnet(innerJobnetId);
+            }
+            else
+            {
+                if (_isDb)
+                {
+                    _isDb = false;
+                    LogInfo.WriteErrorLog(Consts.SYSERR_001, dbEx.InnerException);
+                    CommonDialog.ShowErrorDialog(Consts.SYSERR_001);
+                }
+            }
+
+            dbEx = _dbAccess.exExecuteHealthCheck();
+            if (dbEx.MessageID.Equals(""))
+            {
+                //added by YAMA 2014/05/19
+                /// 実行エージェントレスアイコン設定テーブル
+                container.IconAgentlessTable = _runIconAgentlessDAO.GetEntityByJobnet(innerJobnetId);
+            }
+            else
+            {
+                if (_isDb)
+                {
+                    _isDb = false;
+                    LogInfo.WriteErrorLog(Consts.SYSERR_001, dbEx.InnerException);
+                    CommonDialog.ShowErrorDialog(Consts.SYSERR_001);
+                }
+            }
+            /*
             RunJobnetSummaryTable = _runJobnetSummaryDAO.GetEntityByPk(innerJobnetId);
             if (RunJobnetSummaryTable.Rows.Count > 0) JobnetRunStatus = (RunJobStatusType)RunJobnetSummaryTable.Rows[0]["status"];
             // 実行ジョブネット管理テーブル 
@@ -502,6 +877,7 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
             //added by YAMA 2014/05/19
             /// 実行エージェントレスアイコン設定テーブル
             container.IconAgentlessTable = _runIconAgentlessDAO.GetEntityByJobnet(innerJobnetId);
+            */
         }
 
         //*******************************************************************
@@ -536,6 +912,9 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
                 room.SetValue(Canvas.LeftProperty, Convert.ToDouble(row["point_x"]));
                 // Y位置 
                 room.SetValue(Canvas.TopProperty, Convert.ToDouble(row["point_y"]));
+
+                // ToolTip設定
+                room.ContentItem.SetToolTip();
 
                 room.RemoveAllEvent();
                 //room.ContextMenu = contextMenu;
@@ -609,6 +988,104 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobManager
 
             }
 
+        }
+
+        //*******************************************************************
+        /// <summary>実行ジョブフロー領域の表示</summary>
+        //*******************************************************************
+        private void ResetToolTip()
+        {
+            string strSqlAfter = "select inner_jobnet_id,value_name,after_value from ja_run_value_after_table where inner_job_id = ?";
+            DBConnect dbAccess = new DBConnect(LoginSetting.ConnectStr);
+            dbAccess.CreateSqlConnect();
+            foreach (DataRow row in container.JobControlTable.Select())
+            {
+                //added by YAMA 2014/11/12
+                //StringBuilder sb = new StringBuilder("Text");
+                StringBuilder sb = new StringBuilder();
+                RunJobStatusType statusType = (RunJobStatusType)row["status"];
+                string innerJobId = Convert.ToString(row["inner_job_id"]);
+                CommonItem room = (CommonItem)container.JobItems[innerJobId];
+
+                if (statusType == RunJobStatusType.RunErr || statusType == RunJobStatusType.Abnormal)
+                {
+                    //added by YAMA 2014/11/12
+                    //string stdOut = "";
+                    //string stdErr = "";
+                    StringBuilder stdOut = new StringBuilder();
+                    StringBuilder stdErr = new StringBuilder();
+
+                    string jobExitCd = "";
+                    string jobargMessage = "";
+
+                    List<ComSqlParam> sqlParams = new List<ComSqlParam>();
+                    sqlParams.Add(new ComSqlParam(DbType.String, "@inner_job_id", innerJobId));
+
+                    DataTable runValueAfterTable = dbAccess.ExecuteQuery(strSqlAfter, sqlParams);
+                    DataRow[] rows = runValueAfterTable.Select("value_name='STD_OUT'");
+                    if (rows != null && rows.Length > 0)
+                    {
+                        //added by YAMA 2014/11/12
+                        //stdOut = Convert.ToString(rows[0]["after_value"]);
+                        string command = Convert.ToString(rows[0]["after_value"]);
+                        foreach (string line in command.Split(new Char[] { '\n' }))
+                        {
+                            stdOut.Append("\n");
+                            stdOut.Append("  ");
+                            stdOut.Append(line);
+                        }
+                    }
+                    rows = runValueAfterTable.Select("value_name='STD_ERR'");
+                    if (rows != null && rows.Length > 0)
+                    {
+                        //added by YAMA 2014/11/12
+                        //stdErr = Convert.ToString(rows[0]["after_value"]);
+                        string command = Convert.ToString(rows[0]["after_value"]);
+                        foreach (string line in command.Split(new Char[] { '\n' }))
+                        {
+                            stdErr.Append("\n");
+                            stdErr.Append("  ");
+                            stdErr.Append(line);
+                        }
+                    }
+                    rows = runValueAfterTable.Select("value_name='JOB_EXIT_CD'");
+                    if (rows != null && rows.Length > 0)
+                    {
+                        jobExitCd = Convert.ToString(rows[0]["after_value"]);
+                    }
+                    rows = runValueAfterTable.Select("value_name='JOBARG_MESSAGE'");
+                    if (rows != null && rows.Length > 0)
+                    {
+                        jobargMessage = Convert.ToString(rows[0]["after_value"]);
+                    }
+                    sb.Append(Properties.Resources.tooltip_err_stdout);
+                    //added by YAMA 2014/11/12
+                    //sb.Append(stdOut);
+                    sb.Append(stdOut.ToString());
+                    sb.Append("\n");
+                    sb.Append(Properties.Resources.tooltip_err_stderr);
+                    //added by YAMA 2014/11/12
+                    //sb.Append(stdErr);
+                    sb.Append(stdErr.ToString());
+                    sb.Append("\n");
+                    sb.Append(Properties.Resources.tooltip_err_job_exit_cd);
+                    sb.Append(jobExitCd);
+                    sb.Append("\n");
+                    sb.Append(Properties.Resources.tooltip_err_jobarg_message);
+                    sb.Append(jobargMessage);
+                    room.ContentItem.ResetToolTip(sb.ToString().Trim());
+                    errorItems.Add(room);
+                }
+                else
+                {
+                    if (errorItems.Contains(room))
+                    {
+                        errorItems.Remove(room);
+                        room.ContentItem.SetToolTip();
+                    }
+                }
+            }
+            dbAccess.CloseSqlConnect();
         }
 
         //*******************************************************************

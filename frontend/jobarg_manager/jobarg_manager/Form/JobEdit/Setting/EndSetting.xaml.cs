@@ -1,6 +1,7 @@
 ﻿/*
 ** Job Arranger for ZABBIX
 ** Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
+** Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -229,52 +230,54 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             // ジョブID
             string jobIdForChange = Properties.Resources.err_message_job_id;
             String jobId = txtJobId.Text;
-            // 未入力の場合 
+            // 未入力の場合
             if (CheckUtil.IsNullOrEmpty(jobId))
             {
-                CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_001, 
+                CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_001,
                     new string[] { jobIdForChange });
                 return false;
             }
-            // 桁数チェック 
+            // 桁数チェック
             if (CheckUtil.IsLenOver(jobId, 32))
             {
                 CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_003,
                     new string[] { jobIdForChange, "32" });
                 return false;
             }
-            // 半角英数値、「-」、「_」チェック 
+            // 半角英数値、「-」、「_」チェック
             if (!CheckUtil.IsHankakuStrAndHyphenAndUnderbar(jobId))
             {
                 CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_013,
                     new string[] { jobIdForChange });
                 return false;
             }
-            // 予約語（START）チェック 
+            // 予約語（START）チェック
             if (CheckUtil.IsHoldStrSTART(jobId))
             {
                 CommonDialog.ShowErrorDialog(Consts.ERROR_JOBEDIT_001);
                 return false;
             }
-            // すでに登録済みの場合 
-            DataRow[] rowJob = _myJob.Container.JobControlTable.Select("job_id='" + jobId + "'");
+            // すでに登録済みの場合
+            DataRow[] rowJob =
+                    _myJob.Container.JobControlTable.Select("job_id='" + jobId + "'");
             if (rowJob != null && rowJob.Length > 0)
             {
                 foreach (DataRow row in rowJob)
                 {
                     if (!jobId.Equals(_oldJobId) && jobId.Equals(row["job_id"]))
                     {
-                        CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_004,
+                         CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_004,
                             new string[] { jobIdForChange });
                         return false;
                     }
                 }
             }
 
-            // ジョブ名 
-            string jobNameForChange = Properties.Resources.err_message_job_name;
+            // ジョブ名
+            string jobNameForChange = 
+                Properties.Resources.err_message_job_name;
             String jobName = txtJobName.Text;
-            // バイト数チェック 
+            // バイト数チェック
             if (CheckUtil.IsLenOver(jobName, 64))
             {
                 CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_003,
@@ -290,32 +293,100 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                 return false;
             }
 
-            // 終了コード 
-            string endCodeForChange = Properties.Resources.err_message_stop_code;
+            // 終了コード
+            string endCodeForChange = Properties.Resources.err_message_exit_code;
             String endCode = txtEndCode.Text;
-            // 半角数字チェック 
-            if (!CheckUtil.IsHankakuNum(endCode))
+
+            //added by YAMA 2014/09/30
+            // 未入力チェック
+            if (CheckUtil.IsNullOrEmpty(endCode))
             {
-                CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_007,
+                CommonDialog.ShowErrorDialog(Consts.ERROR_COMMON_001,
                     new string[] { endCodeForChange });
                 return false;
             }
-            // 「0～255」以内チェック 
-            if (CheckUtil.IsNullOrEmpty(endCode))
+
+            //added by YAMA 2014/09/30
+            // 半角英数字、ドル記号、アンダーバー以外はエラー
+            if (!CheckUtil.IsHankakuStrAndDollarAndUnderbar(endCode))
             {
-                CommonDialog.ShowErrorDialog(Consts.ERROR_JOBEDIT_008,
-                    new string[] { endCodeForChange, "「0～255」" });
+                CommonDialog.ShowErrorDialog(Consts.ERROR_END_SETTING_001,
+                    new string[] { endCodeForChange });
                 return false;
+            }
+
+            //added by YAMA 2014/09/30
+            // １文字目が半角英字の場合、エラー
+            if (CheckUtil.IsHankakuLerrer(endCode.Substring(0, 1)))
+            {
+                CommonDialog.ShowErrorDialog(Consts.ERROR_END_SETTING_001,
+                    new string[] { endCodeForChange });
+                return false;
+            }
+
+            //added by YAMA 2014/09/30
+            // １文字目が半角数値の場合、全て半角数値以外はエラー
+            // 数値の範囲は０～２５５以外はエラー
+            if (CheckUtil.IsHankakuNum(endCode.Substring(0, 1)))
+            {
+                if (CheckUtil.IsHankakuNum(endCode.Substring(1)))
+                {
+                    Int16 endCodeInt = Convert.ToInt16(endCode);
+                    if (endCodeInt < 0 || endCodeInt > 255)
+                    {
+                        CommonDialog.ShowErrorDialog(Consts.ERROR_END_SETTING_001,
+                            new string[] { endCodeForChange });
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                }
+                else
+                {
+                    CommonDialog.ShowErrorDialog(Consts.ERROR_END_SETTING_001,
+                        new string[] { endCodeForChange });
+                    return false;
+                }
+            }
+
+            //added by YAMA 2014/09/30
+            // １文字目が＄の場合
+            if (endCode.Substring(0, 1) == "$")
+            {
+                try
+                {
+                    // ２文字目は半角英字とアンダーバー以外はエラー、＄のみもエラー
+                    if (!CheckUtil.IsHankakuLerrerAndUnderbar(endCode.Substring(1, 1)))
+                    {
+                        CommonDialog.ShowErrorDialog(Consts.ERROR_END_SETTING_001,
+                            new string[] { endCodeForChange });
+                        return false;
+                    }
+                    else
+                    {
+                        //３文字以降は半角英数字とアンダーバー以外はエラー
+                        if (!CheckUtil.IsHankakuStrAndUnderbar(endCode.Substring(2)))
+                        {
+                            CommonDialog.ShowErrorDialog(Consts.ERROR_END_SETTING_001,
+                                new string[] { endCodeForChange });
+                            return false;
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    CommonDialog.ShowErrorDialog(Consts.ERROR_END_SETTING_001,
+                        new string[] { endCodeForChange });
+                    return false;
+                }
             }
             else
             {
-                Int16 endCodeInt = Convert.ToInt16(endCode);
-                if (endCodeInt < 0 || endCodeInt > 255)
-                {
-                    CommonDialog.ShowErrorDialog(Consts.ERROR_JOBEDIT_008,
-                        new string[] { endCodeForChange, "「0～255」" });
-                    return false;
-                }
+                CommonDialog.ShowErrorDialog(Consts.ERROR_END_SETTING_001,
+                    new string[] { endCodeForChange });
+                return false;
             }
 
             return true;
