@@ -18,8 +18,8 @@
 **/
 
 /*
-** $Date:: 2013-09-10 17:50:21 +0900 #$
-** $Revision: 5265 $
+** $Date:: 2014-02-26 10:24:08 +0900 #$
+** $Revision: 5821 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -71,7 +71,7 @@ int ja_flow_set_status(const zbx_uint64_t start_inner_job_id,
         ja_log("JAFLOW200001", 0, NULL, start_inner_job_id,
                __function_name, end_inner_job_id);
         DBfree_result(result);
-        return ja_set_enderr(start_inner_job_id);
+        return ja_set_enderr(start_inner_job_id, 1);
     }
 
     status = atoi(row[0]);
@@ -90,7 +90,7 @@ int ja_flow_set_status(const zbx_uint64_t start_inner_job_id,
         if (job_type == JA_JOB_TYPE_END) {
             ja_log("JAFLOW300001", 0, NULL, start_inner_job_id,
                    __function_name, end_inner_job_id);
-            return ja_set_enderr(start_inner_job_id);
+            return ja_set_enderr(start_inner_job_id, 1);
         } else {
             status = JA_JOB_STATUS_BEGIN;
             end_count = 0;
@@ -110,7 +110,7 @@ int ja_flow_set_status(const zbx_uint64_t start_inner_job_id,
     } else {
         ja_log("JAFLOW200002", 0, NULL, start_inner_job_id,
                __function_name, end_inner_job_id, status);
-        return ja_set_enderr(start_inner_job_id);
+        return ja_set_enderr(start_inner_job_id, 1);
     }
 
     // reset status for all icons of the jobnet
@@ -128,7 +128,7 @@ int ja_flow_set_status(const zbx_uint64_t start_inner_job_id,
             ja_log("JAFLOW200004", 0, NULL, start_inner_job_id,
                    __function_name, end_inner_job_id);
             DBfree_result(result);
-            return ja_set_enderr(start_inner_job_id);
+            return ja_set_enderr(start_inner_job_id, 1);
         }
         DBfree_result(result);
 
@@ -219,7 +219,7 @@ int ja_flow(const zbx_uint64_t inner_job_id, const int type)
     if (flows == 0) {
         ja_log("JAFLOW200003", inner_jobnet_id, NULL, inner_job_id,
                __function_name, inner_job_id);
-        return ja_set_enderr(inner_job_id);
+        return ja_set_enderr(inner_job_id, 1);
     } else {
         return ja_set_end(inner_job_id);
     }

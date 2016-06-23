@@ -1,3 +1,16 @@
+Changes for 1.4.2 (Rev:5870) GA
+
+2014-03-13  FitechForce Business Dept.
+
+	* Job Arranger : ジョブアイコン、ファイル転送アイコン、ファイル待合せアイコン、
+	リブートアイコンにホスト無効時の強制実行を追加。
+	* Job Arranger : ジョブ実行結果画面とjobarg_joblogputコマンドの状況欄をマルチ言語化。
+	* jobarg_exec.c : ジョブネット実行コマンド（jobarg_exec）にオプション「-D」を追加。
+	* jaruniconreboot.c : ホスト無効時にリブートアイコンがフリーズする不具合に対応。
+	* jp.co.ftf.jobcontroller.JobController.LoginWindow.xaml.cs :
+	Zabbix2.x系でPostgreSQLを使用している場合、拡張ジョブアイコンで拡張ジョブの
+	プルダウンがすべて空白となる不具合に対応。
+
 Changes for 1.4.1 (Rev:5710) GA
 
 2014-01-06  FitechForce Business Dept.

@@ -18,9 +18,9 @@
 **/
 
 /*
-** $Date:: 2013-05-27 13:50:15 +0900 #$
-** $Revision: 4664 $
-** $Author: ossinfra@FITECHLABS.CO.JP $
+** $Date:: 2014-02-20 15:50:58 +0900 #$
+** $Revision: 5808 $
+** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
 #include "common.h"
@@ -47,7 +47,7 @@
  * Comments:                                                                  *
  *                                                                            *
  ******************************************************************************/
-int ja_connect(zbx_sock_t * s, const char *host)
+int ja_connect(zbx_sock_t * s, const char *host, const zbx_uint64_t inner_job_id)
 {
     int ret;
     char host_ip[128];
@@ -57,7 +57,7 @@ int ja_connect(zbx_sock_t * s, const char *host)
 
     zabbix_log(LOG_LEVEL_DEBUG, "In %s() host: %s", __function_name, host);
 
-    hostid = ja_host_getip(host, host_ip);
+    hostid = ja_host_getip(host, host_ip, inner_job_id);
     if (hostid == 0)
         return FAIL;
     port = ja_host_getport(hostid);
@@ -70,6 +70,8 @@ int ja_connect(zbx_sock_t * s, const char *host)
         zbx_tcp_connect(s, CONFIG_SOURCE_IP, host_ip, port,
                         CONFIG_TIMEOUT);
     if (ret == FAIL) {
+        ja_log("JACONNECT300001", 0, NULL, inner_job_id, __function_name, zbx_tcp_strerror(),
+               host_ip, port, CONFIG_SOURCE_IP, CONFIG_TIMEOUT);
         zabbix_log(LOG_LEVEL_WARNING,
                    "In %s() can not connect the host. %s", __function_name,
                    zbx_tcp_strerror());

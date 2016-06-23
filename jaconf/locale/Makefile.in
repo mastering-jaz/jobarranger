@@ -196,7 +196,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-locale_DATA = jamessage_en.txt jamessage_ja_JP_UTF-8.txt logmessage_32BIT.txt logmessage_64BIT.txt
+locale_DATA = logmessage_32BIT.txt logmessage_64BIT.txt
 all: all-am
 
 .SUFFIXES:

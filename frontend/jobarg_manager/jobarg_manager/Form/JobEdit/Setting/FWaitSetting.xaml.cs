@@ -208,6 +208,17 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                     // 待ち合わせ時間  
                     rowIconFwait[0]["file_wait_time"] = "0";
                 }
+
+                //added by YAMA 2014/02/19	
+                // 強制実行フラグ	
+                if (cbForce.IsChecked == false)
+                {
+                    rowJobCon[0]["force_flag"] = "0";
+                }
+                else
+                {
+                    rowJobCon[0]["force_flag"] = "1";
+                }	
             }
 
 
@@ -278,6 +289,9 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             rbFileCheck.IsEnabled = false;
             CheckBoxDelete.IsEnabled = false;
             txtWaitTime.IsEnabled = false;
+
+            //added by YAMA 2014/02/19
+            cbForce.IsEnabled = false;
         }
         #endregion
 
@@ -381,6 +395,14 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                 {
                     CheckBoxDelete.IsChecked = true;
                 }
+
+                //added by YAMA 2014/02/19		
+                // 強制実行		
+                string forceFlag = Convert.ToString(rowJob[0]["force_flag"]);
+                if ("1".Equals(forceFlag))
+                {
+                    cbForce.IsChecked = true;
+                }		
 
             }
         }

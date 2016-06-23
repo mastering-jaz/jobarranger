@@ -18,8 +18,8 @@
 **/
 
 /*
-** $Date:: 2013-12-13 16:48:28 +0900 #$
-** $Revision: 5622 $
+** $Date:: 2014-01-28 16:00:35 +0900 #$
+** $Revision: 5755 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -107,7 +107,6 @@ int	CONFIG_JA_JOB_TIMEOUT		= 30;
 char	*CONFIG_EXTJOB_PATH		= NULL;
 char	*CONFIG_ERROR_CMD_PATH		= NULL;
 char	*CONFIG_JA_LOG_MESSAGE_FILE	= NULL;
-char	*CONFIG_JA_MESSAGE_FILE		= NULL;
 int	CONFIG_FCOPY_TIMEOUT		= 180;
 int	CONFIG_ZABBIX_VERSION		= 1;
 int	CONFIG_JALAUNCH_INTERVAL	= 1;
@@ -293,7 +292,6 @@ static void zbx_load_config()
 		{"JaExtjobPath",	&CONFIG_EXTJOB_PATH,		TYPE_STRING,		PARM_MAND,	0,	0},
 		{"JaErrorCmdPath",	&CONFIG_ERROR_CMD_PATH,		TYPE_STRING,		PARM_MAND,	0,	0},
 		{"JaLogMessageFile",	&CONFIG_JA_LOG_MESSAGE_FILE,	TYPE_STRING,		PARM_MAND,	0,	0},
-		{"JaMessageFile",	&CONFIG_JA_MESSAGE_FILE,	TYPE_STRING,		PARM_MAND,	0,	0},
 		{"JaFcopyTimeout",	&CONFIG_FCOPY_TIMEOUT,		TYPE_INT,		PARM_OPT,	1,	3600},
 		{"JaZabbixVersion",	&CONFIG_ZABBIX_VERSION,		TYPE_INT,		PARM_OPT,	1,	2},
 		{"JaLaunchInterval",	&CONFIG_JALAUNCH_INTERVAL,	TYPE_INT,		PARM_OPT,	1,	9999999},

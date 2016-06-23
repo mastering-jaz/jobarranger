@@ -114,8 +114,8 @@ int jarun_icon_release(const zbx_uint64_t inner_job_id,
         result =
             DBselect
             ("select inner_jobnet_id from ja_run_jobnet_summary_table"
-             " where jobnet_id = '%s' and status = 2",
-             jobnet_id);
+             " where jobnet_id = '%s' and status = %d",
+             jobnet_id, JA_JOBNET_STATUS_RUN);
         while ((row = DBfetch(result)) != NULL) {
             ZBX_STR2UINT64(inner_jobnet_id, row[0]);
             get_job_id = zbx_strdup(NULL, job_id);
@@ -159,8 +159,8 @@ int jarun_icon_release(const zbx_uint64_t inner_job_id,
         result =
             DBselect
             ("select inner_jobnet_id from ja_run_jobnet_summary_table"
-             " where jobnet_id = '%s' and status = 2",
-             jobnet_id);
+             " where jobnet_id = '%s' and status = %d",
+             jobnet_id, JA_JOBNET_STATUS_RUN);
         while ((row = DBfetch(result)) != NULL) {
             ZBX_STR2UINT64(inner_jobnet_id, row[0]);
             get_job_id = zbx_strdup(NULL, job_id);

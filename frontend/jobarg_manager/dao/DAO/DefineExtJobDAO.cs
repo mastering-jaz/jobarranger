@@ -55,7 +55,7 @@ namespace jp.co.ftf.jobcontroller.DAO
         private string _selectSqlByPk = "select * from ja_define_extjob_table " +
                                         "where command_id = ? ";
 
-        private string _selectLangSql = "select command_id, command_name, memo from ja_define_extjob_table where lang = ?" +
+        private string _selectLangSql = "select command_id, command_name, memo from ja_define_extjob_table where lang = ? " +
                                "order by command_id ASC";
 
         private DBConnect _db = null;

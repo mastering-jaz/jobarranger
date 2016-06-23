@@ -18,9 +18,9 @@
 **/
 
 /*
-** $Date:: 2013-07-18 16:21:01 +0900 #$
-** $Revision: 5200 $
-** $Author: ossinfra@FITECHLABS.CO.JP $
+** $Date:: 2014-03-06 16:18:01 +0900 #$
+** $Revision: 5866 $
+** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
 #ifndef JOBARG_JAUSER_H
@@ -31,6 +31,7 @@ zbx_uint64_t ja_user_id(const char *username);
 zbx_uint64_t ja_user_usrgrpid(zbx_uint64_t userid);
 int ja_user_status(zbx_uint64_t userid);
 int ja_user_type(zbx_uint64_t userid);
+char *ja_user_lang(zbx_uint64_t userid);
 int ja_user_groups(zbx_uint64_t userid1, zbx_uint64_t userid2);
 
 #endif

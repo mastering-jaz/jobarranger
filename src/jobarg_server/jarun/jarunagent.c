@@ -108,9 +108,7 @@ int jarun_agent(ja_job_object * job, const char *host_name,
     ret = FAIL;
     ja_job_object_init(&job_res);
     DBconnect(ZBX_DB_CONNECT_ONCE);
-    if (ja_connect(&sock, host) == FAIL) {
-        ja_log("JARUNAGENT200003", 0, NULL, inner_job_id,
-               __function_name, host, inner_job_id);
+    if (ja_connect(&sock, host, inner_job_id) == FAIL) {
         ja_set_runerr(job->jobid);
         DBclose();
         exit(1);

@@ -38,16 +38,16 @@
 
 /* long options */
 static struct zbx_option longopts[] = {
-    {"jobarg-server", 1, NULL, 'z'},
+    {"jobarranger-server", 1, NULL, 'z'},
     {"port", 1, NULL, 'p'},
     {"user-name", 1, NULL, 'U'},
     {"password", 1, NULL, 'P'},
-    {"from", 0, NULL, 's'},
-    {"to", 0, NULL, 'e'},
+    {"from-time", 1, NULL, 's'},
+    {"to-time", 1, NULL, 'e'},
     {"jobnet-id", 1, NULL, 'n'},
     {"job-id", 1, NULL, 'j'},
     {"target-user", 1, NULL, 'u'},
-    {"management-id", 0, NULL, 'r'},
+    {"registry-number", 1, NULL, 'r'},
     {"help", 0, NULL, 'h'},
     {"version", 0, NULL, 'V'},
     {NULL}
@@ -72,26 +72,26 @@ char *CONFIG_TARGETUSER = NULL;
 char *CONFIG_MID = NULL;
 
 const char *progname = NULL;
-const char title_message[] = "Job Arranger Joblogput";
+const char title_message[] = "Job Arranger Job log outut";
 const char usage_message[] =
-    "[-hV] -z <hostname or IP> [-p <port>] -U <username> -P <password> -s [<YYYYMMDD>|<YYYYMMDDHHMM>] -e [<YYYYMMDD>|<YYYYMMDDHHMM>] -n <jobnet-id> -j <job-id> -u <target-user> -r <registry number>";
+    "[-hV] -z <hostname or IP> [-p <port>] -U <username> -P <password> [-s <YYYYMMDD>|<YYYYMMDDHHMM>] [-e <YYYYMMDD>|<YYYYMMDDHHMM>] [-n <jobnet-id>] [-j <job-id>] [-u <target-user>] [-r <registry number>]";
 
 const char *help_message[] = {
     "Options:",
-    "  -z --jobarranger-server <server>                 Hostname or IP address of Job Arranger server",
-    "  -p --port <server port>                          Specify port number of server trapper running on the server. Default is 10061",
-    "  -U --user-name <user-name>                       Specify user name",
-    "  -P --password <password>                         Specify password",
-    "  -s --from-time [<YYYYMMDD>|<YYYYMMDDHHMM>]       Specify from-time",
-    "  -e --to-time [<YYYYMMDD>|<YYYYMMDDHHMM>]         Specify to-time",
-    "  -n --jobnet-id <jobnet-id>                       Specify jobnet-id",
-    "  -j --job-id <job-id>                             Specify job-id",
-    "  -u --target-user <target-user>                   Specify target-user",
-    "  -r --registry-number <registry-number>           Specify registry number",
+    "  -z --jobarranger-server <server>                Hostname or IP address of Job Arranger server",
+    " [-p --port <server port>]                        Specify port number of server trapper running on the server. Default is 10061",
+    "  -U --user-name <user-name>                      Specify user name",
+    "  -P --password <password>                        Specify password",
+    " [-s --from-time <YYYYMMDD> or <YYYYMMDDHHMM>]    Specify search start time",
+    " [-e --to-time <YYYYMMDD> or <YYYYMMDDHHMM>]      Specify search end time",
+    " [-n --jobnet-id <jobnet-id>]                     Specify the jobnet-id to be refine search",
+    " [-j --job-id <job-id>]                           Specify the job-id to be refine search",
+    " [-u --target-user <target-user>]                 Specify the target-user to be refine search",
+    " [-r --registry-number <registry-number>]         Specify the registry number to be refine search",
     "",
     "Other options:",
-    "  -h --help                                        Give this help",
-    "  -V --version                                     Display version number",
+    "  -h --help                                       Give this help",
+    "  -V --version                                    Display version number",
     NULL
 };
 

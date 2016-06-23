@@ -18,8 +18,8 @@
 **/
 
 /*
-** $Date:: 2013-12-16 16:44:34 +0900 #$
-** $Revision: 5628 $
+** $Date:: 2014-02-20 16:52:27 +0900 #$
+** $Revision: 5809 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -107,10 +107,8 @@ int jarun_icon_reboot(const zbx_uint64_t inner_job_id, const int method)
             return FAIL;
         }
 
-        if (ja_host_lock(host) == FAIL) {
-            ja_log("JARUNICONREBOOT200003", 0, NULL, inner_job_id,
-                   __function_name, host, inner_job_id);
-            return FAIL;
+        if (ja_host_lock(host, inner_job_id) == FAIL) {
+            return ja_set_runerr(inner_job_id);
         }
     }
 
@@ -132,9 +130,7 @@ int jarun_icon_reboot(const zbx_uint64_t inner_job_id, const int method)
 
     ret = FAIL;
     DBconnect(ZBX_DB_CONNECT_ONCE);
-    if (ja_connect(&sock, host) == FAIL) {
-        ja_log("JARUNICONREBOOT200005", 0, NULL, inner_job_id,
-               __function_name, host, inner_job_id);
+    if (ja_connect(&sock, host, inner_job_id) == FAIL) {
         if (method != JA_JOB_METHOD_ABORT) {
             ja_host_unlock(host);
             ja_set_runerr(inner_job_id);

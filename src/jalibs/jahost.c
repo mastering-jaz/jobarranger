@@ -18,9 +18,9 @@
 **/
 
 /*
-** $Date:: 2013-05-27 13:50:15 +0900 #$
-** $Revision: 4664 $
-** $Author: ossinfra@FITECHLABS.CO.JP $
+** $Date:: 2014-02-20 15:50:58 +0900 #$
+** $Revision: 5808 $
+** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
 #include "common.h"
@@ -75,10 +75,12 @@ int ja_host_getname(const zbx_uint64_t inner_job_id, const int host_flag,
  * Comments:                                                                  *
  *                                                                            *
  ******************************************************************************/
-zbx_uint64_t ja_host_getip(const char *host, char *host_ip)
+zbx_uint64_t ja_host_getip(const char *host, char *host_ip, const zbx_uint64_t inner_job_id)
 {
     DB_RESULT result;
+    DB_RESULT result2;
     DB_ROW row;
+    DB_ROW row2;
     char *host_esc;
     zbx_uint64_t hostid;
     const char *__function_name = "ja_host_getip";
@@ -91,23 +93,17 @@ zbx_uint64_t ja_host_getip(const char *host, char *host_ip)
     switch (CONFIG_ZABBIX_VERSION) {
     case 1:
         // for zabbix 1.8
-        result =
-            DBselect
-            ("select hostid, useip, dns, ip, status from hosts where host = '%s'",
-             host_esc);
+        result = DBselect("select hostid, useip, dns, ip, status from hosts where host = '%s'",
+                          host_esc);
         break;
     case 2:
         // for zabbix 2.0
-        result =
-            DBselect
-            (" select i.hostid, i.useip, i.dns, i.ip, h.status from hosts h, interface i"
-             " where h.hostid = i.hostid and i.main = 1 and host = '%s'",
-             host_esc);
+        result = DBselect(" select i.hostid, i.useip, i.dns, i.ip, h.status from hosts h, interface i"
+                          " where h.hostid = i.hostid and i.main = 1 and host = '%s'",
+                          host_esc);
         break;
     default:
-        zabbix_log(LOG_LEVEL_ERR,
-                   "In %s() can not support ZABBIX_VERSION: %d",
-                   __function_name, CONFIG_ZABBIX_VERSION);
+        ja_log("JAHOST200001", 0, NULL, inner_job_id, __function_name, CONFIG_ZABBIX_VERSION);
         break;
     }
 
@@ -118,16 +114,26 @@ zbx_uint64_t ja_host_getip(const char *host, char *host_ip)
 
     row = DBfetch(result);
     if (row == NULL) {
-        zabbix_log(LOG_LEVEL_ERR, "In %s() can not find host: %s",
-                   __function_name, host);
+        ja_log("JAHOST200002", 0, NULL, inner_job_id, __function_name, host, inner_job_id);
         goto error;
     }
 
-    if (atoi(row[4]) != HOST_STATUS_MONITORED) {
-        zabbix_log(LOG_LEVEL_ERR, "In %s() host: %s is disabled",
-                   __function_name, host);
+    /* get the force flag and job id */
+    result2 = DBselect("select force_flag, job_id from ja_run_job_table where inner_job_id = " ZBX_FS_UI64,
+                       inner_job_id);
+    if (NULL == (row2 = DBfetch(result2))) {
+        ja_log("JAHOST200004", 0, NULL, inner_job_id, __function_name, inner_job_id);
+        DBfree_result(result2);
         goto error;
     }
+
+    if (atoi(row[4]) != HOST_STATUS_MONITORED && atoi(row2[0]) == JA_JOB_FORCE_FLAG_OFF) {
+        ja_log("JAHOST200003", 0, NULL, inner_job_id, __function_name, host, inner_job_id, row2[1]);
+        DBfree_result(result2);
+        goto error;
+    }
+
+    DBfree_result(result2);
 
     ZBX_STR2UINT64(hostid, row[0]);
     if (host_ip != NULL) {
@@ -196,23 +202,19 @@ int ja_host_getport(zbx_uint64_t hostid)
  * Comments:                                                                  *
  *                                                                            *
  ******************************************************************************/
-int ja_host_auth(zbx_sock_t * sock, const char *host)
+int ja_host_auth(zbx_sock_t * sock, const char *host, const zbx_uint64_t inner_job_id)
 {
     char host_ip[128];
     const char *__function_name = "ja_host_auth";
 
     zabbix_log(LOG_LEVEL_DEBUG, "In %s() host: %s", __function_name, host);
 
-    if (ja_host_getip(host, host_ip) == 0) {
-        zabbix_log(LOG_LEVEL_ERR, "In %s() can not find host: %s",
-                   __function_name, host);
+    if (ja_host_getip(host, host_ip, inner_job_id) == 0) {
         return FAIL;
     }
 
     if (zbx_tcp_check_security(sock, host_ip, 0) == FAIL) {
-        zabbix_log(LOG_LEVEL_ERR,
-                   "In %s() authentication failure host or ip: %s",
-                   __function_name, host_ip);
+        ja_log("JAHOST200006", 0, NULL, inner_job_id, __function_name, host, host_ip, inner_job_id);
         return FAIL;
     }
     return SUCCEED;
@@ -269,7 +271,7 @@ int ja_host_lockinfo(const char *host)
  * Comments:                                                                  *
  *                                                                            *
  ******************************************************************************/
-int ja_host_lock(const char *host)
+int ja_host_lock(const char *host, const zbx_uint64_t inner_job_id)
 {
     int db_ret;
     char *host_esc;
@@ -277,11 +279,11 @@ int ja_host_lock(const char *host)
 
     zabbix_log(LOG_LEVEL_DEBUG, "In %s() host: %s", __function_name, host);
 
-    if (ja_host_getip(host, NULL) == 0)
+    if (ja_host_getip(host, NULL, inner_job_id) == 0)
         return FAIL;
 
     DBfree_result(DBselect
-                  ("select * from ja_host_lock_table where lock_host_name = 'HOST_LOCK_RECORD' for update"));
+                  ("select lock_host_name from ja_host_lock_table where lock_host_name = 'HOST_LOCK_RECORD' for update"));
 
     host_esc = DBdyn_escape_string(host);
     db_ret =
@@ -290,10 +292,12 @@ int ja_host_lock(const char *host)
          host_esc);
     zbx_free(host_esc);
 
-    if (db_ret < ZBX_DB_OK)
+    if (db_ret < ZBX_DB_OK) {
+        ja_log("JAHOST200005", 0, NULL, inner_job_id, __function_name, host, inner_job_id);
         return FAIL;
-    else
+    } else {
         return SUCCEED;
+    }
 }
 
 /******************************************************************************
@@ -318,7 +322,7 @@ int ja_host_unlock(const char *host)
     zabbix_log(LOG_LEVEL_DEBUG, "In %s() host: %s", __function_name, host);
 
     DBfree_result(DBselect
-                  ("select * from ja_host_lock_table where lock_host_name = 'HOST_LOCK_RECORD' for update"));
+                  ("select lock_host_name from ja_host_lock_table where lock_host_name = 'HOST_LOCK_RECORD' for update"));
 
     host_esc = DBdyn_escape_string(host);
     db_ret =

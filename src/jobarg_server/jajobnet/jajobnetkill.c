@@ -18,8 +18,8 @@
 **/
 
 /*
-** $Date:: 2013-12-12 11:34:45 +0900 #$
-** $Revision: 5601 $
+** $Date:: 2014-02-24 17:40:05 +0900 #$
+** $Revision: 5818 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -58,8 +58,16 @@ int jajobnet_kill(const zbx_uint64_t inner_jobnet_id)
     int db_ret;
     const char *__function_name = "jajobnet_kill";
 
-    ja_log("JAJOBNET000001", inner_jobnet_id, NULL, 0, __function_name,
-           inner_jobnet_id);
+    zabbix_log(LOG_LEVEL_DEBUG, "In %s() inner_jobnet_id: " ZBX_FS_UI64,
+               __function_name, inner_jobnet_id);
+
+    result = DBselect("select jobnet_id, execution_user_name from ja_run_jobnet_table"
+                      " where inner_jobnet_id = " ZBX_FS_UI64,
+                      inner_jobnet_id);
+    if (NULL != (row = DBfetch(result))) {
+        ja_log("JAJOBNET000001", inner_jobnet_id, NULL, 0, __function_name, inner_jobnet_id, row[0], row[1]);
+    }
+    DBfree_result(result);
 
     DBfree_result(DBselect
                   ("select inner_job_id from ja_run_job_table where inner_jobnet_main_id = "
@@ -84,9 +92,9 @@ int jajobnet_kill(const zbx_uint64_t inner_jobnet_id)
     db_ret =
         DBexecute
         ("update ja_run_jobnet_table set status = %d where inner_jobnet_main_id = "
-         ZBX_FS_UI64 " and main_flag = 1 and status in (%d, %d)",
-         JA_JOB_STATUS_ENDERR, inner_jobnet_id, JA_JOB_STATUS_RUN,
-         JA_JOB_STATUS_RUNERR);
+         ZBX_FS_UI64 " and main_flag = 0 and status in (%d, %d)",
+         JA_JOBNET_STATUS_ENDERR, inner_jobnet_id, JA_JOBNET_STATUS_RUN,
+         JA_JOBNET_STATUS_RUNERR);
     if (db_ret < ZBX_DB_OK)
         return FAIL;
 

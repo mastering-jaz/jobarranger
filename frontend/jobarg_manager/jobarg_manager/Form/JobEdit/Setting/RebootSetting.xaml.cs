@@ -181,6 +181,16 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                     rowIconReboot[0]["reboot_wait_time"] = txtWaitTime.Text;
                 }
 
+                //added by YAMA 2014/02/19	
+                // 強制実行フラグ	
+                if (cbForce.IsChecked == false)
+                {
+                    rowJobCon[0]["force_flag"] = "0";
+                }
+                else
+                {
+                    rowJobCon[0]["force_flag"] = "1";
+                }	
             }
 
             // ジョブIDが変更された場合、フロー管理テーブルを更新 
@@ -265,6 +275,8 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             rbWaitTime.IsEnabled = false;
             txtWaitTime.IsEnabled = false;
 
+            //added by YAMA 2014/02/19
+            cbForce.IsEnabled = false;
         }
         #endregion
 
@@ -356,6 +368,13 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                     txtWaitTime.IsEnabled = false;
                 }
 
+                //added by YAMA 2014/02/19		
+                // 強制実行		
+                string forceFlag = Convert.ToString(rowJob[0]["force_flag"]);
+                if ("1".Equals(forceFlag))
+                {
+                    cbForce.IsChecked = true;
+                }		
             }
         }
 

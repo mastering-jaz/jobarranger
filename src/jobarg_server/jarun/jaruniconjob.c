@@ -18,8 +18,8 @@
 **/
 
 /*
-** $Date:: 2013-11-14 11:51:12 +0900 #$
-** $Revision: 5320 $
+** $Date:: 2014-02-20 16:52:27 +0900 #$
+** $Revision: 5809 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -220,10 +220,7 @@ int jarun_icon_job(zbx_uint64_t inner_job_id, int flag)
     ret = FAIL;
     ja_job_object_init(&job_res);
     DBconnect(ZBX_DB_CONNECT_ONCE);
-    if (ja_connect(&sock, host) == FAIL) {
-        zbx_snprintf(job_res.message, sizeof(job_res.message),
-                     "Can not connect the host: %s", host);
-        ja_log("JARUNICONJOB200012", inner_jobnet_id, NULL, inner_job_id, inner_job_id, job_res.message);
+    if (ja_connect(&sock, host, inner_job_id) == FAIL) {
         ja_set_runerr(inner_job_id);
         DBclose();
         exit(1);

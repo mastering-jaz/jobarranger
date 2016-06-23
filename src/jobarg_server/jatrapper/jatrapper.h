@@ -18,8 +18,8 @@
 **/
 
 /*
-** $Date:: 2013-12-06 15:33:03 +0900 #$
-** $Revision: 5531 $
+** $Date:: 2014-03-05 09:13:15 +0900 #$
+** $Revision: 5855 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -44,6 +44,7 @@ JOBARG_EXEC_REQUEST {
     char *starttime;
     char *env[1024];
     char *value[1024];
+    int deterrence;
 };
 
 JOBARG_JOBNET_INFO {

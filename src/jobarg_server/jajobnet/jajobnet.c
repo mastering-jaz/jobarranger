@@ -18,9 +18,9 @@
 **/
 
 /*
-** $Date:: 2013-07-19 15:00:14 +0900 #$
-** $Revision: 5208 $
-** $Author: ossinfra@FITECHLABS.CO.JP $
+** $Date:: 2014-02-24 17:15:48 +0900 #$
+** $Revision: 5817 $
+** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
 #include "common.h"
@@ -77,6 +77,10 @@ static void process_jajobnet_summary()
         ZBX_STR2UINT64(inner_jobnet_id, row[0]);
         status = atoi(row[1]);
         jobnet_abort_flag = atoi(row[2]);
+
+        zabbix_log(LOG_LEVEL_DEBUG, "In %s() ja_run_jobnet_summary_table read."
+                   " inner_jobnet_id[%s] status[%s] jobnet_abort_flag[%s]",
+                   __function_name, row[0], row[1], row[2]);
 
         ret = SUCCEED;
         DBbegin();
@@ -147,6 +151,10 @@ static void process_jajobnet()
         timeout_flag = atoi(row[2]);
         status = atoi(row[3]);
 
+        zabbix_log(LOG_LEVEL_DEBUG, "In %s() ja_run_jobnet_table read."
+                   " inner_jobnet_id[%s] inner_job_id[%s] timeout_flag[%s] status[%s]",
+                   __function_name, row[0], row[1], row[2], row[3]);
+
         ret = SUCCEED;
         DBbegin();
         switch (status) {
@@ -155,9 +163,7 @@ static void process_jajobnet()
             break;
         case JA_JOBNET_STATUS_RUN:
         case JA_JOBNET_STATUS_RUNERR:
-            ret =
-                jajobnet_run(inner_jobnet_id, inner_job_id, status,
-                             timeout_flag);
+            ret = jajobnet_run(inner_jobnet_id, inner_job_id, status, timeout_flag);
             break;
         default:
             break;

@@ -196,6 +196,18 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                 rowIconFcopy[0]["from_file_name"] = textFileName.Text;
                 //転送先ディレクトリー
                 rowIconFcopy[0]["to_directory"] = textDestinationDir.Text;
+
+                //added by YAMA 2014/02/19
+                // 強制実行フラグ
+                if (cbForce.IsChecked == false)
+                {
+                    rowJobCon[0]["force_flag"] = "0";
+                }
+                else
+                {
+                    rowJobCon[0]["force_flag"] = "1";
+                }
+
             }
 
             // ジョブIDが変更された場合、フロー管理テーブルを更新 
@@ -287,6 +299,9 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             textFileName.IsEnabled = false;
             textDestinationDir.IsEnabled = false;
             CheckBoxOverride.IsEnabled = false;
+
+            //added by YAMA 2014/02/19
+            cbForce.IsEnabled = false;
         }
         #endregion
 
@@ -407,6 +422,16 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                 textFileName.Text = Convert.ToString(rowIconFcopy[0]["from_file_name"]);
                 //転送先ディレクトリー
                 textDestinationDir.Text = Convert.ToString(rowIconFcopy[0]["to_directory"]);
+
+		    	//added by YAMA 2014/02/19	
+	            // 強制実行	
+                string forceFlag = Convert.ToString(rowJob[0]["force_flag"]);	
+	            if ("1".Equals(forceFlag))	
+	            {	
+	                cbForce.IsChecked = true;	
+	            }	
+
+
             }
         }
 

@@ -156,8 +156,8 @@ int jatrap_jobrelease(ja_telegram_object * obj)
         }
         result = DBselect("select inner_jobnet_id from ja_run_jobnet_summary_table"
                           " where inner_jobnet_id = " ZBX_FS_UI64
-                          " and jobnet_id = '%s' and status = 2",
-                          inner_jobnet_id, jobnet_id);
+                          " and jobnet_id = '%s' and status = %d",
+                          inner_jobnet_id, jobnet_id, JA_JOBNET_STATUS_RUN);
         if ((row = DBfetch(result)) != NULL) {
             get_job_id_2 = zbx_strdup(NULL, get_job_id);
             inner_job_id = ja_jobnet_get_job_id(inner_jobnet_id, get_job_id_2);
@@ -195,8 +195,8 @@ int jatrap_jobrelease(ja_telegram_object * obj)
         result =
             DBselect
             ("select inner_jobnet_id, start_time from ja_run_jobnet_summary_table"
-             " where jobnet_id = '%s' and status = 2",
-             jobnet_id);
+             " where jobnet_id = '%s' and status = %d",
+             jobnet_id, JA_JOBNET_STATUS_RUN);
         while ((row = DBfetch(result)) != NULL) {
             ZBX_STR2UINT64(inner_jobnet_id, row[0]);
             if (start_time != NULL) {

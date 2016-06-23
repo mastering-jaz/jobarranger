@@ -18,8 +18,8 @@
 **/
 
 /*
-** $Date:: 2013-11-26 09:57:12 +0900 #$
-** $Revision: 5457 $
+** $Date:: 2014-02-26 10:24:08 +0900 #$
+** $Revision: 5821 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -115,9 +115,7 @@ int jajobnet_run_sync(const zbx_uint64_t inner_jobnet_id,
             }
             break;
         }
-        if (ja_set_jobstatus
-            (inner_jobnet_id, jobnet_summary_status,
-             jobnet_summary_job_status) == FAIL)
+        if (ja_set_jobstatus(inner_jobnet_id, jobnet_summary_status, jobnet_summary_job_status) == FAIL)
             return FAIL;
     } else {
         // set icon jobnet status
@@ -158,7 +156,7 @@ int jajobnet_run_sync(const zbx_uint64_t inner_jobnet_id,
                 return FAIL;
             break;
         case JA_JOBNET_STATUS_ENDERR:
-            if (ja_set_enderr(icon_jobnet_id) == FAIL)
+            if (ja_set_enderr(icon_jobnet_id, 0) == FAIL)
                 return FAIL;
             break;
         default:
@@ -188,22 +186,13 @@ int jajobnet_run(const zbx_uint64_t inner_jobnet_id,
                  const int timeout_flag)
 {
     DB_RESULT result;
-    DB_RESULT result3;
-    DB_RESULT result4;
-    DB_RESULT result5;
     DB_ROW row;
-    DB_ROW row3;
-    DB_ROW row4;
-    DB_ROW row5;
     double sec;
     zbx_uint64_t inner_job_id, icon_end_id;
     int renew_flag, renew_status, renew_timeout_flag;
     int job_status, job_type, test_flag, job_timeout_flag;
     int count, ready_cnt, run_cnt, runerr_cnt, end_cnt, start_icons,
-        end_icons, end_icons_end, timeout_cnt, exit_flag, idx, len;
-    char *w_main_jobnet_id, *w_execution_user_name;
-    char w_inner_job_id[40];
-    char w_job_id[3000];
+        end_icons, end_icons_end, timeout_cnt;
     const char *__function_name = "jajobnet_run";
 
     zabbix_log(LOG_LEVEL_DEBUG,
@@ -239,8 +228,6 @@ int jajobnet_run(const zbx_uint64_t inner_jobnet_id,
         job_type = atoi(row[2]);
         test_flag = atoi(row[3]);
         job_timeout_flag = atoi(row[4]);
-        w_main_jobnet_id = "";
-        w_execution_user_name = "";
 
         count++;
         if (job_timeout_flag == 1)
@@ -270,144 +257,8 @@ int jajobnet_run(const zbx_uint64_t inner_jobnet_id,
         case JA_JOB_STATUS_RUNERR:
         case JA_JOB_STATUS_ABORT:
             runerr_cnt++;
-            if (status == JA_JOBNET_STATUS_RUN) {
-                result3 = DBselect("select jobnet_id, execution_user_name from ja_run_jobnet_table"
-                                   " where inner_jobnet_id = %s", row[5]);
-                if (NULL != (row3 = DBfetch(result3))) {
-                    w_main_jobnet_id = row3[0];
-                    w_execution_user_name = row3[1];
-                }
-
-                /* job id get */
-                idx = sizeof(w_job_id) - 1;
-                w_job_id[idx] = '\0';
-                zbx_strlcpy(w_inner_job_id, row[0], sizeof(w_inner_job_id));
-
-                /* sub jobnet search */
-                exit_flag = 0;
-                while (exit_flag == 0) {
-                    result4 = DBselect("select inner_jobnet_id, inner_jobnet_main_id, job_id"
-                                       " from ja_run_job_table"
-                                       " where inner_job_id = %s", w_inner_job_id);
-                    if (NULL == (row4 = DBfetch(result4))) {
-                        DBfree_result(result4);
-                        exit_flag = 1;
-                        continue;
-                    }
-
-                    len = strlen(row4[2]);
-                    if (((idx - 1) - len) < 0) {
-                        DBfree_result(result4);
-                        exit_flag = 1;
-                        continue;
-                    } else {
-                        idx = idx - len;
-                        memcpy(&w_job_id[idx], row4[2], len);
-                        idx = idx - 1;
-                        memcpy(&w_job_id[idx], "/", 1);
-                    }
-
-                    if (strcmp(row4[0], row4[1]) == 0) {
-                        DBfree_result(result4);
-                        exit_flag = 1;
-                        continue;
-                    }
-
-                    /* get the job id of the jobnet icon */
-                    result5 = DBselect("select inner_job_id from ja_run_icon_jobnet_table"
-                                       " where link_inner_jobnet_id = %s", row4[0]);
-                    if (NULL == (row5 = DBfetch(result5))) {
-                        DBfree_result(result4);
-                        DBfree_result(result5);
-                        exit_flag = 1;
-                        continue;
-                    }
-                    zbx_strlcpy(w_inner_job_id, row5[0], sizeof(w_inner_job_id));
-                    DBfree_result(result4);
-                    DBfree_result(result5);
-                }
-
-                /* jobnet id set */
-                len = strlen(w_main_jobnet_id);
-                if ((idx - len) >= 0) {
-                    idx = idx - len;
-                    memcpy(&w_job_id[idx], w_main_jobnet_id, len);
-                }
-
-                ja_log("JAJOBNETRUN000001", inner_jobnet_id, NULL, 0,
-                       __function_name, inner_job_id, w_main_jobnet_id, &w_job_id[idx],
-                       w_execution_user_name);
-                DBfree_result(result3);
-            }
             break;
         case JA_JOB_STATUS_ENDERR:
-            result3 = DBselect("select jobnet_id, execution_user_name from ja_run_jobnet_table"
-                               " where inner_jobnet_id = %s", row[5]);
-            if (NULL != (row3 = DBfetch(result3))) {
-                w_main_jobnet_id = row3[0];
-                w_execution_user_name = row3[1];
-            }
-
-            /* job id get */
-            idx = sizeof(w_job_id) - 1;
-            w_job_id[idx] = '\0';
-            zbx_strlcpy(w_inner_job_id, row[0], sizeof(w_inner_job_id));
-
-            /* sub jobnet search */
-            exit_flag = 0;
-            while (exit_flag == 0) {
-                result4 = DBselect("select inner_jobnet_id, inner_jobnet_main_id, job_id"
-                                   " from ja_run_job_table"
-                                   " where inner_job_id = %s", w_inner_job_id);
-                if (NULL == (row4 = DBfetch(result4))) {
-                    DBfree_result(result4);
-                    exit_flag = 1;
-                    continue;
-                }
-
-                len = strlen(row4[2]);
-                if (((idx - 1) - len) < 0) {
-                    DBfree_result(result4);
-                    exit_flag = 1;
-                    continue;
-                } else {
-                    idx = idx - len;
-                    memcpy(&w_job_id[idx], row4[2], len);
-                    idx = idx - 1;
-                    memcpy(&w_job_id[idx], "/", 1);
-                }
-
-                if (strcmp(row4[0], row4[1]) == 0) {
-                    DBfree_result(result4);
-                    exit_flag = 1;
-                    continue;
-                }
-
-                /* get the job id of the jobnet icon */
-                result5 = DBselect("select inner_job_id from ja_run_icon_jobnet_table"
-                                   " where link_inner_jobnet_id = %s", row4[0]);
-                if (NULL == (row5 = DBfetch(result5))) {
-                    DBfree_result(result4);
-                    DBfree_result(result5);
-                    exit_flag = 1;
-                    continue;
-                }
-                zbx_strlcpy(w_inner_job_id, row5[0], sizeof(w_inner_job_id));
-                DBfree_result(result4);
-                DBfree_result(result5);
-            }
-
-            /* jobnet id set */
-            len = strlen(w_main_jobnet_id);
-            if ((idx - len) >= 0) {
-                idx = idx - len;
-                memcpy(&w_job_id[idx], w_main_jobnet_id, len);
-            }
-
-            ja_log("JAJOBNETRUN200001", inner_jobnet_id, NULL, 0,
-                   __function_name, inner_job_id, w_main_jobnet_id, &w_job_id[idx],
-                   w_execution_user_name);
-            DBfree_result(result3);
             goto error;
             break;
         default:

@@ -18,9 +18,9 @@
 **/
 
 /*
-** $Date:: 2013-04-15 14:29:52 +0900 #$
-** $Revision: 4400 $
-** $Author: ossinfra@FITECHLABS.CO.JP $
+** $Date:: 2014-02-26 10:24:08 +0900 #$
+** $Revision: 5821 $
+** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
 #ifndef JOBARG_JASTATUS_H
@@ -48,6 +48,6 @@ int ja_set_enderr_jobnet(const zbx_uint64_t inner_jobnet_id);
 int ja_set_run(const zbx_uint64_t inner_job_id);
 int ja_set_end(const zbx_uint64_t inner_job_id);
 int ja_set_runerr(const zbx_uint64_t inner_job_id);
-int ja_set_enderr(const zbx_uint64_t inner_job_id);
+int ja_set_enderr(const zbx_uint64_t inner_job_id, int msg_flag);
 
 #endif

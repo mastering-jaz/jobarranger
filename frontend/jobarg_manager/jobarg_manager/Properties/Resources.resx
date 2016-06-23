@@ -1470,10 +1470,10 @@ Please confirm ODBC and a database.</value>
   <data name="MSG_COMMON_003" xml:space="preserve">
     <value>Job Arranger for Zabbix
 
-Job Manager Version 1.4.0
+Job Manager Version 1.4.2 (Rev:5870)
 
 Copyright (C) 2012-2013 FitechForce, Inc. All Rights Reserved. 
-Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.</value>
+Copyright (C) 2013-2014 Daiwa Institute of Research Business Innovation Ltd. All Rights Reserved.</value>
   </data>
   <data name="detail_col_head_text" xml:space="preserve">
     <value>Detail</value>
@@ -1522,5 +1522,8 @@ Copyright (C) 2013 Daiwa Institute of Research Business Innovation Ltd. All Righ
   </data>
   <data name="ERROR_DB_LOCK" xml:space="preserve">
     <value>Since data is in use, it cannot be operated.At a later time, please try again.</value>
+  </data>
+  <data name="force_label_text" xml:space="preserve">
+    <value>compulsory run</value>
   </data>
 </root>

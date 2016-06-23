@@ -38,13 +38,13 @@
 
 /* long options */
 static struct zbx_option longopts[] = {
-    {"jobarg-server", 1, NULL, 'z'},
+    {"jobarranger-server", 1, NULL, 'z'},
     {"port", 1, NULL, 'p'},
     {"user-name", 1, NULL, 'U'},
     {"password", 1, NULL, 'P'},
     {"job-id", 1, NULL, 'j'},
-    {"time", 0, NULL, 't'},
-    {"management-id", 0, NULL, 'r'},
+    {"start-time", 1, NULL, 't'},
+    {"registry-number", 1, NULL, 'r'},
     {"help", 0, NULL, 'h'},
     {"version", 0, NULL, 'V'},
     {NULL}
@@ -66,19 +66,19 @@ char *CONFIG_STARTTIME = NULL;
 char *CONFIG_MID = NULL;
 
 const char *progname = NULL;
-const char title_message[] = "Job Arranger Release";
+const char title_message[] = "Job Arranger Job wait release";
 const char usage_message[] =
-    "[-hV] -z <hostname or IP> [-p <port>] -U <username> -P <password> -j <jobid> [-t [<YYYYMMDD>|<YYYYMMDDHHMM>] ] [-r <registry number>]";
+    "[-hV] -z <hostname or IP> [-p <port>] -U <username> -P <password> -j <jobid> [-t <YYYYMMDD>|<YYYYMMDDHHMM>] [-r <registry number>]";
 
 const char *help_message[] = {
     "Options:",
     "  -z --jobarranger-server <server>                 Hostname or IP address of Job Arranger server",
-    "  -p --port <server port>                          Specify port number of server trapper running on the server. Default is 10061",
+    " [-p --port <server port>]                         Specify port number of server trapper running on the server. Default is 10061",
     "  -U --user-name <user-name>                       Specify user name",
     "  -P --password <password>                         Specify password",
     "  -j --job-id <jobid>                              Specify jobid",
-    "  -t --start-time [<YYYYMMDD>|<YYYYMMDDHHMM>]      Specify jobnet start time",
-    "  -r --registry-number <registry-number>           Specify registry number",
+    " [-t --start-time <YYYYMMDD> or <YYYYMMDDHHMM>]    Specify jobnet start time",
+    " [-r --registry-number <registry-number>]          Specify registry number",
     "",
     "Other options:",
     "  -h --help                                        Give this help",

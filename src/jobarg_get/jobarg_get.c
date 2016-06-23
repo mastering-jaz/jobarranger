@@ -18,8 +18,8 @@
 **/
 
 /*
-** $Date:: 2013-12-13 10:32:07 +0900 #$
-** $Revision: 5620 $
+** $Date:: 2014-03-05 16:36:46 +0900 #$
+** $Revision: 5861 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -37,12 +37,12 @@
 
 /* long options */
 static struct zbx_option longopts[] = {
-    {"zabbix-server", 1, NULL, 'z'},
+    {"jobarranger-server", 1, NULL, 'z'},
     {"port", 1, NULL, 'p'},
     {"user-name", 1, NULL, 'U'},
     {"password", 1, NULL, 'P'},
     {"registry-number", 1, NULL, 'r'},
-    {"variable-display", 0, NULL, 'e'},
+    {"variable-format", 0, NULL, 'e'},
     {"help", 0, NULL, 'h'},
     {"version", 0, NULL, 'V'},
     {NULL}
@@ -65,23 +65,23 @@ static char *JOBARG_PASSWORD = NULL;
 static int JOBARG_VARIABLE_FORMAT = 0;
 
 const char *progname = NULL;
-const char title_message[] = "Job Arranger Get";
+const char title_message[] = "Job Arranger Jobnet status get";
 const char usage_message[] =
     "[-hV] -z <hostname or IP> [-p <port>] -U <username> -P <password> -r <registry number> [-e]";
 
 const char *help_message[] = {
     "Options:",
-    "  -z --jobarranger-server <server>            Hostname or IP address of Job Arranger server",
-    "  -p --port <server port>                     Specify port number of server trapper running on the server. Default is "
+    "  -z --jobarranger-server <server>          Hostname or IP address of Job Arranger server",
+    " [-p --port <server port>]                  Specify port number of server trapper running on the server. Default is "
         JOBARG_DEFAULT_SERVER_PORT_STR,
-    "  -U --user-name <user-name>                  Specify user name",
-    "  -P --password <password>                    Specify password",
-    "  -r --registry-number <registry-number>      Specify registry number",
-    "  -e --variable-format                        Specify output in the environment variable format (with bash format)",
+    "  -U --user-name <user-name>                Specify user name",
+    "  -P --password <password>                  Specify password",
+    "  -r --registry-number <registry-number>    Specify registry number",
+    " [-e --variable-format]                     Specify output in the environment variable format (with bash format)",
     "",
     "Other options:",
-    "  -h --help                                   Give this help",
-    "  -V --version                                Display version number",
+    "  -h --help                                 Give this help",
+    "  -V --version                              Display version number",
     NULL                        /* end of text */
 };
 
@@ -507,7 +507,6 @@ int main(int argc, char **argv)
 {
     int ret = SUCCEED;
     struct zbx_json json;
-    int tcp_ret;
     zbx_sock_t sock;
     char *answer = NULL;
 
@@ -561,27 +560,36 @@ int main(int argc, char **argv)
     signal(SIGALRM, send_signal_handler);
 #endif                          /* NOT _WINDOWS */
 
-    if (SUCCEED ==
-        (tcp_ret =
-         zbx_tcp_connect(&sock, JOBARG_SOURCE_IP, JOBARG_SERVER,
-                         JOBARG_SERVER_PORT, GET_SENDER_TIMEOUT))) {
-        if (SUCCEED == (tcp_ret = zbx_tcp_send(&sock, json.buffer))) {
-            if (SUCCEED == (tcp_ret = zbx_tcp_recv(&sock, &answer))) {
-                zabbix_log(LOG_LEVEL_DEBUG, "Answer from server [%s]",
-                           answer);
-                if (NULL == answer || FAIL == (ret = check_response(answer))) {
-                    tcp_ret = FAIL;
-                }
-            }
-        }
-        zbx_tcp_close(&sock);
+    if (SUCCEED != zbx_tcp_connect(&sock, JOBARG_SOURCE_IP, JOBARG_SERVER, JOBARG_SERVER_PORT, GET_SENDER_TIMEOUT)) {
+        zabbix_log(LOG_LEVEL_ERR, "Job arranger server connect error: [%s : %u] %s", JOBARG_SERVER, JOBARG_SERVER_PORT, zbx_tcp_strerror());
+        zbx_json_free(&json);
+        ret = FAIL;
+        goto exit;
     }
 
-    if (FAIL == tcp_ret) {
-        zabbix_log(LOG_LEVEL_ERR, "send value error: %s",
-                   zbx_tcp_strerror());
+    if (SUCCEED != zbx_tcp_send(&sock, json.buffer)) {
+        zabbix_log(LOG_LEVEL_ERR, "Job arranger message send error: %s", zbx_tcp_strerror());
+        zbx_json_free(&json);
+        zbx_tcp_close(&sock);
         ret = FAIL;
+        goto exit;
     }
+
+    if (SUCCEED != zbx_tcp_recv(&sock, &answer)) {
+        zabbix_log(LOG_LEVEL_ERR, "Job arranger message receive error: %s", zbx_tcp_strerror());
+        zbx_json_free(&json);
+        zbx_tcp_close(&sock);
+        ret = FAIL;
+        goto exit;
+    }
+
+    zabbix_log(LOG_LEVEL_DEBUG, "Answer from server [%s]", answer);
+    if (NULL == answer || FAIL == (ret = check_response(answer))) {
+         ret = FAIL;
+    }
+
+    zbx_tcp_close(&sock);
+    zbx_json_free(&json);
 
   exit:
     zabbix_close_log();

@@ -18,8 +18,8 @@
 **/
 
 /*
-** $Date:: 2013-12-16 16:39:52 +0900 #$
-** $Revision: 5627 $
+** $Date:: 2014-02-21 16:04:34 +0900 #$
+** $Revision: 5810 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -58,7 +58,7 @@ int jarun_icon_fcopy(const zbx_uint64_t inner_job_id, const int method)
     int ret;
     DB_RESULT result;
     DB_ROW row;
-    int from_host_flag, to_host_flag, overwrite_flag;
+    int from_host_flag, to_host_flag, overwrite_flag, msg_skip;
     char from_host_name[128], to_host_name[128];
     char from_host[JA_MAX_STRING_LEN], to_host[JA_MAX_STRING_LEN];
     char from_directory[JA_MAX_STRING_LEN];
@@ -75,6 +75,8 @@ int jarun_icon_fcopy(const zbx_uint64_t inner_job_id, const int method)
 
     zabbix_log(LOG_LEVEL_DEBUG, "In %s() inner_job_id: " ZBX_FS_UI64,
                __function_name, inner_job_id);
+
+    msg_skip = 0;
 
     result =
         DBselect
@@ -183,9 +185,8 @@ int jarun_icon_fcopy(const zbx_uint64_t inner_job_id, const int method)
 
     // connet to_host
     DBconnect(ZBX_DB_CONNECT_ONCE);
-    if (ja_connect(&sock_to, to_host) == FAIL) {
-        zbx_snprintf(errmsg, sizeof(errmsg),
-                     "can not connect the host '%s'", to_host);
+    if (ja_connect(&sock_to, to_host, inner_job_id) == FAIL) {
+        msg_skip = 1;
         DBclose();
         goto error;
     }
@@ -201,9 +202,8 @@ int jarun_icon_fcopy(const zbx_uint64_t inner_job_id, const int method)
         goto error;
 
     DBconnect(ZBX_DB_CONNECT_ONCE);
-    if (ja_connect(&sock_from, from_host) == FAIL) {
-        zbx_snprintf(errmsg, sizeof(errmsg),
-                     "can not connect the host '%s'", from_host);
+    if (ja_connect(&sock_from, from_host, inner_job_id) == FAIL) {
+        msg_skip = 1;
         DBclose();
         goto error;
     }
@@ -262,13 +262,13 @@ int jarun_icon_fcopy(const zbx_uint64_t inner_job_id, const int method)
         if (strlen(errmsg) == 0) {
             zbx_snprintf(errmsg, sizeof(errmsg), "%s", job_res.message);
         }
-        ja_log("JARUNICONFCOPY200003", 0, NULL, inner_job_id,
-               __function_name, errmsg, inner_job_id);
+        if (msg_skip == 0) {
+            ja_log("JARUNICONFCOPY200003", 0, NULL, inner_job_id, __function_name, errmsg, inner_job_id);
+        }
         ja_set_runerr(inner_job_id);
     }
     DBclose();
-    zabbix_log(LOG_LEVEL_INFORMATION,
-               "In %s() END. inner_job_id: " ZBX_FS_UI64, __function_name,
-               inner_job_id);
+    zabbix_log(LOG_LEVEL_DEBUG, "In %s() END. inner_job_id: " ZBX_FS_UI64,
+               __function_name, inner_job_id);
     exit(0);
 }

@@ -394,6 +394,10 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
             btnAdd.IsEnabled = false;
             btnDel.IsEnabled = false;
             txtTimeOut.IsEnabled = false;
+
+            //added by YAMA 2014/02/19
+            cbForce.IsEnabled = false;
+
             txtStopCode.IsEnabled = false;
             rbHostName.IsEnabled = false;
             rbVariableName.IsEnabled = false;
@@ -543,6 +547,14 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
 
                 // タイムアウト警告 
                 txtTimeOut.Text = Convert.ToString(rowIconJob[0]["timeout"]);
+
+                //added by YAMA 2014/02/19
+                // 強制実行
+                string forceFlag = Convert.ToString(rowJob[0]["force_flag"]);
+                if ("1".Equals(forceFlag))
+                {
+                    cbForce.IsChecked = true;
+                }
 
                 // ジョブ停止コード 
                 txtStopCode.Text = Convert.ToString(rowIconJob[0]["stop_code"]);
@@ -978,6 +990,18 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobEdit
                 }
                 // ジョブ停止コード 
                 rowIconJob[0]["stop_code"] = txtStopCode.Text;
+
+                //added by YAMA 2014/02/19
+                // 強制実行フラグ
+                if (cbForce.IsChecked == false)
+                {
+                    rowJobCon[0]["force_flag"] = "0";
+                }
+                else
+                {
+                    rowJobCon[0]["force_flag"] = "1";
+                }
+
             }
 
             // ジョブコマンド設定テーブルの削除 

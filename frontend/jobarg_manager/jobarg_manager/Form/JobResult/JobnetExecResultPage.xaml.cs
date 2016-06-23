@@ -131,11 +131,11 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobResult
 
             if (LoginSetting.Authority.Equals(Consts.AuthorityEnum.SUPER))
             {
-                resultDt = runLogDAO.GetEntitySuper(manageId, from, to);
+                resultDt = runLogDAO.GetEntitySuper(manageId, from, to, LoginSetting.Lang);
             }
             else
             {
-                resultDt = runLogDAO.GetEntity(manageId, from, to, LoginSetting.UserID);
+                resultDt = runLogDAO.GetEntity(manageId, from, to, LoginSetting.UserID, LoginSetting.Lang);
             }
             _db.CloseSqlConnect();
 
@@ -163,13 +163,11 @@ namespace jp.co.ftf.jobcontroller.JobController.Form.JobResult
         {
             // Add the number to the observable collection
             // bound to the ListBox
-            LogInfo.WriteDebugLog("num:" + number);
             if (number < resultDt.Rows.Count)
             {
                 DataRow row = viewDt.NewRow();
                 row.ItemArray = resultDt.Rows[number].ItemArray;
                 viewDt.Rows.Add(row);
-                LogInfo.WriteDebugLog("log_date:" + row["log_date"]);
 
                 // Load the next number, by executing this method
                 // recursively on the dispatcher queue, with

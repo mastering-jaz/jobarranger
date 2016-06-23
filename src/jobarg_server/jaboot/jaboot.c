@@ -18,8 +18,8 @@
 **/
 
 /*
-** $Date:: 2013-08-05 13:45:29 +0900 #$
-** $Rev: 5232 $
+** $Date:: 2014-02-17 14:40:27 +0900 #$
+** $Rev: 5797 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -153,6 +153,142 @@ static int	get_joblog_keep_span()
 
 /******************************************************************************
  *                                                                            *
+ * Function: get_running_jobnet                                               *
+ *                                                                            *
+ * Purpose: get the number of running jobnet                                  *
+ *                                                                            *
+ * Parameters: jobnet_id (in) - jobnet id                                     *
+ *                                                                            *
+ * Return value:  number of running jobnet                                    *
+ *                FAIL - an error occurred                                    *
+ *                                                                            *
+ * Comments:                                                                  *
+ *                                                                            *
+ ******************************************************************************/
+static int	get_running_jobnet(char *jobnet_id)
+{
+	DB_RESULT	result;
+	DB_ROW		row;
+	int		count;
+	const char	*__function_name = "get_running_jobnet";
+
+	zabbix_log(LOG_LEVEL_DEBUG, "In %s(%s)", __function_name, jobnet_id);
+
+	result = DBselect("select count(*) from ja_run_jobnet_summary_table"
+			" where jobnet_id = '%s' and status in(%d, %d)",
+			jobnet_id, JA_JOBNET_STATUS_READY, JA_JOBNET_STATUS_RUN);
+
+	if (NULL == (row = DBfetch(result)))
+	{
+		zbx_snprintf(msgwork, sizeof(msgwork), "%s (%d %d)",
+			jobnet_id, JA_JOBNET_STATUS_READY, JA_JOBNET_STATUS_RUN);
+		ja_log("JABOOT200001", 0, jobnet_id, 0, "ja_run_jobnet_summary_table", msgwork);
+		DBfree_result(result);
+		return FAIL;
+	}
+
+	count = atoi(row[0]);
+
+	DBfree_result(result);
+
+	return count;
+}
+
+/******************************************************************************
+ *                                                                            *
+ * Function: skip_state_jobnet                                                *
+ *                                                                            *
+ * Purpose: change in the status of the jobnet skip boot state                *
+ *                                                                            *
+ * Parameters: inner_jobnet_id (in) - inner jobnet id                         *
+ *             jobnet_id (in) - jobnet id                                     *
+ *             scheduled_time (in) - scheduled time  (YYYYMMDDHHMM)           *
+ *                                                                            *
+ * Return value:  SUCCEED - processed successfully                            *
+ *                FAIL - an error occurred                                    *
+ *                                                                            *
+ * Comments:                                                                  *
+ *                                                                            *
+ ******************************************************************************/
+static int	skip_state_jobnet(char *inner_jobnet_id, char *jobnet_id, char *scheduled_time)
+{
+	struct tm	*tm;
+	time_t		now;
+	int		rc;
+	zbx_uint64_t	i_inner_jobnet_id;
+	char		now_time[20];
+	const char	*__function_name = "skip_state_jobnet";
+
+	zabbix_log(LOG_LEVEL_DEBUG, "In %s(%s %s %s)",
+		__function_name, inner_jobnet_id, jobnet_id, scheduled_time);
+
+	ZBX_STR2UINT64(i_inner_jobnet_id, inner_jobnet_id);
+
+	time(&now);
+	tm = localtime(&now);
+	strftime(now_time, sizeof(now_time), "%Y%m%d%H%M%S", tm);
+
+	rc = DBexecute("update ja_run_jobnet_table set status = %d, start_time = %s, end_time = %s where inner_jobnet_id = %s",
+			JA_JOBNET_STATUS_END, now_time, now_time, inner_jobnet_id);
+	if (rc <= ZBX_DB_OK)
+	{
+		ja_log("JABOOT200002", i_inner_jobnet_id, NULL, 0, "ja_run_jobnet_table", inner_jobnet_id);
+		return FAIL;
+	}
+
+	rc = DBexecute("update ja_run_jobnet_summary_table set status = %d, load_status = %d, start_time = %s, end_time = %s"
+			" where inner_jobnet_id = %s",
+			JA_JOBNET_STATUS_END, JA_SUMMARY_LOAD_STATUS_SKIP, now_time, now_time,
+			inner_jobnet_id);
+	if (rc <= ZBX_DB_OK)
+	{
+		ja_log("JABOOT200002", i_inner_jobnet_id, NULL, 0, "ja_run_jobnet_summary_table", inner_jobnet_id);
+		return FAIL;
+	}
+
+	ja_log("JABOOT000001", i_inner_jobnet_id, NULL, 0, inner_jobnet_id, jobnet_id, scheduled_time);
+
+	return SUCCEED;
+}
+
+/******************************************************************************
+ *                                                                            *
+ * Function: delay_state_jobnet                                               *
+ *                                                                            *
+ * Purpose: change in the status of the jobnet delay boot state               *
+ *                                                                            *
+ * Parameters: inner_jobnet_id (in) - inner jobnet id                         *
+ *                                                                            *
+ * Return value:  SUCCEED - processed successfully                            *
+ *                FAIL - an error occurred                                    *
+ *                                                                            *
+ * Comments:                                                                  *
+ *                                                                            *
+ ******************************************************************************/
+static int	delay_state_jobnet(char *inner_jobnet_id)
+{
+	int		rc;
+	zbx_uint64_t	i_inner_jobnet_id;
+	const char	*__function_name = "delay_state_jobnet";
+
+	zabbix_log(LOG_LEVEL_DEBUG, "In %s(%s)",
+		__function_name, inner_jobnet_id);
+
+	ZBX_STR2UINT64(i_inner_jobnet_id, inner_jobnet_id);
+
+	rc = DBexecute("update ja_run_jobnet_summary_table set load_status = %d where inner_jobnet_id = %s",
+			JA_SUMMARY_LOAD_STATUS_DELAY, inner_jobnet_id);
+	if (rc < ZBX_DB_OK)
+	{
+		ja_log("JABOOT200002", i_inner_jobnet_id, NULL, 0, "ja_run_jobnet_summary_table", inner_jobnet_id);
+		return FAIL;
+	}
+
+	return SUCCEED;
+}
+
+/******************************************************************************
+ *                                                                            *
  * Function: error_state_jobnet                                               *
  *                                                                            *
  * Purpose: change in the status of the jobnet error stop state               *
@@ -213,9 +349,10 @@ static int	error_state_jobnet(char *inner_jobnet_id, char *jobnet_id, char *upda
 	}
 
 	rc = DBexecute("update ja_run_jobnet_summary_table set"
-			" status = %d, job_status = %d"
+			" status = %d, job_status = %d, load_status = %d"
 			" where inner_jobnet_id = %s",
-			JA_JOBNET_STATUS_RUN, JA_SUMMARY_JOB_STATUS_ERROR, inner_jobnet_id);
+			JA_JOBNET_STATUS_RUN, JA_SUMMARY_JOB_STATUS_ERROR, JA_SUMMARY_LOAD_STATUS_DELAY,
+			inner_jobnet_id);
 	if (rc <= ZBX_DB_OK)
 	{
 		ja_log("JABOOT200002", i_inner_jobnet_id, NULL, 0, "ja_run_jobnet_summary_table", inner_jobnet_id);
@@ -223,7 +360,8 @@ static int	error_state_jobnet(char *inner_jobnet_id, char *jobnet_id, char *upda
 		return FAIL;
 	}
 
-	rc = ja_joblog(JC_JOBNET_START_ERR, i_inner_jobnet_id, 0, scheduled_time);
+	ja_log("JABOOT200006", i_inner_jobnet_id, NULL, 0, inner_jobnet_id, jobnet_id, scheduled_time);
+	ja_joblog(JC_JOBNET_START_ERR, i_inner_jobnet_id, 0);
 
 	DBfree_result(result);
 
@@ -252,8 +390,10 @@ static int	start_jobnet(char *inner_jobnet_id, char *jobnet_id)
 
 	zabbix_log(LOG_LEVEL_DEBUG, "In %s(%s %s)", __function_name, inner_jobnet_id, jobnet_id);
 
-	rc = DBexecute("update ja_run_jobnet_summary_table set status = %d where inner_jobnet_id = %s",
-			JA_JOBNET_STATUS_READY, inner_jobnet_id);
+	rc = DBexecute("update ja_run_jobnet_summary_table set status = %d, load_status = %d"
+			" where inner_jobnet_id = %s",
+			JA_JOBNET_STATUS_READY, JA_SUMMARY_LOAD_STATUS_NORMAL,
+			inner_jobnet_id);
 	if (rc <= ZBX_DB_OK)
 	{
 		ja_log("JABOOT200002", 0, jobnet_id, 0, "ja_run_jobnet_summary_table", inner_jobnet_id);
@@ -281,37 +421,34 @@ static int	jobnet_boot(char *now_date)
 {
 	DB_RESULT	result;
 	DB_ROW		row;
-	int		run_type, rc;
+	int		run_type, multiple_start_up, load_status, rc;
 	const char	*__function_name = "jobnet_boot";
 
 	zabbix_log(LOG_LEVEL_DEBUG, "In %s(%s)", __function_name, now_date);
 
-	result = DBselect("select inner_jobnet_id, run_type, scheduled_time, jobnet_id, update_date"
+	result = DBselect("select inner_jobnet_id, run_type, scheduled_time, jobnet_id,"
+			" update_date, multiple_start_up, load_status"
 			" from ja_run_jobnet_summary_table"
-			" where status = %d",
-			JA_JOBNET_STATUS_BEGIN);
+			" where status = %d and (scheduled_time <= %s or scheduled_time = 0)"
+			" order by scheduled_time",
+			JA_JOBNET_STATUS_BEGIN, now_date);
 
 	while (NULL != (row = DBfetch(result)))
 	{
 		DBbegin();
 
 		zabbix_log(LOG_LEVEL_DEBUG, "-DEBUG- get ja_run_jobnet_summary_table data:"
-			" run_type[%s] scheduled_time[%s] now_date[%s]",
-			row[1], row[2], now_date);
+			" run_type[%s] scheduled_time[%s] now_date[%s] multiple_start_up[%s] load_status[%s]",
+			row[1], row[2], now_date, row[5], row[6]);
 
-		run_type = atoi(row[1]);
+		run_type          = atoi(row[1]);
+		multiple_start_up = atoi(row[5]);
+		load_status       = atoi(row[6]);
 		if (run_type == JA_JOBNET_RUN_TYPE_NORMAL ||
 		    run_type == JA_JOBNET_RUN_TYPE_SCHEDULED)
 		{
-			/* excluded from execution */
-			if (strcmp(row[2], now_date) > 0)
-			{
-				DBcommit();
-				continue;
-			}
-
-			/* reform leak */
-			if (strcmp(row[2], now_date) < 0)
+			/* delay start-up check */
+			if (strcmp(row[2], now_date) < 0 && load_status != JA_SUMMARY_LOAD_STATUS_DELAY)
 			{
 				rc = error_state_jobnet(row[0], row[3], row[4], row[2]);
 				if (rc != SUCCEED)
@@ -324,6 +461,57 @@ static int	jobnet_boot(char *now_date)
 			}
 		}
 
+		/* check multiple start-up method */
+		switch (multiple_start_up)
+		{
+			case JA_JOBNET_MULTIPLE_SKIP:
+				rc = get_running_jobnet(row[3]);
+				if (rc == FAIL)
+				{
+					DBrollback();
+					continue;
+				}
+
+				/* jobnet running ? */
+				if (rc > 0)
+				{
+					/* skip the jobnet boot */
+					rc = skip_state_jobnet(row[0], row[3], row[2]);
+					if (rc != SUCCEED)
+					{
+						DBrollback();
+						continue;
+					}
+					DBcommit();
+					continue;
+				}
+				break;
+
+			case JA_JOBNET_MULTIPLE_DELAY:
+				rc = get_running_jobnet(row[3]);
+				if (rc == FAIL)
+				{
+					DBrollback();
+					continue;
+				}
+
+				/* jobnet running ? */
+				if (rc > 0)
+				{
+					/* wait the jobnet boot */
+					rc = delay_state_jobnet(row[0]);
+					if (rc != SUCCEED)
+					{
+						DBrollback();
+						continue;
+					}
+					DBcommit();
+					continue;
+				}
+				break;
+		}
+
+		/* start the jonbet */
 		rc = start_jobnet(row[0], row[3]);
 		if (rc != SUCCEED)
 		{
@@ -364,13 +552,13 @@ static int	get_running_jobs(char *inner_jobnet_id)
 
 	result = DBselect("select count(*) from ja_run_job_table"
 			" where inner_jobnet_main_id = %s and status in(%d, %d)",
-			inner_jobnet_id, JA_JOBNET_STATUS_READY, JA_JOBNET_STATUS_RUN);
+			inner_jobnet_id, JA_JOB_STATUS_READY, JA_JOB_STATUS_RUN);
 
 	if (NULL == (row = DBfetch(result)))
 	{
 		ZBX_STR2UINT64(i_inner_jobnet_id, inner_jobnet_id);
 		zbx_snprintf(msgwork, sizeof(msgwork), "%s (%d %d)",
-			inner_jobnet_id, JA_JOBNET_STATUS_READY, JA_JOBNET_STATUS_RUN);
+			inner_jobnet_id, JA_JOB_STATUS_READY, JA_JOB_STATUS_RUN);
 		ja_log("JABOOT200001", i_inner_jobnet_id, NULL, 0, "ja_run_job_table", msgwork);
 		DBfree_result(result);
 		return FAIL;

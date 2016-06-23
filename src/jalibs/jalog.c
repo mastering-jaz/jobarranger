@@ -18,8 +18,8 @@
 **/
 
 /*
-** $Date:: 2013-07-01 16:35:28 +0900 #$
-** $Revision: 5018 $
+** $Date:: 2014-02-20 16:52:27 +0900 #$
+** $Revision: 5809 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -393,7 +393,8 @@ int	ja_log(char *message_id, zbx_uint64_t inner_jobnet_id, char *jobnet_id, zbx_
 	zabbix_log(log_level, "[%s] %s", message_id, message);
 
 	/* register the error message variable */
-	if (w_inner_jobnet_id == 0 || inner_job_id == 0)
+	if (w_inner_jobnet_id == 0 || inner_job_id == 0 ||
+	    log_level == LOG_LEVEL_INFORMATION || log_level == LOG_LEVEL_DEBUG)
 	{
 		/* skip the registration */
 	}

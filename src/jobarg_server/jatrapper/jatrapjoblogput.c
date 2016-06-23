@@ -55,7 +55,8 @@ int jatrap_joblogput_load(ja_joblogput_object * job,
     int ret;
     json_object *jp_data, *jp;
     char *request, *err;
-    char *str;
+    char *str = NULL;
+    char *str2 = NULL;
     int len;
     zbx_uint64_t inner_jobnet_id;
     const char *__function_name = "jatrap_jobnetrun_load";
@@ -120,17 +121,24 @@ int jatrap_joblogput_load(ja_joblogput_object * job,
 
     jp = json_object_object_get(jp_data, "to_time");
     if (jp != NULL) {
-        str = (char *) json_object_get_string(jp);
-        len = strlen(str);
+        str2 = (char *) json_object_get_string(jp);
+        len = strlen(str2);
         if (len == 8) {
-            job->to_time = zbx_dsprintf(NULL, "%s235959", str);
+            job->to_time = zbx_dsprintf(NULL, "%s235959", str2);
         } else if (len == 12) {
-            job->to_time = zbx_dsprintf(NULL, "%s59", str);
+            job->to_time = zbx_dsprintf(NULL, "%s59", str2);
         } else {
             job->to_time = zbx_dsprintf(NULL, "00");
         }
         if (ja_str2timestamp(job->to_time) == 0) {
-            err = zbx_dsprintf(NULL, "Unknowed to_time: %s", str);
+            err = zbx_dsprintf(NULL, "Unknowed to_time: %s", str2);
+            goto error;
+        }
+    }
+
+    if (job->from_time != NULL && job->to_time != NULL) {
+        if (strcmp(job->from_time, job->to_time) > 0) {
+            err = zbx_dsprintf(NULL, "to_time is greater than the from_time: from_time %s to_time %s", str, str2);
             goto error;
         }
     }
@@ -244,7 +252,9 @@ int jatrap_joblogput(ja_telegram_object * obj)
     ja_joblogput_object job;
     zbx_uint64_t userid, userid2;
     char *err;
+    char *user_lang;
     char csv[JA_MAX_DATA_LEN];
+    char sql[JA_MAX_DATA_LEN];
     char *msg, jobid[JA_MAX_STRING_LEN], job_name[JA_MAX_STRING_LEN],
         exit_cd[255];
     char *jobnet_id, *job_id, *user_name;
@@ -280,28 +290,35 @@ int jatrap_joblogput(ja_telegram_object * obj)
             zbx_dsprintf(NULL, "invalid user, username: %s", job.username);
         goto error;
     }
-    user_type = ja_user_type(userid);
 
-    if (job.registry_number != NULL) {
-        result =
-            DBselect
-            ("select * from ja_run_log_table where inner_jobnet_main_id = %s order by inner_jobnet_main_id, log_date",
-             job.registry_number);
-    } else {
+    if (job.registry_number == NULL) {
         if (job.from_time == NULL || job.to_time == NULL) {
-            err =
-                zbx_dsprintf(NULL,
-                             "Can not get 'from_time' and 'to_time' from the telegram");
+            err = zbx_dsprintf(NULL, "Can not get 'from_time' and 'to_time' from the telegram");
             goto error;
         }
-        result =
-            DBselect
-            ("select * from ja_run_log_table where log_date >= %s000 and log_date <= %s999 order by inner_jobnet_main_id, log_date",
-             job.from_time, job.to_time);
     }
-    zbx_snprintf(csv, sizeof(csv),
-                 "\"log date\",\"inner jobnet main id\",\"inner jobnet id\",\"run type\",\"public flag\",\"jobnet id\",\"job id\",\"message id\",\"message\",\"jobnet name\",\"job name\",\"user name\",\"update date\",\"return code\"");
+
+    user_type = ja_user_type(userid);
+    user_lang = ja_user_lang(userid);
+
+    if (job.registry_number != NULL) {
+        zbx_snprintf(sql, sizeof(sql), "a.inner_jobnet_main_id = %s", job.registry_number);
+    } else {
+        zbx_snprintf(sql, sizeof(sql), "a.log_date >= %s000 and a.log_date <= %s999", job.from_time, job.to_time);
+    }
+
+    zbx_snprintf(csv, sizeof(csv), "\"log date\",\"inner jobnet main id\",\"inner jobnet id\",\"run type\",\"public flag\",\"jobnet id\",\"job id\",\"message id\",\"message\",\"jobnet name\",\"job name\",\"user name\",\"update date\",\"return code\"");
     json_object_array_add(jp_csv, json_object_new_string(csv));
+
+    result = DBselect("select a.log_date, a.inner_jobnet_id, a.inner_jobnet_main_id, a.inner_job_id, a.update_date, b.log_type, a.method_flag,"
+                      " a.jobnet_status, a.job_status, a.run_type, a.public_flag, a.jobnet_id, a.jobnet_name, a.job_id, a.job_name, a.user_name,"
+                      " a.return_code, a.std_out, a.std_err, a.message_id, b.message"
+                      " from ja_run_log_table a, ja_define_run_log_message_table b"
+                      " where %s"
+                      " and b.lang = '%s' and a.message_id = b.message_id order by a.inner_jobnet_main_id, a.log_date",
+                      sql, user_lang);
+
+    zbx_free(user_lang);
 
     while ((row = DBfetch(result)) != NULL) {
         public_flag = atoi(row[10]);

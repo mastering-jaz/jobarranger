@@ -18,8 +18,8 @@
 **/
 
 /*
-** $Date:: 2013-08-15 14:22:47 +0900 #$
-** $Revision: 5240 $
+** $Date:: 2014-03-05 16:44:24 +0900 #$
+** $Revision: 5862 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -39,20 +39,21 @@
 
 /* long options */
 static struct zbx_option longopts[] = {
-    {"zabbix-server", 1, NULL, 'z'},
+    {"jobarranger-server", 1, NULL, 'z'},
     {"port", 1, NULL, 'p'},
     {"user-name", 1, NULL, 'U'},
     {"password", 1, NULL, 'P'},
     {"jobnet-id", 1, NULL, 'j'},
-    {"time", 0, NULL, 't'},
-    {"environment-variables", 0, NULL, 'E'},
+    {"start-time", 1, NULL, 't'},
+    {"environment-variables", 1, NULL, 'E'},
+    {"deterrence", 0, NULL, 'D'},
     {"help", 0, NULL, 'h'},
     {"version", 0, NULL, 'V'},
     {NULL}
 };
 
 /* short options */
-static char shortopts[] = "z:p:U:P:j:t:E:hV";
+static char shortopts[] = "z:p:U:P:j:t:E:DhV";
 
 /* end of COMMAND LINE OPTIONS */
 
@@ -67,26 +68,28 @@ static char *JOBARG_USERNAME = NULL;
 static char *JOBARG_PASSWORD = NULL;
 static char *JOBARG_START_TIME = NULL;
 static char *JOBARG_ENV_VARIABLES = NULL;
+static char *JOBARG_DETERRENCE = "0";
 
 const char *progname = NULL;
-const char title_message[] = "Job Arranger Exec";
+const char title_message[] = "Job Arranger Jobnet execution";
 const char usage_message[] =
-    "[-hV] -z <hostname or IP> [-p <port>] -U <username> -P <password> -j <jobnetid> [-t <YYYYMMDDHHMM>] [-E <environment-variables>,...]";
+    "[-hV] -z <hostname or IP> [-p <port>] -U <username> -P <password> -j <jobnetid> [-t <YYYYMMDDHHMM>] [-E <environment-variables>,...] [-D]";
 
 const char *help_message[] = {
     "Options:",
-    "  -z --jobarranger-server <server>                       Hostname or IP address of Job Arranger server",
-    "  -p --port <server port>                                Specify port number of server trapper running on the server. Default is "
+    "  -z --jobarranger-server <server>                         Hostname or IP address of Job Arranger server",
+    " [-p --port <server port>]                                 Specify port number of server trapper running on the server. Default is "
         JOBARG_DEFAULT_SERVER_PORT_STR,
-    "  -U --user-name <user-name>                             Specify user name",
-    "  -P --password <password>                               Specify password",
-    "  -j --jobnet-id <jobnetid>                              Specify jobnetid",
-    "  -t --start-time <YYYYMMDDHHSS>                         Specify start time",
-    "  -E --environment-variable <environment-variable>,...   Specify environment variables",
+    "  -U --user-name <user-name>                               Specify user name",
+    "  -P --password <password>                                 Specify password",
+    "  -j --jobnet-id <jobnetid>                                Specify jobnetid",
+    " [-t --start-time <YYYYMMDDHHSS>]                          Specify start time",
+    " [-E --environment-variable <environment-variable>,...]    Specify environment variables",
+    " [-D --deterrence]                                         Specify the double registration deterrence of time start-up with -t option",
     "",
     "Other options:",
-    "  -h --help                                              Give this help",
-    "  -V --version                                           Display version number",
+    "  -h --help                                                Give this help",
+    "  -V --version                                             Display version number",
     NULL                        /* end of text */
 };
 
@@ -360,10 +363,7 @@ static void parse_commandline(int argc, char **argv)
     char ch = '\0';
 
     /* parse the command-line */
-    while ((char) EOF !=
-           (ch =
-            (char) zbx_getopt_long(argc, argv, shortopts, longopts,
-                                   NULL))) {
+    while ((char) EOF != (ch = (char) zbx_getopt_long(argc, argv, shortopts, longopts, NULL))) {
         switch (ch) {
         case 'h':
             help_jobarg();
@@ -388,8 +388,10 @@ static void parse_commandline(int argc, char **argv)
             JOBARG_START_TIME = zbx_strdup(JOBARG_START_TIME, zbx_optarg);
             break;
         case 'E':
-            JOBARG_ENV_VARIABLES =
-                zbx_strdup(JOBARG_ENV_VARIABLES, zbx_optarg);
+            JOBARG_ENV_VARIABLES = zbx_strdup(JOBARG_ENV_VARIABLES, zbx_optarg);
+            break;
+        case 'D':
+            JOBARG_DETERRENCE = "1";
             break;
         case 'V':
             version_jobarg();
@@ -402,8 +404,8 @@ static void parse_commandline(int argc, char **argv)
         }
     }
 
-    if (NULL == JOBARG_SERVER || NULL == JOBARG_USERNAME
-        || NULL == JOBARG_PASSWORD || NULL == JOBARG_JOBNETID) {
+    if (NULL == JOBARG_SERVER || NULL == JOBARG_USERNAME ||
+        NULL == JOBARG_PASSWORD || NULL == JOBARG_JOBNETID) {
         usage();
         exit(FAIL);
     }
@@ -413,7 +415,6 @@ int main(int argc, char **argv)
 {
     int ret = SUCCEED;
     struct zbx_json json;
-    int tcp_ret;
     zbx_sock_t sock;
     char *answer = NULL;
     char *tp = NULL;
@@ -424,7 +425,7 @@ int main(int argc, char **argv)
 
     parse_commandline(argc, argv);
 
-    /*output to stderr */
+    /* output to stderr */
     zabbix_open_log(LOG_TYPE_UNDEFINED, CONFIG_LOG_LEVEL, NULL);
 
     if (NULL == JOBARG_SERVER) {
@@ -444,7 +445,7 @@ int main(int argc, char **argv)
         goto exit;
     }
 
-    /*JSON data */
+    /* JSON data */
     zbx_json_init(&json, ZBX_JSON_STAT_BUF_LEN);
     zbx_json_addstring(&json, JA_PROTO_TAG_KIND, JA_PROTO_VALUE_JOBNETRUN,
                        ZBX_JSON_TYPE_STRING);
@@ -458,7 +459,7 @@ int main(int argc, char **argv)
     zbx_json_addstring(&json, JA_PROTO_TAG_JOBNETID, JOBARG_JOBNETID,
                        ZBX_JSON_TYPE_STRING);
 
-    /*Start time */
+    /* Start time */
     if (JOBARG_START_TIME != NULL) {
         ret = Ymdhm_check(JOBARG_START_TIME);
         if (ret != SUCCEED) {
@@ -467,9 +468,11 @@ int main(int argc, char **argv)
         }
         zbx_json_addstring(&json, JA_PROTO_TAG_STARTTIME,
                            JOBARG_START_TIME, ZBX_JSON_TYPE_STRING);
+        zbx_json_addstring(&json, JA_PROTO_TAG_DETERRENCE,
+                           JOBARG_DETERRENCE, ZBX_JSON_TYPE_STRING);
     }
 
-    /*Env */
+    /* Env */
     if (JOBARG_ENV_VARIABLES != NULL) {
         zbx_json_addobject(&json, JA_PROTO_TAG_ENV);
         copy = (char *) malloc(strlen(JOBARG_ENV_VARIABLES) + 1);
@@ -479,7 +482,7 @@ int main(int argc, char **argv)
         tp = strtok(copy, ",");
 
         if (strcmp(JOBARG_ENV_VARIABLES, tp)) {
-            /*delim */
+            /* delim */
             env = getenv(tp);
             if (env == NULL) {
                 zabbix_log(LOG_LEVEL_ERR, "Env [%s] does not exist.", tp);
@@ -528,28 +531,35 @@ int main(int argc, char **argv)
     signal(SIGALRM, send_signal_handler);
 #endif                          /* NOT _WINDOWS */
 
-    if (SUCCEED ==
-        (tcp_ret =
-         zbx_tcp_connect(&sock, JOBARG_SOURCE_IP, JOBARG_SERVER,
-                         JOBARG_SERVER_PORT, GET_SENDER_TIMEOUT))) {
-        if (SUCCEED == (tcp_ret = zbx_tcp_send(&sock, json.buffer))) {
-            if (SUCCEED == (tcp_ret = zbx_tcp_recv(&sock, &answer))) {
-                zabbix_log(LOG_LEVEL_DEBUG, "Answer from server [%s]",
-                           answer);
-                if (NULL == answer || SUCCEED != check_response(answer)) {
-                    tcp_ret = FAIL;
-                }
-            }
-        }
+    if (SUCCEED != zbx_tcp_connect(&sock, JOBARG_SOURCE_IP, JOBARG_SERVER, JOBARG_SERVER_PORT, GET_SENDER_TIMEOUT)) {
+        zabbix_log(LOG_LEVEL_ERR, "Job arranger server connect error: [%s : %u] %s", JOBARG_SERVER, JOBARG_SERVER_PORT, zbx_tcp_strerror());
+        zbx_json_free(&json);
+        ret = FAIL;
+        goto exit;
+    }
+ 
+    if (SUCCEED != zbx_tcp_send(&sock, json.buffer)) {
+        zabbix_log(LOG_LEVEL_ERR, "Job arranger message send error: %s", zbx_tcp_strerror());
+        zbx_json_free(&json);
         zbx_tcp_close(&sock);
+        ret = FAIL;
+        goto exit;
+    }
+ 
+    if (SUCCEED != zbx_tcp_recv(&sock, &answer)) {
+        zabbix_log(LOG_LEVEL_ERR, "Job arranger message receive error: %s", zbx_tcp_strerror());
+        zbx_json_free(&json);
+        zbx_tcp_close(&sock);
+        ret = FAIL;
+        goto exit;
     }
 
-    if (FAIL == tcp_ret) {
-        zabbix_log(LOG_LEVEL_ERR, "send value error: %s",
-                   zbx_tcp_strerror());
+    zabbix_log(LOG_LEVEL_DEBUG, "Answer from server [%s]", answer);
+    if (NULL == answer || SUCCEED != check_response(answer)) {
         ret = FAIL;
     }
 
+    zbx_tcp_close(&sock);
     zbx_json_free(&json);
 
   exit:

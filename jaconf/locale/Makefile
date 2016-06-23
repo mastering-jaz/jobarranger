@@ -125,9 +125,9 @@ OBJEXT = o
 PACKAGE = jobarranger
 PACKAGE_BUGREPORT = 
 PACKAGE_NAME = jobarranger
-PACKAGE_STRING = jobarranger 1.4.1
+PACKAGE_STRING = jobarranger 1.4.2
 PACKAGE_TARNAME = jobarranger
-PACKAGE_VERSION = 1.4.1
+PACKAGE_VERSION = 1.4.2
 PATH_SEPARATOR = :
 PG_CONFIG = 
 POSTGRESQL_CPPFLAGS = 
@@ -145,7 +145,7 @@ SQLITE3_LDFLAGS =
 SQLITE3_LIBS = 
 SQLITE3_VERSION = 
 STRIP = 
-VERSION = 1.4.1
+VERSION = 1.4.2
 abs_builddir = /cus/jobarranger/infra/branches/jaconf/locale
 abs_srcdir = /cus/jobarranger/infra/branches/jaconf/locale
 abs_top_builddir = /cus/jobarranger/infra/branches
@@ -196,7 +196,7 @@ target_alias =
 top_build_prefix = ../../
 top_builddir = ../..
 top_srcdir = ../..
-locale_DATA = jamessage_en.txt jamessage_ja_JP_UTF-8.txt logmessage_32BIT.txt logmessage_64BIT.txt
+locale_DATA = logmessage_32BIT.txt logmessage_64BIT.txt
 all: all-am
 
 .SUFFIXES:

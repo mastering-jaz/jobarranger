@@ -18,9 +18,9 @@
 **/
 
 /*
-** $Date:: 2013-07-12 15:12:54 +0900 #$
-** $Revision: 5180 $
-** $Author: ossinfra@FITECHLABS.CO.JP $
+** $Date:: 2014-02-26 10:47:36 +0900 #$
+** $Revision: 5822 $
+** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
 #include "common.h"
@@ -55,8 +55,8 @@ int ja_set_jobstatus(const zbx_uint64_t inner_jobnet_id, const int status,
 
     zabbix_log(LOG_LEVEL_DEBUG,
                "In %s() inner_jobnet_id: " ZBX_FS_UI64
-               ", status: %d, jobstatus: %d", __function_name,
-               inner_jobnet_id, jobstatus);
+               ", status: %d, jobstatus: %d",
+               __function_name, inner_jobnet_id, status, jobstatus);
 
     ts = ja_timestamp2str(time(NULL));
     if (status == JA_JOBNET_STATUS_END
@@ -383,8 +383,7 @@ int ja_set_run_jobnet(const zbx_uint64_t inner_jobnet_id)
     if (ja_joblog(JC_JOBNET_START, inner_jobnet_id, 0) == FAIL)
         return FAIL;
 
-    return ja_set_status_jobnet(inner_jobnet_id, JA_JOBNET_STATUS_RUN, 1,
-                                0);
+    return ja_set_status_jobnet(inner_jobnet_id, JA_JOBNET_STATUS_RUN, 1, 0);
 }
 
 /******************************************************************************
@@ -413,8 +412,7 @@ int ja_set_end_jobnet(const zbx_uint64_t inner_jobnet_id)
     if (ja_joblog(JC_JOBNET_END, inner_jobnet_id, 0) == FAIL)
         return FAIL;
 
-    return ja_set_status_jobnet(inner_jobnet_id, JA_JOBNET_STATUS_END, -1,
-                                1);
+    return ja_set_status_jobnet(inner_jobnet_id, JA_JOBNET_STATUS_END, -1, 1);
 }
 
 /******************************************************************************
@@ -443,8 +441,7 @@ int ja_set_runerr_jobnet(const zbx_uint64_t inner_jobnet_id)
     //if (ja_joblog(JC_JOBNET_ERR_END, inner_jobnet_id, 0) == FAIL)
     //    return FAIL;
 
-    return ja_set_status_jobnet(inner_jobnet_id, JA_JOBNET_STATUS_RUNERR,
-                                -1, 1);
+    return ja_set_status_jobnet(inner_jobnet_id, JA_JOBNET_STATUS_RUNERR, -1, 1);
 }
 
 /******************************************************************************
@@ -470,11 +467,7 @@ int ja_set_enderr_jobnet(const zbx_uint64_t inner_jobnet_id)
     if (ja_clean_value_jobnet_after(inner_jobnet_id) == FAIL)
         return FAIL;
 
-    if (ja_joblog(JC_JOB_ERR_END, inner_jobnet_id, 0) == FAIL)
-        return FAIL;
-
-    return ja_set_status_jobnet(inner_jobnet_id, JA_JOBNET_STATUS_ENDERR,
-                                -1, 1);
+    return ja_set_status_jobnet(inner_jobnet_id, JA_JOBNET_STATUS_ENDERR, -1, 1);
 }
 
 /******************************************************************************
@@ -550,6 +543,15 @@ int ja_set_end(const zbx_uint64_t inner_job_id)
  ******************************************************************************/
 int ja_set_runerr(const zbx_uint64_t inner_job_id)
 {
+    DB_RESULT result;
+    DB_RESULT result2;
+    DB_ROW row;
+    DB_ROW row2;
+    zbx_uint64_t inner_jobnet_main_id;
+    zbx_uint64_t w_inner_job_id;
+    int exit_flag, idx, len, sw;
+    char *w_main_jobnet_id, *w_execution_user_name;
+    char w_job_id[3000];
     const char *__function_name = "ja_set_runerr";
 
     zabbix_log(LOG_LEVEL_DEBUG, "In %s() inner_job_id: " ZBX_FS_UI64,
@@ -560,6 +562,87 @@ int ja_set_runerr(const zbx_uint64_t inner_job_id)
 
     if (ja_joblog(JC_JOB_ERR_END, 0, inner_job_id) == FAIL)
         return FAIL;
+
+    /* print the job stop error message */
+    inner_jobnet_main_id = 0;
+    w_main_jobnet_id = "";
+    w_execution_user_name = "";
+
+    /* job id get */
+    idx = sizeof(w_job_id) - 1;
+    w_job_id[idx] = '\0';
+    w_inner_job_id = inner_job_id;
+
+    /* sub jobnet search */
+    sw = 0;
+    exit_flag = 0;
+    while (exit_flag == 0) {
+        result = DBselect("select inner_jobnet_id, inner_jobnet_main_id, job_id"
+                           " from ja_run_job_table"
+                           " where inner_job_id = " ZBX_FS_UI64, w_inner_job_id);
+        if (NULL == (row = DBfetch(result))) {
+            DBfree_result(result);
+            exit_flag = 1;
+            continue;
+        }
+
+        if (sw == 0) {
+            ZBX_STR2UINT64(inner_jobnet_main_id, row[1]);
+            sw = 1;
+        }
+
+        len = strlen(row[2]);
+        if (((idx - 1) - len) < 0) {
+            DBfree_result(result);
+            exit_flag = 1;
+            continue;
+        } else {
+            idx = idx - len;
+            memcpy(&w_job_id[idx], row[2], len);
+            idx = idx - 1;
+            memcpy(&w_job_id[idx], "/", 1);
+        }
+
+        if (strcmp(row[0], row[1]) == 0) {
+            DBfree_result(result);
+            exit_flag = 1;
+            continue;
+        }
+
+        /* get the job id of the jobnet icon */
+        result2 = DBselect("select inner_job_id from ja_run_icon_jobnet_table"
+                           " where link_inner_jobnet_id = %s", row[0]);
+        if (NULL == (row2 = DBfetch(result2))) {
+            DBfree_result(result);
+            DBfree_result(result2);
+            exit_flag = 1;
+            continue;
+        }
+        ZBX_STR2UINT64(w_inner_job_id, row2[0]);
+        DBfree_result(result);
+        DBfree_result(result2);
+    }
+
+    /* jobnet id and user name get */
+    if (inner_jobnet_main_id != 0) {
+        result = DBselect("select jobnet_id, execution_user_name from ja_run_jobnet_table"
+                          " where inner_jobnet_id = " ZBX_FS_UI64, inner_jobnet_main_id);
+        if (NULL != (row = DBfetch(result))) {
+            w_main_jobnet_id = row[0];
+            w_execution_user_name = row[1];
+        }
+        DBfree_result(result);
+
+        /* jobnet id set */
+        len = strlen(w_main_jobnet_id);
+        if ((idx - len) >= 0) {
+            idx = idx - len;
+            memcpy(&w_job_id[idx], w_main_jobnet_id, len);
+        }
+    }
+
+    ja_log("JAJOBNETRUN000001", 0, NULL, inner_job_id,
+           __function_name, inner_job_id, w_main_jobnet_id, &w_job_id[idx], w_execution_user_name);
 
     return ja_set_status_job(inner_job_id, JA_JOB_STATUS_RUNERR, -1, 1);
 }
@@ -577,8 +660,17 @@ int ja_set_runerr(const zbx_uint64_t inner_job_id)
  * Comments:                                                                  *
  *                                                                            *
  ******************************************************************************/
-int ja_set_enderr(const zbx_uint64_t inner_job_id)
+int ja_set_enderr(const zbx_uint64_t inner_job_id, int msg_flag)
 {
+    DB_RESULT result;
+    DB_RESULT result2;
+    DB_ROW row;
+    DB_ROW row2;
+    zbx_uint64_t inner_jobnet_main_id;
+    zbx_uint64_t w_inner_job_id;
+    int exit_flag, idx, len, sw;
+    char *w_main_jobnet_id, *w_execution_user_name;
+    char w_job_id[3000];
     const char *__function_name = "ja_set_enderr";
 
     zabbix_log(LOG_LEVEL_DEBUG, "In %s() inner_job_id: " ZBX_FS_UI64,
@@ -587,8 +679,91 @@ int ja_set_enderr(const zbx_uint64_t inner_job_id)
     if (ja_clean_value_after(inner_job_id) == FAIL)
         return FAIL;
 
-    if (ja_joblog(JC_JOB_ERR_END, 0, inner_job_id) == FAIL)
-        return FAIL;
+    if (msg_flag == 1) {
+        if (ja_joblog(JC_JOB_ERR_END, 0, inner_job_id) == FAIL)
+            return FAIL;
+
+        /* print the job stop error message */
+        inner_jobnet_main_id = 0;
+        w_main_jobnet_id = "";
+        w_execution_user_name = "";
+
+        /* job id get */
+        idx = sizeof(w_job_id) - 1;
+        w_job_id[idx] = '\0';
+        w_inner_job_id = inner_job_id;
+
+        /* sub jobnet search */
+        sw = 0;
+        exit_flag = 0;
+        while (exit_flag == 0) {
+            result = DBselect("select inner_jobnet_id, inner_jobnet_main_id, job_id"
+                               " from ja_run_job_table"
+                               " where inner_job_id = " ZBX_FS_UI64, w_inner_job_id);
+            if (NULL == (row = DBfetch(result))) {
+                DBfree_result(result);
+                exit_flag = 1;
+                continue;
+            }
+
+            if (sw == 0) {
+                ZBX_STR2UINT64(inner_jobnet_main_id, row[1]);
+                sw = 1;
+            }
+
+            len = strlen(row[2]);
+            if (((idx - 1) - len) < 0) {
+                DBfree_result(result);
+                exit_flag = 1;
+                continue;
+            } else {
+                idx = idx - len;
+                memcpy(&w_job_id[idx], row[2], len);
+                idx = idx - 1;
+                memcpy(&w_job_id[idx], "/", 1);
+            }
+
+            if (strcmp(row[0], row[1]) == 0) {
+                DBfree_result(result);
+                exit_flag = 1;
+                continue;
+            }
+
+            /* get the job id of the jobnet icon */
+            result2 = DBselect("select inner_job_id from ja_run_icon_jobnet_table"
+                               " where link_inner_jobnet_id = %s", row[0]);
+            if (NULL == (row2 = DBfetch(result2))) {
+                DBfree_result(result);
+                DBfree_result(result2);
+                exit_flag = 1;
+                continue;
+            }
+            ZBX_STR2UINT64(w_inner_job_id, row2[0]);
+            DBfree_result(result);
+            DBfree_result(result2);
+        }
+
+        /* jobnet id and user name get */
+        if (inner_jobnet_main_id != 0) {
+            result = DBselect("select jobnet_id, execution_user_name from ja_run_jobnet_table"
+                              " where inner_jobnet_id = " ZBX_FS_UI64, inner_jobnet_main_id);
+            if (NULL != (row = DBfetch(result))) {
+                w_main_jobnet_id = row[0];
+                w_execution_user_name = row[1];
+            }
+            DBfree_result(result);
+
+            /* jobnet id set */
+            len = strlen(w_main_jobnet_id);
+            if ((idx - len) >= 0) {
+                idx = idx - len;
+                memcpy(&w_job_id[idx], w_main_jobnet_id, len);
+            }
+        }
+
+        ja_log("JAJOBNETRUN200001", 0, NULL, inner_job_id,
+               __function_name, inner_job_id, w_main_jobnet_id, &w_job_id[idx], w_execution_user_name);
+    }
 
     return ja_set_status_job(inner_job_id, JA_JOB_STATUS_ENDERR, -1, 1);
 }

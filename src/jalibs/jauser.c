@@ -18,9 +18,9 @@
 **/
 
 /*
-** $Date:: 2013-07-18 16:21:01 +0900 #$
-** $Revision: 5200 $
-** $Author: ossinfra@FITECHLABS.CO.JP $
+** $Date:: 2014-03-06 16:18:01 +0900 #$
+** $Revision: 5866 $
+** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
 #include "common.h"
@@ -232,6 +232,46 @@ int ja_user_type(zbx_uint64_t userid)
 
     DBfree_result(result);
     return type;
+}
+
+/******************************************************************************
+ *                                                                            *
+ * Function: ja_user_lang                                                     *
+ *                                                                            *
+ * Purpose: get the user language to the key user id                          *
+ *                                                                            *
+ * Parameters: userid (in) - search target user id                            *
+ *                                                                            *
+ * Return value: zabbix user language (convert to lower case)                 *
+ *                                                                            *
+ * Comments: return the "en_gb" if the user id is not found                   *
+ *                                                                            *
+ ******************************************************************************/
+char *ja_user_lang(zbx_uint64_t userid)
+{
+    DB_RESULT result;
+    DB_ROW row;
+    char *p;
+    char *lang;
+    const char *__function_name = "ja_user_lang";
+
+    zabbix_log(LOG_LEVEL_DEBUG, "In %s() userid: " ZBX_FS_UI64, __function_name, userid);
+
+    result = DBselect("select lang from users where userid = " ZBX_FS_UI64, userid);
+
+    row = DBfetch(result);
+    if (row == NULL) {
+        zabbix_log(LOG_LEVEL_WARNING, "In %s() cat not find the user: " ZBX_FS_UI64, __function_name, userid);
+        lang = strdup("en_gb");
+    } else {
+        lang = strdup(row[0]);
+         for (p = lang; *p != '\0'; p++) {
+            *p = tolower(*p);
+        }
+    }
+
+    DBfree_result(result);
+    return lang;
 }
 
 /******************************************************************************

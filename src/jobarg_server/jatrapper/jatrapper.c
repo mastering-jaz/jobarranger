@@ -18,8 +18,8 @@
 **/
 
 /*
-** $Date:: 2013-12-18 16:46:23 +0900 #$
-** $Revision: 5658 $
+** $Date:: 2014-03-06 11:05:13 +0900 #$
+** $Revision: 5865 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -49,6 +49,21 @@ extern unsigned char process_type;
 extern char serverid[JA_SERVERID_LEN];
 extern int CONFIG_ZABBIX_VERSION;
 
+static char msgwork[2048];
+
+/******************************************************************************
+ *                                                                            *
+ * Function:                                                                  *
+ *                                                                            *
+ * Purpose:                                                                   *
+ *                                                                            *
+ * Parameters:                                                                *
+ *                                                                            *
+ * Return value:                                                              *
+ *                                                                            *
+ * Comments:                                                                  *
+ *                                                                            *
+ ******************************************************************************/
 void init_exec_request(JOBARG_EXEC_REQUEST * er)
 {
     int i;
@@ -60,8 +75,22 @@ void init_exec_request(JOBARG_EXEC_REQUEST * er)
         er->env[i] = NULL;
         er->value[i] = NULL;
     }
+    er->deterrence = 0;
 }
 
+/******************************************************************************
+ *                                                                            *
+ * Function:                                                                  *
+ *                                                                            *
+ * Purpose:                                                                   *
+ *                                                                            *
+ * Parameters:                                                                *
+ *                                                                            *
+ * Return value:                                                              *
+ *                                                                            *
+ * Comments:                                                                  *
+ *                                                                            *
+ ******************************************************************************/
 void clean_exec_request(JOBARG_EXEC_REQUEST * er, int cnt)
 {
     int i;
@@ -77,6 +106,19 @@ void clean_exec_request(JOBARG_EXEC_REQUEST * er, int cnt)
     }
 }
 
+/******************************************************************************
+ *                                                                            *
+ * Function:                                                                  *
+ *                                                                            *
+ * Purpose:                                                                   *
+ *                                                                            *
+ * Parameters:                                                                *
+ *                                                                            *
+ * Return value:                                                              *
+ *                                                                            *
+ * Comments:                                                                  *
+ *                                                                            *
+ ******************************************************************************/
 void init_jobnetinfo(JOBARG_JOBNET_INFO * ji)
 {
     ji->jobnetid = NULL;
@@ -92,6 +134,19 @@ void init_jobnetinfo(JOBARG_JOBNET_INFO * ji)
     ji->laststderr[0] = '\0';
 }
 
+/******************************************************************************
+ *                                                                            *
+ * Function:                                                                  *
+ *                                                                            *
+ * Purpose:                                                                   *
+ *                                                                            *
+ * Parameters:                                                                *
+ *                                                                            *
+ * Return value:                                                              *
+ *                                                                            *
+ * Comments:                                                                  *
+ *                                                                            *
+ ******************************************************************************/
 int get_jobnet_info(zbx_uint64_t registrynumber,
                     JOBARG_EXEC_REQUEST * er, JOBARG_JOBNET_INFO * ji)
 {
@@ -106,7 +161,6 @@ int get_jobnet_info(zbx_uint64_t registrynumber,
          " where inner_jobnet_id = " ZBX_FS_UI64, registrynumber);
     row = DBfetch(result);
     if (row == NULL) {
-        ja_log("JATRAPPER200054", 0, NULL, 0, registrynumber);
         DBfree_result(result);
         ret = FAIL;
         return ret;
@@ -176,6 +230,19 @@ int get_jobnet_info(zbx_uint64_t registrynumber,
     return ret;
 }
 
+/******************************************************************************
+ *                                                                            *
+ * Function:                                                                  *
+ *                                                                            *
+ * Purpose:                                                                   *
+ *                                                                            *
+ * Parameters:                                                                *
+ *                                                                            *
+ * Return value:                                                              *
+ *                                                                            *
+ * Comments:                                                                  *
+ *                                                                            *
+ ******************************************************************************/
 int time_passed_check(char *starttime)
 {
     time_t now, t;
@@ -188,6 +255,19 @@ int time_passed_check(char *starttime)
     return SUCCEED;
 }
 
+/******************************************************************************
+ *                                                                            *
+ * Function:                                                                  *
+ *                                                                            *
+ * Purpose:                                                                   *
+ *                                                                            *
+ * Parameters:                                                                *
+ *                                                                            *
+ * Return value:                                                              *
+ *                                                                            *
+ * Comments:                                                                  *
+ *                                                                            *
+ ******************************************************************************/
 int job_exec_auth(JOBARG_EXEC_REQUEST er)
 {
     int ret;
@@ -239,6 +319,19 @@ int job_exec_auth(JOBARG_EXEC_REQUEST er)
     return FAIL;
 }
 
+/******************************************************************************
+ *                                                                            *
+ * Function:                                                                  *
+ *                                                                            *
+ * Purpose:                                                                   *
+ *                                                                            *
+ * Parameters:                                                                *
+ *                                                                            *
+ * Return value:                                                              *
+ *                                                                            *
+ * Comments:                                                                  *
+ *                                                                            *
+ ******************************************************************************/
 int register_db_table(JOBARG_EXEC_REQUEST er,
                       zbx_uint64_t * inner_jobnet_id, int cnt)
 {
@@ -253,6 +346,7 @@ int register_db_table(JOBARG_EXEC_REQUEST er,
     int res;
     int public_flag = 0;
     int run_type;
+    int multiple_start_up;
     int i;
     zbx_uint64_t next_id;
     zbx_uint64_t update_date;
@@ -264,7 +358,7 @@ int register_db_table(JOBARG_EXEC_REQUEST er,
     jobnetid = DBdyn_escape_string(er.jobnetid);
     result =
         DBselect
-        ("select update_date, created_date, public_flag, user_name, jobnet_name, memo"
+        ("select update_date, public_flag, multiple_start_up, user_name, jobnet_name, memo"
          " from ja_jobnet_control_table" " where jobnet_id='%s'"
          " and valid_flag=1", jobnetid);
     row = DBfetch(result);
@@ -276,7 +370,8 @@ int register_db_table(JOBARG_EXEC_REQUEST er,
         return ret;
     }
     ZBX_STR2UINT64(update_date, row[0]);
-    public_flag = atoi(row[2]);
+    public_flag = atoi(row[1]);
+    multiple_start_up = atoi(row[2]);
     user_name = DBdyn_escape_string(row[3]);
     jobnet_name = DBdyn_escape_string(row[4]);
     memo = DBdyn_escape_string(row[5]);
@@ -300,12 +395,16 @@ int register_db_table(JOBARG_EXEC_REQUEST er,
     }
     res = DBexecute("insert into ja_run_jobnet_table"
                     " (inner_jobnet_id, inner_jobnet_main_id,"
-                    " update_date, run_type, main_flag, status, scheduled_time, public_flag,"
+                    " update_date, run_type, main_flag, status, scheduled_time,"
+                    " public_flag, multiple_start_up,"
                     " jobnet_id, user_name, jobnet_name, memo, execution_user_name)"
                     " values ( " ZBX_FS_UI64 ", " ZBX_FS_UI64 ", "
-                    ZBX_FS_UI64 "," " %d, 0, 0, " ZBX_FS_UI64
-                    ", %d, '%s', '%s', '%s', '%s', '%s')", next_id, next_id,
-                    update_date, run_type, scheduled_time, public_flag,
+                    ZBX_FS_UI64 ", %d, %d, %d, " ZBX_FS_UI64
+                    ", %d, %d,"
+                    " '%s', '%s', '%s', '%s', '%s')",
+                    next_id, next_id,
+                    update_date, run_type, JA_JOBNET_MAIN_FLAG_MAIN, JA_JOBNET_STATUS_BEGIN, scheduled_time,
+                    public_flag, multiple_start_up,
                     jobnetid, user_name, jobnet_name, memo, er.username);
     if (ZBX_DB_OK > res) {
         ja_log("JATRAPPER200016", 0, jobnetid, 0, jobnetid);
@@ -348,6 +447,19 @@ int register_db_table(JOBARG_EXEC_REQUEST er,
     return ret;
 }
 
+/******************************************************************************
+ *                                                                            *
+ * Function:                                                                  *
+ *                                                                            *
+ * Purpose:                                                                   *
+ *                                                                            *
+ * Parameters:                                                                *
+ *                                                                            *
+ * Return value:                                                              *
+ *                                                                            *
+ * Comments:                                                                  *
+ *                                                                            *
+ ******************************************************************************/
 void reply_jobresult_response(zbx_sock_t * sock, int ret, char *message)
 {
     struct zbx_json json;
@@ -373,6 +485,19 @@ void reply_jobresult_response(zbx_sock_t * sock, int ret, char *message)
     zbx_json_free(&json);
 }
 
+/******************************************************************************
+ *                                                                            *
+ * Function:                                                                  *
+ *                                                                            *
+ * Purpose:                                                                   *
+ *                                                                            *
+ * Parameters:                                                                *
+ *                                                                            *
+ * Return value:                                                              *
+ *                                                                            *
+ * Comments:                                                                  *
+ *                                                                            *
+ ******************************************************************************/
 void reply_jobnetrun_response(zbx_sock_t * sock, int ret, char *message)
 {
     struct zbx_json json;
@@ -398,6 +523,19 @@ void reply_jobnetrun_response(zbx_sock_t * sock, int ret, char *message)
     zbx_json_free(&json);
 }
 
+/******************************************************************************
+ *                                                                            *
+ * Function:                                                                  *
+ *                                                                            *
+ * Purpose:                                                                   *
+ *                                                                            *
+ * Parameters:                                                                *
+ *                                                                            *
+ * Return value:                                                              *
+ *                                                                            *
+ * Comments:                                                                  *
+ *                                                                            *
+ ******************************************************************************/
 void reply_jobnetstatusrq_response(zbx_sock_t * sock, int ret,
                                    JOBARG_JOBNET_INFO * ji, char *message)
 {
@@ -451,9 +589,24 @@ void reply_jobnetstatusrq_response(zbx_sock_t * sock, int ret,
     zbx_json_free(&json);
 }
 
+/******************************************************************************
+ *                                                                            *
+ * Function:                                                                  *
+ *                                                                            *
+ * Purpose:                                                                   *
+ *                                                                            *
+ * Parameters:                                                                *
+ *                                                                            *
+ * Return value:                                                              *
+ *                                                                            *
+ * Comments:                                                                  *
+ *                                                                            *
+ ******************************************************************************/
 char *evaluate_jobnetrun(zbx_sock_t * sock, struct zbx_json_parse *jp,
                          int *ret)
 {
+    DB_RESULT result;
+    DB_ROW row;
     struct zbx_json_parse jp_row;
     struct zbx_json_parse jp_row2;
     char *message = NULL;
@@ -464,6 +617,7 @@ char *evaluate_jobnetrun(zbx_sock_t * sock, struct zbx_json_parse *jp,
     int version;
     int res;
     int i;
+    int count;
     zbx_uint64_t inner_jobnet_id;
     static JOBARG_EXEC_REQUEST er;
     init_exec_request(&er);
@@ -548,7 +702,11 @@ char *evaluate_jobnetrun(zbx_sock_t * sock, struct zbx_json_parse *jp,
             if (NULL !=
                 (p2 = zbx_json_pair_by_name(&jp_row, JA_PROTO_TAG_ENV))) {
                 if (FAIL == (*ret = zbx_json_brackets_open(p2, &jp_row2))) {
-                    ja_log("JATRAPPER200051", 0, NULL, 0);
+                    ja_log("JATRAPPER200051", 0, er.jobnetid, 0);
+                    zbx_free(er.username);
+                    zbx_free(er.password);
+                    zbx_free(er.jobnetid);
+                    zbx_free(er.starttime);
                     *ret = FAIL;
                     return zbx_dsprintf(message,
                                         "Received message error: Cannot open [env] object");
@@ -566,8 +724,39 @@ char *evaluate_jobnetrun(zbx_sock_t * sock, struct zbx_json_parse *jp,
                     er.env[i] = '\0';
                 }
             }
+            if (SUCCEED ==
+                zbx_json_value_by_name(&jp_row, JA_PROTO_TAG_DETERRENCE,
+                                       value, sizeof(value))) {
+                er.deterrence = atoi(value);
+            }
+
             if (SUCCEED == (job_exec_auth(er))) {
                 DBbegin();
+                /* double check start-up suppression time specified */
+                if (er.starttime != NULL && er.deterrence == 1) {
+                    result = DBselect("select count(*) from ja_run_jobnet_table"
+                                      " where scheduled_time = %s and jobnet_id = '%s' and run_type = %d",
+                                      er.starttime, er.jobnetid, JA_JOBNET_RUN_TYPE_SCHEDULED);
+                    if (NULL == (row = DBfetch(result))) {
+                        zbx_snprintf(msgwork, sizeof(msgwork), "%s %s %d", er.starttime, er.jobnetid, JA_JOBNET_RUN_TYPE_SCHEDULED);
+                        ja_log("JATRAPPER200057", 0, er.jobnetid, 0, "ja_run_jobnet_table", msgwork);
+                        DBfree_result(result);
+                        DBrollback();
+                        clean_exec_request(&er, i);
+                        *ret = FAIL;
+                        return zbx_dsprintf(message, "ja_run_jobnet_table select error.");
+                    }
+                    count = atoi(row[0]);
+                    DBfree_result(result);
+
+                    if (count > 0) {
+                        DBrollback();
+                        clean_exec_request(&er, i);
+                        *ret = FAIL;
+                        return zbx_dsprintf(message, "Received message error: Double registration detection of time starting jobnet.");
+                    }
+                }
+
                 if (SUCCEED ==
                     (register_db_table(er, &inner_jobnet_id, i))) {
                     DBcommit();
@@ -579,7 +768,7 @@ char *evaluate_jobnetrun(zbx_sock_t * sock, struct zbx_json_parse *jp,
                     DBrollback();
                     clean_exec_request(&er, i);
                     *ret = FAIL;
-                    return zbx_dsprintf(message, "Insert table error.");
+                    return zbx_dsprintf(message, "ja_run_jobnet_table insert error.");
                 }
             } else {
                 clean_exec_request(&er, i);
@@ -590,6 +779,19 @@ char *evaluate_jobnetrun(zbx_sock_t * sock, struct zbx_json_parse *jp,
     }
 }
 
+/******************************************************************************
+ *                                                                            *
+ * Function:                                                                  *
+ *                                                                            *
+ * Purpose:                                                                   *
+ *                                                                            *
+ * Parameters:                                                                *
+ *                                                                            *
+ * Return value:                                                              *
+ *                                                                            *
+ * Comments:                                                                  *
+ *                                                                            *
+ ******************************************************************************/
 char *evaluate_jobnetstatusrq(zbx_sock_t * sock,
                               struct zbx_json_parse *jp, int *ret,
                               JOBARG_JOBNET_INFO * ji)
@@ -666,12 +868,11 @@ char *evaluate_jobnetstatusrq(zbx_sock_t * sock,
                                     "Received message error: [registrynumber] not found");
             }
             if (SUCCEED != get_jobnet_info(registrynumber, &er, ji)) {
-                ja_log("JATRAPPER200053", 0, NULL, 0);
                 zbx_free(er.username);
                 zbx_free(er.password);
                 *ret = FAIL;
                 return zbx_dsprintf(message,
-                                    "[registrynumber] is already cleaned up in DB");
+                                    "jobnet specified by the registry number is not found");
             }
             if (SUCCEED == (job_exec_auth(er))) {
                 zbx_free(er.username);

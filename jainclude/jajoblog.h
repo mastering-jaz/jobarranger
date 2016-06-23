@@ -18,8 +18,8 @@
 **/
 
 /*
-** $Date:: 2013-06-10 14:12:42 +0900 #$
-** $Revision: 4882 $
+** $Date:: 2014-01-28 16:00:35 +0900 #$
+** $Revision: 5755 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -41,8 +41,6 @@
 #define	JC_JOB_ERR_END		"JC90000002"
 #define	JC_JOBNET_ERR_END	"JC90000003"
 
-extern char	*CONFIG_JA_MESSAGE_FILE;
-
-int ja_joblog(char *message_id, zbx_uint64_t inner_jobnet_id, zbx_uint64_t inner_job_id, ...);
+int ja_joblog(char *message_id, zbx_uint64_t inner_jobnet_id, zbx_uint64_t inner_job_id);
 
 #endif

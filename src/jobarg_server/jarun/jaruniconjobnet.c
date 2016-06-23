@@ -18,9 +18,9 @@
 **/
 
 /*
-** $Date:: 2013-05-17 16:53:37 +0900 #$
-** $Revision: 4641 $
-** $Author: ossinfra@FITECHLABS.CO.JP $
+** $Date:: 2014-02-03 14:11:01 +0900 #$
+** $Revision: 5757 $
+** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
 #include "common.h"
@@ -70,7 +70,7 @@ int jarun_icon_jobnet(const zbx_uint64_t inner_job_id)
     }
     DBfree_result(result);
 
-    if (ja_set_status_jobnet(inner_jobnet_id, JA_JOB_STATUS_READY, -1, -1)
+    if (ja_set_status_jobnet(inner_jobnet_id, JA_JOBNET_STATUS_READY, -1, -1)
         == FAIL)
         return ja_set_runerr(inner_job_id);
 

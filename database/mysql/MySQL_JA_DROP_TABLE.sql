@@ -1,5 +1,5 @@
 
--- Job Arranger drop table SQL for MySQL  - 2013/05/24 -
+-- Job Arranger drop table SQL for MySQL  - 2014/02/05 -
 
 -- Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
 
@@ -122,6 +122,7 @@ DROP TABLE `ja_run_value_after_table`;
 DROP TABLE `ja_value_before_jobnet_table`;
 DROP TABLE `ja_value_after_jobnet_table`;
 DROP TABLE `ja_run_log_table`;
+DROP TABLE `ja_define_run_log_message_table`;
 DROP TABLE `ja_index_table`;
 DROP TABLE `ja_parameter_table`;
 DROP TABLE `ja_host_lock_table`;

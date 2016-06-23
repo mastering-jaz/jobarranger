@@ -18,8 +18,8 @@
 **/
 
 /*
-** $Date:: 2013-10-11 10:26:38 +0900 #$
-** $Revision: 5276 $
+** $Date:: 2014-02-10 14:15:00 +0900 #$
+** $Revision: 5782 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -271,8 +271,7 @@ static void jobarg_load_config(int requirement)
     struct cfg_line cfg[] = {
         /* PARAMETER, VAR, TYPE, MANDATORY, MIN, MAX */
 #ifdef USE_PID_FILE
-        {"JaPidFile", &CONFIG_PID_FILE, TYPE_STRING,
-         PARM_OPT, 0, 0},
+        {"JaPidFile", &CONFIG_PID_FILE, TYPE_STRING, PARM_OPT, 0, 0},
 #endif
         {"TmpDir", &CONFIG_TMPDIR, TYPE_STRING, PARM_MAND, 0, 0},
         {"Server", &CONFIG_HOSTS_ALLOWED, TYPE_STRING, PARM_OPT, 0, 0},
@@ -282,22 +281,16 @@ static void jobarg_load_config(int requirement)
         {"ListenIP", &CONFIG_SOURCE_IP, TYPE_STRING, PARM_OPT, 0, 0},
         {"Timeout", &CONFIG_TIMEOUT, TYPE_INT, PARM_OPT, 1, 30},
         {"DebugLevel", &CONFIG_LOG_LEVEL, TYPE_INT, PARM_OPT, 0, 4},
-        {"LogFileSize", &CONFIG_LOG_FILE_SIZE, TYPE_INT, PARM_OPT, 0,
-         1024},
+        {"LogFileSize", &CONFIG_LOG_FILE_SIZE, TYPE_INT, PARM_OPT, 0, 1024},
         {"JaLogFile", &CONFIG_LOG_FILE, TYPE_STRING, PARM_OPT, 0, 0},
-        {"JaServerPort", &CONFIG_SERVER_PORT, TYPE_INT, PARM_OPT, 1024,
-         32767},
-        {"JaListenPort", &CONFIG_LISTEN_PORT, TYPE_INT, PARM_OPT, 1024,
-         32767},
+        {"JaServerPort", &CONFIG_SERVER_PORT, TYPE_INT, PARM_OPT, 1, 65535},
+        {"JaListenPort", &CONFIG_LISTEN_PORT, TYPE_INT, PARM_OPT, 1, 65535},
         {"JaSendRetry", &CONFIG_SEND_RETRY, TYPE_INT, PARM_OPT, 0, 3600},
-        {"JaDatabaseFile", &CONFIG_DATABASE_FILE, TYPE_STRING, PARM_MAND,
-         0, 0},
+        {"JaDatabaseFile", &CONFIG_DATABASE_FILE, TYPE_STRING, PARM_MAND, 0, 0},
         {"JaJobHistory", &CONFIG_JOB_HISTORY, TYPE_INT, PARM_OPT, 1, 365},
         {"JaBackupTime", &CONFIG_BACKUP_TIME, TYPE_INT, PARM_OPT, 1, 24},
-        {"JaExtjobPath", &CONFIG_EXTJOB_PATH, TYPE_STRING, PARM_MAND, 0,
-         0},
-        {"JaFcopyTimeout", &CONFIG_FCOPY_TIMEOUT, TYPE_INT, PARM_OPT, 1,
-         3600},
+        {"JaExtjobPath", &CONFIG_EXTJOB_PATH, TYPE_STRING, PARM_MAND, 0, 0},
+        {"JaFcopyTimeout", &CONFIG_FCOPY_TIMEOUT, TYPE_INT, PARM_OPT, 1, 3600},
         {NULL}
     };
 
@@ -324,8 +317,7 @@ static void jobarg_load_config(int requirement)
     }
 
     CONFIG_REQUEST_FLAG =
-        zbx_dsprintf(NULL, "%s%cjobarg_agentd_request_flag", CONFIG_TMPDIR,
-                     JA_DLM);
+        zbx_dsprintf(NULL, "%s%cjobarg_agentd_request_flag.%d", CONFIG_TMPDIR, JA_DLM, (int)getpid());
     CONFIG_CMD_FILE =
         zbx_dsprintf(NULL, "%s%c%s", CONFIG_EXTJOB_PATH, JA_DLM,
                      JA_JOBARG_COMMAND);

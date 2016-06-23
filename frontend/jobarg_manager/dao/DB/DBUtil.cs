@@ -693,11 +693,11 @@ namespace jp.co.ftf.jobcontroller.DAO
                 {
                     if (i == 0)
                     {
-                        sqlCalendar[i] = "select A.* from " + calendarTableName + " AS A,users AS U,users_groups AS UG1, users_groups AS UG2 where A.user_name=U.alias and UG1.userid=U.userid and UG2.userid=" + LoginSetting.UserID + " and UG1.usrgrpid=UG2.usrgrpid";
+                        sqlCalendar[i] = "select distinct A.* from " + calendarTableName + " AS A,users AS U,users_groups AS UG1, users_groups AS UG2 where A.user_name=U.alias and UG1.userid=U.userid and UG2.userid=" + LoginSetting.UserID + " and UG1.usrgrpid=UG2.usrgrpid";
                     }
                     else
                     {
-                        sqlCalendar[i] = "select B.* from " + calendarTableName + " AS B," + EXPORT_CALENDAR_TABLES[0] + " AS A,users AS U,users_groups AS UG1, users_groups AS UG2 "
+                        sqlCalendar[i] = "select distinct B.* from " + calendarTableName + " AS B," + EXPORT_CALENDAR_TABLES[0] + " AS A,users AS U,users_groups AS UG1, users_groups AS UG2 "
                                                 + "where A." + idColumnName + "=B." + idColumnName + " and A.update_date=B.update_date and "
                                                 + "A.user_name=U.alias and UG1.userid=U.userid and UG2.userid=" + LoginSetting.UserID + " and UG1.usrgrpid=UG2.usrgrpid";
                     }
@@ -715,11 +715,11 @@ namespace jp.co.ftf.jobcontroller.DAO
                 {
                     if (i == 0)
                     {
-                        sqlSchedule[i] = "select A.* from " + scheduleTableName + " AS A,users AS U,users_groups AS UG1, users_groups AS UG2 where A.user_name=U.alias and UG1.userid=U.userid and UG2.userid=" + LoginSetting.UserID + " and UG1.usrgrpid=UG2.usrgrpid";
+                        sqlSchedule[i] = "select distinct A.* from " + scheduleTableName + " AS A,users AS U,users_groups AS UG1, users_groups AS UG2 where A.user_name=U.alias and UG1.userid=U.userid and UG2.userid=" + LoginSetting.UserID + " and UG1.usrgrpid=UG2.usrgrpid";
                     }
                     else
                     {
-                        sqlSchedule[i] = "select B.* from " + scheduleTableName + " AS B," + EXPORT_SCHEDULE_TABLES[0] + " AS A,users AS U,users_groups AS UG1, users_groups AS UG2 "
+                        sqlSchedule[i] = "select distinct B.* from " + scheduleTableName + " AS B," + EXPORT_SCHEDULE_TABLES[0] + " AS A,users AS U,users_groups AS UG1, users_groups AS UG2 "
                                                 + "where A." + idColumnName + "=B." + idColumnName + " and A.update_date=B.update_date and "
                                                 + "A.user_name=U.alias and UG1.userid=U.userid and UG2.userid=" + LoginSetting.UserID + " and UG1.usrgrpid=UG2.usrgrpid";
                     }
@@ -738,11 +738,11 @@ namespace jp.co.ftf.jobcontroller.DAO
                 {
                     if (i == 0)
                     {
-                        sqlJobnet[i] = "select A.* from " + jobnetTableName + " AS A,users AS U,users_groups AS UG1, users_groups AS UG2 where A.user_name=U.alias and UG1.userid=U.userid and UG2.userid=" + LoginSetting.UserID + " and UG1.usrgrpid=UG2.usrgrpid";
+                        sqlJobnet[i] = "select distinct A.* from " + jobnetTableName + " AS A,users AS U,users_groups AS UG1, users_groups AS UG2 where A.user_name=U.alias and UG1.userid=U.userid and UG2.userid=" + LoginSetting.UserID + " and UG1.usrgrpid=UG2.usrgrpid";
                     }
                     else
                     {
-                        sqlJobnet[i] = "select B.* from " + jobnetTableName + " AS B," + EXPORT_JOBNET_TABLES[0] + " AS A,users AS U,users_groups AS UG1, users_groups AS UG2 "
+                        sqlJobnet[i] = "select distinct B.* from " + jobnetTableName + " AS B," + EXPORT_JOBNET_TABLES[0] + " AS A,users AS U,users_groups AS UG1, users_groups AS UG2 "
                                                 + "where A." + idColumnName + "=B." + idColumnName + " and A.update_date=B.update_date and "
                                                 + "A.user_name=U.alias and UG1.userid=U.userid and UG2.userid=" + LoginSetting.UserID + " and UG1.usrgrpid=UG2.usrgrpid";
                     }

@@ -18,9 +18,9 @@
 **/
 
 /*
-** $Date:: 2013-05-27 13:50:15 +0900 #$
-** $Revision: 4664 $
-** $Author: ossinfra@FITECHLABS.CO.JP $
+** $Date:: 2014-02-20 15:50:58 +0900 #$
+** $Revision: 5808 $
+** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
 #ifndef JOBARG_JACONNECT_H
@@ -30,6 +30,6 @@
 extern char *CONFIG_SOURCE_IP;
 extern int CONFIG_TIMEOUT;
 
-int ja_connect(zbx_sock_t * s, const char *host);
+int ja_connect(zbx_sock_t * s, const char *host, const zbx_uint64_t inner_job_id);
 
 #endif

@@ -1,5 +1,5 @@
 
--- Job Arranger drop table SQL for PostgreSQL  - 2013/05/24 -
+-- Job Arranger drop table SQL for PostgreSQL  - 2014/02/05 -
 
 -- Copyright (C) 2012 FitechForce, Inc. All Rights Reserved.
 
@@ -55,6 +55,7 @@ DROP TABLE ja_run_value_after_table CASCADE;
 DROP TABLE ja_value_before_jobnet_table CASCADE;
 DROP TABLE ja_value_after_jobnet_table CASCADE;
 DROP TABLE ja_run_log_table CASCADE;
+DROP TABLE ja_define_run_log_message_table CASCADE;
 DROP TABLE ja_index_table CASCADE;
 DROP TABLE ja_parameter_table CASCADE;
 DROP TABLE ja_host_lock_table CASCADE;

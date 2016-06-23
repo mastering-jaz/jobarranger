@@ -49,6 +49,7 @@
 int jatrap_auth_host(zbx_sock_t * sock, ja_telegram_object * obj)
 {
     int ret;
+    zbx_uint64_t inner_job_id;
     json_object *jp_data, *jp;
     char *request;
     char *hostname, *err;
@@ -72,7 +73,18 @@ int jatrap_auth_host(zbx_sock_t * sock, ja_telegram_object * obj)
         goto error;
     }
     hostname = (char *) json_object_get_string(jp);
-    if (ja_host_auth(sock, hostname) == FAIL) {
+
+    jp = json_object_object_get(jp_data, JA_PROTO_TAG_JOBID);
+    if (jp == NULL) {
+        err =
+            zbx_dsprintf(NULL,
+                         "can not find the tag '%s' from the request telegram: %s",
+                         JA_PROTO_TAG_JOBID, request);
+        goto error;
+    }
+    ZBX_STR2UINT64(inner_job_id, (char *) json_object_get_string(jp));
+
+    if (ja_host_auth(sock, hostname, inner_job_id) == FAIL) {
         err =
             zbx_dsprintf(NULL, "host '%s' is not authenticated", hostname);
         goto error;

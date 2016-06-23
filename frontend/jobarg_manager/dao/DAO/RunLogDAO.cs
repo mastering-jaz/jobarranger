@@ -47,22 +47,22 @@ namespace jp.co.ftf.jobcontroller.DAO
 
         private string[] _primaryKey = { "inner_jobnet_id" };
 
-        private string _selectSql = "select * from ja_run_log_table where 0!=0";
+        private string _selectSql = "select JR.*,DM.message as message from ja_run_log_table as JR, ja_define_run_log_message_table as DM where JR.message_id=DM.message_id and DM.message= '1' and  0!=0";
 
         private string _selectSqlByPk = "select * from ja_run_log_table " +
                                         "where inner_jobnet_id = ? ";
 
-        private String _select_run_result_super_manageid = "select JR.* from "
-                                                + "ja_run_log_table AS JR "
-                                                + "where JR.inner_jobnet_main_id = ? order by JR.inner_jobnet_main_id,JR.log_date";
-        private String _select_run_result_super_from_to = "select JR.* from "
-                                                + "ja_run_log_table AS JR "
-                                                + "where JR.log_date >= ? and JR.log_date <= ? order by JR.inner_jobnet_main_id,JR.log_date";
-        private String _select_run_result_super_from = "select JR.* from "
-                                                + "ja_run_log_table AS JR "
-                                                + "where JR.log_date >= ? order by JR.inner_jobnet_main_id,JR.log_date";
+        private String _select_run_result_super_manageid = "select JR.*, DM.message as message from "
+                                                + "ja_run_log_table AS JR, ja_define_run_log_message_table as DM "
+                                                + "where JR.inner_jobnet_main_id = ? and JR.message_id=DM.message_id and DM.lang=? order by JR.inner_jobnet_main_id,JR.log_date";
+        private String _select_run_result_super_from_to = "select JR.*, DM.message as message from "
+                                                + "ja_run_log_table AS JR, ja_define_run_log_message_table as DM "
+                                                + "where JR.log_date >= ? and JR.log_date <= ? and JR.message_id=DM.message_id and DM.lang=? order by JR.inner_jobnet_main_id,JR.log_date";
+        private String _select_run_result_super_from = "select JR.*, DM.message as message from "
+                                                + "ja_run_log_table AS JR, ja_define_run_log_message_table as DM "
+                                                + "where JR.log_date >= ? and JR.message_id=DM.message_id and DM.lang=? order by JR.inner_jobnet_main_id,JR.log_date";
 
-        private String _select_run_result_manageid = "select JRAll.* from ( (select JR.* from "
+        private String _select_run_result_manageid = "select JRAll.*, DM.message as message from ( (select JR.* from "
                                                 + "ja_run_log_table AS JR "
                                                 + "where JR.inner_jobnet_main_id = ? and JR.public_flag=1) "
                                                 + "union "
@@ -70,10 +70,11 @@ namespace jp.co.ftf.jobcontroller.DAO
                                                 + "ja_run_log_table AS JR, users AS U, users_groups AS UG1, users_groups AS UG2 "
                                                 + "where JR.inner_jobnet_main_id = ? and "
                                                 + "JR.public_flag=0 and JR.user_name=U.alias and U.userid=UG1.userid and UG2.userid=? and UG1.usrgrpid=UG2.usrgrpid)) "
-                                                + "as JRAll "
+                                                + "as JRAll, ja_define_run_log_message_table as DM "
+                                                + "where JRAll.message_id=DM.message_id and DM.lang=? "
                                                 + "order by JRAll.inner_jobnet_main_id,JRAll.log_date";
 
-        private String _select_run_result_from_to = "select JRAll.* from ( (select JR.* from "
+        private String _select_run_result_from_to = "select JRAll.*, DM.message as message from ( (select JR.* from "
                                                 + "ja_run_log_table AS JR "
                                                 + "where JR.log_date >= ? and JR.log_date <= ? and JR.public_flag=1) "
                                                 + "union "
@@ -81,10 +82,11 @@ namespace jp.co.ftf.jobcontroller.DAO
                                                 + "ja_run_log_table AS JR, users AS U, users_groups AS UG1, users_groups AS UG2 "
                                                 + "where JR.log_date >= ? and JR.log_date <= ? and "
                                                 + "JR.public_flag=0 and JR.user_name=U.alias and U.userid=UG1.userid and UG2.userid=? and UG1.usrgrpid=UG2.usrgrpid)) "
-                                                + "as JRAll "
+                                                + "as JRAll, ja_define_run_log_message_table as DM "
+                                                + "where JRAll.message_id=DM.message_id and DM.lang=? "
                                                 + "order by JRAll.inner_jobnet_main_id,JRAll.log_date";
 
-        private String _select_run_result_from = "select JRAll.* from ( (select JR.* from "
+        private String _select_run_result_from = "select JRAll.*, DM.message as message from ( (select JR.* from "
                                                 + "ja_run_log_table AS JR "
                                                 + "where JR.log_date >= ? and JR.public_flag=1) "
                                                 + "union "
@@ -92,7 +94,8 @@ namespace jp.co.ftf.jobcontroller.DAO
                                                 + "ja_run_log_table AS JR, users AS U, users_groups AS UG1, users_groups AS UG2 "
                                                 + "where JR.log_date >= ? and "
                                                 + "JR.public_flag=0 and JR.user_name=U.alias and U.userid=UG1.userid and UG2.userid=? and UG1.usrgrpid=UG2.usrgrpid)) "
-                                                + "as JRAll "
+                                                + "as JRAll, ja_define_run_log_message_table as DM "
+                                                + "where JRAll.message_id=DM.message_id and DM.lang=? "
                                                 + "order by JRAll.inner_jobnet_main_id,JRAll.log_date";
 
 
@@ -190,9 +193,10 @@ namespace jp.co.ftf.jobcontroller.DAO
         /// <param name="manageId">管理ID</param>
         /// <param name="from">from日付</param>
         /// <param name="to">to日付</param>
+        /// <param name="lang">ユーザー設定言語</param>
         /// <return>検索結果</return>
         //************************************************************************
-        public DataTable GetEntitySuper(object manageId, object from, object to)
+        public DataTable GetEntitySuper(object manageId, object from, object to, object lang)
         {
             List<ComSqlParam> sqlParams = new List<ComSqlParam>();
             if (manageId != null)
@@ -201,6 +205,8 @@ namespace jp.co.ftf.jobcontroller.DAO
                 sqlParams.Add(new ComSqlParam(DbType.UInt64, "@log_date", from));
             if (to != null)
                 sqlParams.Add(new ComSqlParam(DbType.UInt64, "@log_date", to));
+
+            sqlParams.Add(new ComSqlParam(DbType.String, "@lang", lang));
 
             DataTable dt;
             if (manageId != null)
@@ -229,9 +235,10 @@ namespace jp.co.ftf.jobcontroller.DAO
         /// <param name="from">from日付</param>
         /// <param name="to">to日付</param>
         /// <param name="userid">ユーザーＩＤ</param>
+        /// <param name="lang">ユーザー設定言語</param>
         /// <return>検索結果</return>
         //************************************************************************
-        public DataTable GetEntity(object manageId, object from, object to, object userid)
+        public DataTable GetEntity(object manageId, object from, object to, object userid, object lang)
         {
             List<ComSqlParam> sqlParams = new List<ComSqlParam>();
             if (manageId != null)
@@ -247,6 +254,7 @@ namespace jp.co.ftf.jobcontroller.DAO
             if (to != null)
                 sqlParams.Add(new ComSqlParam(DbType.UInt64, "@log_date", to));
             sqlParams.Add(new ComSqlParam(DbType.UInt64, "@userid", userid));
+            sqlParams.Add(new ComSqlParam(DbType.String, "@lang", lang));
 
             DataTable dt;
             if (manageId != null)

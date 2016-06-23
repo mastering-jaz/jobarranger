@@ -18,8 +18,8 @@
 **/
 
 /*
-** $Date:: 2014-01-06 11:52:37 +0900 #$
-** $Revision: 5711 $
+** $Date:: 2014-03-13 14:31:28 +0900 #$
+** $Revision: 5871 $
 ** $Author: nagata@FITECHLABS.CO.JP $
 **/
 
@@ -34,9 +34,9 @@
 #endif
 
 /* version or revsion */
-#define JOBARG_VERSION          "1.4.1"
-#define JOBARG_REVISION         "5710"
-#define JOBARG_REVDATE		"2014-01-06"
+#define JOBARG_VERSION          "1.4.2"
+#define JOBARG_REVISION         "5870"
+#define JOBARG_REVDATE		"2014-03-13"
 
 /* treat unknown parameters as error */
 #define JA_CFG_STRICT			0
@@ -56,6 +56,7 @@
 
 /* extjob command */
 #define JA_CMD_TIME			"jacmdtime"
+
 
 /* ja_run_jobnet_table */
 /* run type */
@@ -77,7 +78,11 @@
 #define	JA_JOBNET_STATUS_END		3
 #define	JA_JOBNET_STATUS_RUNERR		4
 #define	JA_JOBNET_STATUS_ENDERR		5
-#define	JA_JOBNET_STATUS_ABORT		6
+
+/* multiple start up */
+#define	JA_JOBNET_MULTIPLE_ON		0
+#define	JA_JOBNET_MULTIPLE_SKIP		1
+#define	JA_JOBNET_MULTIPLE_DELAY	2
 
 
 /* ja_run_jobnet_summary_table */
@@ -89,6 +94,8 @@
 /* load status */
 #define	JA_SUMMARY_LOAD_STATUS_NORMAL	0
 #define	JA_SUMMARY_LOAD_STATUS_ERROR	1
+#define	JA_SUMMARY_LOAD_STATUS_DELAY	2
+#define	JA_SUMMARY_LOAD_STATUS_SKIP	3
 
 
 /* ja_run_job_table */
@@ -111,6 +118,8 @@
 #define	JA_JOB_TYPE_FWAIT		15
 #define	JA_JOB_TYPE_REBOOT		16
 #define	JA_JOB_TYPE_REL			17
+#define	JA_JOB_TYPE_LESS		18
+#define	JA_JOB_TYPE_LINK		19
 #define	JA_JOB_TYPE_ABORT		90
 
 /* job status */
@@ -137,9 +146,10 @@
 #define	JA_JOB_INVO_FLAG_OFF		0
 #define	JA_JOB_INVO_FLAG_ON		1
 
-/*job command type*/
-#define JA_JOB_TYPE_COMMAND		0
-#define JA_JOB_TYPE_SCRIPT		1
+/* force flag */
+#define	JA_JOB_FORCE_FLAG_OFF		0
+#define	JA_JOB_FORCE_FLAG_ON		1
+
 
 /* ja_run_flow_table */
 /* flow type */
@@ -166,6 +176,7 @@
 #define JA_PROTO_TAG_LASTEXITCD         "lastexitcd"
 #define JA_PROTO_TAG_LASTSTDOUT         "laststdout"
 #define JA_PROTO_TAG_LASTSTDERR         "laststderr"
+#define JA_PROTO_TAG_DETERRENCE		"deterrence"
 
 /* message item value */
 #define JA_PROTO_VALUE_JOBNETRUN	"jobnetrun"
